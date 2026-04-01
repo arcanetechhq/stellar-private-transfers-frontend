@@ -1,0 +1,47 @@
+{
+  "title": "History",
+  "subtitle": "All deposits, private transfers, and withdrawals",
+  "exportHistory": "Export History",
+  "noTransactionsFound": "No transactions found. Try changing your search parameters.",
+  "viewDetails": "View details",
+  "tableHeaders": {
+    "date": "Date",
+    "type": "Type",
+    "asset": "Asset",
+    "amount": "Amount",
+    "counterparty": "Counterparty / Wallet",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "filterTypes": {
+    "all": "All Activity",
+    "deposits": "Deposits",
+    "privateTransfers": "Private Transfers",
+    "withdrawals": "Withdrawals"
+  },
+  "searchPlaceholder": "Search by ID, address or asset...",
+  "startDate": "Start Date",
+  "endDate": "End Date",
+  "apply": "Apply",
+  "dateFilters": {
+    "allTime": "All Time",
+    "today": "Today",
+    "last7Days": "Last 7 Days",
+    "last30Days": "Last 30 Days",
+    "last90Days": "Last 90 Days",
+    "customRange": "Custom Range"
+  },
+  "transactionLabels": {
+    "deposit": "Deposit to Private Balance",
+    "sent": "Private Transfer (Sent)",
+    "received": "Private Transfer (Received)",
+    "withdrawal": "Withdraw to Public Balance"
+  },
+  "statusLabels": {
+    "completed": "Completed",
+    "pending": "Pending",
+    "processing": "Processing",
+    "created": "Created",
+    "failed": "Failed"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "title": "Contacts",
+  "subtitle": "Manage wallet addresses for quick transfers",
+  "addContact": "Add Contact",
+  "copied": "Copied",
+  "copy": "Copy",
+  "noContactsYet": "No contacts yet",
+  "addContactsHint": "Add contacts to make transfers faster",
+  "name": "Name",
+  "privateAddress": "Private address",
+  "invalidPrivateAddress": "Enter a valid private address (stpl1…)",
+  "address": "Address",
+  "selectContact": "Select Contact",
+  "noContactsFound": "No contacts found"
+}

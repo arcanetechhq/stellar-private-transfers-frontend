@@ -1,0 +1,21 @@
+---
+alwaysApply: true
+---
+
+# TS/TSX edits and hook-provided lint context
+
+After you edit a `.ts` or `.tsx` file, the workspace hook `.cursor/hooks/calculateLintAttempts.js` runs ESLint on that file and may attach **`additional_context`** to the tool result.
+
+## When you see `LINTING:` in additional context
+
+1. **Treat it as required feedback** for the file named in the message. Read the full ESLint output and fix the reported issues in source code (types, imports, rules like `better-max-params`, React hooks, Tailwind, SonarJS, Unicorn, project custom rules, etc.).
+
+2. **Do not bypass lint** by adding `eslint-disable` / `eslint-disable-next-line` comments or by editing `eslint.config.ts`. The hook explicitly warns that this will not satisfy the workflow.
+
+3. **Escalation after repeated failure:** If the context says the file has failed linting **3 times** (`MAX_ATTEMPTS`) and tells you to **STOP** and report to the user, do not keep editing in a loop. Summarize the remaining errors and hand off to the user.
+
+4. **On success:** If the context says the file **passed linting**, you do not need further lint fixes for that edit cycle.
+
+## Optional verification
+
+If you need to confirm locally before or after an edit, run ESLint the same way the project expects (see `AGENTS.md`: `npm run lint` covers `src/**/*.{ts,tsx}`). The hook's output is the authoritative signal tied to your edit.

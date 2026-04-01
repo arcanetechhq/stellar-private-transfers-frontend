@@ -1,0 +1,76 @@
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+import enCommon from "./locales/en/common.json";
+import enNavigation from "./locales/en/navigation.json";
+import enHelp from "./locales/en/help.json";
+import enDeposit from "./locales/en/deposit.json";
+import enOverview from "./locales/en/overview.json";
+import enSettings from "./locales/en/settings.json";
+import enContacts from "./locales/en/contacts.json";
+import enHistory from "./locales/en/history.json";
+import enTransactionDetails from "./locales/en/transactionDetails.json";
+import enTransfer from "./locales/en/transfer.json";
+import enWithdrawal from "./locales/en/withdrawal.json";
+import enAllAssets from "./locales/en/allAssets.json";
+import enConfirmations from "./locales/en/confirmations.json";
+import enDisclosure from "./locales/en/disclosure.json";
+import enAbout from "./locales/en/about.json";
+import enPrivacyPolicy from "./locales/en/privacyPolicy.json";
+import enDataExport from "./locales/en/dataExport.json";
+import enAccess from "./locales/en/access.json";
+import enStealth from "./locales/en/stealth.json";
+
+const NAMESPACES = [
+  "common",
+  "navigation",
+  "help",
+  "deposit",
+  "overview",
+  "settings",
+  "contacts",
+  "history",
+  "transactionDetails",
+  "transfer",
+  "withdrawal",
+  "allAssets",
+  "confirmations",
+  "disclosure",
+  "about",
+  "privacyPolicy",
+  "dataExport",
+  "access",
+  "stealth",
+] as const;
+
+i18n.use(initReactI18next).init({
+  lng: "en",
+  fallbackLng: "en",
+  interpolation: { escapeValue: false },
+  defaultNS: "common",
+  ns: [...NAMESPACES],
+  resources: {
+    en: {
+      common: enCommon,
+      navigation: enNavigation,
+      help: enHelp,
+      deposit: enDeposit,
+      overview: enOverview,
+      settings: enSettings,
+      contacts: enContacts,
+      history: enHistory,
+      transactionDetails: enTransactionDetails,
+      transfer: enTransfer,
+      withdrawal: enWithdrawal,
+      allAssets: enAllAssets,
+      confirmations: enConfirmations,
+      disclosure: enDisclosure,
+      about: enAbout,
+      privacyPolicy: enPrivacyPolicy,
+      dataExport: enDataExport,
+      access: enAccess,
+      stealth: enStealth,
+    },
+  },
+});
+
+export { default as i18n } from "i18next";

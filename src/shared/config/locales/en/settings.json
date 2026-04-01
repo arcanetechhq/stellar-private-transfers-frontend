@@ -1,0 +1,16 @@
+{
+  "title": "Settings",
+  "subtitle": "Manage your wallet connection and preferences",
+  "walletName": "MetaMask",
+  "connected": "Connected",
+  "changeWallet": "Change Wallet",
+  "disconnect": "Disconnect",
+  "fullAddress": "Full Address",
+  "copied": "Copied",
+  "copy": "Copy",
+  "about": "About",
+  "appVersion": "App Version",
+  "version": "1.0.0",
+  "network": "Network",
+  "ethereumMainnet": "Ethereum Mainnet"
+}

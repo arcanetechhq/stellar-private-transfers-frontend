@@ -1,0 +1,4 @@
+export const COPY_FEEDBACK_TIMEOUT_MS = 2000;
+export const WALLET_START_SLICE = 10;
+export const WALLET_END_SLICE = -8;
+export const WALLET_ADDRESS = "0x742d35Cc6634C0532925a3b844Bc9e7595f7a3f1";

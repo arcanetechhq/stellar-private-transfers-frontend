@@ -1,0 +1,20 @@
+{
+  "title": "Help & Support",
+  "subtitle": "Find answers to your questions or contact us",
+  "documentation": "Documentation",
+  "documentationDesc": "Guides for using private transfers",
+  "supportChat": "Support Chat",
+  "supportChatDesc": "Get help in real-time",
+  "emailSupport": "Email Support",
+  "emailSupportDesc": "Send a request to support@privatetransfer.com",
+  "faq": "FAQ",
+  "faqDesc": "Frequently asked questions",
+  "goLink": "Go ->",
+  "popularQuestions": "Popular Questions",
+  "q1": "How do I create a private transfer?",
+  "a1": "Go to the \"Private Transfers\" section, fill out the form with recipient details and amount, then confirm the transaction.",
+  "q2": "What is data disclosure?",
+  "a2": "Data disclosure allows you to selectively share transaction information with third parties while maintaining control over privacy.",
+  "q3": "How long does a transfer take to process?",
+  "a3": "Transfers are typically processed within a few minutes, depending on network congestion."
+}

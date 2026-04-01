@@ -1,0 +1,58 @@
+{
+  "title": "Privacy Policy",
+  "lastUpdated": "Last updated: March 11, 2026",
+  "introduction": {
+    "title": "Introduction",
+    "content": "Arcn (\"we\", \"our\", or \"us\") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, and safeguard your information when you use our private transfer platform. By using Arcn, you agree to the collection and use of information in accordance with this policy."
+  },
+  "dataCollection": {
+    "title": "Information We Collect",
+    "walletInfo": "Wallet Information",
+    "walletInfoContent": "We collect your public wallet address when you connect to our platform. This information is necessary to facilitate transactions and display your balance.",
+    "transactionData": "Transaction Data",
+    "transactionDataContent": "We process transaction data including amounts, timestamps, and recipient addresses. All transactions are encrypted using zero-knowledge proofs to ensure maximum privacy.",
+    "usageData": "Usage Data",
+    "usageDataContent": "We may collect information about how you access and use the platform, including your device type, browser information, and interaction patterns to improve our services."
+  },
+  "dataUsage": {
+    "title": "How We Use Your Information",
+    "item1": "To process and facilitate your private transfers",
+    "item2": "To maintain and improve the security of our platform",
+    "item3": "To provide customer support and respond to your inquiries",
+    "item4": "To detect and prevent fraud or unauthorized activity",
+    "item5": "To comply with legal obligations and regulatory requirements"
+  },
+  "privacyProtection": {
+    "title": "Privacy Protection",
+    "intro": "Arcn is built on zero-knowledge proof technology, which means:",
+    "item1": "Your transaction details remain completely private on-chain",
+    "item2": "We cannot see the amounts or recipients of your transfers",
+    "item3": "Your private balance is encrypted and only visible to you",
+    "item4": "All cryptographic operations happen locally in your browser"
+  },
+  "security": {
+    "title": "Data Security",
+    "content": "We implement industry-standard security measures to protect your information, including encryption, secure communication protocols, and regular security audits. However, no method of transmission over the Internet is 100% secure, and we cannot guarantee absolute security."
+  },
+  "thirdParty": {
+    "title": "Third-Party Services",
+    "content": "We may use third-party services to facilitate our platform, such as blockchain infrastructure providers and analytics tools. These third parties have access to your information only to perform specific tasks on our behalf and are obligated not to disclose or use it for any other purpose."
+  },
+  "rights": {
+    "title": "Your Rights",
+    "intro": "You have the right to:",
+    "item1": "Access the personal information we hold about you",
+    "item2": "Request correction of inaccurate information",
+    "item3": "Request deletion of your personal information",
+    "item4": "Object to processing of your personal information",
+    "item5": "Disconnect your wallet at any time"
+  },
+  "changes": {
+    "title": "Changes to This Policy",
+    "content": "We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the \"Last updated\" date. You are advised to review this Privacy Policy periodically for any changes."
+  },
+  "contact": {
+    "title": "Contact Us",
+    "content": "If you have any questions about this Privacy Policy or our privacy practices, please contact us at "
+  }
+}

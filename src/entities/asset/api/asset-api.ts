@@ -1,0 +1,25 @@
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+
+export interface AssetDto {
+  id: number;
+  assetId: string;
+  name: string;
+  logoUrl: string | null;
+  issuerAddress: string | null;
+  clientContract: string | null;
+  poolContract: string | null;
+}
+
+export const assetApi = createApi({
+  reducerPath: "assetApi",
+  baseQuery: fetchBaseQuery({
+    baseUrl: import.meta.env.VITE_API_BASE_URL as string,
+  }),
+  endpoints: (builder) => ({
+    getAssets: builder.query<AssetDto[], void>({
+      query: () => "/assets",
+    }),
+  }),
+});
+
+export const { useGetAssetsQuery } = assetApi;

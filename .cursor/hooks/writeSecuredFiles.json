@@ -1,0 +1,14 @@
+[
+    {
+        "pathGlob": "eslint.config.mjs",
+        "reason": "Editing eslint.config.mjs is forbidden. Modifying eslint.config.mjs is forbidden. If you believe a rule makes your task impossible, report this to the user and explain why."
+    },
+    {
+        "pathGlob": "eslint/**",
+        "reason": "ESLint rules change is forbiden. If you unable to fulfill the task due this restriction STOP and notify the user."
+    },
+    {
+        "pathGlob": ".cursor/**",
+        "reason": "Editing .cursor/** is forbidden. Only user can modify this directory. If you believe a rule makes your task impossible, report this to the user and explain why."
+    }
+]

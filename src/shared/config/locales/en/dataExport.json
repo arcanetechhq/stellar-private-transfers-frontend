@@ -1,0 +1,109 @@
+{
+  "pageTitle": "Transaction Data Export",
+  "pageSubtitle": "Generate aggregated reports for audit, compliance, and analytics",
+  "steps": {
+    "period": "Period",
+    "dataTypes": "Data Types",
+    "aggregation": "Aggregation",
+    "format": "Format"
+  },
+  "periodStep": {
+    "title": "Select Time Period",
+    "description": "Choose the date range for your transaction report",
+    "last7Days": "Last 7 days",
+    "last30Days": "Last 30 days",
+    "last90Days": "Last 90 days",
+    "currentYear": "Current year",
+    "customRange": "Custom range",
+    "startDate": "Start Date",
+    "endDate": "End Date"
+  },
+  "dataTypesStep": {
+    "title": "Select Data Types",
+    "description": "Choose which types of transactions to include",
+    "selectAll": "Select All",
+    "options": {
+      "all": "All transactions",
+      "sent": "Sent",
+      "received": "Received",
+      "private": "Private transfers",
+      "disclosed": "Disclosed",
+      "confirmations": "Confirmations"
+    }
+  },
+  "aggregationStep": {
+    "title": "Choose Aggregation Level",
+    "description": "How should the data be organized in your report?",
+    "detailed": {
+      "label": "Detailed list",
+      "description": "Every transaction listed individually"
+    },
+    "daily": {
+      "label": "Daily aggregation",
+      "description": "Transactions grouped by day"
+    },
+    "asset": {
+      "label": "Aggregation by assets",
+      "description": "Transactions grouped by asset type"
+    },
+    "counterparty": {
+      "label": "Aggregation by counterparties",
+      "description": "Transactions grouped by sender/receiver"
+    }
+  },
+  "formatStep": {
+    "title": "Select Export Format",
+    "description": "Choose your preferred file format",
+    "advancedFilters": "Advanced Filters (Optional)",
+    "asset": "Asset",
+    "status": "Status",
+    "minAmount": "Min Amount",
+    "maxAmount": "Max Amount",
+    "allAssets": "All assets",
+    "allStatuses": "All",
+    "completed": "Completed",
+    "pending": "Pending",
+    "rejected": "Rejected",
+    "from": "From",
+    "to": "To"
+  },
+  "navigation": {
+    "back": "Back",
+    "continue": "Continue"
+  },
+  "reportSummary": {
+    "title": "Report Summary",
+    "period": "Period",
+    "transactions": "Transactions",
+    "totalVolume": "Total Volume",
+    "assets": "Assets",
+    "counterparties": "Counterparties",
+    "generating": "Generating...",
+    "generateReport": "Generate Report",
+    "downloadAvailability": "Reports are available for download for 7 days"
+  },
+  "exportHistory": {
+    "title": "Export History",
+    "noExportsYet": "No exports yet",
+    "reportsWillAppear": "Your generated reports will appear here",
+    "tableHeaders": {
+      "date": "Date",
+      "period": "Period",
+      "format": "Format",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "ready": "Ready",
+    "generating": "Generating",
+    "download": "Download"
+  },
+  "transactionPreview": {
+    "title": "Preview (First 3 Transactions)",
+    "tableHeaders": {
+      "date": "Date",
+      "asset": "Asset",
+      "type": "Type",
+      "amount": "Amount"
+    }
+  }
+}

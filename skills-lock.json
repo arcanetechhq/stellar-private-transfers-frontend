@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "skills": {
+    "feature-sliced-design": {
+      "source": "feature-sliced/skills",
+      "sourceType": "github",
+      "computedHash": "98020388ca6fb26ac9b060f81eb3064fefce9018e6f660e69419a00adf0801e7"
+    },
+    "i18n-localization": {
+      "source": "sickn33/antigravity-awesome-skills",
+      "sourceType": "github",
+      "computedHash": "7f3f5255cfb91f2d97a870feee48141d9063bc0c02b7227732cf54ae0cd8fc55"
+    },
+    "react-state-management": {
+      "source": "wshobson/agents",
+      "sourceType": "github",
+      "computedHash": "7c63f9bf6ce2e2884b2da61e899a2701068b53ef6e87fc29e3c04a199e3092cb"
+    },
+    "tailwind-v4-shadcn": {
+      "source": "secondsky/claude-skills",
+      "sourceType": "github",
+      "computedHash": "dedaff41ff3331cfe9734eee4203a1e85c6a013eec46df83d9c00e3d36e421f9"
+    }
+  }
+}

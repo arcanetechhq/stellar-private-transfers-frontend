@@ -1,0 +1,21 @@
+{
+  "title": "About",
+  "version": "Version 1.0.0",
+  "tagline": "Premium Private Transfers Platform",
+  "description": "Arcn provides institutional-grade private transfers with full confidentiality for your digital assets. Built on advanced cryptographic protocols to ensure complete transaction privacy.",
+  "keyFeatures": "Key Features",
+  "feature1": "Complete transaction privacy using zero-knowledge proofs",
+  "feature2": "Multi-token support for stablecoins, ETH, BTC, and more",
+  "feature3": "Institutional-grade security and compliance",
+  "feature4": "User-friendly interface for seamless transfers",
+  "feature5": "Advanced contact management and transaction history",
+  "technicalDetails": "Technical Details",
+  "network": "Network",
+  "ethereumMainnet": "Ethereum Mainnet",
+  "protocol": "Protocol",
+  "zeroKnowledgeProofs": "Zero-Knowledge Proofs",
+  "license": "License",
+  "mit": "MIT",
+  "contactSupport": "Contact & Support",
+  "contactDescription": "For questions, support, or feedback, please contact us at "
+}

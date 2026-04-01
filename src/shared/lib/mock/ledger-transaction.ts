@@ -1,0 +1,124 @@
+export interface Transaction {
+  id: string;
+  date: string;
+  type: "sent" | "received" | "deposit" | "withdrawal";
+  asset: string;
+  amount: number;
+  counterparty: string;
+  status: "completed" | "pending" | "processing" | "created" | "failed";
+  confirmationStatus: "created" | "sent" | "viewed" | "used" | "none";
+  disclosureStatus: "none" | "partial" | "full" | "pending";
+}
+
+export const mockTransactions: Transaction[] = [
+  {
+    id: "tx_001",
+    date: "2026-03-10T14:30:00",
+    type: "deposit",
+    asset: "USDC",
+    amount: 10_000,
+    counterparty: "0x4a2c...8f1e",
+    status: "completed",
+    confirmationStatus: "none",
+    disclosureStatus: "none",
+  },
+  {
+    id: "tx_002",
+    date: "2026-03-10T10:30:00",
+    type: "sent",
+    asset: "USDC",
+    amount: 5000,
+    counterparty: "0x742d...3f8c",
+    status: "completed",
+    confirmationStatus: "created",
+    disclosureStatus: "none",
+  },
+  {
+    id: "tx_003",
+    date: "2026-03-09T14:15:00",
+    type: "received",
+    asset: "USDT",
+    amount: 12_500,
+    counterparty: "0x891a...7d2e",
+    status: "completed",
+    confirmationStatus: "sent",
+    disclosureStatus: "partial",
+  },
+  {
+    id: "tx_004",
+    date: "2026-03-09T09:20:00",
+    type: "withdrawal",
+    asset: "ETH",
+    amount: 1.5,
+    counterparty: "0x7b3f...4d9a",
+    status: "completed",
+    confirmationStatus: "none",
+    disclosureStatus: "none",
+  },
+  {
+    id: "tx_005",
+    date: "2026-03-08T09:45:00",
+    type: "sent",
+    asset: "ETH",
+    amount: 2.5,
+    counterparty: "0x3c4d...9b1a",
+    status: "completed",
+    confirmationStatus: "viewed",
+    disclosureStatus: "full",
+  },
+  {
+    id: "tx_006",
+    date: "2026-03-07T16:20:00",
+    type: "sent",
+    asset: "USDC",
+    amount: 8000,
+    counterparty: "0x5e7f...2c3d",
+    status: "pending",
+    confirmationStatus: "none",
+    disclosureStatus: "pending",
+  },
+  {
+    id: "tx_007",
+    date: "2026-03-07T11:00:00",
+    type: "deposit",
+    asset: "USDT",
+    amount: 5000,
+    counterparty: "0x2e8d...6c4b",
+    status: "completed",
+    confirmationStatus: "none",
+    disclosureStatus: "none",
+  },
+  {
+    id: "tx_008",
+    date: "2026-03-06T11:00:00",
+    type: "received",
+    asset: "DAI",
+    amount: 3500,
+    counterparty: "0x9a1b...4e5f",
+    status: "completed",
+    confirmationStatus: "used",
+    disclosureStatus: "none",
+  },
+  {
+    id: "tx_009",
+    date: "2026-03-05T15:30:00",
+    type: "withdrawal",
+    asset: "USDC",
+    amount: 3000,
+    counterparty: "0x1c5d...7a2e",
+    status: "completed",
+    confirmationStatus: "none",
+    disclosureStatus: "none",
+  },
+  {
+    id: "tx_010",
+    date: "2026-03-04T13:10:00",
+    type: "deposit",
+    asset: "DAI",
+    amount: 2500,
+    counterparty: "0x6f9a...3b8c",
+    status: "processing",
+    confirmationStatus: "none",
+    disclosureStatus: "none",
+  },
+];

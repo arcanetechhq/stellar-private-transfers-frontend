@@ -1,0 +1,22 @@
+{
+  "connectWalletPrompt": "Connect your wallet in the header to create and manage private addresses.",
+  "fullAddressPlaceholder": "The full private address will appear here after you connect your wallet and generate an address.",
+  "title": "Private address",
+  "generateHint": "Generate a private address to receive privately.",
+  "generating": "Signing…",
+  "generate": "Generate",
+  "unsupportedWallet": "This wallet does not support message signing. Try another wallet.",
+  "errorGeneric": "Could not complete signing.",
+  "retry": "Retry",
+  "myPrivateAddresses": "My private addresses",
+  "myPrivateSubtitle": "View, copy, and manage addresses derived from your wallet.",
+  "selectPrivateAddress": "Private address",
+  "selectPlaceholder": "Select an address",
+  "currentAddress": "Full address",
+  "noAddressesYet": "You have no private addresses yet. Create one below.",
+  "createNamed": "New address",
+  "newAddressNamePlaceholder": "Name for this address",
+  "create": "Create",
+  "newAddressNameHint": "This name is signed with your wallet to derive a unique address.",
+  "generateDefaultAddress": "Generate default address"
+}

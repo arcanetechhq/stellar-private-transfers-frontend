@@ -1,0 +1,49 @@
+{
+  "backToHistory": "Back to History",
+  "title": "Transaction Details",
+  "idPrefix": "ID: ",
+  "downloadReceipt": "Download Receipt",
+  "shareReceipt": "Share Receipt",
+  "transactionInformation": "Transaction Information",
+  "amount": "Amount",
+  "asset": "Asset",
+  "transactionStatus": "Transaction Status",
+  "completed": "Completed",
+  "sender": "Sender",
+  "recipient": "Recipient",
+  "dateTime": "Date & Time",
+  "networkFee": "Network Fee",
+  "activityHistory": "Activity History",
+  "transferConfirmation": "Transfer Confirmation",
+  "confirmationCreated": "Confirmation Created",
+  "downloadConfirmation": "Download Confirmation",
+  "sendConfirmation": "Send Confirmation",
+  "createNew": "Create New",
+  "dataDisclosureOptions": "Data Disclosure Options",
+  "discloseSelectedData": "Disclose Selected Data",
+  "disclosureHistory": "Disclosure History",
+  "noDisclosureYet": "Transaction data has not been disclosed yet",
+  "disclosureOptions": {
+    "fact": {
+      "title": "Confirm transaction fact only",
+      "description": "Confirmation that the transaction occurred"
+    },
+    "amount": {
+      "title": "Disclose amount",
+      "description": "Reveal transaction amount without other details"
+    },
+    "parties": {
+      "title": "Disclose sender and recipient",
+      "description": "Reveal transaction parties"
+    },
+    "full": {
+      "title": "Disclose full transaction data",
+      "description": "Full disclosure of all transaction details"
+    }
+  },
+  "activityLog": {
+    "confirmationCreated": "Transaction confirmation created",
+    "transactionCompleted": "Transaction completed",
+    "transactionCreated": "Transaction created"
+  }
+}

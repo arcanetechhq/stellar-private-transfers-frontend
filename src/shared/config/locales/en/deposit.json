@@ -1,0 +1,20 @@
+{
+  "backToHome": "Back to Home",
+  "pageTitle": "Deposit to Private Balance",
+  "pageSubtitle": "Move funds from your public wallet into your private balance",
+  "asset": "Asset",
+  "amount": "Amount",
+  "max": "MAX",
+  "aboutDeposits": "About Deposits",
+  "aboutDepositsText": "Funds will be moved from your public wallet into your private balance. Once confirmed, they will become available for private transfers with full confidentiality.",
+  "summary": "Summary",
+  "fiatValue": "Fiat Value",
+  "networkFee": "Network Fee",
+  "youWillReceive": "You Will Receive",
+  "destination": "Destination",
+  "privateBalance": "Private Balance",
+  "confirmDeposit": "Confirm Deposit",
+  "selectAsset": "Select Asset",
+  "searchAssetPlaceholder": "Search by name or ticker...",
+  "noTokensFound": "No tokens found"
+}

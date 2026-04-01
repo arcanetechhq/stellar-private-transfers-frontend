@@ -1,0 +1,20 @@
+{
+  "assetsOnBalance": "Assets on Balance",
+  "viewAllAssets": "View All Assets",
+  "recentTransactions": "Recent Transactions",
+  "viewAll": "View All",
+  "privateBalance": "Private Balance",
+  "assetsInWallet": "{{count}} assets in your wallet",
+  "privateSend": "Private Send",
+  "deposit": "Deposit",
+  "withdraw": "Withdraw",
+  "balance": "Balance",
+  "value": "Value",
+  "send": "Send",
+  "transactionLabels": {
+    "deposit": "Deposit",
+    "sent": "Sent",
+    "received": "Received",
+    "withdrawal": "Withdrawal"
+  }
+}
