@@ -4,6 +4,7 @@ import { selectWalletPublicKey } from "@/entities/wallet";
 import { useAssetsWithTrustlines } from "@/entities/asset";
 import { useAddTrustline } from "@/features/add-asset-trustline";
 import { AssetTable } from "@/widgets/asset-table";
+import { PrivateAssetTable } from "@/widgets/private-asset-table";
 import { PageHeader } from "./page-header";
 import { PortfolioSummary } from "./portfolio-summary";
 
@@ -35,7 +36,7 @@ export function AllAssets() {
       className="p-8"
       style={{ backgroundColor: "#F6F7F9", minHeight: "100%" }}
     >
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto max-w-7xl space-y-6">
         <PageHeader />
         <PortfolioSummary
           assetCount={assets.length}
@@ -49,6 +50,7 @@ export function AllAssets() {
           onAddTrustline={addTrustline}
           onMintSuccess={handleSuccess}
         />
+        <PrivateAssetTable />
       </div>
     </div>
   );

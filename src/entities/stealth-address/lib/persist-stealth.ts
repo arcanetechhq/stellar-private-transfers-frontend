@@ -1,4 +1,8 @@
-import type { StealthPersistedShape } from "../model/types";
+import type {
+  StealthAddressState,
+  StealthPersistedShape,
+  StealthPersistedNonceEntry,
+} from "../model/types";
 
 function storageKeyForWallet(publicKey: string): string {
   return `stellar-payment-stealth-v1:${publicKey}`;
@@ -12,15 +16,24 @@ function isOptionalStringOrNullish(value: unknown): boolean {
   );
 }
 
-function isNonceEntry(value: unknown): value is StealthPersistedShape["byNonce"][string] {
+function isNonceEntry(value: unknown): value is StealthPersistedNonceEntry {
   if (typeof value !== "object" || value === null) {
     return false;
   }
   const record = value as Record<string, unknown>;
-  return (
-    typeof record.stealthAddress === "string" &&
-    typeof record.createdAt === "number"
-  );
+  if (
+    typeof record.stealthAddress !== "string" ||
+    typeof record.createdAt !== "number"
+  ) {
+    return false;
+  }
+  if (
+    record.recipientScalarHex !== undefined &&
+    typeof record.recipientScalarHex !== "string"
+  ) {
+    return false;
+  }
+  return true;
 }
 
 function isPersistedShape(value: unknown): value is StealthPersistedShape {
@@ -81,7 +94,24 @@ export function saveStealthState(
 export function readStealthRecordFromStorage(
   publicKey: string,
   nonce: string,
-): StealthPersistedShape["byNonce"][string] | undefined {
+): StealthPersistedNonceEntry | undefined {
   const loaded = loadStealthState(publicKey);
   return loaded?.byNonce[nonce];
+}
+
+export function buildStealthPersistPayload(
+  state: StealthAddressState,
+): StealthPersistedShape {
+  const byNonce: StealthPersistedShape["byNonce"] = {};
+  for (const [nonceKey, entry] of Object.entries(state.byNonce)) {
+    const scalarHex = state.scalarByNonce[nonceKey]?.trim();
+    byNonce[nonceKey] =
+      scalarHex !== undefined && scalarHex !== ""
+        ? { ...entry, recipientScalarHex: scalarHex }
+        : { ...entry };
+  }
+  return {
+    byNonce,
+    defaultNonce: state.defaultNonce,
+  };
 }

@@ -7,6 +7,11 @@ import { i18n } from "@/shared/config/i18n-instance";
 import { MainLayoutHeader } from "./main-layout-header";
 import { MainLayoutSidebar } from "./main-layout-sidebar";
 import { NotificationsModal } from "./notifications-modal";
+import {
+  EnsureMissingStealthScalars,
+  PollAllAssetDeliveries,
+} from "@/features/poll-coin-deliveries";
+import { PollPendingDeposits } from "@/features/poll-deposit";
 
 export function MainLayout() {
   const { t: translate } = useTranslation(["navigation", "common"]);
@@ -83,6 +88,10 @@ export function MainLayout() {
         isOpen={notificationsOpen}
         onClose={() => setNotificationsOpen(false)}
       />
+
+      <EnsureMissingStealthScalars />
+      <PollAllAssetDeliveries />
+      <PollPendingDeposits />
     </div>
   );
 }

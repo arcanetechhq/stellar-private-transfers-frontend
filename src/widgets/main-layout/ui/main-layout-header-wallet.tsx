@@ -1,8 +1,9 @@
 import React from "react";
-import { useAppDispatch } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { selectWalletPublicKey } from "@/entities/wallet";
 import {
-  syncWalletFromStellarKitIfConnected,
-  type StellarWalletConnection,
+  connectStellarWallet,
+  disconnectStellarWallet,
 } from "@/features/stellar-wallet-connect";
 import { shortenStellarAddress } from "@/shared/lib/shorten-stellar-address";
 import {
@@ -12,42 +13,36 @@ import {
 
 type MainLayoutHeaderWalletProperties = {
   translate: (key: string) => string;
-  wallet: StellarWalletConnection;
   walletOpen: boolean;
   setWalletOpen: (open: boolean) => void;
 };
 
 export function MainLayoutHeaderWallet({
   translate,
-  wallet,
   walletOpen,
   setWalletOpen,
 }: MainLayoutHeaderWalletProperties) {
   const dispatch = useAppDispatch();
+  const publicKey = useAppSelector(selectWalletPublicKey);
+  const isConnected = Boolean(publicKey);
 
-  React.useEffect(() => {
-    void syncWalletFromStellarKitIfConnected(dispatch);
-  }, [dispatch]);
-
-  const shortAddress = wallet.publicKey
-    ? shortenStellarAddress(wallet.publicKey)
-    : "";
+  const shortAddress = publicKey ? shortenStellarAddress(publicKey) : "";
 
   const handleChangeWallet = async () => {
     setWalletOpen(false);
-    await wallet.changeWallet();
+    await dispatch(connectStellarWallet());
   };
 
   const handleDisconnect = async () => {
     setWalletOpen(false);
-    await wallet.disconnect();
+    await dispatch(disconnectStellarWallet());
   };
 
-  const handleConnect = async () => {
-    await wallet.connect();
+  const handleConnect = () => {
+    void dispatch(connectStellarWallet());
   };
 
-  if (wallet.isConnected && wallet.publicKey) {
+  if (isConnected && publicKey) {
     return (
       <div className="relative">
         <MainLayoutWalletTrigger
@@ -58,7 +53,7 @@ export function MainLayoutHeaderWallet({
         <MainLayoutWalletMenu
           isOpen={walletOpen}
           onClose={() => setWalletOpen(false)}
-          publicKey={wallet.publicKey}
+          publicKey={publicKey}
           translate={translate}
           onChangeWallet={handleChangeWallet}
           onDisconnect={handleDisconnect}

@@ -1,5 +1,5 @@
 import { useState, useMemo, type FormEvent } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useAppSelector } from "@/app/hooks";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import {
@@ -15,6 +15,8 @@ import { isNumericDecimalInput } from "../lib/numeric-input";
 
 export function useCreateTransfer() {
   const navigate = useNavigate();
+  const [searchParameters] = useSearchParams();
+  const assetIdFromUrl = searchParameters.get("assetId");
   const publicKey = useAppSelector(selectWalletPublicKey);
   const { assets } = useAssetsWithTrustlines(publicKey);
 
@@ -27,7 +29,10 @@ export function useCreateTransfer() {
   const [recipient, setRecipient] = useState("");
   const [note, setNote] = useState("");
 
-  const selectedAsset = selectedToken ?? assets[0];
+  const selectedAsset =
+    selectedToken ??
+    assets.find((asset) => asset.assetId === assetIdFromUrl) ??
+    assets[0];
 
   const handleTokenSelect = (asset: AssetWithTrustline) => {
     setSelectedToken(asset);
@@ -59,21 +64,11 @@ export function useCreateTransfer() {
     navigate("/transfer-success/tx_new_001");
   };
 
-  const navigateHome = () => navigate("/");
-
   const handleAmountChange = (value: string) => {
     if (value === "" || isNumericDecimalInput(value)) {
       setAmount(value);
     }
   };
-
-  const canSubmit =
-    selectedAsset !== undefined &&
-    amount !== "" &&
-    !Number.isNaN(Number.parseFloat(amount)) &&
-    Number.parseFloat(amount) > 0 &&
-    Number.parseFloat(amount) <= numericBalance &&
-    recipient !== "";
 
   return {
     assets,
@@ -94,7 +89,13 @@ export function useCreateTransfer() {
     handleMaxAmount,
     totalAmount,
     handleSubmit,
-    navigateHome,
-    canSubmit,
+    navigateHome: () => navigate("/"),
+    canSubmit:
+      selectedAsset !== undefined &&
+      amount !== "" &&
+      !Number.isNaN(Number.parseFloat(amount)) &&
+      Number.parseFloat(amount) > 0 &&
+      Number.parseFloat(amount) <= numericBalance &&
+      recipient !== "",
   };
 }

@@ -1,3 +1,7 @@
+declare global {
+  var Buffer: typeof import("buffer").Buffer;
+}
+
 declare module "*.wasm?url" {
   const url: string;
   export default url;

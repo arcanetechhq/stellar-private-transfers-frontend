@@ -7,12 +7,36 @@ import {
 import { assetApi } from "@/entities/asset";
 import { walletReducer } from "@/entities/wallet";
 import {
+  buildStealthPersistPayload,
   hydrateFromStorage,
   loadStealthState,
-  resetForWalletChange,
+  resetForWalletChange as resetStealthForWalletChange,
   saveStealthState,
   stealthAddressReducer,
 } from "@/entities/stealth-address";
+import {
+  hydrateTransactions,
+  loadTransactionState,
+  resetForWalletChange as resetTransactionsForWalletChange,
+  saveTransactionState,
+  transactionReducer,
+} from "@/entities/transaction";
+import {
+  coinDeliveryApi,
+  coinDeliveryReducer,
+  hydrateSeenTags,
+  loadSeenTags,
+  resetSeenTags,
+  saveSeenTags,
+} from "@/entities/coin-deliveries";
+import {
+  coinReducer,
+  hydrateCoinState,
+  loadCoinState,
+  resetCoinState,
+  saveCoinState,
+} from "@/entities/coin";
+import { mockTransactions } from "@/shared/lib/mock/ledger-transaction";
 
 const loadedContact = loadContactState();
 
@@ -21,10 +45,18 @@ export const store = configureStore({
     contact: contactReducer,
     wallet: walletReducer,
     stealthAddress: stealthAddressReducer,
+    transaction: transactionReducer,
+    coinDelivery: coinDeliveryReducer,
+    coin: coinReducer,
     [assetApi.reducerPath]: assetApi.reducer,
+    [coinDeliveryApi.reducerPath]: coinDeliveryApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    new Tuple(...getDefaultMiddleware(), assetApi.middleware),
+    new Tuple(
+      ...getDefaultMiddleware(),
+      assetApi.middleware,
+      coinDeliveryApi.middleware,
+    ),
   preloadedState: loadedContact ? { contact: loadedContact } : undefined,
 });
 
@@ -38,10 +70,19 @@ store.subscribe(() => {
   }
   lastWalletPublicKey = publicKey;
   if (publicKey) {
-    const loaded = loadStealthState(publicKey);
-    store.dispatch(hydrateFromStorage(loaded));
+    const loadedStealth = loadStealthState(publicKey);
+    store.dispatch(hydrateFromStorage(loadedStealth));
+    const loadedTransactions = loadTransactionState(publicKey);
+    store.dispatch(hydrateTransactions(loadedTransactions ?? mockTransactions));
+    const loadedTags = loadSeenTags(publicKey);
+    store.dispatch(hydrateSeenTags(loadedTags));
+    const loadedCoins = loadCoinState(publicKey);
+    store.dispatch(hydrateCoinState(loadedCoins));
   } else {
-    store.dispatch(resetForWalletChange());
+    store.dispatch(resetStealthForWalletChange());
+    store.dispatch(resetTransactionsForWalletChange());
+    store.dispatch(resetSeenTags());
+    store.dispatch(resetCoinState());
   }
 });
 
@@ -51,14 +92,38 @@ store.subscribe(() => {
   if (!publicKey) {
     return;
   }
-  saveStealthState(publicKey, {
-    byNonce: state.stealthAddress.byNonce,
-    defaultNonce: state.stealthAddress.defaultNonce,
-  });
+  saveStealthState(publicKey, buildStealthPersistPayload(state.stealthAddress));
 });
 
 store.subscribe(() => {
   saveContactState(store.getState().contact);
+});
+
+store.subscribe(() => {
+  const state = store.getState();
+  const publicKey = state.wallet.publicKey;
+  if (!publicKey) {
+    return;
+  }
+  saveTransactionState(publicKey, state.transaction.items);
+});
+
+store.subscribe(() => {
+  const state = store.getState();
+  const publicKey = state.wallet.publicKey;
+  if (!publicKey) {
+    return;
+  }
+  saveSeenTags(publicKey, state.coinDelivery.tagsByAssetId);
+});
+
+store.subscribe(() => {
+  const state = store.getState();
+  const publicKey = state.wallet.publicKey;
+  if (!publicKey) {
+    return;
+  }
+  saveCoinState(publicKey, state.coin.items);
 });
 
 export type RootState = ReturnType<typeof store.getState>;

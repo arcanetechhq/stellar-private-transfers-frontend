@@ -16,5 +16,9 @@
   "confirmDeposit": "Confirm Deposit",
   "selectAsset": "Select Asset",
   "searchAssetPlaceholder": "Search by name or ticker...",
-  "noTokensFound": "No tokens found"
+  "noTokensFound": "No tokens found",
+  "stealthDestination": "Private destination",
+  "stealthPlaceholder": "Select stealth address",
+  "noStealthAddresses": "Create a stealth address on the overview page first.",
+  "submitErrorTitle": "Could not complete deposit"
 }

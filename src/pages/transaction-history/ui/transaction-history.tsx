@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useTransactionHistory } from "../model/use-transaction-history";
 import { HistoryHeader } from "./history-header";
 import { HistoryFilters } from "./history-filters";
-import { TransactionTable } from "./transaction-table";
+import { TransactionTable } from "@/widgets/transaction-list";
 
 export function TransactionHistory() {
   const { t: translate } = useTranslation("history");

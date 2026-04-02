@@ -1,6 +1,9 @@
 import { useState, useCallback } from "react";
+import { StellarWalletsKit as StellarWalletsKitSdk } from "@creit-tech/stellar-wallets-kit/sdk";
+import { useAppDispatch } from "@/app/hooks";
+import { submitHorizonTransaction } from "@/features/stellar-wallet-connect";
 import { buildChangeTrustTx } from "@/shared/stellar/build-change-trust-tx";
-import { useStellar } from "@/shared/stellar/stellar-context";
+import { HORIZON_URL, horizonServer } from "@/shared/stellar/horizon-server";
 
 interface TrustlineTarget {
   assetId: string;
@@ -12,7 +15,7 @@ export function useAddTrustline(
   publicKey: string | undefined,
   onSuccess: () => void,
 ) {
-  const { server, signAndSubmitTransaction } = useStellar();
+  const dispatch = useAppDispatch();
   const [pendingAssetId, setPendingAssetId] = useState<string | undefined>();
 
   const addTrustline = useCallback(
@@ -21,19 +24,28 @@ export function useAddTrustline(
 
       setPendingAssetId(target.assetId);
       try {
+        const { networkPassphrase } = await StellarWalletsKitSdk.getNetwork();
         const xdr = await buildChangeTrustTx({
-          server,
+          server: horizonServer,
           publicKey,
           assetCode: target.assetCode,
           issuerAddress: target.issuerAddress,
+          networkPassphrase,
         });
-        await signAndSubmitTransaction(xdr, publicKey);
+        await dispatch(
+          submitHorizonTransaction({
+            horizonUrl: HORIZON_URL,
+            networkPassphrase,
+            publicKey,
+            xdr,
+          }),
+        ).unwrap();
         onSuccess();
       } finally {
         setPendingAssetId(undefined);
       }
     },
-    [publicKey, server, signAndSubmitTransaction, onSuccess],
+    [dispatch, onSuccess, publicKey],
   );
 
   return {

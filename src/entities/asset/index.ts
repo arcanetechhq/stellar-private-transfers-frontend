@@ -4,6 +4,10 @@ export {
 } from "./model/asset";
 
 export { useAssetsWithTrustlines } from "./model/use-assets-with-trustlines";
+export {
+  useAssetLookup,
+  useAssetByPoolContract,
+} from "./model/use-asset-lookup";
 
 export {
   assetApi,

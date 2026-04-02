@@ -18,7 +18,14 @@ export default {
         ],
       },
       create(context) {
-        const sourceCode = context.getSourceCode();
+        const sourceCode =
+          context.sourceCode ??
+          (typeof context.getSourceCode === "function"
+            ? context.getSourceCode()
+            : undefined);
+        if (!sourceCode) {
+          return {};
+        }
         function processComment(comment) {
           const options = context.options[0] || {};
           const allow = (options && options.allow) || [];

@@ -12,3 +12,4 @@ export {
   errorToMessage,
   isSignMessageUnsupportedError,
 } from "./lib/sign-message-errors";
+export { ensureStealthScalarForNonce } from "./lib/ensure-stealth-scalar-for-nonce";

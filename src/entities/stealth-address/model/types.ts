@@ -3,8 +3,12 @@ export interface StealthNonceEntry {
   createdAt: number;
 }
 
+export type StealthPersistedNonceEntry = StealthNonceEntry & {
+  recipientScalarHex?: string;
+};
+
 export interface StealthPersistedShape {
-  byNonce: Record<string, StealthNonceEntry>;
+  byNonce: Record<string, StealthPersistedNonceEntry>;
   defaultNonce: string | undefined;
 }
 

@@ -3,7 +3,9 @@ import { Info } from "lucide-react";
 import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TokenIcon } from "@/shared/ui/token-icon";
+import { FormErrorAlert } from "@/shared/ui/form-error-alert";
 import type { AssetWithTrustline } from "@/entities/asset";
+import { StealthAddressPicker } from "@/features/pick-stealth-address";
 import { QUICK_PERCENTAGE_OPTIONS } from "../model/create-deposit";
 
 interface AssetSelectorProperties {
@@ -102,14 +104,14 @@ function DepositInfoBanner() {
   const { t: translate } = useTranslation("deposit");
 
   return (
-    <div className="rounded-lg p-4" style={{ backgroundColor: "#EFF6FF", border: "1px solid #BFDBFE" }}>
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--info-bg)] p-4">
       <div className="flex gap-3">
-        <Info className="mt-0.5 h-5 w-5 flex-shrink-0" style={{ color: "#3B82F6" }} />
+        <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--info)]" />
         <div>
-          <p className="mb-1 font-semibold" style={{ fontSize: "14px", lineHeight: "20px", color: "#1E40AF" }}>
+          <p className="mb-1 text-sm font-semibold leading-5 text-[var(--info-foreground)]">
             {translate("aboutDeposits")}
           </p>
-          <p style={{ fontSize: "13px", lineHeight: "18px", color: "#1E40AF" }}>
+          <p className="text-[13px] leading-[18px] text-[var(--info-foreground)]">
             {translate("aboutDepositsText")}
           </p>
         </div>
@@ -125,6 +127,9 @@ interface DepositFormProperties {
   onMaxAmount: () => void;
   onPercentage: (percentage: number) => void;
   onOpenTokenPicker: () => void;
+  selectedStealthNonce: string | undefined;
+  onStealthSelect: (nonce: string, stealthAddress: string) => void;
+  errorMessage?: string;
 }
 
 export function DepositForm({
@@ -134,16 +139,29 @@ export function DepositForm({
   onMaxAmount,
   onPercentage,
   onOpenTokenPicker,
+  selectedStealthNonce,
+  onStealthSelect,
+  errorMessage,
 }: DepositFormProperties) {
+  const { t: translate } = useTranslation("deposit");
+
   return (
-    <div className="rounded-xl bg-white p-6" style={{ border: "1px solid #E7EAF0" }}>
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
       <div className="space-y-6">
+        <FormErrorAlert
+          message={errorMessage}
+          title={translate("submitErrorTitle")}
+        />
         <AssetSelector selectedToken={selectedToken} onOpen={onOpenTokenPicker} />
         <AmountInput
           amount={amount}
           onAmountChange={onAmountChange}
           onMaxAmount={onMaxAmount}
           onPercentage={onPercentage}
+        />
+        <StealthAddressPicker
+          selectedNonce={selectedStealthNonce}
+          onSelectNonce={onStealthSelect}
         />
         <DepositInfoBanner />
       </div>

@@ -1,14 +1,35 @@
 import { useState, useMemo } from "react";
 import type { FormEvent } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useAppSelector } from "@/app/hooks";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { useAssetsWithTrustlines, type AssetWithTrustline } from "@/entities/asset";
 import { PERCENTAGE_DIVISOR, NETWORK_FEE } from "./create-withdrawal";
 import { isNumericDecimalInput } from "../lib/is-numeric-decimal-input";
 
+interface WithdrawalCanSubmitInput {
+  selectedAsset: AssetWithTrustline | undefined;
+  amount: string;
+  numericBalance: number;
+  destinationWallet: string;
+}
+
+function computeWithdrawalCanSubmit(input: WithdrawalCanSubmitInput): boolean {
+  const numericAmount = Number.parseFloat(input.amount);
+  return (
+    input.selectedAsset !== undefined &&
+    input.amount !== "" &&
+    !Number.isNaN(numericAmount) &&
+    numericAmount > 0 &&
+    numericAmount <= input.numericBalance &&
+    input.destinationWallet !== ""
+  );
+}
+
 export function useCreateWithdrawal() {
   const navigate = useNavigate();
+  const [searchParameters] = useSearchParams();
+  const assetIdFromUrl = searchParameters.get("assetId");
   const publicKey = useAppSelector(selectWalletPublicKey);
   const { assets } = useAssetsWithTrustlines(publicKey);
 
@@ -18,7 +39,10 @@ export function useCreateWithdrawal() {
   const [amount, setAmount] = useState("");
   const [destinationWallet, setDestinationWallet] = useState("");
 
-  const selectedAsset = selectedToken ?? assets[0];
+  const selectedAsset =
+    selectedToken ??
+    assets.find((asset) => asset.assetId === assetIdFromUrl) ??
+    assets[0];
 
   const numericBalance = selectedAsset
     ? Number.parseFloat(selectedAsset.balance ?? "0")
@@ -50,22 +74,11 @@ export function useCreateWithdrawal() {
     navigate("/transfer-success/withdrawal_new_001");
   };
 
-  const handleGoBack = () => navigate("/");
-
   const handleAmountChange = (value: string) => {
     if (value === "" || isNumericDecimalInput(value)) {
       setAmount(value);
     }
   };
-
-  const numericAmount = Number.parseFloat(amount);
-  const canSubmit =
-    selectedAsset !== undefined &&
-    amount !== "" &&
-    !Number.isNaN(numericAmount) &&
-    numericAmount > 0 &&
-    numericAmount <= numericBalance &&
-    destinationWallet !== "";
 
   return {
     assets,
@@ -84,7 +97,12 @@ export function useCreateWithdrawal() {
     receivedAmount,
     networkFee: NETWORK_FEE,
     handleSubmit,
-    handleGoBack,
-    canSubmit,
+    handleGoBack: () => navigate("/"),
+    canSubmit: computeWithdrawalCanSubmit({
+      selectedAsset,
+      amount,
+      numericBalance,
+      destinationWallet,
+    }),
   };
 }

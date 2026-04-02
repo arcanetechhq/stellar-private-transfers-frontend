@@ -1,7 +1,6 @@
 import React from "react";
 import { Bell, Globe, Search } from "lucide-react";
 import type { ReactNode } from "react";
-import { useStellarWalletConnection } from "@/features/stellar-wallet-connect";
 import { MainLayoutHeaderWallet } from "./main-layout-header-wallet";
 import { MainLayoutLanguageMenu } from "./main-layout-language-menu";
 
@@ -73,8 +72,6 @@ export function MainLayoutHeader({
   currentLanguage,
   onSelectLanguage,
 }: MainLayoutHeaderProperties) {
-  const wallet = useStellarWalletConnection();
-
   return (
     <React.Fragment>
       <header className="border-b border-gray-200 bg-white px-6 py-4">
@@ -107,7 +104,6 @@ export function MainLayoutHeader({
 
             <MainLayoutHeaderWallet
               translate={translate}
-              wallet={wallet}
               walletOpen={walletOpen}
               setWalletOpen={setWalletOpen}
             />

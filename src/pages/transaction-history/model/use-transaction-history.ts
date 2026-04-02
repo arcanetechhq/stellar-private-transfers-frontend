@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { mockTransactions } from "@/shared/lib/mock";
+import { useAppSelector } from "@/app/hooks";
+import { selectTransactions } from "@/entities/transaction";
 import type { DateFilterValue, FilterType } from "./transaction-history";
 import { dateFilterOptions } from "./transaction-history";
 import { isTransactionInDateRange } from "../lib/date-filter";
@@ -37,16 +38,18 @@ export function useTransactionHistory() {
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
 
+  const allTransactions = useAppSelector(selectTransactions);
+
   const dateLabel =
     dateFilterOptions.find((option) => option.value === dateFilter)?.label ??
     "dateFilters.allTime";
 
-  const filteredTransactions = mockTransactions.filter((transaction) => {
+  const filteredTransactions = allTransactions.filter((transaction) => {
     const lowerQuery = searchQuery.toLowerCase();
     const matchesSearch =
       transaction.id.toLowerCase().includes(lowerQuery) ||
       transaction.counterparty.toLowerCase().includes(lowerQuery) ||
-      transaction.asset.toLowerCase().includes(lowerQuery);
+      transaction.assetId.toLowerCase().includes(lowerQuery);
 
     const matchesType = getTypeMatch({
       filterType,

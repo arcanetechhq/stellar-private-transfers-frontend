@@ -1,6 +1,9 @@
-import { Horizon, Networks } from "@stellar/stellar-sdk";
+import { Horizon } from "@stellar/stellar-sdk";
+import { getDefaultStellarNetworkConfig } from "./stellar-network-environment";
 
-export const STELLAR_NETWORK_PASSPHRASE = Networks.TESTNET;
-export const HORIZON_URL = "https://horizon-testnet.stellar.org";
+const defaults = getDefaultStellarNetworkConfig();
+
+export const STELLAR_NETWORK_PASSPHRASE = defaults.networkPassphrase;
+export const HORIZON_URL = defaults.horizonUrl;
 
 export const horizonServer = new Horizon.Server(HORIZON_URL);

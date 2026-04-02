@@ -9,9 +9,15 @@ export default defineConfig({
     global: "globalThis",
   },
   resolve: {
+    dedupe: ["buffer"],
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      buffer: "buffer",
+      contract: path.resolve(__dirname, "./generated/contract/src/index.ts"),
     },
+  },
+  optimizeDeps: {
+    include: ["buffer", "@auditable/stellar-audit", "contract"],
   },
   assetsInclude: ["**/*.svg", "**/*.csv", "**/*.wasm", "**/*.zkey"],
   build: {

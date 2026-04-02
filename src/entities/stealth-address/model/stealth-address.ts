@@ -1,5 +1,13 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { StealthAddressState, StealthNonceEntry, StealthPersistedShape } from "./types";
+import {
+  createSelector,
+  createSlice,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
+import type {
+  StealthAddressState,
+  StealthNonceEntry,
+  StealthPersistedShape,
+} from "./types";
 
 const initialPersisted: StealthPersistedShape = {
   byNonce: {},
@@ -20,16 +28,25 @@ const stealthAddressSlice = createSlice({
       action: PayloadAction<StealthPersistedShape | undefined>,
     ) => {
       const payload = action.payload ?? initialPersisted;
-      state.byNonce = { ...payload.byNonce };
-      state.defaultNonce = payload.defaultNonce ?? undefined;
+      state.byNonce = {};
       state.scalarByNonce = {};
+      for (const [nonceKey, persisted] of Object.entries(payload.byNonce)) {
+        const { recipientScalarHex, ...entry } = persisted;
+        state.byNonce[nonceKey] = entry;
+        const hex = recipientScalarHex?.trim();
+        if (hex) {
+          state.scalarByNonce[nonceKey] = hex;
+        }
+      }
+      state.defaultNonce = payload.defaultNonce ?? undefined;
     },
     resetForWalletChange: () => ({ ...initialState }),
     setStealthRecord: (
       state,
       action: PayloadAction<{ nonce: string; entry: StealthNonceEntry }>,
     ) => {
-      state.byNonce[action.payload.nonce] = action.payload.entry;
+      const { stealthAddress, createdAt } = action.payload.entry;
+      state.byNonce[action.payload.nonce] = { stealthAddress, createdAt };
     },
     setDefaultNonce: (state, action: PayloadAction<string | undefined>) => {
       state.defaultNonce = action.payload;
@@ -73,5 +90,10 @@ export const selectScalarByNonce =
   (nonce: string | undefined) => (state: StealthAddressRootState) =>
     nonce ? state.stealthAddress.scalarByNonce[nonce] : undefined;
 
-export const selectAllStealthNonces = (state: StealthAddressRootState) =>
-  Object.keys(state.stealthAddress.byNonce);
+const selectStealthByNonceMap = (state: StealthAddressRootState) =>
+  state.stealthAddress.byNonce;
+
+export const selectAllStealthNonces = createSelector(
+  [selectStealthByNonceMap],
+  (byNonce) => Object.keys(byNonce),
+);

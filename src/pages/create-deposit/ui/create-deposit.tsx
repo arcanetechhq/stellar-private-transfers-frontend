@@ -9,10 +9,7 @@ export function CreateDeposit() {
   const deposit = useCreateDeposit();
 
   return (
-    <div
-      className="p-8"
-      style={{ backgroundColor: "#F6F7F9", minHeight: "100%" }}
-    >
+    <div className="min-h-full bg-[var(--background)] p-8">
       <div className="mx-auto max-w-5xl">
         <PageHeader onBack={() => deposit.navigate("/")} />
         <form onSubmit={deposit.handleSubmit}>
@@ -25,6 +22,9 @@ export function CreateDeposit() {
                 onMaxAmount={deposit.handleMaxAmount}
                 onPercentage={deposit.handlePercentage}
                 onOpenTokenPicker={() => deposit.setShowTokenPicker(true)}
+                selectedStealthNonce={deposit.selectedStealthNonce}
+                onStealthSelect={deposit.handleStealthSelect}
+                errorMessage={deposit.submitErrorMessage}
               />
             </div>
             <div className="lg:col-span-1">
@@ -34,6 +34,8 @@ export function CreateDeposit() {
                 networkFee={deposit.networkFee}
                 receivedAmount={deposit.receivedAmount}
                 canSubmit={deposit.canSubmit}
+                isSubmitting={deposit.isSubmitting}
+                destinationPreview={deposit.destinationStealthPreview}
               />
             </div>
           </div>

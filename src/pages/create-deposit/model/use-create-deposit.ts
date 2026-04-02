@@ -1,80 +1,70 @@
-import { type FormEvent, useState, useMemo } from "react";
+import { type FormEvent, useCallback } from "react";
 import { useNavigate } from "react-router";
-import { useAppSelector } from "@/app/hooks";
-import { selectWalletPublicKey } from "@/entities/wallet";
-import { useAssetsWithTrustlines, type AssetWithTrustline } from "@/entities/asset";
-import { PERCENTAGE_DIVISOR, NETWORK_FEE } from "./create-deposit";
-import { isNumericDecimalInput } from "../lib/validation";
+import { useDepositTransaction } from "@/features/deposit";
+import { useCreateDepositForm } from "./use-create-deposit-form";
 
 export function useCreateDeposit() {
   const navigate = useNavigate();
-  const publicKey = useAppSelector(selectWalletPublicKey);
-  const { assets } = useAssetsWithTrustlines(publicKey);
+  const {
+    mutateAsync: submitDeposit,
+    isPending: isSubmitting,
+    error: submitError,
+  } = useDepositTransaction();
+  const form = useCreateDepositForm({ isSubmitting });
 
-  const [showTokenPicker, setShowTokenPicker] = useState(false);
-  const [selectedToken, setSelectedToken] = useState<AssetWithTrustline | undefined>();
-  const [amount, setAmount] = useState("");
-
-  const selectedAsset = selectedToken ?? assets[0];
-
-  const numericBalance = selectedAsset
-    ? Number.parseFloat(selectedAsset.balance ?? "0")
-    : 0;
-
-  const handleTokenSelect = (asset: AssetWithTrustline) => {
-    setSelectedToken(asset);
-    setShowTokenPicker(false);
-  };
-
-  const handleAmountChange = (value: string) => {
-    if (value === "" || isNumericDecimalInput(value)) {
-      setAmount(value);
-    }
-  };
-
-  const handlePercentage = (percentage: number) => {
-    const value = (numericBalance * percentage) / PERCENTAGE_DIVISOR;
-    setAmount(value.toString());
-  };
-
-  const handleMaxAmount = () => {
-    if (selectedAsset?.balance) {
-      setAmount(selectedAsset.balance);
-    }
-  };
-
-  const receivedAmount = useMemo(() => {
-    if (!amount || Number.isNaN(Number.parseFloat(amount))) return 0;
-    return Number.parseFloat(amount);
-  }, [amount]);
-
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    navigate("/transfer-success/deposit_new_001");
-  };
-
-  const numericAmount = Number.parseFloat(amount);
-  const canSubmit =
-    selectedAsset !== undefined &&
-    amount !== "" &&
-    !Number.isNaN(numericAmount) &&
-    numericAmount > 0 &&
-    numericAmount <= numericBalance;
+  const handleSubmit = useCallback(
+    async (event: FormEvent) => {
+      event.preventDefault();
+      if (!form.canSubmit || !form.selectedAsset) {
+        return;
+      }
+      try {
+        const result = await submitDeposit({
+          asset: form.selectedAsset,
+          amountDisplay: form.numericAmount,
+          stealthAddress: form.destinationStealthPreview.trim(),
+        });
+        navigate(`/transfer-success/${encodeURIComponent(result.txId)}`, {
+          state: {
+            amount: result.amountDisplay,
+            assetId: result.assetId,
+            poolContract: result.poolContract,
+            txId: result.txId,
+          },
+        });
+      } catch {
+        return;
+      }
+    },
+    [
+      form.canSubmit,
+      form.destinationStealthPreview,
+      form.numericAmount,
+      form.selectedAsset,
+      navigate,
+      submitDeposit,
+    ],
+  );
 
   return {
-    assets,
+    assets: form.assets,
     navigate,
-    showTokenPicker,
-    setShowTokenPicker,
-    selectedToken: selectedAsset,
-    amount,
-    handleTokenSelect,
-    handleAmountChange,
-    handlePercentage,
-    handleMaxAmount,
-    networkFee: NETWORK_FEE,
-    receivedAmount,
+    showTokenPicker: form.showTokenPicker,
+    setShowTokenPicker: form.setShowTokenPicker,
+    selectedToken: form.selectedToken,
+    amount: form.amount,
+    handleTokenSelect: form.handleTokenSelect,
+    handleAmountChange: form.handleAmountChange,
+    handlePercentage: form.handlePercentage,
+    handleMaxAmount: form.handleMaxAmount,
+    networkFee: form.networkFee,
+    receivedAmount: form.receivedAmount,
     handleSubmit,
-    canSubmit,
+    canSubmit: form.canSubmit,
+    selectedStealthNonce: form.selectedStealthNonce,
+    handleStealthSelect: form.handleStealthSelect,
+    destinationStealthPreview: form.destinationStealthPreview,
+    isSubmitting,
+    submitErrorMessage: submitError?.message,
   };
 }

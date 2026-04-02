@@ -1,8 +1,9 @@
 import React from "react";
 import { Link } from "react-router";
-import { Send, Plus, Loader2 } from "lucide-react";
+import { ArrowDownToLine, Plus, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { TrustlineStatus } from "@/entities/asset";
+import { cn } from "@/shared/lib/cn";
 
 interface TrustlineTarget {
   assetId: string;
@@ -40,7 +41,7 @@ export function AssetActionButton({
 
   if (trustlineStatus === "loading") {
     return (
-      <button disabled className={`${BASE_CLASSES} ${OUTLINE_CLASSES}`}>
+      <button type="button" disabled className={cn(BASE_CLASSES, OUTLINE_CLASSES)}>
         <Loader2 className="h-3.5 w-3.5 animate-spin" />
       </button>
     );
@@ -49,8 +50,9 @@ export function AssetActionButton({
   if (trustlineStatus === "missing") {
     return (
       <button
+        type="button"
         disabled={isSubmitting}
-        className={`${BASE_CLASSES} ${PRIMARY_CLASSES}`}
+        className={cn(BASE_CLASSES, PRIMARY_CLASSES)}
         onClick={() => {
           if (issuerAddress) {
             onAddTrustline({ assetId, assetCode, issuerAddress });
@@ -70,10 +72,13 @@ export function AssetActionButton({
   }
 
   return (
-    <Link to={`/create-transfer?asset=${assetId}`} className="block w-24">
-      <button className={`${BASE_CLASSES} ${OUTLINE_CLASSES} w-full`}>
-        <Send className="h-3.5 w-3.5" />
-        {translate("trustline.send")}
+    <Link
+      to={`/deposit?assetId=${encodeURIComponent(assetId)}`}
+      className="block w-24"
+    >
+      <button type="button" className={cn(BASE_CLASSES, OUTLINE_CLASSES, "w-full")}>
+        <ArrowDownToLine className="h-3.5 w-3.5" />
+        {translate("trustline.deposit")}
       </button>
     </Link>
   );

@@ -39,7 +39,7 @@ export function AboutDetails() {
   const { t: translate } = useTranslation("about");
 
   const technicalDetails: DetailRowProperties[] = [
-    { label: translate("network"), value: translate("ethereumMainnet") },
+    { label: translate("network"), value: translate("stellarTestnet") },
     { label: translate("protocol"), value: translate("zeroKnowledgeProofs") },
     { label: translate("license"), value: translate("mit") },
   ];

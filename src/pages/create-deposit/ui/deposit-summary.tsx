@@ -1,7 +1,8 @@
 import React from "react";
-import { Download } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { AssetWithTrustline } from "@/entities/asset";
+import { shortenStealthForDisplay } from "@/features/pick-stealth-address";
 
 interface SummaryLineItemsProperties {
   selectedToken: AssetWithTrustline | undefined;
@@ -9,33 +10,37 @@ interface SummaryLineItemsProperties {
   networkFee: number;
 }
 
-function SummaryLineItems({ selectedToken, amount, networkFee }: SummaryLineItemsProperties) {
+function SummaryLineItems({
+  selectedToken,
+  amount,
+  networkFee,
+}: SummaryLineItemsProperties) {
   const { t: translate } = useTranslation("deposit");
   const ticker = selectedToken?.assetId.toUpperCase() ?? "—";
 
   return (
     <div className="mb-6 space-y-3">
       <div className="flex justify-between">
-        <span style={{ fontSize: "14px", lineHeight: "20px", color: "#667085" }}>
+        <span className="text-sm leading-5 text-[var(--foreground-secondary)]">
           {translate("asset")}
         </span>
-        <span className="font-semibold" style={{ fontSize: "14px", lineHeight: "20px", color: "#121826" }}>
+        <span className="text-sm font-semibold leading-5 text-[var(--foreground-primary)]">
           {ticker}
         </span>
       </div>
       <div className="flex justify-between">
-        <span style={{ fontSize: "14px", lineHeight: "20px", color: "#667085" }}>
+        <span className="text-sm leading-5 text-[var(--foreground-secondary)]">
           {translate("amount")}
         </span>
-        <span className="font-semibold" style={{ fontSize: "14px", lineHeight: "20px", color: "#121826" }}>
+        <span className="text-sm font-semibold leading-5 text-[var(--foreground-primary)]">
           {amount || "0.00"}
         </span>
       </div>
       <div className="flex justify-between">
-        <span style={{ fontSize: "14px", lineHeight: "20px", color: "#667085" }}>
+        <span className="text-sm leading-5 text-[var(--foreground-secondary)]">
           {translate("networkFee")}
         </span>
-        <span className="font-semibold" style={{ fontSize: "14px", lineHeight: "20px", color: "#121826" }}>
+        <span className="text-sm font-semibold leading-5 text-[var(--foreground-primary)]">
           ${networkFee.toFixed(2)}
         </span>
       </div>
@@ -46,47 +51,35 @@ function SummaryLineItems({ selectedToken, amount, networkFee }: SummaryLineItem
 interface SummaryReceiveInfoProperties {
   receivedAmount: number;
   ticker: string;
+  destinationPreview: string;
 }
 
-function SummaryReceiveInfo(properties: SummaryReceiveInfoProperties) {
-  const { receivedAmount, ticker } = properties;
+function SummaryReceiveInfo({
+  receivedAmount,
+  ticker,
+  destinationPreview,
+}: SummaryReceiveInfoProperties) {
   const { t: translate } = useTranslation("deposit");
+  const preview = destinationPreview.trim()
+    ? shortenStealthForDisplay(destinationPreview.trim())
+    : "—";
 
   return (
-    <div className="mb-6 border-t pt-4" style={{ borderColor: "#E7EAF0" }}>
+    <div className="mb-6 border-t border-[var(--border)] pt-4">
       <div className="mb-3 flex justify-between">
-        <span
-          className="font-semibold"
-          style={{ fontSize: "15px", lineHeight: "22px", color: "#121826" }}
-        >
+        <span className="text-[15px] font-semibold leading-[22px] text-[var(--foreground-primary)]">
           {translate("youWillReceive")}
         </span>
-        <span
-          className="font-semibold"
-          style={{ fontSize: "15px", lineHeight: "22px", color: "#121826" }}
-        >
+        <span className="text-[15px] font-semibold leading-[22px] text-[var(--foreground-primary)]">
           {receivedAmount.toLocaleString()} {ticker}
         </span>
       </div>
-      <div
-        className="rounded-lg p-3"
-        style={{ backgroundColor: "#F9FAFB", border: "1px solid #E7EAF0" }}
-      >
-        <p
-          style={{
-            fontSize: "12px",
-            lineHeight: "16px",
-            color: "#667085",
-            marginBottom: "4px",
-          }}
-        >
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-subtle)] p-3">
+        <p className="mb-1 text-xs leading-4 text-[var(--foreground-secondary)]">
           {translate("destination")}
         </p>
-        <p
-          className="font-semibold"
-          style={{ fontSize: "13px", lineHeight: "18px", color: "#121826" }}
-        >
-          {translate("privateBalance")}
+        <p className="font-mono text-[13px] font-semibold leading-[18px] text-[var(--foreground-primary)]">
+          {preview}
         </p>
       </div>
     </div>
@@ -99,21 +92,25 @@ interface DepositSummaryProperties {
   networkFee: number;
   receivedAmount: number;
   canSubmit: boolean;
+  isSubmitting: boolean;
+  destinationPreview: string;
 }
 
-export function DepositSummary({ selectedToken, amount, networkFee, receivedAmount, canSubmit }: DepositSummaryProperties) {
+export function DepositSummary({
+  selectedToken,
+  amount,
+  networkFee,
+  receivedAmount,
+  canSubmit,
+  isSubmitting,
+  destinationPreview,
+}: DepositSummaryProperties) {
   const { t: translate } = useTranslation("deposit");
   const ticker = selectedToken?.assetId.toUpperCase() ?? "—";
 
   return (
-    <div
-      className="sticky top-6 rounded-xl bg-white p-6"
-      style={{ border: "1px solid #E7EAF0" }}
-    >
-      <h3
-        className="mb-4 font-semibold"
-        style={{ fontSize: "16px", lineHeight: "24px", color: "#121826" }}
-      >
+    <div className="sticky top-6 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+      <h3 className="mb-4 text-base font-semibold leading-6 text-[var(--foreground-primary)]">
         {translate("summary")}
       </h3>
       <SummaryLineItems
@@ -124,28 +121,18 @@ export function DepositSummary({ selectedToken, amount, networkFee, receivedAmou
       <SummaryReceiveInfo
         receivedAmount={receivedAmount}
         ticker={ticker}
+        destinationPreview={destinationPreview}
       />
       <button
         type="submit"
         disabled={!canSubmit}
-        className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-semibold transition-all"
-        style={{
-          fontSize: "15px",
-          lineHeight: "22px",
-          backgroundColor: canSubmit ? "#111827" : "#E7EAF0",
-          color: canSubmit ? "#FFFFFF" : "#98A2B3",
-          cursor: canSubmit ? "pointer" : "not-allowed",
-        }}
-        onMouseEnter={(event) => {
-          if (canSubmit)
-            event.currentTarget.style.backgroundColor = "#1F2937";
-        }}
-        onMouseLeave={(event) => {
-          if (canSubmit)
-            event.currentTarget.style.backgroundColor = "#111827";
-        }}
+        className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-3 text-[15px] font-semibold leading-[22px] text-[var(--primary-foreground)] transition-colors hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:bg-[var(--border)] disabled:text-[var(--foreground-tertiary)]"
       >
-        <Download className="h-4 w-4" />
+        {isSubmitting ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <Download className="h-4 w-4" />
+        )}
         {translate("confirmDeposit")}
       </button>
     </div>
