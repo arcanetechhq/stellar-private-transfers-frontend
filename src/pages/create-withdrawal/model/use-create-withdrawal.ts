@@ -1,53 +1,44 @@
 import { useState, useMemo } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router";
-import {
-  MOCK_TOKENS, PERCENTAGE_DIVISOR, NETWORK_FEE, type Token,
-} from "./create-withdrawal";
+import { useAppSelector } from "@/app/hooks";
+import { selectWalletPublicKey } from "@/entities/wallet";
+import { useAssetsWithTrustlines, type AssetWithTrustline } from "@/entities/asset";
+import { PERCENTAGE_DIVISOR, NETWORK_FEE } from "./create-withdrawal";
 import { isNumericDecimalInput } from "../lib/is-numeric-decimal-input";
 
 export function useCreateWithdrawal() {
   const navigate = useNavigate();
+  const publicKey = useAppSelector(selectWalletPublicKey);
+  const { assets } = useAssetsWithTrustlines(publicKey);
+
   const [showTokenPicker, setShowTokenPicker] = useState(false);
   const [showContactPicker, setShowContactPicker] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedToken, setSelectedToken] = useState(MOCK_TOKENS[0]);
+  const [selectedToken, setSelectedToken] = useState<AssetWithTrustline | undefined>();
   const [amount, setAmount] = useState("");
-  const [destinationWallet, setDestinationWallet] = useState("0x742d...3f8c");
+  const [destinationWallet, setDestinationWallet] = useState("");
 
-  const filteredTokens = useMemo(() => {
-    const filtered = MOCK_TOKENS.filter(
-      (token) =>
-        token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        token.ticker.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-    filtered.sort((leftItem, rightItem) => {
-      if (leftItem.balance > 0 && rightItem.balance === 0) return -1;
-      if (leftItem.balance === 0 && rightItem.balance > 0) return 1;
-      return rightItem.balance * rightItem.price - leftItem.balance * leftItem.price;
-    });
-    return filtered;
-  }, [searchQuery]);
+  const selectedAsset = selectedToken ?? assets[0];
 
-  const handleTokenSelect = (token: Token) => {
-    setSelectedToken(token);
+  const numericBalance = selectedAsset
+    ? Number.parseFloat(selectedAsset.balance ?? "0")
+    : 0;
+
+  const handleTokenSelect = (asset: AssetWithTrustline) => {
+    setSelectedToken(asset);
     setShowTokenPicker(false);
-    setSearchQuery("");
   };
 
   const handlePercentage = (percentage: number) => {
-    const value = (selectedToken.balance * percentage) / PERCENTAGE_DIVISOR;
+    const value = (numericBalance * percentage) / PERCENTAGE_DIVISOR;
     setAmount(value.toString());
   };
 
   const handleMaxAmount = () => {
-    setAmount(selectedToken.balance.toString());
+    if (selectedAsset?.balance) {
+      setAmount(selectedAsset.balance);
+    }
   };
-
-  const fiatValue = useMemo(() => {
-    if (!amount || Number.isNaN(Number.parseFloat(amount))) return 0;
-    return Number.parseFloat(amount) * selectedToken.price;
-  }, [amount, selectedToken]);
 
   const receivedAmount = useMemo(() => {
     if (!amount || Number.isNaN(Number.parseFloat(amount))) return 0;
@@ -59,9 +50,7 @@ export function useCreateWithdrawal() {
     navigate("/transfer-success/withdrawal_new_001");
   };
 
-  const handleGoBack = () => {
-    navigate("/");
-  };
+  const handleGoBack = () => navigate("/");
 
   const handleAmountChange = (value: string) => {
     if (value === "" || isNumericDecimalInput(value)) {
@@ -69,20 +58,33 @@ export function useCreateWithdrawal() {
     }
   };
 
+  const numericAmount = Number.parseFloat(amount);
   const canSubmit =
+    selectedAsset !== undefined &&
     amount !== "" &&
-    Number.parseFloat(amount) > 0 &&
-    Number.parseFloat(amount) <= selectedToken.balance &&
+    !Number.isNaN(numericAmount) &&
+    numericAmount > 0 &&
+    numericAmount <= numericBalance &&
     destinationWallet !== "";
 
   return {
-    showTokenPicker, setShowTokenPicker,
-    showContactPicker, setShowContactPicker,
-    searchQuery, setSearchQuery,
-    selectedToken, filteredTokens, handleTokenSelect,
-    amount, handleAmountChange, handlePercentage, handleMaxAmount,
-    destinationWallet, setDestinationWallet,
-    fiatValue, receivedAmount, networkFee: NETWORK_FEE,
-    handleSubmit, handleGoBack, canSubmit,
+    assets,
+    showTokenPicker,
+    setShowTokenPicker,
+    showContactPicker,
+    setShowContactPicker,
+    selectedToken: selectedAsset,
+    handleTokenSelect,
+    amount,
+    handleAmountChange,
+    handlePercentage,
+    handleMaxAmount,
+    destinationWallet,
+    setDestinationWallet,
+    receivedAmount,
+    networkFee: NETWORK_FEE,
+    handleSubmit,
+    handleGoBack,
+    canSubmit,
   };
 }

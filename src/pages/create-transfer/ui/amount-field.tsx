@@ -1,36 +1,22 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { mockQuickPercentageOptions } from "../model/create-transfer";
+import { QUICK_PERCENTAGE_OPTIONS } from "../model/create-transfer";
 
 interface QuickAmountButtonsProperties {
   onPercentage: (percentage: number) => void;
   onMaxAmount: () => void;
 }
 
-function QuickAmountButtons(properties: QuickAmountButtonsProperties) {
-  const { onPercentage, onMaxAmount } = properties;
+function QuickAmountButtons({ onPercentage, onMaxAmount }: QuickAmountButtonsProperties) {
   const { t: translate } = useTranslation("transfer");
   return (
     <div className="mt-3 flex gap-2">
-      {mockQuickPercentageOptions.map((percentage) => (
+      {QUICK_PERCENTAGE_OPTIONS.map((percentage) => (
         <button
           key={percentage}
           type="button"
           onClick={() => onPercentage(percentage)}
-          className="rounded-lg px-4 py-2 transition-colors"
-          style={{
-            fontSize: "13px",
-            fontWeight: 500,
-            color: "#667085",
-            border: "1px solid #E7EAF0",
-            backgroundColor: "#FFFFFF",
-          }}
-          onMouseEnter={(event) =>
-            (event.currentTarget.style.backgroundColor = "#F6F7F9")
-          }
-          onMouseLeave={(event) =>
-            (event.currentTarget.style.backgroundColor = "#FFFFFF")
-          }
+          className="rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
         >
           {percentage}%
         </button>
@@ -38,20 +24,7 @@ function QuickAmountButtons(properties: QuickAmountButtonsProperties) {
       <button
         type="button"
         onClick={onMaxAmount}
-        className="rounded-lg px-4 py-2 transition-colors"
-        style={{
-          fontSize: "13px",
-          fontWeight: 500,
-          color: "#667085",
-          border: "1px solid #E7EAF0",
-          backgroundColor: "#FFFFFF",
-        }}
-        onMouseEnter={(event) =>
-          (event.currentTarget.style.backgroundColor = "#F6F7F9")
-        }
-        onMouseLeave={(event) =>
-          (event.currentTarget.style.backgroundColor = "#FFFFFF")
-        }
+        className="rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
       >
         {translate("maxButton")}
       </button>
@@ -66,15 +39,11 @@ interface AmountFieldProperties {
   onMaxAmount: () => void;
 }
 
-export function AmountField(properties: AmountFieldProperties) {
-  const { amount, onAmountChange, onPercentage, onMaxAmount } = properties;
+export function AmountField({ amount, onAmountChange, onPercentage, onMaxAmount }: AmountFieldProperties) {
   const { t: translate } = useTranslation("transfer");
   return (
     <div>
-      <label
-        className="mb-2 block"
-        style={{ fontSize: "14px", lineHeight: "20px", color: "#344054", fontWeight: 600 }}
-      >
+      <label className="mb-2 block text-[14px] font-semibold leading-[20px] text-[var(--foreground-primary)]">
         {translate("amount")}
       </label>
       <div className="relative">
@@ -83,31 +52,12 @@ export function AmountField(properties: AmountFieldProperties) {
           value={amount}
           onChange={(event) => onAmountChange(event.target.value)}
           placeholder={translate("amountPlaceholder")}
-          className="w-full rounded-lg px-4 py-4 pr-20 focus:ring-2 focus:outline-none"
-          style={{
-            border: "1px solid #E7EAF0",
-            fontSize: "20px",
-            fontWeight: 600,
-            color: "#121826",
-          }}
+          className="w-full rounded-lg border border-[var(--border)] px-4 py-4 pr-20 text-[20px] font-semibold text-[var(--foreground-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
         />
         <button
           type="button"
           onClick={onMaxAmount}
-          className="absolute top-1/2 right-4 -translate-y-1/2 rounded-lg px-3 py-1.5 transition-colors"
-          style={{
-            fontSize: "13px",
-            fontWeight: 600,
-            color: "#667085",
-            border: "1px solid #E7EAF0",
-            backgroundColor: "#FFFFFF",
-          }}
-          onMouseEnter={(event) =>
-            (event.currentTarget.style.backgroundColor = "#F6F7F9")
-          }
-          onMouseLeave={(event) =>
-            (event.currentTarget.style.backgroundColor = "#FFFFFF")
-          }
+          className="absolute right-4 top-1/2 -translate-y-1/2 rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-3 py-1.5 text-[13px] font-semibold text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
         >
           {translate("max")}
         </button>

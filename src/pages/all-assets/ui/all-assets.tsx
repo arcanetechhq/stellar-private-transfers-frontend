@@ -1,23 +1,34 @@
-import React from "react";
-import { useState } from "react";
-import { usePortfolioAssets } from "@/features/view-portfolio-assets";
+import React, { useState, useCallback } from "react";
+import { useAppSelector } from "@/app/hooks";
+import { selectWalletPublicKey } from "@/entities/wallet";
+import { useAssetsWithTrustlines } from "@/entities/asset";
+import { useAddTrustline } from "@/features/add-asset-trustline";
+import { AssetTable } from "@/widgets/asset-table";
 import { PageHeader } from "./page-header";
 import { PortfolioSummary } from "./portfolio-summary";
-import { AssetList } from "./asset-list";
 
 export function AllAssets() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { assets, totalBalanceUSD, assetCount } = usePortfolioAssets();
+
+  const publicKey = useAppSelector(selectWalletPublicKey);
+  const { assets, refetch } = useAssetsWithTrustlines(publicKey);
+
+  const handleSuccess = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  const { addTrustline, pendingAssetId } = useAddTrustline(
+    publicKey,
+    handleSuccess,
+  );
 
   const filteredAssets = assets.filter(
     (asset) =>
-      asset.ticker.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      asset.assetId.toLowerCase().includes(searchQuery.toLowerCase()) ||
       asset.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const sortedAssets = filteredAssets.toSorted(
-    (leftAsset, rightAsset) => rightAsset.valueUSD - leftAsset.valueUSD,
-  );
+  const sortedAssets = filteredAssets.toSorted((left, right) => left.id - right.id);
 
   return (
     <div
@@ -27,15 +38,16 @@ export function AllAssets() {
       <div className="mx-auto max-w-7xl">
         <PageHeader />
         <PortfolioSummary
-          totalBalanceUSD={totalBalanceUSD}
-          assetCount={assetCount}
+          assetCount={assets.length}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
         />
-        <AssetList
+        <AssetTable
           assets={sortedAssets}
-          totalBalanceUSD={totalBalanceUSD}
-          searchQuery={searchQuery}
+          pendingAssetId={pendingAssetId}
+          walletPublicKey={publicKey ?? undefined}
+          onAddTrustline={addTrustline}
+          onMintSuccess={handleSuccess}
         />
       </div>
     </div>

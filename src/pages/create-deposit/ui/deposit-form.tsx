@@ -1,70 +1,51 @@
 import React from "react";
 import { Info } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TokenIcon } from "@/shared/ui/token-icon";
-import type { Token } from "../model/create-deposit";
+import type { AssetWithTrustline } from "@/entities/asset";
 import { QUICK_PERCENTAGE_OPTIONS } from "../model/create-deposit";
 
 interface AssetSelectorProperties {
-  selectedToken: Token;
+  selectedToken: AssetWithTrustline | undefined;
   onOpen: () => void;
 }
 
-function AssetSelector(properties: AssetSelectorProperties) {
-  const { selectedToken, onOpen } = properties;
+function AssetSelector({ selectedToken, onOpen }: AssetSelectorProperties) {
   const { t: translate } = useTranslation("deposit");
-  const formattedBalance = (
-    selectedToken.balance * selectedToken.price
-  ).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 
   return (
     <div>
-      <label
-        className="mb-2 block"
-        style={{ fontSize: "14px", lineHeight: "20px", color: "#344054", fontWeight: 600 }}
-      >
+      <label className="mb-2 block text-[14px] font-semibold leading-[20px] text-[var(--foreground-primary)]">
         {translate("asset")}
       </label>
       <button
         type="button"
         onClick={onOpen}
-        className="flex w-full items-center justify-between rounded-lg px-4 py-3 transition-colors"
-        style={{ border: "1px solid #E7EAF0", backgroundColor: "#FFFFFF" }}
-        onMouseEnter={(event) =>
-          (event.currentTarget.style.backgroundColor = "#F9FAFB")
-        }
-        onMouseLeave={(event) =>
-          (event.currentTarget.style.backgroundColor = "#FFFFFF")
-        }
+        className="flex w-full items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-4 py-3 transition-colors hover:bg-[var(--surface-hover)]"
       >
-        <div className="flex items-center gap-3">
-          <TokenIcon ticker={selectedToken.ticker} size={40} />
-          <div className="text-left">
-            <p
-              className="font-semibold"
-              style={{ fontSize: "14px", lineHeight: "20px", color: "#121826" }}
-            >
-              {selectedToken.ticker}
-            </p>
-            <p style={{ fontSize: "13px", lineHeight: "18px", color: "#667085" }}>
-              {selectedToken.name}
-            </p>
+        {selectedToken ? (
+          <div className="flex items-center gap-3">
+            <TokenIcon
+              ticker={selectedToken.assetId.toUpperCase()}
+              logoUrl={selectedToken.logoUrl}
+              size={40}
+            />
+            <div className="text-left">
+              <p className="text-[14px] font-semibold leading-[20px] text-[var(--foreground-primary)]">
+                {selectedToken.assetId.toUpperCase()}
+              </p>
+              <p className="text-[13px] leading-[18px] text-[var(--foreground-secondary)]">
+                {selectedToken.name}
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="text-right">
-          <p
-            className="font-semibold"
-            style={{ fontSize: "15px", lineHeight: "20px", color: "#121826" }}
-          >
-            {selectedToken.balance.toLocaleString()}
+        ) : (
+          <p className="text-[15px] text-[var(--foreground-tertiary)]">
+            {translate("asset")}
           </p>
-          <p style={{ fontSize: "13px", lineHeight: "18px", color: "#667085" }}>
-            ${formattedBalance}
-          </p>
-        </div>
+        )}
+        <ChevronDown className="h-4 w-4 text-[var(--foreground-secondary)]" />
       </button>
     </div>
   );
@@ -77,16 +58,12 @@ interface AmountInputProperties {
   onPercentage: (percentage: number) => void;
 }
 
-function AmountInput(properties: AmountInputProperties) {
-  const { amount, onAmountChange, onMaxAmount, onPercentage } = properties;
+function AmountInput({ amount, onAmountChange, onMaxAmount, onPercentage }: AmountInputProperties) {
   const { t: translate } = useTranslation("deposit");
 
   return (
     <div>
-      <label
-        className="mb-2 block"
-        style={{ fontSize: "14px", lineHeight: "20px", color: "#344054", fontWeight: 600 }}
-      >
+      <label className="mb-2 block text-[14px] font-semibold leading-[20px] text-[var(--foreground-primary)]">
         {translate("amount")}
       </label>
       <div className="relative">
@@ -95,20 +72,12 @@ function AmountInput(properties: AmountInputProperties) {
           value={amount}
           onChange={(event) => onAmountChange(event.target.value)}
           placeholder="0.00"
-          className="w-full rounded-lg px-4 py-4 pr-20 focus:ring-2 focus:outline-none"
-          style={{ border: "1px solid #E7EAF0", fontSize: "20px", fontWeight: 600, color: "#121826" }}
+          className="w-full rounded-lg border border-[var(--border)] px-4 py-4 pr-20 text-[20px] font-semibold text-[var(--foreground-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
         />
         <button
           type="button"
           onClick={onMaxAmount}
-          className="absolute top-1/2 right-4 -translate-y-1/2 rounded-lg px-3 py-1.5 transition-colors"
-          style={{ fontSize: "13px", fontWeight: 600, color: "#667085", border: "1px solid #E7EAF0", backgroundColor: "#FFFFFF" }}
-          onMouseEnter={(event) =>
-            (event.currentTarget.style.backgroundColor = "#F6F7F9")
-          }
-          onMouseLeave={(event) =>
-            (event.currentTarget.style.backgroundColor = "#FFFFFF")
-          }
+          className="absolute right-4 top-1/2 -translate-y-1/2 rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-3 py-1.5 text-[13px] font-semibold text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
         >
           {translate("max")}
         </button>
@@ -119,32 +88,11 @@ function AmountInput(properties: AmountInputProperties) {
             key={percentage}
             type="button"
             onClick={() => onPercentage(percentage)}
-            className="rounded-lg px-4 py-2 transition-colors"
-            style={{ fontSize: "13px", fontWeight: 500, color: "#667085", border: "1px solid #E7EAF0", backgroundColor: "#FFFFFF" }}
-            onMouseEnter={(event) =>
-              (event.currentTarget.style.backgroundColor = "#F6F7F9")
-            }
-            onMouseLeave={(event) =>
-              (event.currentTarget.style.backgroundColor = "#FFFFFF")
-            }
+            className="rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
           >
             {percentage}%
           </button>
         ))}
-        <button
-          type="button"
-          onClick={onMaxAmount}
-          className="rounded-lg px-4 py-2 transition-colors"
-          style={{ fontSize: "13px", fontWeight: 500, color: "#667085", border: "1px solid #E7EAF0", backgroundColor: "#FFFFFF" }}
-          onMouseEnter={(event) =>
-            (event.currentTarget.style.backgroundColor = "#F6F7F9")
-          }
-          onMouseLeave={(event) =>
-            (event.currentTarget.style.backgroundColor = "#FFFFFF")
-          }
-        >
-          {translate("max")}
-        </button>
       </div>
     </div>
   );
@@ -154,20 +102,11 @@ function DepositInfoBanner() {
   const { t: translate } = useTranslation("deposit");
 
   return (
-    <div
-      className="rounded-lg p-4"
-      style={{ backgroundColor: "#EFF6FF", border: "1px solid #BFDBFE" }}
-    >
+    <div className="rounded-lg p-4" style={{ backgroundColor: "#EFF6FF", border: "1px solid #BFDBFE" }}>
       <div className="flex gap-3">
-        <Info
-          className="mt-0.5 h-5 w-5 flex-shrink-0"
-          style={{ color: "#3B82F6" }}
-        />
+        <Info className="mt-0.5 h-5 w-5 flex-shrink-0" style={{ color: "#3B82F6" }} />
         <div>
-          <p
-            className="mb-1 font-semibold"
-            style={{ fontSize: "14px", lineHeight: "20px", color: "#1E40AF" }}
-          >
+          <p className="mb-1 font-semibold" style={{ fontSize: "14px", lineHeight: "20px", color: "#1E40AF" }}>
             {translate("aboutDeposits")}
           </p>
           <p style={{ fontSize: "13px", lineHeight: "18px", color: "#1E40AF" }}>
@@ -180,7 +119,7 @@ function DepositInfoBanner() {
 }
 
 interface DepositFormProperties {
-  selectedToken: Token;
+  selectedToken: AssetWithTrustline | undefined;
   amount: string;
   onAmountChange: (value: string) => void;
   onMaxAmount: () => void;
@@ -188,21 +127,16 @@ interface DepositFormProperties {
   onOpenTokenPicker: () => void;
 }
 
-export function DepositForm(properties: DepositFormProperties) {
-  const {
-    selectedToken,
-    amount,
-    onAmountChange,
-    onMaxAmount,
-    onPercentage,
-    onOpenTokenPicker,
-  } = properties;
-
+export function DepositForm({
+  selectedToken,
+  amount,
+  onAmountChange,
+  onMaxAmount,
+  onPercentage,
+  onOpenTokenPicker,
+}: DepositFormProperties) {
   return (
-    <div
-      className="rounded-xl bg-white p-6"
-      style={{ border: "1px solid #E7EAF0" }}
-    >
+    <div className="rounded-xl bg-white p-6" style={{ border: "1px solid #E7EAF0" }}>
       <div className="space-y-6">
         <AssetSelector selectedToken={selectedToken} onOpen={onOpenTokenPicker} />
         <AmountInput

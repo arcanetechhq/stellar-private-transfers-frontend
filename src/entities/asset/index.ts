@@ -1,18 +1,9 @@
 export {
-  ASSET_CATALOG,
-  assetReducer,
-  replaceBalances,
-  selectAssetCatalog,
-  selectAssetCount,
-  selectPortfolioAssets,
-  selectTotalBalanceUsd,
-  setAssetBalance,
-  type Asset,
-  type AssetBalanceEntry,
-  type AssetBalanceState,
-  type AssetCatalogItem,
-  type AssetId,
+  type TrustlineStatus,
+  type AssetWithTrustline,
 } from "./model/asset";
+
+export { useAssetsWithTrustlines } from "./model/use-assets-with-trustlines";
 
 export {
   assetApi,

@@ -4,7 +4,7 @@ import {
   loadContactState,
   saveContactState,
 } from "@/entities/contact";
-import { assetApi, assetReducer } from "@/entities/asset";
+import { assetApi } from "@/entities/asset";
 import { walletReducer } from "@/entities/wallet";
 import {
   hydrateFromStorage,
@@ -18,7 +18,6 @@ const loadedContact = loadContactState();
 
 export const store = configureStore({
   reducer: {
-    asset: assetReducer,
     contact: contactReducer,
     wallet: walletReducer,
     stealthAddress: stealthAddressReducer,

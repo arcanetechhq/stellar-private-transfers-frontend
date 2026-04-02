@@ -1,9 +1,9 @@
 import React from "react";
+import { AssetPickerModal } from "@/features/pick-asset";
 import { useCreateDeposit } from "../model/use-create-deposit";
 import { PageHeader } from "./page-header";
 import { DepositForm } from "./deposit-form";
 import { DepositSummary } from "./deposit-summary";
-import { TokenPickerModal } from "./token-picker-modal";
 
 export function CreateDeposit() {
   const deposit = useCreateDeposit();
@@ -31,7 +31,6 @@ export function CreateDeposit() {
               <DepositSummary
                 selectedToken={deposit.selectedToken}
                 amount={deposit.amount}
-                fiatValue={deposit.fiatValue}
                 networkFee={deposit.networkFee}
                 receivedAmount={deposit.receivedAmount}
                 canSubmit={deposit.canSubmit}
@@ -41,12 +40,10 @@ export function CreateDeposit() {
         </form>
       </div>
       {deposit.showTokenPicker && (
-        <TokenPickerModal
-          filteredTokens={deposit.filteredTokens}
-          selectedTokenId={deposit.selectedToken.id}
-          searchQuery={deposit.searchQuery}
-          onSearchChange={deposit.setSearchQuery}
-          onTokenSelect={deposit.handleTokenSelect}
+        <AssetPickerModal
+          assets={deposit.assets}
+          selectedAssetId={deposit.selectedToken?.assetId}
+          onSelect={deposit.handleTokenSelect}
           onClose={() => deposit.setShowTokenPicker(false)}
         />
       )}

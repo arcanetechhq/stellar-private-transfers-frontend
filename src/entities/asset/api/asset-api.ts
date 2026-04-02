@@ -8,6 +8,8 @@ export interface AssetDto {
   issuerAddress: string | null;
   clientContract: string | null;
   poolContract: string | null;
+  mintable: boolean;
+  mintAmount: string | null;
 }
 
 export const assetApi = createApi({

@@ -1,47 +1,29 @@
-import React from "react";
-import UsdCoinUsdc from "@/shared/assets/usd-coin-usdc";
-import TetherUsdt from "@/shared/assets/tether-usdt";
-import EthereumEth from "@/shared/assets/ethereum-eth";
-import DaiDai from "@/shared/assets/dai-dai";
-import PaxGoldPaxg from "@/shared/assets/pax-gold-paxg";
-import Tokens from "@/shared/assets/tokens";
+import React, { useState } from "react";
 
 interface TokenIconProperties {
-  symbol?: string;
   ticker?: string;
+  logoUrl?: string | null;
   size?: "sm" | "md" | "lg" | number;
   className?: string;
 }
 
-type IconComponentProperties = {
+const SIZE_CLASS_MAP: Record<"sm" | "md" | "lg", string> = {
+  sm: "size-5",
+  md: "size-6",
+  lg: "size-8",
+};
+
+function sizeToClass(size: "sm" | "md" | "lg" | number): {
   className?: string;
-};
+  style?: React.CSSProperties;
+} {
+  if (typeof size === "number") {
+    return { style: { width: `${size}px`, height: `${size}px` } };
+  }
+  return { className: SIZE_CLASS_MAP[size] };
+}
 
-const tokenComponents: Record<
-  string,
-  React.ComponentType<IconComponentProperties>
-> = {
-  USDC: UsdCoinUsdc,
-  USDT: TetherUsdt,
-  ETH: EthereumEth,
-  WETH: EthereumEth,
-  DAI: DaiDai,
-  PAXG: PaxGoldPaxg,
-  BTC: Tokens,
-  WBTC: Tokens,
-
-  LINK: () => <DefaultTokenIcon symbol="LINK" color="#2A5ADA" />,
-  UNI: () => <DefaultTokenIcon symbol="UNI" color="#FF007A" />,
-  MATIC: () => <DefaultTokenIcon symbol="MATIC" color="#8247E5" />,
-};
-
-function DefaultTokenIcon({
-  symbol,
-  color,
-}: {
-  symbol: string;
-  color: string;
-}) {
+function FallbackIcon({ symbol }: { symbol: string }) {
   return (
     <div className="relative size-full">
       <svg
@@ -50,7 +32,7 @@ function DefaultTokenIcon({
         preserveAspectRatio="none"
         viewBox="0 0 120 120"
       >
-        <circle cx="60" cy="60" r="60" fill={color} />
+        <circle cx="60" cy="60" r="60" fill="#6B7280" />
         <text
           x="60"
           y="60"
@@ -60,45 +42,56 @@ function DefaultTokenIcon({
           fontSize="48"
           fontWeight="600"
         >
-          {symbol.slice(0, 1)}
+          {symbol.slice(0, 1).toUpperCase()}
         </text>
       </svg>
     </div>
   );
 }
 
-export function TokenIcon({
-  symbol,
+function RemoteIcon({
+  logoUrl,
   ticker,
+}: {
+  logoUrl: string;
+  ticker: string;
+}) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return <FallbackIcon symbol={ticker} />;
+  }
+
+  return (
+    <img
+      src={logoUrl}
+      alt={ticker}
+      className="size-full rounded-full object-cover"
+      onError={() => {
+        setFailed(true);
+      }}
+    />
+  );
+}
+
+export function TokenIcon({
+  ticker = "",
+  logoUrl,
   size = "md",
   className = "",
 }: TokenIconProperties) {
-  const tokenSymbol = symbol || ticker || "";
-  const TokenComponent = tokenComponents[tokenSymbol] || (() => (
-    <DefaultTokenIcon symbol={tokenSymbol} color="#6B7280" />
-  ));
-
-  const getSizeStyles = () => {
-    if (typeof size === "number") {
-      return {
-        width: `${size}px`,
-        height: `${size}px`,
-      };
-    }
-
-    const sizeMap = {
-      sm: { width: "20px", height: "20px" },
-      md: { width: "24px", height: "24px" },
-      lg: { width: "32px", height: "32px" },
-    };
-    return sizeMap[size];
-  };
-
-  const sizeStyles = getSizeStyles();
+  const { className: sizeClass, style: sizeStyle } = sizeToClass(size);
 
   return (
-    <div className={`relative flex-shrink-0 ${className}`} style={sizeStyles}>
-      <TokenComponent className="relative size-full" />
+    <div
+      className={`relative flex-shrink-0 ${sizeClass ?? ""} ${className}`}
+      style={sizeStyle}
+    >
+      {logoUrl ? (
+        <RemoteIcon logoUrl={logoUrl} ticker={ticker} />
+      ) : (
+        <FallbackIcon symbol={ticker} />
+      )}
     </div>
   );
 }

@@ -1,18 +1,18 @@
 import React from "react";
 import { Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { formatUSD } from "../model/all-assets";
 
 interface PortfolioSummaryProperties {
-  totalBalanceUSD: number;
   assetCount: number;
   searchQuery: string;
   onSearchChange: (query: string) => void;
 }
 
-export function PortfolioSummary(properties: PortfolioSummaryProperties) {
-  const { totalBalanceUSD, assetCount, searchQuery, onSearchChange } =
-    properties;
+export function PortfolioSummary({
+  assetCount,
+  searchQuery,
+  onSearchChange,
+}: PortfolioSummaryProperties) {
   const { t: translate } = useTranslation("allAssets");
 
   return (
@@ -33,18 +33,7 @@ export function PortfolioSummary(properties: PortfolioSummaryProperties) {
               letterSpacing: "0.02em",
             }}
           >
-            {translate("totalPortfolioValue")}
-          </p>
-          <p
-            className="font-semibold"
-            style={{
-              fontSize: "40px",
-              lineHeight: "48px",
-              color: "#121826",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            ${formatUSD(totalBalanceUSD)}
+            {translate("pageTitle")}
           </p>
           <p
             className="mt-1"

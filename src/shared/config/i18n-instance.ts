@@ -19,6 +19,7 @@ import enPrivacyPolicy from "./locales/en/privacyPolicy.json";
 import enDataExport from "./locales/en/dataExport.json";
 import enAccess from "./locales/en/access.json";
 import enStealth from "./locales/en/stealth.json";
+import enAssets from "./locales/en/assets.json";
 
 const NAMESPACES = [
   "common",
@@ -40,6 +41,7 @@ const NAMESPACES = [
   "dataExport",
   "access",
   "stealth",
+  "assets",
 ] as const;
 
 i18n.use(initReactI18next).init({
@@ -69,6 +71,7 @@ i18n.use(initReactI18next).init({
       dataExport: enDataExport,
       access: enAccess,
       stealth: enStealth,
+      assets: enAssets,
     },
   },
 });

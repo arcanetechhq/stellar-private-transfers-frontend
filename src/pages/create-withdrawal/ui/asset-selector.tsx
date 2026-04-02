@@ -1,62 +1,49 @@
 import React from "react";
+import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TokenIcon } from "@/shared/ui/token-icon";
-import type { Token } from "../model/create-withdrawal";
+import type { AssetWithTrustline } from "@/entities/asset";
 
 interface AssetSelectorProperties {
-  selectedToken: Token;
+  selectedToken: AssetWithTrustline | undefined;
   onOpenPicker: () => void;
 }
 
-export function AssetSelector(properties: AssetSelectorProperties) {
-  const { selectedToken, onOpenPicker } = properties;
+export function AssetSelector({ selectedToken, onOpenPicker }: AssetSelectorProperties) {
   const { t: translate } = useTranslation("withdrawal");
-  const fiatBalance = (selectedToken.balance * selectedToken.price).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 
   return (
     <div>
-      <label
-        className="mb-2 block"
-        style={{ fontSize: "14px", lineHeight: "20px", color: "#344054", fontWeight: 600 }}
-      >
+      <label className="mb-2 block text-[14px] font-semibold leading-[20px] text-[var(--foreground-primary)]">
         {translate("asset")}
       </label>
       <button
         type="button"
         onClick={onOpenPicker}
-        className="flex w-full items-center justify-between rounded-lg px-4 py-3 transition-colors"
-        style={{ border: "1px solid #E7EAF0", backgroundColor: "#FFFFFF" }}
-        onMouseEnter={(event) => (event.currentTarget.style.backgroundColor = "#F9FAFB")}
-        onMouseLeave={(event) => (event.currentTarget.style.backgroundColor = "#FFFFFF")}
+        className="flex w-full items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-4 py-3 transition-colors hover:bg-[var(--surface-hover)]"
       >
-        <div className="flex items-center gap-3">
-          <TokenIcon ticker={selectedToken.ticker} size={40} />
-          <div className="text-left">
-            <p
-              className="font-semibold"
-              style={{ fontSize: "15px", lineHeight: "20px", color: "#121826" }}
-            >
-              {selectedToken.ticker}
-            </p>
-            <p style={{ fontSize: "13px", lineHeight: "18px", color: "#667085" }}>
-              {selectedToken.name}
-            </p>
+        {selectedToken ? (
+          <div className="flex items-center gap-3">
+            <TokenIcon
+              ticker={selectedToken.assetId.toUpperCase()}
+              logoUrl={selectedToken.logoUrl}
+              size={40}
+            />
+            <div className="text-left">
+              <p className="text-[15px] font-semibold leading-[20px] text-[var(--foreground-primary)]">
+                {selectedToken.assetId.toUpperCase()}
+              </p>
+              <p className="text-[13px] leading-[18px] text-[var(--foreground-secondary)]">
+                {selectedToken.name}
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="text-right">
-          <p
-            className="font-semibold"
-            style={{ fontSize: "15px", lineHeight: "20px", color: "#121826" }}
-          >
-            {selectedToken.balance.toLocaleString()}
+        ) : (
+          <p className="text-[15px] text-[var(--foreground-tertiary)]">
+            {translate("asset")}
           </p>
-          <p style={{ fontSize: "13px", lineHeight: "18px", color: "#667085" }}>
-            ${fiatBalance}
-          </p>
-        </div>
+        )}
+        <ChevronDown className="h-4 w-4 text-[var(--foreground-secondary)]" />
       </button>
     </div>
   );

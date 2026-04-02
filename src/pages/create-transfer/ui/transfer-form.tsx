@@ -1,7 +1,7 @@
 import React from "react";
 import { Users, Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { MockToken } from "../model/create-transfer";
+import type { AssetWithTrustline } from "@/entities/asset";
 import { AssetField } from "./asset-field";
 import { AmountField } from "./amount-field";
 
@@ -114,7 +114,7 @@ function PrivacyNotice() {
 }
 
 export interface TransferFormProperties {
-  selectedToken: MockToken;
+  selectedToken: AssetWithTrustline | undefined;
   amount: string;
   onAmountChange: (value: string) => void;
   recipient: string;

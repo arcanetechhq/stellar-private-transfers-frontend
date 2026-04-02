@@ -1,40 +1,29 @@
 import { type FormEvent, useState, useMemo } from "react";
 import { useNavigate } from "react-router";
-import {
-  type Token,
-  mockTokens,
-  PERCENTAGE_DIVISOR,
-  NETWORK_FEE,
-} from "./create-deposit";
+import { useAppSelector } from "@/app/hooks";
+import { selectWalletPublicKey } from "@/entities/wallet";
+import { useAssetsWithTrustlines, type AssetWithTrustline } from "@/entities/asset";
+import { PERCENTAGE_DIVISOR, NETWORK_FEE } from "./create-deposit";
 import { isNumericDecimalInput } from "../lib/validation";
 
 export function useCreateDeposit() {
   const navigate = useNavigate();
+  const publicKey = useAppSelector(selectWalletPublicKey);
+  const { assets } = useAssetsWithTrustlines(publicKey);
+
   const [showTokenPicker, setShowTokenPicker] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedToken, setSelectedToken] = useState<Token>(mockTokens[0]);
+  const [selectedToken, setSelectedToken] = useState<AssetWithTrustline | undefined>();
   const [amount, setAmount] = useState("");
 
-  const filteredTokens = useMemo(() => {
-    const filtered = mockTokens.filter(
-      (token) =>
-        token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        token.ticker.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  const selectedAsset = selectedToken ?? assets[0];
 
-    filtered.sort((leftItem, rightItem) => {
-      if (leftItem.balance > 0 && rightItem.balance === 0) return -1;
-      if (leftItem.balance === 0 && rightItem.balance > 0) return 1;
-      return rightItem.balance * rightItem.price - leftItem.balance * leftItem.price;
-    });
+  const numericBalance = selectedAsset
+    ? Number.parseFloat(selectedAsset.balance ?? "0")
+    : 0;
 
-    return filtered;
-  }, [searchQuery]);
-
-  const handleTokenSelect = (token: Token) => {
-    setSelectedToken(token);
+  const handleTokenSelect = (asset: AssetWithTrustline) => {
+    setSelectedToken(asset);
     setShowTokenPicker(false);
-    setSearchQuery("");
   };
 
   const handleAmountChange = (value: string) => {
@@ -44,18 +33,15 @@ export function useCreateDeposit() {
   };
 
   const handlePercentage = (percentage: number) => {
-    const value = (selectedToken.balance * percentage) / PERCENTAGE_DIVISOR;
+    const value = (numericBalance * percentage) / PERCENTAGE_DIVISOR;
     setAmount(value.toString());
   };
 
   const handleMaxAmount = () => {
-    setAmount(selectedToken.balance.toString());
+    if (selectedAsset?.balance) {
+      setAmount(selectedAsset.balance);
+    }
   };
-
-  const fiatValue = useMemo(() => {
-    if (!amount || Number.isNaN(Number.parseFloat(amount))) return 0;
-    return Number.parseFloat(amount) * selectedToken.price;
-  }, [amount, selectedToken]);
 
   const receivedAmount = useMemo(() => {
     if (!amount || Number.isNaN(Number.parseFloat(amount))) return 0;
@@ -67,25 +53,25 @@ export function useCreateDeposit() {
     navigate("/transfer-success/deposit_new_001");
   };
 
+  const numericAmount = Number.parseFloat(amount);
   const canSubmit =
+    selectedAsset !== undefined &&
     amount !== "" &&
-    Number.parseFloat(amount) > 0 &&
-    Number.parseFloat(amount) <= selectedToken.balance;
+    !Number.isNaN(numericAmount) &&
+    numericAmount > 0 &&
+    numericAmount <= numericBalance;
 
   return {
+    assets,
     navigate,
     showTokenPicker,
     setShowTokenPicker,
-    searchQuery,
-    setSearchQuery,
-    selectedToken,
+    selectedToken: selectedAsset,
     amount,
-    filteredTokens,
     handleTokenSelect,
     handleAmountChange,
     handlePercentage,
     handleMaxAmount,
-    fiatValue,
     networkFee: NETWORK_FEE,
     receivedAmount,
     handleSubmit,

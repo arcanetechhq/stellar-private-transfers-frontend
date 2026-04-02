@@ -1,10 +1,10 @@
 import React from "react";
+import { AssetPickerModal } from "@/features/pick-asset";
+import { PickContactModal } from "@/features/pick-contact";
 import { useCreateTransfer } from "../model/use-create-transfer";
 import { PageHeader } from "./page-header";
 import { TransferForm } from "./transfer-form";
 import { TransferSummary } from "./transfer-summary";
-import { TokenPickerModal } from "./token-picker-modal";
-import { PickContactModal } from "@/features/pick-contact";
 
 export function CreateTransfer() {
   const transfer = useCreateTransfer();
@@ -33,7 +33,6 @@ export function CreateTransfer() {
             <TransferSummary
               selectedToken={transfer.selectedToken}
               amount={transfer.amount}
-              fiatValue={transfer.fiatValue}
               recipient={transfer.recipient}
               totalAmount={transfer.totalAmount}
               canSubmit={transfer.canSubmit}
@@ -42,11 +41,9 @@ export function CreateTransfer() {
         </form>
       </div>
       {transfer.showTokenPicker && (
-        <TokenPickerModal
-          filteredTokens={transfer.filteredTokens}
-          selectedTokenId={transfer.selectedToken.id}
-          searchQuery={transfer.searchQuery}
-          onSearchChange={transfer.setSearchQuery}
+        <AssetPickerModal
+          assets={transfer.assets}
+          selectedAssetId={transfer.selectedToken?.assetId}
           onSelect={transfer.handleTokenSelect}
           onClose={() => transfer.setShowTokenPicker(false)}
         />

@@ -1,0 +1,21 @@
+{
+  "trustline": {
+    "add": "Add",
+    "send": "Send"
+  },
+  "faucet": {
+    "mint": "Mint",
+    "hint": "Get test tokens"
+  },
+  "noAssetsFound": "No assets found",
+  "tableHeaders": {
+    "asset": "Asset",
+    "balance": "Balance",
+    "actions": "Actions"
+  },
+  "picker": {
+    "title": "Select Asset",
+    "searchPlaceholder": "Search by name or ticker...",
+    "noResults": "No assets found"
+  }
+}

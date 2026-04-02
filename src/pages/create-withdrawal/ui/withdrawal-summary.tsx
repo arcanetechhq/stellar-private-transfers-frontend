@@ -1,18 +1,16 @@
 import React from "react";
 import { ArrowUpFromLine } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { Token } from "../model/create-withdrawal";
+import type { AssetWithTrustline } from "@/entities/asset";
 
 interface SummaryLineItemsProperties {
-  selectedToken: Token;
+  selectedToken: AssetWithTrustline | undefined;
   amount: string;
-  fiatValue: number;
   networkFee: number;
-  showFiatValue: boolean;
 }
 
-function SummaryLineItems(properties: SummaryLineItemsProperties) {
-  const { selectedToken, amount, fiatValue, networkFee, showFiatValue } = properties;
+function SummaryLineItems({ selectedToken, amount, networkFee }: SummaryLineItemsProperties) {
+  const ticker = selectedToken?.assetId.toUpperCase() ?? "—";
   const { t: translate } = useTranslation("withdrawal");
 
   return (
@@ -23,7 +21,7 @@ function SummaryLineItems(properties: SummaryLineItemsProperties) {
           className="font-semibold"
           style={{ fontSize: "14px", lineHeight: "20px", color: "#121826" }}
         >
-          {selectedToken.ticker}
+          {ticker}
         </span>
       </div>
       <div className="flex justify-between">
@@ -35,16 +33,6 @@ function SummaryLineItems(properties: SummaryLineItemsProperties) {
           {amount || translate("amountPlaceholder")}
         </span>
       </div>
-      {showFiatValue && (
-        <div className="flex justify-between">
-          <span style={{ fontSize: "13px", lineHeight: "18px", color: "#98A2B3" }}>
-            {translate("fiatValue")}
-          </span>
-          <span style={{ fontSize: "13px", lineHeight: "18px", color: "#667085" }}>
-            ${fiatValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </span>
-        </div>
-      )}
       <div className="flex justify-between">
         <span style={{ fontSize: "14px", lineHeight: "20px", color: "#667085" }}>
           {translate("networkFee")}
@@ -94,22 +82,17 @@ function ConfirmButton(properties: ConfirmButtonProperties) {
 }
 
 interface WithdrawalSummaryProperties {
-  selectedToken: Token;
+  selectedToken: AssetWithTrustline | undefined;
   amount: string;
-  fiatValue: number;
   networkFee: number;
   receivedAmount: number;
   destinationWallet: string;
   canSubmit: boolean;
 }
 
-export function WithdrawalSummary(properties: WithdrawalSummaryProperties) {
-  const {
-    selectedToken, amount, fiatValue, networkFee,
-    receivedAmount, destinationWallet, canSubmit,
-  } = properties;
+export function WithdrawalSummary({ selectedToken, amount, networkFee, receivedAmount, destinationWallet, canSubmit }: WithdrawalSummaryProperties) {
   const { t: translate } = useTranslation("withdrawal");
-  const showFiatValue = amount !== "" && Number.parseFloat(amount) > 0;
+  const ticker = selectedToken?.assetId.toUpperCase() ?? "—";
 
   return (
     <div className="lg:col-span-1">
@@ -126,9 +109,7 @@ export function WithdrawalSummary(properties: WithdrawalSummaryProperties) {
         <SummaryLineItems
           selectedToken={selectedToken}
           amount={amount}
-          fiatValue={fiatValue}
           networkFee={networkFee}
-          showFiatValue={showFiatValue}
         />
         <div className="mb-6 border-t pt-4" style={{ borderColor: "#E7EAF0" }}>
           <div className="mb-3 flex justify-between">
@@ -142,7 +123,7 @@ export function WithdrawalSummary(properties: WithdrawalSummaryProperties) {
               className="font-semibold"
               style={{ fontSize: "15px", lineHeight: "22px", color: "#121826" }}
             >
-              {receivedAmount.toLocaleString()} {selectedToken.ticker}
+              {receivedAmount.toLocaleString()} {ticker}
             </span>
           </div>
           <div

@@ -1,59 +1,57 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, type FormEvent } from "react";
 import { useNavigate } from "react-router";
-import type { FormEvent } from "react";
+import { useAppSelector } from "@/app/hooks";
+import { selectWalletPublicKey } from "@/entities/wallet";
 import {
-  mockTokens,
-  mockPercentageDivisor,
-  networkFee,
-  type MockToken,
+  useAssetsWithTrustlines,
+  type AssetWithTrustline,
+} from "@/entities/asset";
+import {
+  QUICK_PERCENTAGE_OPTIONS,
+  PERCENTAGE_DIVISOR,
+  NETWORK_FEE,
 } from "./create-transfer";
 import { isNumericDecimalInput } from "../lib/numeric-input";
 
 export function useCreateTransfer() {
   const navigate = useNavigate();
+  const publicKey = useAppSelector(selectWalletPublicKey);
+  const { assets } = useAssetsWithTrustlines(publicKey);
+
   const [showTokenPicker, setShowTokenPicker] = useState(false);
   const [showContactPicker, setShowContactPicker] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedToken, setSelectedToken] = useState(mockTokens[0]);
+  const [selectedToken, setSelectedToken] = useState<
+    AssetWithTrustline | undefined
+  >();
   const [amount, setAmount] = useState("");
   const [recipient, setRecipient] = useState("");
   const [note, setNote] = useState("");
 
-  const filteredTokens = useMemo(() => {
-    const filtered = mockTokens.filter(
-      (token) =>
-        token.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        token.ticker.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    filtered.sort((leftItem, rightItem) => {
-      if (leftItem.balance > 0 && rightItem.balance === 0) return -1;
-      if (leftItem.balance === 0 && rightItem.balance > 0) return 1;
-      return rightItem.balance * rightItem.price - leftItem.balance * leftItem.price;
-    });
-    return filtered;
-  }, [searchQuery]);
+  const selectedAsset = selectedToken ?? assets[0];
 
-  const handleTokenSelect = (token: MockToken) => {
-    setSelectedToken(token);
+  const handleTokenSelect = (asset: AssetWithTrustline) => {
+    setSelectedToken(asset);
     setShowTokenPicker(false);
-    setSearchQuery("");
   };
 
+  const numericBalance = selectedAsset
+    ? Number.parseFloat(selectedAsset.balance ?? "0")
+    : 0;
+
   const handlePercentage = (percentage: number) => {
-    const value = (selectedToken.balance * percentage) / mockPercentageDivisor;
+    const value = (numericBalance * percentage) / PERCENTAGE_DIVISOR;
     setAmount(value.toString());
   };
 
-  const handleMaxAmount = () => setAmount(selectedToken.balance.toString());
-
-  const fiatValue = useMemo(() => {
-    if (!amount || Number.isNaN(Number.parseFloat(amount))) return 0;
-    return Number.parseFloat(amount) * selectedToken.price;
-  }, [amount, selectedToken]);
+  const handleMaxAmount = () => {
+    if (selectedAsset?.balance) {
+      setAmount(selectedAsset.balance);
+    }
+  };
 
   const totalAmount = useMemo(() => {
-    if (!amount || Number.isNaN(Number.parseFloat(amount))) return networkFee;
-    return Number.parseFloat(amount) + networkFee;
+    if (!amount || Number.isNaN(Number.parseFloat(amount))) return NETWORK_FEE;
+    return Number.parseFloat(amount) + NETWORK_FEE;
   }, [amount]);
 
   const handleSubmit = (event: FormEvent) => {
@@ -70,28 +68,30 @@ export function useCreateTransfer() {
   };
 
   const canSubmit =
-    amount !== "" && Number.parseFloat(amount) > 0 &&
-    Number.parseFloat(amount) <= selectedToken.balance && recipient !== "";
+    selectedAsset !== undefined &&
+    amount !== "" &&
+    !Number.isNaN(Number.parseFloat(amount)) &&
+    Number.parseFloat(amount) > 0 &&
+    Number.parseFloat(amount) <= numericBalance &&
+    recipient !== "";
 
   return {
+    assets,
     showTokenPicker,
     setShowTokenPicker,
     showContactPicker,
     setShowContactPicker,
-    searchQuery,
-    setSearchQuery,
-    selectedToken,
+    selectedToken: selectedAsset,
     amount,
     handleAmountChange,
     recipient,
     setRecipient,
     note,
     setNote,
-    filteredTokens,
+    quickPercentageOptions: QUICK_PERCENTAGE_OPTIONS,
     handleTokenSelect,
     handlePercentage,
     handleMaxAmount,
-    fiatValue,
     totalAmount,
     handleSubmit,
     navigateHome,

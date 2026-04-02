@@ -1,19 +1,17 @@
 import React from "react";
 import { Download } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { Token } from "../model/create-deposit";
+import type { AssetWithTrustline } from "@/entities/asset";
 
 interface SummaryLineItemsProperties {
-  selectedToken: Token;
+  selectedToken: AssetWithTrustline | undefined;
   amount: string;
-  fiatValue: number;
   networkFee: number;
 }
 
-function SummaryLineItems(properties: SummaryLineItemsProperties) {
-  const { selectedToken, amount, fiatValue, networkFee } = properties;
+function SummaryLineItems({ selectedToken, amount, networkFee }: SummaryLineItemsProperties) {
   const { t: translate } = useTranslation("deposit");
-  const showFiatValue = amount !== "" && Number.parseFloat(amount) > 0;
+  const ticker = selectedToken?.assetId.toUpperCase() ?? "—";
 
   return (
     <div className="mb-6 space-y-3">
@@ -21,46 +19,23 @@ function SummaryLineItems(properties: SummaryLineItemsProperties) {
         <span style={{ fontSize: "14px", lineHeight: "20px", color: "#667085" }}>
           {translate("asset")}
         </span>
-        <span
-          className="font-semibold"
-          style={{ fontSize: "14px", lineHeight: "20px", color: "#121826" }}
-        >
-          {selectedToken.ticker}
+        <span className="font-semibold" style={{ fontSize: "14px", lineHeight: "20px", color: "#121826" }}>
+          {ticker}
         </span>
       </div>
       <div className="flex justify-between">
         <span style={{ fontSize: "14px", lineHeight: "20px", color: "#667085" }}>
           {translate("amount")}
         </span>
-        <span
-          className="font-semibold"
-          style={{ fontSize: "14px", lineHeight: "20px", color: "#121826" }}
-        >
+        <span className="font-semibold" style={{ fontSize: "14px", lineHeight: "20px", color: "#121826" }}>
           {amount || "0.00"}
         </span>
       </div>
-      {showFiatValue && (
-        <div className="flex justify-between">
-          <span style={{ fontSize: "13px", lineHeight: "18px", color: "#98A2B3" }}>
-            {translate("fiatValue")}
-          </span>
-          <span style={{ fontSize: "13px", lineHeight: "18px", color: "#667085" }}>
-            $
-            {fiatValue.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </span>
-        </div>
-      )}
       <div className="flex justify-between">
         <span style={{ fontSize: "14px", lineHeight: "20px", color: "#667085" }}>
           {translate("networkFee")}
         </span>
-        <span
-          className="font-semibold"
-          style={{ fontSize: "14px", lineHeight: "20px", color: "#121826" }}
-        >
+        <span className="font-semibold" style={{ fontSize: "14px", lineHeight: "20px", color: "#121826" }}>
           ${networkFee.toFixed(2)}
         </span>
       </div>
@@ -119,24 +94,16 @@ function SummaryReceiveInfo(properties: SummaryReceiveInfoProperties) {
 }
 
 interface DepositSummaryProperties {
-  selectedToken: Token;
+  selectedToken: AssetWithTrustline | undefined;
   amount: string;
-  fiatValue: number;
   networkFee: number;
   receivedAmount: number;
   canSubmit: boolean;
 }
 
-export function DepositSummary(properties: DepositSummaryProperties) {
-  const {
-    selectedToken,
-    amount,
-    fiatValue,
-    networkFee,
-    receivedAmount,
-    canSubmit,
-  } = properties;
+export function DepositSummary({ selectedToken, amount, networkFee, receivedAmount, canSubmit }: DepositSummaryProperties) {
   const { t: translate } = useTranslation("deposit");
+  const ticker = selectedToken?.assetId.toUpperCase() ?? "—";
 
   return (
     <div
@@ -152,12 +119,11 @@ export function DepositSummary(properties: DepositSummaryProperties) {
       <SummaryLineItems
         selectedToken={selectedToken}
         amount={amount}
-        fiatValue={fiatValue}
         networkFee={networkFee}
       />
       <SummaryReceiveInfo
         receivedAmount={receivedAmount}
-        ticker={selectedToken.ticker}
+        ticker={ticker}
       />
       <button
         type="submit"

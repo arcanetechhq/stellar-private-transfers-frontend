@@ -1,68 +1,53 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import type { Asset } from "@/entities/asset";
-import { AssetRow } from "./asset-row";
+import type { AssetWithTrustline } from "@/entities/asset";
+import { AssetTable } from "@/widgets/asset-table";
 
-const VIEW_ALL_BUTTON_STYLE: React.CSSProperties = {
-  fontSize: "14px",
-  lineHeight: "20px",
-  color: "#667085",
-  fontWeight: 600,
-  border: "1px solid #E7EAF0",
-  backgroundColor: "#FFFFFF",
-  borderRadius: "10px",
-};
-
-function handleViewAllMouseEnter(event: React.MouseEvent<HTMLButtonElement>) {
-  event.currentTarget.style.backgroundColor = "#F6F7F9";
-  event.currentTarget.style.borderColor = "#D0D5DD";
-}
-
-function handleViewAllMouseLeave(event: React.MouseEvent<HTMLButtonElement>) {
-  event.currentTarget.style.backgroundColor = "#FFFFFF";
-  event.currentTarget.style.borderColor = "#E7EAF0";
+interface TrustlineTarget {
+  assetId: string;
+  assetCode: string;
+  issuerAddress: string;
 }
 
 interface AssetsSectionProperties {
-  assets: Asset[];
+  assets: AssetWithTrustline[];
+  pendingAssetId: string | undefined;
+  walletPublicKey?: string;
+  onAddTrustline: (target: TrustlineTarget) => void;
+  onMintSuccess?: () => void;
 }
 
-export function AssetsSection(properties: AssetsSectionProperties) {
-  const { assets } = properties;
+export function AssetsSection({
+  assets,
+  pendingAssetId,
+  walletPublicKey,
+  onAddTrustline,
+  onMintSuccess,
+}: AssetsSectionProperties) {
   const { t: translate } = useTranslation("overview");
 
   return (
-    <div
-      className="overflow-hidden rounded-xl bg-white"
-      style={{ border: "1px solid #E7EAF0", borderRadius: "20px" }}
-    >
-      <div
-        className="flex items-center justify-between px-6 py-5"
-        style={{ borderBottom: "1px solid #E7EAF0" }}
-      >
-        <h2
-          className="font-semibold"
-          style={{ fontSize: "16px", lineHeight: "24px", color: "#121826" }}
-        >
-          {translate("assetsOnBalance")}
+    <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--card)]">
+      <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-5">
+        <h2 className="text-[16px] font-semibold leading-[24px] text-[var(--foreground-primary)]">
+          {translate("publicAssetsOnBalance")}
         </h2>
         <Link to="/assets">
-          <button
-            className="rounded-lg px-4 py-2 transition-all"
-            style={VIEW_ALL_BUTTON_STYLE}
-            onMouseEnter={handleViewAllMouseEnter}
-            onMouseLeave={handleViewAllMouseLeave}
-          >
+          <button className="rounded-[10px] border border-[var(--border)] bg-[var(--secondary)] px-4 py-2 text-[14px] font-semibold leading-[20px] text-[var(--foreground-secondary)] transition-colors hover:border-[var(--border-focus)] hover:bg-[var(--surface-hover)]">
             {translate("viewAllAssets")}
           </button>
         </Link>
       </div>
-      <div className="divide-y" style={{ borderColor: "#E7EAF0" }}>
-        {assets.map((asset) => (
-          <AssetRow key={asset.id} asset={asset} />
-        ))}
-      </div>
+      <AssetTable
+        assets={assets}
+        pendingAssetId={pendingAssetId}
+        walletPublicKey={walletPublicKey}
+        onAddTrustline={onAddTrustline}
+        onMintSuccess={onMintSuccess}
+        className=""
+        showColumnHeaders={false}
+      />
     </div>
   );
 }
