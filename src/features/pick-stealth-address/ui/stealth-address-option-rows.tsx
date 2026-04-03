@@ -1,6 +1,6 @@
 import React from "react";
 import { cn } from "@/shared/lib/cn";
-import { shortenStealthForDisplay } from "../lib/shorten-stealth-for-display";
+import { shortenStealthForDisplay } from "@/shared/lib/stealth/shorten-stealth-for-display";
 
 export interface StealthAddressOptionRowsProperties {
   addressLabel: string;

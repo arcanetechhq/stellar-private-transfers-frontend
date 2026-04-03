@@ -7,4 +7,4 @@ export {
   stealthAddressSelectItemClassName,
 } from "./ui/stealth-address-select";
 export { StealthAddressOptionRows } from "./ui/stealth-address-option-rows";
-export { shortenStealthForDisplay } from "./lib/shorten-stealth-for-display";
+export { shortenStealthForDisplay } from "@/shared/lib/stealth/shorten-stealth-for-display";

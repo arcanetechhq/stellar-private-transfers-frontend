@@ -1,6 +1,10 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { AggregatedPrivateAssetRow, CoinWithMetadata } from "./coin";
 import { normalizeCommitmentHex } from "../lib/persist-coin";
+import {
+  findCoinItemByLedgerReference,
+  incomingSharesLedgerKeyWithAnyItem,
+} from "../lib/ledger-commitment";
 
 export interface CoinState {
   items: CoinWithMetadata[];
@@ -22,29 +26,27 @@ const coinSlice = createSlice({
       state.items = action.payload;
     },
     addCoin: (state, action: PayloadAction<CoinWithMetadata>) => {
-      const normalized = commitmentKey(action.payload.commitmentHex);
-      const exists = state.items.some(
-        (item) => commitmentKey(item.commitmentHex) === normalized,
-      );
-      if (exists) {
+      if (incomingSharesLedgerKeyWithAnyItem(state.items, action.payload)) {
         return;
       }
+      const normalized = commitmentKey(action.payload.commitmentHex);
       state.items.push({
         ...action.payload,
         commitmentHex: normalized,
       });
     },
     finalizeCoin: (state, action: PayloadAction<string>) => {
-      const key = commitmentKey(action.payload);
-      const item = state.items.find((entry) => commitmentKey(entry.commitmentHex) === key);
-      if (item?.status === "pending") {
+      const item = findCoinItemByLedgerReference(state.items, action.payload);
+      if (!item || item.status === "spent") {
+        return;
+      }
+      if (item.status === "pending") {
         item.status = "finalized";
       }
     },
     markCoinSpent: (state, action: PayloadAction<string>) => {
-      const key = commitmentKey(action.payload);
-      const item = state.items.find((entry) => commitmentKey(entry.commitmentHex) === key);
-      if (item?.status === "finalized") {
+      const item = findCoinItemByLedgerReference(state.items, action.payload);
+      if (item?.status === "finalized" || item?.status === "pending") {
         item.status = "spent";
       }
     },

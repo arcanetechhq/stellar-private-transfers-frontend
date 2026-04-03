@@ -22,3 +22,5 @@ export {
 } from "./model/coin-slice";
 
 export { normalizeCommitmentHex, loadCoinState, saveCoinState } from "./lib/persist-coin";
+
+export { existingSpentCoinMatchesIncomingDelivery } from "./lib/ledger-commitment";

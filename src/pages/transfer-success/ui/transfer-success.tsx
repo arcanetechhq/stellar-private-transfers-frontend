@@ -144,11 +144,20 @@ export function TransferSuccess() {
     fallbackTransactionLabel: translate("success.transactionId"),
     language: i18n.language,
   });
+  const deliveryWarning = state?.coinDeliveryWarning?.trim();
 
   return (
     <div className="p-6">
       <div className="mx-auto max-w-2xl">
         <TransferSuccessHero />
+        {deliveryWarning ? (
+          <div
+            role="status"
+            className="mb-6 rounded-lg border border-[var(--warning)] bg-[var(--warning-bg)] px-4 py-3 text-sm text-[var(--warning-foreground)]"
+          >
+            {deliveryWarning}
+          </div>
+        ) : undefined}
         <TransferSuccessMeta
           amountDisplay={view.amountDisplay}
           ticker={view.ticker}

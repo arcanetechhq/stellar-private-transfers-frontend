@@ -1,0 +1,188 @@
+import { ZERO_STROOPS } from "@/shared/lib/privacy-pool/privacy-pool-confidential-proof-helpers";
+import { addCoin, markCoinSpent, type CoinWithMetadata } from "@/entities/coin";
+import { buildCoinDeliveryPostBody } from "@/features/deposit/lib/build-coin-delivery-post-body";
+import { prepareConfidentialTransferProofDual } from "@/shared/lib/privacy-pool/privacy-pool-confidential-proofs";
+import { readLeafEphemeralHex } from "@/shared/lib/privacy-pool/fetch-contract-merkle";
+import { stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops";
+import { findCommitmentLeafIndex } from "./confidential-transfer-audit-helpers";
+import { postCoinDeliveryBestEffort } from "./confidential-transfer-delivery";
+import type { RunConfidentialTransferInput } from "./confidential-transfer-mutation-types";
+import { sealEncryptAndSubmitDualCoinConfidentialTransfer } from "./dual-coin-confidential-audit-submit";
+
+type PreparedDualProof = Awaited<
+  ReturnType<typeof prepareConfidentialTransferProofDual>
+>;
+
+interface DualCoinBranchParameters {
+  input: RunConfidentialTransferInput;
+  poolContract: string;
+  transferStroops: bigint;
+  commitments: string[];
+  state: { commitments: string[] };
+  signedMessage: string;
+  recipientTrim: string;
+  senderTrim: string;
+  picked: CoinWithMetadata[];
+}
+
+async function submitDualCoinTransfer(
+  parameters: DualCoinBranchParameters,
+): Promise<{
+  txId: string;
+  recipientCoin: PreparedDualProof["recipientCoin"];
+  changeCoin: PreparedDualProof["changeCoin"];
+}> {
+  const {
+    input,
+    poolContract,
+    transferStroops,
+    commitments,
+    state,
+    signedMessage,
+    recipientTrim,
+    senderTrim,
+    picked,
+  } = parameters;
+  const [first, second] = picked;
+  const leafIndexA = findCommitmentLeafIndex(commitments, first);
+  const leafIndexB = findCommitmentLeafIndex(commitments, second);
+  if (leafIndexA < 0 || leafIndexB < 0) {
+    throw new Error("Coin commitment not found in on-chain Merkle state");
+  }
+  const ephemeralA = await readLeafEphemeralHex({
+    poolContractId: poolContract,
+    walletPublicKey: input.walletPublicKey,
+    leafIndex: leafIndexA,
+    networkPassphrase: input.networkPassphrase,
+    sorobanRpcUrl: input.sorobanRpcUrl,
+  });
+  const ephemeralB = await readLeafEphemeralHex({
+    poolContractId: poolContract,
+    walletPublicKey: input.walletPublicKey,
+    leafIndex: leafIndexB,
+    networkPassphrase: input.networkPassphrase,
+    sorobanRpcUrl: input.sorobanRpcUrl,
+  });
+  const totalNotes = BigInt(first.coin.value) + BigInt(second.coin.value);
+  const changeStroopsDual = totalNotes - transferStroops;
+  const preparedDual = await prepareConfidentialTransferProofDual({
+    coinA: first.coin,
+    coinB: second.coin,
+    state,
+    senderGAddress: input.walletPublicKey.trim(),
+    senderWithdrawSignMessageSignature: signedMessage,
+    ephemeralA: { xHex: ephemeralA.xHex, yHex: ephemeralA.yHex },
+    ephemeralB: { xHex: ephemeralB.xHex, yHex: ephemeralB.yHex },
+    transferStroops,
+    recipientStealthStpl1: recipientTrim,
+    selfStealthStpl1ForChange:
+      changeStroopsDual > ZERO_STROOPS ? senderTrim : undefined,
+  });
+  const noteA = BigInt(first.coin.value);
+  const noteB = BigInt(second.coin.value);
+  const txId = await sealEncryptAndSubmitDualCoinConfidentialTransfer({
+    preparedDual,
+    first,
+    second,
+    noteA,
+    noteB,
+    transferStroops,
+    changeStroopsDual,
+    recipientTrim,
+    senderTrim,
+    input,
+    poolContract,
+  });
+  return {
+    txId,
+    recipientCoin: preparedDual.recipientCoin,
+    changeCoin: preparedDual.changeCoin,
+  };
+}
+
+interface FinalizeDualParameters extends DualCoinBranchParameters {
+  txId: string;
+  recipientCoin: PreparedDualProof["recipientCoin"];
+  changeCoin: PreparedDualProof["changeCoin"];
+}
+
+async function finalizeDualCoinDeliveries(
+  parameters: FinalizeDualParameters,
+): Promise<string | undefined> {
+  const {
+    input,
+    poolContract,
+    recipientTrim,
+    senderTrim,
+    txId,
+    recipientCoin,
+    changeCoin,
+    picked,
+  } = parameters;
+  for (const coinRow of picked) {
+    input.dispatch(markCoinSpent(coinRow.coin.commitment));
+  }
+  if (changeCoin) {
+    const changeDisplayDual = stroopsToDisplayAmount(
+      BigInt(changeCoin.coin.value),
+    );
+    input.dispatch(
+      addCoin({
+        commitmentHex: changeCoin.commitment_hex,
+        coin: changeCoin.coin,
+        depositScalarHex: changeCoin.depositScalarHex,
+        stealthAddress: senderTrim,
+        assetId: input.assetId,
+        poolContract,
+        amountDisplay: changeDisplayDual,
+        status: "pending",
+        txId,
+      }),
+    );
+  }
+  const warningsDual: string[] = [];
+  const recipientWarning = await postCoinDeliveryBestEffort(input.dispatch, () =>
+    buildCoinDeliveryPostBody({
+      recipientStealthStpl1: recipientTrim,
+      commitmentHex: recipientCoin.commitment_hex,
+      coin: recipientCoin.coin,
+      depositScalarHex: recipientCoin.depositScalarHex,
+      assetId: input.assetId,
+      amountDisplay: input.amountDisplay,
+      txId,
+    }),
+  );
+  if (recipientWarning) {
+    warningsDual.push(recipientWarning);
+  }
+  if (changeCoin) {
+    const changeWarn = await postCoinDeliveryBestEffort(input.dispatch, () =>
+      buildCoinDeliveryPostBody({
+        recipientStealthStpl1: senderTrim,
+        commitmentHex: changeCoin.commitment_hex,
+        coin: changeCoin.coin,
+        depositScalarHex: changeCoin.depositScalarHex,
+        assetId: input.assetId,
+        amountDisplay: stroopsToDisplayAmount(BigInt(changeCoin.coin.value)),
+        txId,
+      }),
+    );
+    if (changeWarn) {
+      warningsDual.push(changeWarn);
+    }
+  }
+  return warningsDual.length > 0 ? warningsDual.join("; ") : undefined;
+}
+
+export async function runDualCoinConfidentialBranch(
+  parameters: DualCoinBranchParameters,
+): Promise<{ txId: string; coinDeliveryWarning?: string }> {
+  const submitted = await submitDualCoinTransfer(parameters);
+  const coinDeliveryWarning = await finalizeDualCoinDeliveries({
+    ...parameters,
+    txId: submitted.txId,
+    recipientCoin: submitted.recipientCoin,
+    changeCoin: submitted.changeCoin,
+  });
+  return { txId: submitted.txId, coinDeliveryWarning };
+}

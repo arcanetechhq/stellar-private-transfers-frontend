@@ -1,101 +1,89 @@
-import { useState, useMemo, type FormEvent } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useAppSelector } from "@/app/hooks";
+import { useGetAssetsQuery } from "@/entities/asset";
+import { selectFinalizedAggregatesForStealth } from "@/entities/coin";
 import { selectWalletPublicKey } from "@/entities/wallet";
-import {
-  useAssetsWithTrustlines,
-  type AssetWithTrustline,
-} from "@/entities/asset";
-import {
-  QUICK_PERCENTAGE_OPTIONS,
-  PERCENTAGE_DIVISOR,
-  NETWORK_FEE,
-} from "./create-transfer";
-import { isNumericDecimalInput } from "../lib/numeric-input";
+import { buildPrivateTransferAssets } from "../lib/private-transfer-asset-list";
+import { QUICK_PERCENTAGE_OPTIONS } from "./create-transfer";
+import { useConfidentialTransferSubmitHandler } from "./use-confidential-transfer-submit-handler";
+import { useConfidentialTransfer } from "./use-confidential-transfer";
+import { useSelectedPrivateToken } from "./use-selected-private-token";
+import { useTransferAmountInputs } from "./use-transfer-amount-inputs";
+import { useTransferRecipientAndSubmitGates } from "./use-transfer-validation";
+import { useTransferSender } from "./use-transfer-sender";
 
 export function useCreateTransfer() {
   const navigate = useNavigate();
+  const { submit } = useConfidentialTransfer();
   const [searchParameters] = useSearchParams();
   const assetIdFromUrl = searchParameters.get("assetId");
   const publicKey = useAppSelector(selectWalletPublicKey);
-  const { assets } = useAssetsWithTrustlines(publicKey);
-
-  const [showTokenPicker, setShowTokenPicker] = useState(false);
-  const [showContactPicker, setShowContactPicker] = useState(false);
-  const [selectedToken, setSelectedToken] = useState<
-    AssetWithTrustline | undefined
-  >();
-  const [amount, setAmount] = useState("");
-  const [recipient, setRecipient] = useState("");
-  const [note, setNote] = useState("");
-
-  const selectedAsset =
-    selectedToken ??
-    assets.find((asset) => asset.assetId === assetIdFromUrl) ??
-    assets[0];
-
-  const handleTokenSelect = (asset: AssetWithTrustline) => {
-    setSelectedToken(asset);
-    setShowTokenPicker(false);
-  };
-
-  const numericBalance = selectedAsset
-    ? Number.parseFloat(selectedAsset.balance ?? "0")
-    : 0;
-
-  const handlePercentage = (percentage: number) => {
-    const value = (numericBalance * percentage) / PERCENTAGE_DIVISOR;
-    setAmount(value.toString());
-  };
-
-  const handleMaxAmount = () => {
-    if (selectedAsset?.balance) {
-      setAmount(selectedAsset.balance);
-    }
-  };
-
-  const totalAmount = useMemo(() => {
-    if (!amount || Number.isNaN(Number.parseFloat(amount))) return NETWORK_FEE;
-    return Number.parseFloat(amount) + NETWORK_FEE;
-  }, [amount]);
-
-  const handleSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    navigate("/transfer-success/tx_new_001");
-  };
-
-  const handleAmountChange = (value: string) => {
-    if (value === "" || isNumericDecimalInput(value)) {
-      setAmount(value);
-    }
-  };
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const transferSender = useTransferSender();
+  const aggregates = useAppSelector(
+    selectFinalizedAggregatesForStealth(
+      transferSender.senderStealthAddress || undefined,
+    ),
+  );
+  const { data: assetCatalog } = useGetAssetsQuery();
+  const privateTransferAssets = useMemo(
+    () => buildPrivateTransferAssets(aggregates, assetCatalog),
+    [aggregates, assetCatalog],
+  );
+  const tokenUi = useSelectedPrivateToken(
+    privateTransferAssets,
+    assetIdFromUrl,
+  );
+  const selectedAsset = tokenUi.selectedToken;
+  const amountInputs = useTransferAmountInputs(selectedAsset);
+  const validation = useTransferRecipientAndSubmitGates({
+    publicKey,
+    senderStealthAddress: transferSender.senderStealthAddress,
+    recipient: amountInputs.recipient,
+    selectedAsset,
+    amount: amountInputs.amount,
+    isSubmitting,
+  });
+  const { submitError, handleSubmit } = useConfidentialTransferSubmitHandler({
+    canSubmit: validation.canSubmit,
+    setIsSubmitting,
+    selectedAsset,
+    submit,
+    navigate,
+    senderStealthAddress: transferSender.senderStealthAddress,
+    recipientTrim: validation.recipientTrim,
+    numericAmount: validation.numericAmount,
+  });
   return {
-    assets,
-    showTokenPicker,
-    setShowTokenPicker,
-    showContactPicker,
-    setShowContactPicker,
+    assets: privateTransferAssets,
+    showTokenPicker: tokenUi.showTokenPicker,
+    setShowTokenPicker: tokenUi.setShowTokenPicker,
+    showContactPicker: tokenUi.showContactPicker,
+    setShowContactPicker: tokenUi.setShowContactPicker,
     selectedToken: selectedAsset,
-    amount,
-    handleAmountChange,
-    recipient,
-    setRecipient,
-    note,
-    setNote,
+    amount: amountInputs.amount,
+    handleAmountChange: amountInputs.handleAmountChange,
+    recipient: amountInputs.recipient,
+    setRecipient: amountInputs.setRecipient,
     quickPercentageOptions: QUICK_PERCENTAGE_OPTIONS,
-    handleTokenSelect,
-    handlePercentage,
-    handleMaxAmount,
-    totalAmount,
+    handleTokenSelect: tokenUi.handleTokenSelect,
+    handlePercentage: amountInputs.handlePercentage,
+    handleMaxAmount: amountInputs.handleMaxAmount,
+    totalAmount: validation.totalAmount,
     handleSubmit,
     navigateHome: () => navigate("/"),
-    canSubmit:
-      selectedAsset !== undefined &&
-      amount !== "" &&
-      !Number.isNaN(Number.parseFloat(amount)) &&
-      Number.parseFloat(amount) > 0 &&
-      Number.parseFloat(amount) <= numericBalance &&
-      recipient !== "",
+    canSubmit: validation.canSubmit,
+    isSubmitting,
+    submitError,
+    senderNonce: transferSender.effectiveSenderNonce,
+    setSenderNonce: transferSender.setSenderNonce,
+    nonces: transferSender.nonces,
+    byNonce: transferSender.byNonce,
+    stealthRowsForPicker: transferSender.stealthRowsForPicker,
+    senderStealthAddress: transferSender.senderStealthAddress,
+    recipientValid: validation.recipientValid,
+    recipientDiffersFromSender: validation.recipientDiffersFromSender,
+    recipientErrorKey: validation.recipientErrorKey,
   };
 }

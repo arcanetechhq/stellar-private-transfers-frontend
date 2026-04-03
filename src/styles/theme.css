@@ -60,6 +60,9 @@
   --info: #1D4ED8;
   --info-bg: #EEF4FF;
   --info-foreground: #1D4ED8;
+  --info-border: #BFDBFE;
+  --overlay-backdrop: color-mix(in srgb, #0f172a 50%, transparent);
+  --surface-selected: #F6F6F4;
   
   /* Legacy variables for compatibility */
   --popover: #FCFCFB;
@@ -209,6 +212,9 @@
   --info: oklch(0.488 0.243 264.376);
   --info-bg: oklch(0.269 0.05 264.376);
   --info-foreground: oklch(0.488 0.243 264.376);
+  --info-border: oklch(0.439 0.1 264.376);
+  --overlay-backdrop: oklch(0.05 0 0 / 0.65);
+  --surface-selected: oklch(0.269 0 0);
 
   --input-background: oklch(0.269 0 0);
   --input-background-hover: color-mix(in oklch, var(--input) 50%, transparent);
@@ -288,6 +294,9 @@
   --color-info: var(--info);
   --color-info-bg: var(--info-bg);
   --color-info-foreground: var(--info-foreground);
+  --color-info-border: var(--info-border);
+  --color-overlay-backdrop: var(--overlay-backdrop);
+  --color-surface-selected: var(--surface-selected);
   --color-success-bg: var(--success-bg);
   --color-success-foreground-alt: var(--success-foreground);
   --color-outline-button-bg: var(--outline-button-bg);

@@ -2,7 +2,7 @@ import React from "react";
 import { Download, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { AssetWithTrustline } from "@/entities/asset";
-import { shortenStealthForDisplay } from "@/features/pick-stealth-address";
+import { shortenStealthForDisplay } from "@/shared/lib/stealth/shorten-stealth-for-display";
 
 interface SummaryLineItemsProperties {
   selectedToken: AssetWithTrustline | undefined;

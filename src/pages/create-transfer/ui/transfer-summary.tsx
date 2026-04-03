@@ -1,8 +1,9 @@
-import React from "react";
 import { Send } from "lucide-react";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import { NETWORK_FEE, RECIPIENT_PREFIX_LENGTH, RECIPIENT_SUFFIX_LENGTH } from "../model/create-transfer";
+import { shortenStealthForDisplay } from "@/shared/lib/stealth/shorten-stealth-for-display";
 import type { AssetWithTrustline } from "@/entities/asset";
+import { NETWORK_FEE } from "../model/create-transfer";
 
 interface SummaryDetailsProperties {
   selectedToken: AssetWithTrustline | undefined;
@@ -10,44 +11,48 @@ interface SummaryDetailsProperties {
   recipient: string;
 }
 
-function SummaryDetails({ selectedToken, amount, recipient }: SummaryDetailsProperties) {
+function SummaryDetails({
+  selectedToken,
+  amount,
+  recipient,
+}: SummaryDetailsProperties) {
   const { t: translate } = useTranslation("transfer");
   const ticker = selectedToken?.assetId.toUpperCase() ?? "—";
   const displayRecipient = recipient
-    ? `${recipient.slice(0, RECIPIENT_PREFIX_LENGTH)}...${recipient.slice(RECIPIENT_SUFFIX_LENGTH)}`
+    ? shortenStealthForDisplay(recipient.trim())
     : "—";
 
   return (
     <div className="mb-6 space-y-3">
       <div className="flex justify-between">
-        <span style={{ fontSize: "14px", lineHeight: "20px", color: "#667085" }}>
+        <span className="text-sm leading-5 text-[var(--foreground-secondary)]">
           {translate("asset")}
         </span>
-        <span className="font-semibold" style={{ fontSize: "14px", lineHeight: "20px", color: "#121826" }}>
+        <span className="text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
           {ticker}
         </span>
       </div>
       <div className="flex justify-between">
-        <span style={{ fontSize: "14px", lineHeight: "20px", color: "#667085" }}>
+        <span className="text-sm leading-5 text-[var(--foreground-secondary)]">
           {translate("amount")}
         </span>
-        <span className="font-semibold" style={{ fontSize: "14px", lineHeight: "20px", color: "#121826" }}>
+        <span className="text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
           {amount || translate("amountPlaceholder")}
         </span>
       </div>
       <div className="flex justify-between">
-        <span style={{ fontSize: "14px", lineHeight: "20px", color: "#667085" }}>
+        <span className="text-sm leading-5 text-[var(--foreground-secondary)]">
           {translate("recipient")}
         </span>
-        <span className="font-mono" style={{ fontSize: "13px", lineHeight: "18px", color: "#121826" }}>
+        <span className="font-mono text-[13px] leading-[18px] text-[var(--foreground-primary)]">
           {displayRecipient}
         </span>
       </div>
       <div className="flex justify-between">
-        <span style={{ fontSize: "14px", lineHeight: "20px", color: "#667085" }}>
+        <span className="text-sm leading-5 text-[var(--foreground-secondary)]">
           {translate("networkFee")}
         </span>
-        <span className="font-semibold" style={{ fontSize: "14px", lineHeight: "20px", color: "#121826" }}>
+        <span className="text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
           {NETWORK_FEE} {ticker}
         </span>
       </div>
@@ -59,53 +64,49 @@ interface SummaryFooterProperties {
   selectedToken: AssetWithTrustline | undefined;
   totalAmount: number;
   canSubmit: boolean;
+  isSubmitting: boolean;
 }
 
-function SummaryFooter({ selectedToken, totalAmount, canSubmit }: SummaryFooterProperties) {
+function SummaryFooter({
+  selectedToken,
+  totalAmount,
+  canSubmit,
+  isSubmitting,
+}: SummaryFooterProperties) {
   const { t: translate } = useTranslation("transfer");
   const ticker = selectedToken?.assetId.toUpperCase() ?? "—";
 
   return (
     <>
-      <div className="mb-6 border-t pt-4" style={{ borderColor: "#E7EAF0" }}>
+      <div className="mb-6 border-t border-[var(--border)] pt-4">
         <div className="mb-3 flex justify-between">
-          <span className="font-semibold" style={{ fontSize: "15px", lineHeight: "22px", color: "#121826" }}>
+          <span className="text-[15px] leading-[22px] font-semibold text-[var(--foreground-primary)]">
             {translate("total")}
           </span>
-          <span className="font-semibold" style={{ fontSize: "15px", lineHeight: "22px", color: "#121826" }}>
-            {totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{" "}
+          <span className="text-[15px] leading-[22px] font-semibold text-[var(--foreground-primary)]">
+            {totalAmount.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}{" "}
             {ticker}
           </span>
         </div>
-        <div className="rounded-lg p-3" style={{ backgroundColor: "#F9FAFB", border: "1px solid #E7EAF0" }}>
-          <p style={{ fontSize: "12px", lineHeight: "16px", color: "#667085", marginBottom: "4px" }}>
+        <div className="rounded-lg border border-[var(--border-soft)] bg-[var(--surface-subtle)] p-3">
+          <p className="mb-1 text-xs leading-4 text-[var(--foreground-secondary)]">
             {translate("type")}
           </p>
-          <p className="font-semibold" style={{ fontSize: "13px", lineHeight: "18px", color: "#121826" }}>
+          <p className="text-[13px] leading-[18px] font-semibold text-[var(--foreground-primary)]">
             {translate("privateTransfer")}
           </p>
         </div>
       </div>
       <button
         type="submit"
-        disabled={!canSubmit}
-        className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 font-semibold transition-all"
-        style={{
-          fontSize: "15px",
-          lineHeight: "22px",
-          backgroundColor: canSubmit ? "#111827" : "#E7EAF0",
-          color: canSubmit ? "#FFFFFF" : "#98A2B3",
-          cursor: canSubmit ? "pointer" : "not-allowed",
-        }}
-        onMouseEnter={(event) => {
-          if (canSubmit) event.currentTarget.style.backgroundColor = "#1F2937";
-        }}
-        onMouseLeave={(event) => {
-          if (canSubmit) event.currentTarget.style.backgroundColor = "#111827";
-        }}
+        disabled={!canSubmit || isSubmitting}
+        className="flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-[15px] leading-[22px] font-semibold transition-colors enabled:cursor-pointer enabled:bg-[var(--primary)] enabled:text-[var(--primary-foreground)] enabled:hover:bg-[var(--primary-hover)] disabled:cursor-not-allowed disabled:bg-[var(--border)] disabled:text-[var(--foreground-tertiary)]"
       >
         <Send className="h-4 w-4" />
-        {translate("privateSend")}
+        {isSubmitting ? translate("submitting") : translate("privateSend")}
       </button>
     </>
   );
@@ -117,18 +118,45 @@ export interface TransferSummaryProperties {
   recipient: string;
   totalAmount: number;
   canSubmit: boolean;
+  isSubmitting: boolean;
+  submitError: string | undefined;
 }
 
-export function TransferSummary({ selectedToken, amount, recipient, totalAmount, canSubmit }: TransferSummaryProperties) {
+export function TransferSummary({
+  selectedToken,
+  amount,
+  recipient,
+  totalAmount,
+  canSubmit,
+  isSubmitting,
+  submitError,
+}: TransferSummaryProperties) {
   const { t: translate } = useTranslation("transfer");
   return (
     <div className="lg:col-span-1">
-      <div className="sticky top-6 rounded-xl bg-white p-6" style={{ border: "1px solid #E7EAF0" }}>
-        <h3 className="mb-4 font-semibold" style={{ fontSize: "16px", lineHeight: "24px", color: "#121826" }}>
+      <div className="sticky top-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)] p-6 shadow-[var(--shadow-card)]">
+        <h3 className="mb-4 text-base leading-6 font-semibold text-[var(--foreground-primary)]">
           {translate("summary")}
         </h3>
-        <SummaryDetails selectedToken={selectedToken} amount={amount} recipient={recipient} />
-        <SummaryFooter selectedToken={selectedToken} totalAmount={totalAmount} canSubmit={canSubmit} />
+        {submitError ? (
+          <div
+            role="alert"
+            className="mb-4 rounded-lg border border-[var(--error)] bg-[var(--error-bg)] px-3 py-2 text-sm text-[var(--error-foreground)]"
+          >
+            {submitError}
+          </div>
+        ) : undefined}
+        <SummaryDetails
+          selectedToken={selectedToken}
+          amount={amount}
+          recipient={recipient}
+        />
+        <SummaryFooter
+          selectedToken={selectedToken}
+          totalAmount={totalAmount}
+          canSubmit={canSubmit}
+          isSubmitting={isSubmitting}
+        />
       </div>
     </div>
   );

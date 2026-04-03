@@ -1,0 +1,72 @@
+import { isRejectedWithValue } from "@reduxjs/toolkit";
+import {
+  useState,
+  type Dispatch,
+  type FormEvent,
+  type SetStateAction,
+} from "react";
+import type { NavigateFunction } from "react-router";
+import type { AssetWithTrustline } from "@/entities/asset";
+
+type ConfidentialTransferSubmit = (payload: {
+  senderStealthAddress: string;
+  recipientStealthStpl1: string;
+  assetId: string;
+  poolContractRaw: string;
+  amountDisplay: number;
+}) => Promise<{ txId: string; coinDeliveryWarning?: string }>;
+
+export function useConfidentialTransferSubmitHandler(parameters: {
+  canSubmit: boolean;
+  setIsSubmitting: Dispatch<SetStateAction<boolean>>;
+  selectedAsset: AssetWithTrustline | undefined;
+  submit: ConfidentialTransferSubmit;
+  navigate: NavigateFunction;
+  senderStealthAddress: string;
+  recipientTrim: string;
+  numericAmount: number;
+}) {
+  const [submitError, setSubmitError] = useState<string | undefined>();
+
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!parameters.canSubmit || !parameters.selectedAsset?.poolContract?.trim()) {
+      return;
+    }
+    parameters.setIsSubmitting(true);
+    setSubmitError(undefined);
+    try {
+      const result = await parameters.submit({
+        senderStealthAddress: parameters.senderStealthAddress,
+        recipientStealthStpl1: parameters.recipientTrim,
+        assetId: parameters.selectedAsset.assetId,
+        poolContractRaw: parameters.selectedAsset.poolContract.trim(),
+        amountDisplay: parameters.numericAmount,
+      });
+      parameters.navigate(`/transfer-success/${encodeURIComponent(result.txId)}`, {
+        state: {
+          txId: result.txId,
+          amount: parameters.numericAmount,
+          assetId: parameters.selectedAsset.assetId,
+          poolContract: parameters.selectedAsset.poolContract.trim(),
+          coinDeliveryWarning: result.coinDeliveryWarning,
+        },
+      });
+    } catch (error: unknown) {
+      if (isRejectedWithValue(error)) {
+        const payload = error.payload;
+        setSubmitError(
+          typeof payload === "string" ? payload : "Transfer failed",
+        );
+      } else if (error instanceof Error) {
+        setSubmitError(error.message);
+      } else {
+        setSubmitError("Transfer failed");
+      }
+    } finally {
+      parameters.setIsSubmitting(false);
+    }
+  };
+
+  return { submitError, handleSubmit };
+}

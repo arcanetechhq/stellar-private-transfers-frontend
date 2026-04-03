@@ -2,6 +2,7 @@ export {
   coinDeliveryApi,
   useGetIncomingDeliveriesQuery,
   usePostCoinDeliveryMutation,
+  existingSpentCoinMatchesIncomingDelivery,
   type PostCoinDeliveryBody,
   type PostCoinDeliveryResponse,
   type IncomingCoinDeliveryDto,

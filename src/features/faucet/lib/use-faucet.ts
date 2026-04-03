@@ -5,6 +5,23 @@ const FRIENDBOT_URL = "https://friendbot.stellar.org";
 
 export type FaucetStatus = "idle" | "loading" | "success" | "error";
 
+function assetFaucetStatusFromMutation(parameters: {
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+}): FaucetStatus {
+  if (parameters.isLoading) {
+    return "loading";
+  }
+  if (parameters.isSuccess) {
+    return "success";
+  }
+  if (parameters.isError) {
+    return "error";
+  }
+  return "idle";
+}
+
 interface UseFaucetResult {
   mint: (address: string) => Promise<void>;
   status: FaucetStatus;
@@ -39,13 +56,11 @@ export function useFaucetForAsset(assetId: string): UseFaucetResult {
   const [mintAsset, { isLoading, isSuccess, isError, reset: resetMutation }] =
     useMintAssetMutation();
 
-  const status: FaucetStatus = isLoading
-    ? "loading"
-    : isSuccess
-      ? "success"
-      : isError
-        ? "error"
-        : "idle";
+  const status: FaucetStatus = assetFaucetStatusFromMutation({
+    isLoading,
+    isSuccess,
+    isError,
+  });
 
   const mint = useCallback(
     async (address: string) => {

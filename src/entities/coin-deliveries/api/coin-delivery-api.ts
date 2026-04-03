@@ -76,3 +76,5 @@ export const coinDeliveryApi = createApi({
 
 export const { useGetIncomingDeliveriesQuery, usePostCoinDeliveryMutation } =
   coinDeliveryApi;
+
+export { existingSpentCoinMatchesIncomingDelivery } from "@/entities/coin";

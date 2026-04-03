@@ -1,53 +1,99 @@
-import React from "react";
 import { Users, Info } from "lucide-react";
+import React from "react";
+import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
+import type { StealthAddressState } from "@/entities/stealth-address";
 import type { AssetWithTrustline } from "@/entities/asset";
+import {
+  StealthAddressSelect,
+  stealthAddressSelectLabelClassName,
+} from "@/features/pick-stealth-address";
 import { AssetField } from "./asset-field";
 import { AmountField } from "./amount-field";
+
+interface SenderFieldProperties {
+  label: string;
+  placeholder: string;
+  senderNonce: string | undefined;
+  onSenderNonceChange: (value: string) => void;
+  nonces: string[];
+  byNonce: StealthAddressState["byNonce"];
+}
+
+function SenderField(properties: SenderFieldProperties) {
+  const {
+    label,
+    placeholder,
+    senderNonce,
+    onSenderNonceChange,
+    nonces,
+    byNonce,
+  } = properties;
+  return (
+    <StealthAddressSelect
+      label={label}
+      triggerId="transfer-sender-stealth"
+      value={senderNonce}
+      onValueChange={onSenderNonceChange}
+      placeholder={placeholder}
+      nonces={nonces}
+      byNonce={byNonce}
+      labelClassName={stealthAddressSelectLabelClassName}
+    />
+  );
+}
 
 interface RecipientFieldProperties {
   recipient: string;
   onRecipientChange: (value: string) => void;
   onOpenContactPicker: () => void;
+  errorMessage: string | undefined;
 }
 
 function RecipientField(properties: RecipientFieldProperties) {
-  const { recipient, onRecipientChange, onOpenContactPicker } = properties;
+  const {
+    recipient,
+    onRecipientChange,
+    onOpenContactPicker,
+    errorMessage,
+  } = properties;
   const { t: translate } = useTranslation("transfer");
   return (
     <div>
       <label
-        className="mb-2 block"
-        style={{ fontSize: "14px", lineHeight: "20px", color: "#344054", fontWeight: 600 }}
+        htmlFor="transfer-recipient"
+        className="mb-2 block text-sm leading-5 font-semibold text-[var(--foreground-primary)]"
       >
         {translate("recipientAddress")}
       </label>
       <div className="flex gap-2">
-        <input
-          type="text"
-          value={recipient}
-          onChange={(event) => onRecipientChange(event.target.value)}
-          placeholder={translate("recipientPlaceholder")}
-          className="flex-1 rounded-lg px-4 py-3 font-mono focus:ring-2 focus:outline-none"
-          style={{ border: "1px solid #E7EAF0", fontSize: "14px", color: "#121826" }}
-        />
+        <div className="min-w-0 flex-1">
+          <input
+            id="transfer-recipient"
+            type="text"
+            value={recipient}
+            onChange={(event) => onRecipientChange(event.target.value)}
+            placeholder={translate("recipientPlaceholder")}
+            className="w-full rounded-lg border border-[var(--border-input)] bg-[var(--input-background)] px-4 py-3 font-mono text-sm text-[var(--foreground-primary)] transition-colors placeholder:text-[var(--foreground-tertiary)] hover:bg-[var(--input-background-hover)] focus:border-[var(--border-focus)] focus:ring-2 focus:ring-[var(--ring)] focus:outline-none"
+            aria-invalid={errorMessage ? true : undefined}
+            aria-describedby={
+              errorMessage ? "transfer-recipient-error" : undefined
+            }
+          />
+          {errorMessage ? (
+            <p
+              id="transfer-recipient-error"
+              className="mt-1.5 text-xs text-[var(--error)]"
+              role="alert"
+            >
+              {errorMessage}
+            </p>
+          ) : undefined}
+        </div>
         <button
           type="button"
           onClick={onOpenContactPicker}
-          className="flex items-center gap-2 rounded-lg px-4 py-3 whitespace-nowrap transition-colors"
-          style={{
-            fontSize: "13px",
-            lineHeight: "18px",
-            color: "#667085",
-            border: "1px solid #E7EAF0",
-            backgroundColor: "#FFFFFF",
-          }}
-          onMouseEnter={(event) =>
-            (event.currentTarget.style.backgroundColor = "#F6F7F9")
-          }
-          onMouseLeave={(event) =>
-            (event.currentTarget.style.backgroundColor = "#FFFFFF")
-          }
+          className="flex shrink-0 items-center gap-2 rounded-lg border border-[var(--border-input)] bg-[var(--secondary)] px-4 py-3 text-[13px] leading-[18px] whitespace-nowrap text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
         >
           <Users className="h-4 w-4" />
           {translate("selectFromContacts")}
@@ -57,54 +103,17 @@ function RecipientField(properties: RecipientFieldProperties) {
   );
 }
 
-interface NoteFieldProperties {
-  note: string;
-  onNoteChange: (value: string) => void;
-}
-
-function NoteField(properties: NoteFieldProperties) {
-  const { note, onNoteChange } = properties;
-  const { t: translate } = useTranslation("transfer");
-  return (
-    <div>
-      <label
-        className="mb-2 block"
-        style={{ fontSize: "14px", lineHeight: "20px", color: "#344054", fontWeight: 600 }}
-      >
-        {translate("noteOptional")}
-      </label>
-      <textarea
-        value={note}
-        onChange={(event) => onNoteChange(event.target.value)}
-        placeholder={translate("notePlaceholder")}
-        rows={1}
-        className="w-full resize-none rounded-lg px-4 py-3 focus:ring-2 focus:outline-none"
-        style={{ border: "1px solid #E7EAF0", fontSize: "14px", color: "#121826" }}
-      />
-    </div>
-  );
-}
-
 function PrivacyNotice() {
   const { t: translate } = useTranslation("transfer");
   return (
-    <div
-      className="rounded-lg p-4"
-      style={{ backgroundColor: "#EFF6FF", border: "1px solid #BFDBFE" }}
-    >
+    <div className="rounded-lg border border-[var(--info-border)] bg-[var(--info-bg)] p-4">
       <div className="flex gap-3">
-        <Info
-          className="mt-0.5 h-5 w-5 flex-shrink-0"
-          style={{ color: "#3B82F6" }}
-        />
+        <Info className="mt-0.5 h-5 w-5 shrink-0 text-[var(--info)]" />
         <div>
-          <p
-            className="mb-1 font-semibold"
-            style={{ fontSize: "14px", lineHeight: "20px", color: "#1E40AF" }}
-          >
+          <p className="mb-1 text-sm leading-5 font-semibold text-[var(--info-foreground)]">
             {translate("privateTransferNotice")}
           </p>
-          <p style={{ fontSize: "13px", lineHeight: "18px", color: "#1E40AF" }}>
+          <p className="text-[13px] leading-[18px] text-[var(--info-foreground)]">
             {translate("privateTransferDescription")}
           </p>
         </div>
@@ -119,26 +128,64 @@ export interface TransferFormProperties {
   onAmountChange: (value: string) => void;
   recipient: string;
   onRecipientChange: (value: string) => void;
-  note: string;
-  onNoteChange: (value: string) => void;
+  recipientErrorKey: "invalidRecipient" | "sameAsSender" | undefined;
   onOpenTokenPicker: () => void;
   onOpenContactPicker: () => void;
   onPercentage: (percentage: number) => void;
   onMaxAmount: () => void;
+  senderNonce: string | undefined;
+  onSenderNonceChange: (value: string) => void;
+  nonces: string[];
+  byNonce: StealthAddressState["byNonce"];
+}
+
+function recipientErrorMessageFromKey(
+  recipientErrorKey: TransferFormProperties["recipientErrorKey"],
+  translate: TFunction<"transfer", undefined>,
+): string | undefined {
+  if (recipientErrorKey === "invalidRecipient") {
+    return translate("invalidRecipientStealth");
+  }
+  if (recipientErrorKey === "sameAsSender") {
+    return translate("recipientSameAsSender");
+  }
+  return undefined;
 }
 
 export function TransferForm(properties: TransferFormProperties) {
   const {
-    selectedToken, amount, onAmountChange, recipient, onRecipientChange,
-    note, onNoteChange, onOpenTokenPicker, onOpenContactPicker, onPercentage, onMaxAmount,
+    selectedToken,
+    amount,
+    onAmountChange,
+    recipient,
+    onRecipientChange,
+    recipientErrorKey,
+    onOpenTokenPicker,
+    onOpenContactPicker,
+    onPercentage,
+    onMaxAmount,
+    senderNonce,
+    onSenderNonceChange,
+    nonces,
+    byNonce,
   } = properties;
+  const { t: translate } = useTranslation("transfer");
+  const recipientErrorMessage = recipientErrorMessageFromKey(
+    recipientErrorKey,
+    translate,
+  );
   return (
     <div className="lg:col-span-2">
-      <div
-        className="rounded-xl bg-white p-6"
-        style={{ border: "1px solid #E7EAF0" }}
-      >
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] p-6 shadow-[var(--shadow-card)]">
         <div className="space-y-6">
+          <SenderField
+            label={translate("senderStealth")}
+            placeholder={translate("senderStealthPlaceholder")}
+            senderNonce={senderNonce}
+            onSenderNonceChange={onSenderNonceChange}
+            nonces={nonces}
+            byNonce={byNonce}
+          />
           <AssetField
             selectedToken={selectedToken}
             onOpenTokenPicker={onOpenTokenPicker}
@@ -153,8 +200,8 @@ export function TransferForm(properties: TransferFormProperties) {
             recipient={recipient}
             onRecipientChange={onRecipientChange}
             onOpenContactPicker={onOpenContactPicker}
+            errorMessage={recipientErrorMessage}
           />
-          <NoteField note={note} onNoteChange={onNoteChange} />
           <PrivacyNotice />
         </div>
       </div>

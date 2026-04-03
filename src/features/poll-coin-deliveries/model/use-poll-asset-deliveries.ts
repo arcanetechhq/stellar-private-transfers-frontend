@@ -1,34 +1,32 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import {
   useGetIncomingDeliveriesQuery,
   addSeenTag,
+  existingSpentCoinMatchesIncomingDelivery,
   selectSeenTagsForAsset,
   type IncomingCoinDeliveryDto,
 } from "@/entities/coin-deliveries";
-import { addCoin, finalizeCoin, normalizeCommitmentHex, type CoinData } from "@/entities/coin";
+import {
+  addCoin,
+  finalizeCoin,
+  normalizeCommitmentHex,
+  selectCoinItems,
+  type CoinData,
+} from "@/entities/coin";
 import {
   tagFromCiphertextBytes,
   decryptCoinPayload,
   parseCoinDeliveryPayloadV1,
-  buildBloomBitmap,
-  bloomBitsToBase64,
   DEFAULT_BLOOM_M,
   DEFAULT_BLOOM_K,
 } from "@/shared/lib/coin-delivery";
 import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
 import { selectWalletPublicKey } from "@/entities/wallet";
+import { base64ToBytes } from "../lib/base64-to-bytes";
+import { useBloomBitsForSeenTags } from "./use-bloom-bits-for-seen-tags";
 
 const POLL_INTERVAL_MS = 12_000;
-
-function base64ToBytes(b64: string): Uint8Array {
-  const bin = atob(b64);
-  const out = new Uint8Array(bin.length);
-  for (let index = 0; index < bin.length; index++) {
-    out[index] = bin.codePointAt(index) ?? 0;
-  }
-  return out;
-}
 
 async function verifyTagIntegrity(cipherBytes: Uint8Array, tagB64: string): Promise<boolean> {
   const expectedTag = await tagFromCiphertextBytes(cipherBytes);
@@ -99,30 +97,8 @@ export function usePollAssetDeliveries({
   const dispatch = useAppDispatch();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const seenTags = useAppSelector(selectSeenTagsForAsset(assetId));
-
-  const [bloomBitsBase64, setBloomBitsBase64] = useState<string | undefined>();
-
-  useEffect(() => {
-    if (seenTags.length === 0) {
-      setBloomBitsBase64(undefined);
-      return;
-    }
-    let cancelled = false;
-    const build = async () => {
-      const bitmap = await buildBloomBitmap({
-        tags: seenTags.map((tag) => base64ToBytes(tag)),
-        bitCount: DEFAULT_BLOOM_M,
-        hashCount: DEFAULT_BLOOM_K,
-      });
-      if (!cancelled) {
-        setBloomBitsBase64(bloomBitsToBase64(bitmap));
-      }
-    };
-    void build();
-    return () => {
-      cancelled = true;
-    };
-  }, [seenTags]);
+  const coinItems = useAppSelector(selectCoinItems);
+  const bloomBitsBase64 = useBloomBitsForSeenTags(seenTags);
 
   const { data } = useGetIncomingDeliveriesQuery(
     {
@@ -146,6 +122,15 @@ export function usePollAssetDeliveries({
         if (seenTags.includes(tagB64)) continue;
         const decrypted = await decryptDeliveryRow(row, recipientScalarHex);
         if (!decrypted) continue;
+        if (
+          existingSpentCoinMatchesIncomingDelivery(coinItems, {
+            commitmentHex: decrypted.commitmentHex,
+            coinCommitment: decrypted.coin.commitment,
+          })
+        ) {
+          dispatch(addSeenTag({ assetId, tagBase64: tagB64 }));
+          continue;
+        }
         dispatch(
           addCoin({
             commitmentHex: decrypted.commitmentHex,
@@ -167,6 +152,7 @@ export function usePollAssetDeliveries({
     data,
     publicKey,
     seenTags,
+    coinItems,
     recipientScalarHex,
     assetId,
     poolContract,

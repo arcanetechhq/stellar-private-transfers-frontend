@@ -11,5 +11,7 @@
   "invalidPrivateAddress": "Enter a valid private address (stpl1…)",
   "address": "Address",
   "selectContact": "Select Contact",
-  "noContactsFound": "No contacts found"
+  "noContactsFound": "No contacts found",
+  "myPrivateAddresses": "My private addresses",
+  "savedContacts": "Saved contacts"
 }

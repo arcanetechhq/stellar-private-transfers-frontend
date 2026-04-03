@@ -1,11 +1,12 @@
 import type { AssetDto } from "@/entities/asset";
-import { shortenStealthForDisplay } from "@/features/pick-stealth-address";
+import { shortenStealthForDisplay } from "@/shared/lib/stealth/shorten-stealth-for-display";
 
 export interface TransferSuccessLocationState {
   amount?: number;
   assetId?: string;
   poolContract?: string;
   txId?: string;
+  coinDeliveryWarning?: string;
 }
 
 export interface TransferSuccessViewModel {
