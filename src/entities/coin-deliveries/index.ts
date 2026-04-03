@@ -17,6 +17,7 @@ export {
   resetSeenTags,
   selectSeenTagsForAsset,
   selectAllSeenTags,
+  selectIsTagsHydrated,
   type CoinDeliveryState,
   type CoinDeliveryRootState,
 } from "./model/coin-delivery";

@@ -11,7 +11,11 @@ export function loadSeenTags(publicKey: string): SeenTagsByAssetId {
     const raw = localStorage.getItem(storageKey(publicKey));
     if (!raw) return {};
     const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      Array.isArray(parsed)
+    ) {
       return {};
     }
     const result: SeenTagsByAssetId = {};
@@ -23,7 +27,8 @@ export function loadSeenTags(publicKey: string): SeenTagsByAssetId {
       }
     }
     return result;
-  } catch {
+  } catch (error) {
+    console.error("Error loading seen tags", error);
     return {};
   }
 }

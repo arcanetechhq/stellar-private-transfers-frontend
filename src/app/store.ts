@@ -111,7 +111,8 @@ store.subscribe(() => {
 store.subscribe(() => {
   const state = store.getState();
   const publicKey = state.wallet.publicKey;
-  if (!publicKey) {
+  const tagsHydrated = state.coinDelivery.tagsHydrated;
+  if (!publicKey || !tagsHydrated) {
     return;
   }
   saveSeenTags(publicKey, state.coinDelivery.tagsByAssetId);
@@ -120,7 +121,8 @@ store.subscribe(() => {
 store.subscribe(() => {
   const state = store.getState();
   const publicKey = state.wallet.publicKey;
-  if (!publicKey) {
+  const coinsHydrated = state.coin.coinsHydrated;
+  if (!publicKey || !coinsHydrated) {
     return;
   }
   saveCoinState(publicKey, state.coin.items);

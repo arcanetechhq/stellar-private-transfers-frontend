@@ -4,6 +4,7 @@ import { useGetAssetsQuery } from "@/entities/asset";
 import { selectStealthState } from "@/entities/stealth-address";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { usePollAssetDeliveries } from "../model/use-poll-asset-deliveries";
+import { useSpentNullifierPolling } from "../model/use-spent-nullifier-polling";
 
 interface AssetPollerProperties {
   stealthAddress: string;
@@ -28,6 +29,7 @@ function AssetPoller({
 }
 
 export function PollAllAssetDeliveries() {
+  useSpentNullifierPolling();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const { byNonce, scalarByNonce } = useAppSelector(selectStealthState);
   const { data: assets } = useGetAssetsQuery();

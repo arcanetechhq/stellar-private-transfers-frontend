@@ -1,3 +1,4 @@
+import { skipToken } from "@reduxjs/toolkit/query/react";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import {
@@ -6,6 +7,7 @@ import {
   existingSpentCoinMatchesIncomingDelivery,
   selectSeenTagsForAsset,
   type IncomingCoinDeliveryDto,
+  selectIsTagsHydrated,
 } from "@/entities/coin-deliveries";
 import {
   addCoin,
@@ -18,8 +20,8 @@ import {
   tagFromCiphertextBytes,
   decryptCoinPayload,
   parseCoinDeliveryPayloadV1,
-  DEFAULT_BLOOM_M,
   DEFAULT_BLOOM_K,
+  DEFAULT_BLOOM_M,
 } from "@/shared/lib/coin-delivery";
 import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
 import { selectWalletPublicKey } from "@/entities/wallet";
@@ -28,7 +30,10 @@ import { useBloomBitsForSeenTags } from "./use-bloom-bits-for-seen-tags";
 
 const POLL_INTERVAL_MS = 12_000;
 
-async function verifyTagIntegrity(cipherBytes: Uint8Array, tagB64: string): Promise<boolean> {
+async function verifyTagIntegrity(
+  cipherBytes: Uint8Array,
+  tagB64: string,
+): Promise<boolean> {
   const expectedTag = await tagFromCiphertextBytes(cipherBytes);
   const rowTagBytes = base64ToBytes(tagB64);
   if (expectedTag.length !== rowTagBytes.length) return false;
@@ -50,10 +55,14 @@ async function decryptDeliveryRow(
   recipientScalarHex: string,
 ): Promise<DecryptedDeliveryCoin | undefined> {
   const cipherBytes = base64ToBytes(row.ciphertext_base64);
-  if (!(await verifyTagIntegrity(cipherBytes, row.tag_base64.trim()))) return undefined;
+  if (!(await verifyTagIntegrity(cipherBytes, row.tag_base64.trim())))
+    return undefined;
   let sharedX: string;
   try {
-    sharedX = await privacyPoolService.sharedSecretX(recipientScalarHex, row.ephemeral_key);
+    sharedX = await privacyPoolService.sharedSecretX(
+      recipientScalarHex,
+      row.ephemeral_key,
+    );
   } catch {
     return undefined;
   }
@@ -98,20 +107,28 @@ export function usePollAssetDeliveries({
   const publicKey = useAppSelector(selectWalletPublicKey);
   const seenTags = useAppSelector(selectSeenTagsForAsset(assetId));
   const coinItems = useAppSelector(selectCoinItems);
+  const isTagsHydrated = useAppSelector(selectIsTagsHydrated);
   const bloomBitsBase64 = useBloomBitsForSeenTags(seenTags);
+  const isSeenTagsBloomReady = bloomBitsBase64 !== undefined;
+
+  const canPollIncomingDeliveries =
+    Boolean(stealthAddress) &&
+    Boolean(recipientScalarHex) &&
+    Boolean(publicKey) &&
+    isSeenTagsBloomReady &&
+    isTagsHydrated;
 
   const { data } = useGetIncomingDeliveriesQuery(
-    {
-      stealthAddress,
-      assetId,
-      bloomM: DEFAULT_BLOOM_M,
-      bloomK: DEFAULT_BLOOM_K,
-      bloomBitsBase64,
-    },
-    {
-      pollingInterval: POLL_INTERVAL_MS,
-      skip: !stealthAddress || !recipientScalarHex || !publicKey,
-    },
+    canPollIncomingDeliveries
+      ? {
+          stealthAddress,
+          assetId,
+          bloomM: DEFAULT_BLOOM_M,
+          bloomK: DEFAULT_BLOOM_K,
+          ...(bloomBitsBase64 !== undefined && { bloomBitsBase64 }),
+        }
+      : skipToken,
+    { pollingInterval: POLL_INTERVAL_MS },
   );
 
   useEffect(() => {

@@ -8,10 +8,12 @@ import {
 
 export interface CoinState {
   items: CoinWithMetadata[];
+  coinsHydrated: boolean;
 }
 
 const initialState: CoinState = {
   items: [],
+  coinsHydrated: false,
 };
 
 function commitmentKey(hex: string): string {
@@ -24,6 +26,7 @@ const coinSlice = createSlice({
   reducers: {
     hydrateCoinState: (state, action: PayloadAction<CoinWithMetadata[]>) => {
       state.items = action.payload;
+      state.coinsHydrated = true;
     },
     addCoin: (state, action: PayloadAction<CoinWithMetadata>) => {
       if (incomingSharesLedgerKeyWithAnyItem(state.items, action.payload)) {
@@ -75,10 +78,14 @@ export const selectCoinsByStealthAddress =
     if (!stealthAddress) {
       return [];
     }
-    return state.coin.items.filter((item) => item.stealthAddress === stealthAddress);
+    return state.coin.items.filter(
+      (item) => item.stealthAddress === stealthAddress,
+    );
   };
 
-export const selectStealthAddressesWithCoins = (state: CoinRootState): string[] => {
+export const selectStealthAddressesWithCoins = (
+  state: CoinRootState,
+): string[] => {
   const unique = new Set<string>();
   for (const item of state.coin.items) {
     unique.add(item.stealthAddress);
@@ -93,7 +100,8 @@ export const selectFinalizedAggregatesForStealth =
       return [];
     }
     const finalized = state.coin.items.filter(
-      (item) => item.stealthAddress === stealthAddress && item.status === "finalized",
+      (item) =>
+        item.stealthAddress === stealthAddress && item.status === "finalized",
     );
     const byAsset = new Map<string, AggregatedPrivateAssetRow>();
     for (const item of finalized) {

@@ -3,21 +3,21 @@ import type { SeenTagsByAssetId } from "../lib/persist-seen-tags";
 
 export interface CoinDeliveryState {
   tagsByAssetId: SeenTagsByAssetId;
+  tagsHydrated: boolean;
 }
 
 const initialState: CoinDeliveryState = {
   tagsByAssetId: {},
+  tagsHydrated: false,
 };
 
 const coinDeliverySlice = createSlice({
   name: "coinDelivery",
   initialState,
   reducers: {
-    hydrateSeenTags: (
-      state,
-      action: PayloadAction<SeenTagsByAssetId>,
-    ) => {
+    hydrateSeenTags: (state, action: PayloadAction<SeenTagsByAssetId>) => {
       state.tagsByAssetId = action.payload;
+      state.tagsHydrated = true;
     },
     addSeenTag: (
       state,
@@ -48,5 +48,9 @@ export const selectSeenTagsForAsset =
   (state: CoinDeliveryRootState): string[] =>
     state.coinDelivery.tagsByAssetId[assetId] ?? emptySeenTagsForAsset;
 
-export const selectAllSeenTags = (state: CoinDeliveryRootState): SeenTagsByAssetId =>
-  state.coinDelivery.tagsByAssetId;
+export const selectAllSeenTags = (
+  state: CoinDeliveryRootState,
+): SeenTagsByAssetId => state.coinDelivery.tagsByAssetId;
+
+export const selectIsTagsHydrated = (state: CoinDeliveryRootState): boolean =>
+  state.coinDelivery.tagsHydrated;

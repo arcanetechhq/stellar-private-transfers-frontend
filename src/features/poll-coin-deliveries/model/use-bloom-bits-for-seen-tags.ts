@@ -4,15 +4,22 @@ import {
   bloomBitsToBase64,
   DEFAULT_BLOOM_M,
   DEFAULT_BLOOM_K,
+  bloomByteLength,
 } from "@/shared/lib/coin-delivery";
 import { base64ToBytes } from "../lib/base64-to-bytes";
 
-export function useBloomBitsForSeenTags(seenTags: string[]): string | undefined {
+const EMPTY_BLOOM_BITS_BASE64 = bloomBitsToBase64(
+  Buffer.alloc(bloomByteLength(DEFAULT_BLOOM_M), 0),
+);
+
+export function useBloomBitsForSeenTags(
+  seenTags: string[],
+): string | undefined {
   const [bloomBitsBase64, setBloomBitsBase64] = useState<string | undefined>();
 
   useEffect(() => {
     if (seenTags.length === 0) {
-      setBloomBitsBase64(undefined);
+      setBloomBitsBase64(EMPTY_BLOOM_BITS_BASE64);
       return;
     }
     let cancelled = false;
