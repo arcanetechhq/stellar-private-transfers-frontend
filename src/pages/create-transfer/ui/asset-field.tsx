@@ -14,7 +14,7 @@ export function AssetField({ selectedToken, onOpenTokenPicker }: AssetFieldPrope
 
   return (
     <div>
-      <label className="mb-2 block text-[14px] font-semibold leading-[20px] text-[var(--foreground-primary)]">
+      <label className="mb-2 block text-[14px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
         {translate("asset")}
       </label>
       <button
@@ -30,7 +30,7 @@ export function AssetField({ selectedToken, onOpenTokenPicker }: AssetFieldPrope
               size={40}
             />
             <div className="text-left">
-              <p className="text-[15px] font-semibold leading-[20px] text-[var(--foreground-primary)]">
+              <p className="text-[15px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
                 {selectedToken.assetId.toUpperCase()}
               </p>
               <p className="text-[13px] leading-[18px] text-[var(--foreground-secondary)]">

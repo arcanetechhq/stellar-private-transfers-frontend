@@ -5,12 +5,14 @@ import { ExternalLink } from "lucide-react";
 import { useAssetLookup } from "@/entities/asset";
 import { StatusBadge } from "@/shared/ui/status-badge";
 import { TokenIcon } from "@/shared/ui/token-icon";
+import { cn } from "@/shared/lib/cn";
+import { formatSenderCounterpartyForDisplay } from "@/shared/lib/format-sender-counterparty-for-display";
 import type { Transaction } from "@/entities/transaction";
 import {
   getTransactionLabel,
   getStatusLabel,
   getStatusVariant,
-  getAmountColor,
+  getAmountToneClass,
   getAmountPrefix,
 } from "../lib/transaction-display";
 import { TransactionTypeIcon } from "./transaction-type-icon";
@@ -19,28 +21,20 @@ interface TransactionTableRowProperties {
   transaction: Transaction;
 }
 
-const cellStyle = {
-  fontSize: "14px",
-  lineHeight: "20px",
-} as const;
-
 interface TransactionDateCellProperties {
   date: string;
 }
 
 function TransactionDateCell(properties: TransactionDateCellProperties) {
   return (
-    <td
-      className="px-6 py-4 whitespace-nowrap"
-      style={{ ...cellStyle, color: "#667085" }}
-    >
+    <td className="px-6 py-4 text-sm leading-5 whitespace-nowrap text-[var(--foreground-secondary)]">
       {new Date(properties.date).toLocaleDateString("en-US", {
         day: "numeric",
         month: "short",
         year: "numeric",
       })}
       <br />
-      <span style={{ fontSize: "12px", color: "#98A2B3" }}>
+      <span className="text-xs text-[var(--foreground-tertiary)]">
         {new Date(properties.date).toLocaleTimeString("en-US", {
           hour: "2-digit",
           minute: "2-digit",
@@ -60,14 +54,8 @@ function ViewDetailsCell(properties: ViewDetailsCellProperties) {
     <td className="px-6 py-4 whitespace-nowrap">
       <Link to={`/transaction/${properties.id}`}>
         <button
-          className="rounded-lg p-2 transition-colors"
-          style={{ color: "#667085" }}
-          onMouseEnter={(event) => {
-            event.currentTarget.style.backgroundColor = "#F3F4F6";
-          }}
-          onMouseLeave={(event) => {
-            event.currentTarget.style.backgroundColor = "transparent";
-          }}
+          type="button"
+          className="rounded-lg p-2 text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
           title={properties.title}
         >
           <ExternalLink className="h-4 w-4" />
@@ -83,59 +71,52 @@ export function TransactionTableRow(properties: TransactionTableRowProperties) {
   const assetMap = useAssetLookup();
   const asset = assetMap.get(transaction.assetId);
   const assetLabel = asset?.name ?? transaction.assetId;
+  const amountToneClass = getAmountToneClass(transaction.type);
+  const counterpartyTrimmed = transaction.counterparty.trim();
+  const counterpartyDisplay =
+    counterpartyTrimmed === ""
+      ? "—"
+      : formatSenderCounterpartyForDisplay(counterpartyTrimmed);
 
   return (
-    <tr
-      className="transition-colors"
-      onMouseEnter={(event) => {
-        event.currentTarget.style.backgroundColor = "#F9FAFB";
-      }}
-      onMouseLeave={(event) => {
-        event.currentTarget.style.backgroundColor = "transparent";
-      }}
-    >
+    <tr className="transition-colors hover:bg-[var(--surface-hover)]">
       <TransactionDateCell date={transaction.date} />
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center gap-3">
           <TransactionTypeIcon type={transaction.type} />
-          <span
-            className="font-semibold"
-            style={{ ...cellStyle, color: "#121826" }}
-          >
+          <span className="text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
             {getTransactionLabel(transaction.type, translate)}
           </span>
         </div>
       </td>
-      <td
-        className="px-6 py-4 whitespace-nowrap"
-        style={{ ...cellStyle, color: "#121826" }}
-      >
+      <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center gap-2">
           <TokenIcon
             ticker={transaction.assetId.toUpperCase()}
             logoUrl={asset?.logoUrl}
             size="sm"
           />
-          <span
-            className="font-semibold"
-            style={{ ...cellStyle, color: "#121826" }}
-          >
+          <span className="text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
             {assetLabel}
           </span>
         </div>
       </td>
       <td
-        className="px-6 py-4 font-semibold whitespace-nowrap"
-        style={{ ...cellStyle, color: getAmountColor(transaction.type) }}
+        className={cn(
+          "px-6 py-4 text-sm leading-5 font-semibold whitespace-nowrap",
+          amountToneClass,
+        )}
       >
         {getAmountPrefix(transaction.type)}
         {transaction.amount.toLocaleString()}
       </td>
       <td
-        className="px-6 py-4 font-mono whitespace-nowrap"
-        style={{ fontSize: "13px", lineHeight: "18px", color: "#667085" }}
+        className="px-6 py-4 font-mono text-[13px] leading-[18px] whitespace-nowrap text-[var(--foreground-secondary)]"
+        title={
+          counterpartyTrimmed === "" ? undefined : transaction.counterparty
+        }
       >
-        {transaction.counterparty}
+        {counterpartyDisplay}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <StatusBadge variant={getStatusVariant(transaction.status)}>

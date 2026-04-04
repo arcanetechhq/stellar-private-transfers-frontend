@@ -1,9 +1,15 @@
 import { type FormEvent, useCallback } from "react";
 import { useNavigate } from "react-router";
+import { useAppDispatch } from "@/app/hooks";
+import {
+  addTransaction,
+  buildUserTransaction,
+} from "@/entities/transaction";
 import { useDepositTransaction } from "@/features/deposit";
 import { useCreateDepositForm } from "./use-create-deposit-form";
 
 export function useCreateDeposit() {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const {
     mutateAsync: submitDeposit,
@@ -24,6 +30,19 @@ export function useCreateDeposit() {
           amountDisplay: form.numericAmount,
           stealthAddress: form.destinationStealthPreview.trim(),
         });
+        const destinationStealth = form.destinationStealthPreview.trim();
+        dispatch(
+          addTransaction(
+            buildUserTransaction({
+              txId: result.txId,
+              type: "deposit",
+              assetId: result.assetId,
+              amount: result.amountDisplay,
+              counterparty: destinationStealth,
+              senderStealthAddress: destinationStealth,
+            }),
+          ),
+        );
         navigate(`/transfer-success/${encodeURIComponent(result.txId)}`, {
           state: {
             amount: result.amountDisplay,
@@ -37,6 +56,7 @@ export function useCreateDeposit() {
       }
     },
     [
+      dispatch,
       form.canSubmit,
       form.destinationStealthPreview,
       form.numericAmount,

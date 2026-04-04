@@ -11,26 +11,14 @@ export function TransactionHistory() {
   const { filteredTransactions, ...filterProperties } = state;
 
   return (
-    <div
-      className="p-8"
-      style={{ backgroundColor: "#F6F7F9", minHeight: "100%" }}
-    >
+    <div className="bg-background min-h-full p-8">
       <div className="mx-auto max-w-7xl">
         <HistoryHeader />
         <HistoryFilters {...filterProperties} />
         <TransactionTable transactions={filteredTransactions} />
         {filteredTransactions.length === 0 && (
-          <div
-            className="mt-6 rounded-xl bg-white py-12 text-center"
-            style={{ border: "1px solid #E7EAF0" }}
-          >
-            <p
-              style={{
-                color: "#667085",
-                fontSize: "14px",
-                lineHeight: "20px",
-              }}
-            >
+          <div className="border-border bg-card mt-6 rounded-xl border py-12 text-center">
+            <p className="text-foreground-secondary text-sm leading-5">
               {translate("noTransactionsFound")}
             </p>
           </div>

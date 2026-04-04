@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useAppSelector } from "@/app/hooks";
-import { selectTransactions } from "@/entities/transaction";
+import {
+  selectTransactions,
+  sortTransactionsByDateDesc,
+} from "@/entities/transaction";
 import type { DateFilterValue, FilterType } from "./transaction-history";
 import { dateFilterOptions } from "./transaction-history";
 import { isTransactionInDateRange } from "../lib/date-filter";
@@ -38,7 +41,9 @@ export function useTransactionHistory() {
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
 
-  const allTransactions = useAppSelector(selectTransactions);
+  const allTransactions = sortTransactionsByDateDesc(
+    useAppSelector(selectTransactions),
+  );
 
   const dateLabel =
     dateFilterOptions.find((option) => option.value === dateFilter)?.label ??

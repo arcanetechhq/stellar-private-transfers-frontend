@@ -6,7 +6,9 @@ import {
   type SetStateAction,
 } from "react";
 import type { NavigateFunction } from "react-router";
+import type { AppDispatch } from "@/app/store";
 import type { AssetWithTrustline } from "@/entities/asset";
+import { addTransaction, buildUserTransaction } from "@/entities/transaction";
 
 type PrivateWithdrawalSubmit = (payload: {
   senderStealthAddress: string;
@@ -17,6 +19,7 @@ type PrivateWithdrawalSubmit = (payload: {
 }) => Promise<{ txId: string; coinDeliveryWarning?: string }>;
 
 export function usePrivateWithdrawalSubmitHandler(parameters: {
+  dispatch: AppDispatch;
   canSubmit: boolean;
   setIsSubmitting: Dispatch<SetStateAction<boolean>>;
   selectedAsset: AssetWithTrustline | undefined;
@@ -43,6 +46,18 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
         amountDisplay: parameters.numericAmount,
         destinationAddress: parameters.destinationTrim,
       });
+      parameters.dispatch(
+        addTransaction(
+          buildUserTransaction({
+            txId: result.txId,
+            type: "withdrawal",
+            assetId: parameters.selectedAsset.assetId,
+            amount: parameters.numericAmount,
+            counterparty: parameters.destinationTrim,
+            senderStealthAddress: parameters.senderStealthAddress.trim(),
+          }),
+        ),
+      );
       parameters.navigate(`/transfer-success/${encodeURIComponent(result.txId)}`, {
         state: {
           txId: result.txId,

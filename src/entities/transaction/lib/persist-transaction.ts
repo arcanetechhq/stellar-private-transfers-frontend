@@ -17,12 +17,21 @@ function hasRequiredStringFields(record: Record<string, unknown>): boolean {
   );
 }
 
+function hasOptionalSenderStealthField(record: Record<string, unknown>): boolean {
+  const value = record.senderStealthAddress;
+  return value === undefined || typeof value === "string";
+}
+
 function isTransactionItem(value: unknown): value is Transaction {
   if (typeof value !== "object" || value === null) {
     return false;
   }
   const record = value as Record<string, unknown>;
-  return hasRequiredStringFields(record) && typeof record.amount === "number";
+  return (
+    hasRequiredStringFields(record) &&
+    typeof record.amount === "number" &&
+    hasOptionalSenderStealthField(record)
+  );
 }
 
 export function loadTransactionState(

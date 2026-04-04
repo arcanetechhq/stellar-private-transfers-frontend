@@ -1,4 +1,6 @@
 {
+  "privateLabel": "Private",
+  "chainLoading": "Loading on-chain data…",
   "backToHistory": "Back to History",
   "title": "Transaction Details",
   "idPrefix": "ID: ",

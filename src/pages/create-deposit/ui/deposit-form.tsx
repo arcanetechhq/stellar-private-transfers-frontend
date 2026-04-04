@@ -18,7 +18,7 @@ function AssetSelector({ selectedToken, onOpen }: AssetSelectorProperties) {
 
   return (
     <div>
-      <label className="mb-2 block text-[14px] font-semibold leading-[20px] text-[var(--foreground-primary)]">
+      <label className="mb-2 block text-[14px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
         {translate("asset")}
       </label>
       <button
@@ -34,7 +34,7 @@ function AssetSelector({ selectedToken, onOpen }: AssetSelectorProperties) {
               size={40}
             />
             <div className="text-left">
-              <p className="text-[14px] font-semibold leading-[20px] text-[var(--foreground-primary)]">
+              <p className="text-[14px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
                 {selectedToken.assetId.toUpperCase()}
               </p>
               <p className="text-[13px] leading-[18px] text-[var(--foreground-secondary)]">
@@ -65,7 +65,7 @@ function AmountInput({ amount, onAmountChange, onMaxAmount, onPercentage }: Amou
 
   return (
     <div>
-      <label className="mb-2 block text-[14px] font-semibold leading-[20px] text-[var(--foreground-primary)]">
+      <label className="mb-2 block text-[14px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
         {translate("amount")}
       </label>
       <div className="relative">
@@ -74,12 +74,12 @@ function AmountInput({ amount, onAmountChange, onMaxAmount, onPercentage }: Amou
           value={amount}
           onChange={(event) => onAmountChange(event.target.value)}
           placeholder="0.00"
-          className="w-full rounded-lg border border-[var(--border)] px-4 py-4 pr-20 text-[20px] font-semibold text-[var(--foreground-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+          className="w-full rounded-lg border border-[var(--border)] px-4 py-4 pr-20 text-[20px] font-semibold text-[var(--foreground-primary)] focus:ring-2 focus:ring-[var(--ring)] focus:outline-none"
         />
         <button
           type="button"
           onClick={onMaxAmount}
-          className="absolute right-4 top-1/2 -translate-y-1/2 rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-3 py-1.5 text-[13px] font-semibold text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
+          className="absolute top-1/2 right-4 -translate-y-1/2 rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-3 py-1.5 text-[13px] font-semibold text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
         >
           {translate("max")}
         </button>
@@ -108,7 +108,7 @@ function DepositInfoBanner() {
       <div className="flex gap-3">
         <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-[var(--info)]" />
         <div>
-          <p className="mb-1 text-sm font-semibold leading-5 text-[var(--info-foreground)]">
+          <p className="mb-1 text-sm leading-5 font-semibold text-[var(--info-foreground)]">
             {translate("aboutDeposits")}
           </p>
           <p className="text-[13px] leading-[18px] text-[var(--info-foreground)]">

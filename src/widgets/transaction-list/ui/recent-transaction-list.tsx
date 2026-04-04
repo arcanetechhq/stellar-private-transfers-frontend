@@ -1,26 +1,12 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
+import { cn } from "@/shared/lib/cn";
 import type { Transaction } from "@/entities/transaction";
 import { RecentTransactionRow } from "./recent-transaction-row";
 
 interface RecentTransactionListProperties {
   transactions: Transaction[];
-}
-
-const PANEL_STYLE: React.CSSProperties = {
-  border: "1px solid #E7EAF0",
-  borderRadius: "20px",
-  width: "50%",
-  height: "260px",
-};
-
-function handleViewAllMouseEnter(event: React.MouseEvent<HTMLButtonElement>) {
-  event.currentTarget.style.color = "#111827";
-}
-
-function handleViewAllMouseLeave(event: React.MouseEvent<HTMLButtonElement>) {
-  event.currentTarget.style.color = "#667085";
 }
 
 export function RecentTransactionList(
@@ -31,36 +17,24 @@ export function RecentTransactionList(
 
   return (
     <div
-      className="flex flex-col overflow-hidden rounded-xl bg-white"
-      style={PANEL_STYLE}
+      className={cn(
+        "flex h-[260px] w-1/2 shrink-0 flex-col overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--card)]",
+      )}
     >
-      <div
-        className="flex flex-shrink-0 items-center justify-between px-5 py-3"
-        style={{ borderBottom: "1px solid #E7EAF0" }}
-      >
-        <p
-          className="font-semibold"
-          style={{ fontSize: "15px", lineHeight: "22px", color: "#121826" }}
-        >
+      <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--border)] px-5 py-3">
+        <p className="text-[15px] leading-[22px] font-semibold text-[var(--foreground-primary)]">
           {translate("recentTransactions")}
         </p>
         <Link to="/history">
           <button
-            className="transition-colors"
-            style={{
-              fontSize: "13px",
-              lineHeight: "18px",
-              color: "#667085",
-              fontWeight: 600,
-            }}
-            onMouseEnter={handleViewAllMouseEnter}
-            onMouseLeave={handleViewAllMouseLeave}
+            type="button"
+            className="text-[13px] leading-[18px] font-semibold text-[var(--foreground-secondary)] transition-colors hover:text-[var(--foreground-primary)]"
           >
             {translate("viewAll")}
           </button>
         </Link>
       </div>
-      <div className="flex-1 divide-y" style={{ borderColor: "#E7EAF0" }}>
+      <div className="flex-1 divide-y divide-[var(--border)]">
         {transactions.map((transaction) => (
           <RecentTransactionRow key={transaction.id} transaction={transaction} />
         ))}

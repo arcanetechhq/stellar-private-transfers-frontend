@@ -1,19 +1,12 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/shared/lib/cn";
 import type { Transaction } from "@/entities/transaction";
 import { TransactionTableRow } from "./transaction-table-row";
 
 interface TransactionTableProperties {
   transactions: Transaction[];
 }
-
-const headerStyle = {
-  fontSize: "12px",
-  lineHeight: "16px",
-  color: "#667085",
-  textTransform: "uppercase" as const,
-  letterSpacing: "0.05em",
-};
 
 const headerKeys = [
   "tableHeaders.date",
@@ -30,31 +23,24 @@ export function TransactionTable(properties: TransactionTableProperties) {
   const { transactions } = properties;
 
   return (
-    <div
-      className="overflow-hidden rounded-xl bg-white"
-      style={{ border: "1px solid #E7EAF0" }}
-    >
+    <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead
-            style={{
-              backgroundColor: "#F9FAFB",
-              borderBottom: "1px solid #E7EAF0",
-            }}
-          >
+          <thead className="border-b border-[var(--border)] bg-[var(--muted)]">
             <tr>
               {headerKeys.map((key) => (
                 <th
                   key={key}
-                  className="px-6 py-3.5 text-left font-semibold"
-                  style={headerStyle}
+                  className={cn(
+                    "px-6 py-3.5 text-left text-xs leading-4 font-semibold tracking-wide text-[var(--foreground-secondary)] uppercase",
+                  )}
                 >
                   {translate(key)}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y" style={{ borderColor: "#E7EAF0" }}>
+          <tbody className="divide-y divide-[var(--border)]">
             {transactions.map((transaction) => (
               <TransactionTableRow
                 key={transaction.id}

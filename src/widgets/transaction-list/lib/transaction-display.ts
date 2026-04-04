@@ -46,18 +46,18 @@ export function getStatusVariant(status: string) {
   }
 }
 
-export function getAmountColor(type: string) {
+export function getAmountToneClass(type: string): string {
   switch (type) {
     case "sent":
     case "withdrawal": {
-      return "#EF4444";
+      return "text-error";
     }
     case "received":
     case "deposit": {
-      return "#10B981";
+      return "text-success";
     }
     default: {
-      return "#121826";
+      return "text-[var(--foreground-primary)]";
     }
   }
 }

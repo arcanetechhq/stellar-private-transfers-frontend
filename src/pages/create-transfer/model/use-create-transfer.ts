@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { useAppSelector } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { useGetAssetsQuery } from "@/entities/asset";
 import { selectFinalizedAggregatesForStealth } from "@/entities/coin";
 import { selectWalletPublicKey } from "@/entities/wallet";
@@ -14,6 +14,7 @@ import { useTransferRecipientAndSubmitGates } from "./use-transfer-validation";
 import { useTransferSender } from "./use-transfer-sender";
 
 export function useCreateTransfer() {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { submit } = useConfidentialTransfer();
   const [searchParameters] = useSearchParams();
@@ -46,6 +47,7 @@ export function useCreateTransfer() {
     isSubmitting,
   });
   const { submitError, handleSubmit } = useConfidentialTransferSubmitHandler({
+    dispatch,
     canSubmit: validation.canSubmit,
     setIsSubmitting,
     selectedAsset,

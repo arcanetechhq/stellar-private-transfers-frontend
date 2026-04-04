@@ -43,7 +43,7 @@ export function AmountField({ amount, onAmountChange, onPercentage, onMaxAmount 
   const { t: translate } = useTranslation("transfer");
   return (
     <div>
-      <label className="mb-2 block text-[14px] font-semibold leading-[20px] text-[var(--foreground-primary)]">
+      <label className="mb-2 block text-[14px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
         {translate("amount")}
       </label>
       <div className="relative">
@@ -52,12 +52,12 @@ export function AmountField({ amount, onAmountChange, onPercentage, onMaxAmount 
           value={amount}
           onChange={(event) => onAmountChange(event.target.value)}
           placeholder={translate("amountPlaceholder")}
-          className="w-full rounded-lg border border-[var(--border)] px-4 py-4 pr-20 text-[20px] font-semibold text-[var(--foreground-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+          className="w-full rounded-lg border border-[var(--border)] px-4 py-4 pr-20 text-[20px] font-semibold text-[var(--foreground-primary)] focus:ring-2 focus:ring-[var(--ring)] focus:outline-none"
         />
         <button
           type="button"
           onClick={onMaxAmount}
-          className="absolute right-4 top-1/2 -translate-y-1/2 rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-3 py-1.5 text-[13px] font-semibold text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
+          className="absolute top-1/2 right-4 -translate-y-1/2 rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-3 py-1.5 text-[13px] font-semibold text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
         >
           {translate("max")}
         </button>

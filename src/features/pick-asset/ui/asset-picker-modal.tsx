@@ -48,7 +48,7 @@ function AssetListItem({ asset, isSelected, onSelect }: AssetListItemProperties)
           size={40}
         />
         <div className="text-left">
-          <p className="text-[14px] font-semibold leading-[20px] text-[var(--foreground-primary)]">
+          <p className="text-[14px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
             {asset.assetId.toUpperCase()}
           </p>
           <p className="text-[13px] leading-[18px] text-[var(--foreground-secondary)]">
@@ -59,7 +59,7 @@ function AssetListItem({ asset, isSelected, onSelect }: AssetListItemProperties)
       <div className="flex items-center gap-3">
         {asset.trustlineStatus !== "loading" && (
           <p
-            className={`text-right text-[14px] font-semibold leading-[20px] ${
+            className={`text-right text-[14px] leading-[20px] font-semibold ${
               hasBalance
                 ? "text-[var(--foreground-primary)]"
                 : "text-[var(--foreground-tertiary)]"
@@ -109,7 +109,7 @@ export function AssetPickerModal({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-[var(--border)] p-6">
-          <h3 className="text-[18px] font-semibold leading-[28px] text-[var(--foreground-primary)]">
+          <h3 className="text-[18px] leading-[28px] font-semibold text-[var(--foreground-primary)]">
             {translate("picker.title")}
           </h3>
           <button
@@ -121,15 +121,15 @@ export function AssetPickerModal({
           </button>
         </div>
 
-        <div className="px-6 pb-3 pt-4">
+        <div className="px-6 pt-4 pb-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--foreground-secondary)]" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-[var(--foreground-secondary)]" />
             <input
               type="text"
               placeholder={translate("picker.searchPlaceholder")}
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="w-full rounded-lg border border-[var(--border)] py-2.5 pl-10 pr-4 text-[14px] text-[var(--foreground-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+              className="w-full rounded-lg border border-[var(--border)] py-2.5 pr-4 pl-10 text-[14px] text-[var(--foreground-primary)] focus:ring-2 focus:ring-[var(--ring)] focus:outline-none"
               autoFocus
             />
           </div>

@@ -10,6 +10,7 @@ export interface AssetDto {
   poolContract: string | null;
   mintable: boolean;
   mintAmount: string | null;
+  decimals?: number | null;
 }
 
 export const assetApi = createApi({

@@ -52,13 +52,13 @@ export function AssetTable({
     <div className={`overflow-hidden bg-[var(--card)] ${className}`}>
       {showColumnHeaders && (
         <div className="grid grid-cols-12 gap-4 border-b border-[var(--border)] px-6 py-3">
-          <div className="col-span-5 text-[12px] font-medium uppercase leading-[16px] tracking-[0.06em] text-[var(--muted-foreground)]">
+          <div className="col-span-5 text-[12px] leading-[16px] font-medium tracking-[0.06em] text-[var(--muted-foreground)] uppercase">
             {translate("tableHeaders.asset")}
           </div>
-          <div className="col-span-4 text-[12px] font-medium uppercase leading-[16px] tracking-[0.06em] text-[var(--muted-foreground)]">
+          <div className="col-span-4 text-[12px] leading-[16px] font-medium tracking-[0.06em] text-[var(--muted-foreground)] uppercase">
             {translate("tableHeaders.balance")}
           </div>
-          <div className="col-span-3 text-right text-[12px] font-medium uppercase leading-[16px] tracking-[0.06em] text-[var(--muted-foreground)]">
+          <div className="col-span-3 text-right text-[12px] leading-[16px] font-medium tracking-[0.06em] text-[var(--muted-foreground)] uppercase">
             {translate("tableHeaders.actions")}
           </div>
         </div>

@@ -169,19 +169,19 @@ function DisclosedTransactionsTable() {
           <table className="w-full">
             <thead className="border-b border-gray-200 bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   {translate("transactionId")}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   {translate("disclosedTo")}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   {translate("disclosureType")}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   {translate("date")}
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium uppercase text-gray-500">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                   {translate("accessExpiry")}
                 </th>
               </tr>

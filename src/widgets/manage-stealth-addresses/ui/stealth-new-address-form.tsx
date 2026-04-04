@@ -28,9 +28,9 @@ export function StealthNewAddressForm({
 }: StealthNewAddressFormProperties) {
   return (
     <>
-      <div className="w-full min-w-0 border-t border-border-soft pt-4">
+      <div className="border-border-soft w-full min-w-0 border-t pt-4">
         <label
-          className="mb-2 block text-sm font-medium text-foreground"
+          className="text-foreground mb-2 block text-sm font-medium"
           htmlFor="private-new-address-name-input"
         >
           {translate("createNamed")}
@@ -42,7 +42,7 @@ export function StealthNewAddressForm({
             name="private-new-address-name"
             autoComplete="off"
             disabled={formDisabled}
-            className="min-h-10 min-w-0 flex-1 rounded-lg border border-border-input bg-input-background px-3 py-2 text-sm text-foreground shadow-sm placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-60"
+            className="border-border-input bg-input-background text-foreground placeholder:text-muted-foreground min-h-10 min-w-0 flex-1 rounded-lg border px-3 py-2 text-sm shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
             placeholder={translate("newAddressNamePlaceholder")}
             value={newNonceLabel}
             onChange={(event) => onNewNonceLabelChange(event.target.value)}

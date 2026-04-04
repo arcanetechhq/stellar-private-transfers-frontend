@@ -36,8 +36,6 @@ import {
   resetCoinState,
   saveCoinState,
 } from "@/entities/coin";
-import { mockTransactions } from "@/shared/lib/mock/ledger-transaction";
-
 const loadedContact = loadContactState();
 
 export const store = configureStore({
@@ -73,7 +71,7 @@ store.subscribe(() => {
     const loadedStealth = loadStealthState(publicKey);
     store.dispatch(hydrateFromStorage(loadedStealth));
     const loadedTransactions = loadTransactionState(publicKey);
-    store.dispatch(hydrateTransactions(loadedTransactions ?? mockTransactions));
+    store.dispatch(hydrateTransactions(loadedTransactions ?? []));
     const loadedTags = loadSeenTags(publicKey);
     store.dispatch(hydrateSeenTags(loadedTags));
     const loadedCoins = loadCoinState(publicKey);

@@ -30,11 +30,11 @@ export function AssetsSection({
   return (
     <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--card)]">
       <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-5">
-        <h2 className="text-[16px] font-semibold leading-[24px] text-[var(--foreground-primary)]">
+        <h2 className="text-[16px] leading-[24px] font-semibold text-[var(--foreground-primary)]">
           {translate("publicAssetsOnBalance")}
         </h2>
         <Link to="/assets">
-          <button className="rounded-[10px] border border-[var(--border)] bg-[var(--secondary)] px-4 py-2 text-[14px] font-semibold leading-[20px] text-[var(--foreground-secondary)] transition-colors hover:border-[var(--border-focus)] hover:bg-[var(--surface-hover)]">
+          <button className="rounded-[10px] border border-[var(--border)] bg-[var(--secondary)] px-4 py-2 text-[14px] leading-[20px] font-semibold text-[var(--foreground-secondary)] transition-colors hover:border-[var(--border-focus)] hover:bg-[var(--surface-hover)]">
             {translate("viewAllAssets")}
           </button>
         </Link>

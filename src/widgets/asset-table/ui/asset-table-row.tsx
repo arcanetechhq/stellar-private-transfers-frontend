@@ -93,7 +93,7 @@ export function AssetTableRow({
     if (asset.balance !== undefined && asset.balance !== null) {
       return (
         <>
-          <p className="text-[15px] font-semibold leading-[20px] text-[var(--foreground-primary)]">
+          <p className="text-[15px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
             {formatBalance(asset.balance)}
           </p>
           <p className="text-[13px] leading-[18px] text-[var(--foreground-secondary)]">
@@ -103,7 +103,7 @@ export function AssetTableRow({
       );
     }
     return (
-      <p className="text-[15px] font-semibold leading-[20px] text-[var(--foreground-tertiary)]">
+      <p className="text-[15px] leading-[20px] font-semibold text-[var(--foreground-tertiary)]">
         —
       </p>
     );
@@ -119,7 +119,7 @@ export function AssetTableRow({
             size={44}
           />
           <div>
-            <p className="mb-0.5 text-[15px] font-semibold leading-[20px] text-[var(--foreground-primary)]">
+            <p className="mb-0.5 text-[15px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
               {asset.assetId.toUpperCase()}
             </p>
             <p className="text-[13px] leading-[18px] text-[var(--foreground-secondary)]">
