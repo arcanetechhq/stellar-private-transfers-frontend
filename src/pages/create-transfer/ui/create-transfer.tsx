@@ -12,7 +12,7 @@ export function CreateTransfer() {
     <React.Fragment>
     <div className="min-h-full bg-[var(--surface-primary)] p-8">
       <div className="mx-auto max-w-5xl">
-        <PageHeader onBack={transfer.navigateHome} />
+        <PageHeader />
         <form onSubmit={transfer.handleSubmit}>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <TransferForm

@@ -12,7 +12,7 @@ export const ZERO_STROOPS = 0n;
 
 type LeafEphemeralCoords = { x: string; y: string };
 
-function leafEphemeralCoords(xHex: string, yHex: string): LeafEphemeralCoords {
+export function leafEphemeralCoords(xHex: string, yHex: string): LeafEphemeralCoords {
   const coords = {} as LeafEphemeralCoords;
   Object.defineProperty(coords, "x", {
     value: xHex,

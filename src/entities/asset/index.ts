@@ -14,3 +14,5 @@ export {
   useGetAssetsQuery,
   type AssetDto,
 } from "./api/asset-api";
+
+export { buildPrivateTransferAssets } from "./lib/private-asset-list";

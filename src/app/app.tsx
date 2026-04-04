@@ -1,5 +1,5 @@
 import React from "react";
-import { RouterProvider } from "react-router";
+import { RouterProvider } from "react-router/dom";
 import "@/shared/lib/stellar-wallet-kit";
 import { I18nProvider } from "./providers/i18n-provider";
 import { MerkleTreeSyncProvider } from "./providers/merkle-tree-sync-provider";
@@ -11,7 +11,7 @@ export default function App() {
     <StoreProvider>
       <MerkleTreeSyncProvider>
         <I18nProvider>
-          <RouterProvider router={router} />
+          <RouterProvider router={router} unstable_useTransitions={false} />
         </I18nProvider>
       </MerkleTreeSyncProvider>
     </StoreProvider>

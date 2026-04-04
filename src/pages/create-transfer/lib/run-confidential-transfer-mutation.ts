@@ -8,7 +8,7 @@ import type {
   RunConfidentialTransferInput,
   RunConfidentialTransferResult,
 } from "./confidential-transfer-mutation-types";
-import { pickCoinsForTransfer } from "./pick-coins-for-transfer";
+import { pickCoinsForTransfer } from "@/entities/coin";
 import { runDualCoinConfidentialBranch } from "./run-dual-coin-confidential-branch";
 import { runSingleCoinConfidentialBranch } from "./run-single-coin-confidential-branch";
 

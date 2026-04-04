@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router";
-import { Send } from "lucide-react";
+import { Send, ArrowUpFromLine } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { TokenIcon } from "@/shared/ui/token-icon";
 import type { AggregatedPrivateAssetRow } from "@/entities/coin";
@@ -29,7 +29,11 @@ type PrivateAssetRowProperties = {
   logoUrl?: string | null;
 };
 
-export function PrivateAssetRow({ row, assetName, logoUrl }: PrivateAssetRowProperties) {
+export function PrivateAssetRow({
+  row,
+  assetName,
+  logoUrl,
+}: PrivateAssetRowProperties) {
   const { t: translate } = useTranslation("assets");
   const ticker = row.assetId.toUpperCase();
 
@@ -68,6 +72,21 @@ export function PrivateAssetRow({ row, assetName, logoUrl }: PrivateAssetRowProp
             >
               <Send className="h-3.5 w-3.5" />
               {translate("trustline.send")}
+            </button>
+          </Link>
+          <Link
+            to={`/withdraw?assetId=${encodeURIComponent(row.assetId)}`}
+            className="block w-24"
+          >
+            <button
+              type="button"
+              className="inline-flex w-full items-center justify-center gap-1.5 rounded-[10px] border border-[var(--border)] bg-[var(--secondary)] px-3 py-2 text-[13px] leading-[18px] font-semibold text-[var(--foreground)] transition-colors hover:border-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)]"
+            >
+              <ArrowUpFromLine
+                className="h-3.5 w-3.5 shrink-0"
+                strokeWidth={2.25}
+              />
+              {translate("trustline.withdraw")}
             </button>
           </Link>
         </div>

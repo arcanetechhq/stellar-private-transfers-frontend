@@ -2,7 +2,8 @@
   "trustline": {
     "add": "Add",
     "send": "Send",
-    "deposit": "Deposit"
+    "deposit": "Deposit",
+    "withdraw": "Withdraw"
   },
   "privateAssets": {
     "title": "Private assets",

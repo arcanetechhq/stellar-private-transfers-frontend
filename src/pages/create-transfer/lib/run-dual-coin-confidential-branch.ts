@@ -4,8 +4,8 @@ import { buildCoinDeliveryPostBody } from "@/features/deposit/lib/build-coin-del
 import { prepareConfidentialTransferProofDual } from "@/shared/lib/privacy-pool/privacy-pool-confidential-proofs";
 import { readLeafEphemeralHex } from "@/shared/lib/privacy-pool/fetch-contract-merkle";
 import { stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops";
-import { findCommitmentLeafIndex } from "./confidential-transfer-audit-helpers";
-import { postCoinDeliveryBestEffort } from "./confidential-transfer-delivery";
+import { findCommitmentLeafIndex } from "@/entities/coin";
+import { postCoinDeliveryBestEffort } from "@/entities/coin-deliveries";
 import type { RunConfidentialTransferInput } from "./confidential-transfer-mutation-types";
 import { sealEncryptAndSubmitDualCoinConfidentialTransfer } from "./dual-coin-confidential-audit-submit";
 

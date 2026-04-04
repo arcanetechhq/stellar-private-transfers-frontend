@@ -2,7 +2,11 @@ import React from "react";
 import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AssetPickerModal } from "@/features/pick-asset";
-import { PickContactModal } from "@/features/pick-contact";
+import {
+  StealthAddressSelect,
+  stealthAddressSelectLabelClassName,
+} from "@/features/pick-stealth-address";
+import type { StealthAddressState } from "@/entities/stealth-address";
 import { useCreateWithdrawal } from "../model/use-create-withdrawal";
 import { AssetSelector } from "./asset-selector";
 import { AmountInput } from "./amount-input";
@@ -26,28 +30,69 @@ function PageHeader({ onGoBack }: PageHeaderProperties) {
         <ArrowLeft className="h-4 w-4" />
         {translate("backToHome")}
       </button>
-      <h1 className="font-semibold" style={{ fontSize: "32px", lineHeight: "40px", color: "#121826" }}>
+      <h1 className="text-[32px] leading-10 font-semibold text-[var(--foreground-primary)]">
         {translate("pageTitle")}
       </h1>
-      <p className="mt-1" style={{ fontSize: "16px", lineHeight: "24px", color: "#667085" }}>
+      <p className="mt-1 text-base leading-6 text-[var(--foreground-secondary)]">
         {translate("pageSubtitle")}
       </p>
     </div>
   );
 }
 
+interface SenderFieldProperties {
+  label: string;
+  placeholder: string;
+  senderNonce: string | undefined;
+  onSenderNonceChange: (value: string) => void;
+  nonces: string[];
+  byNonce: StealthAddressState["byNonce"];
+}
+
+function SenderField(properties: SenderFieldProperties) {
+  const {
+    label,
+    placeholder,
+    senderNonce,
+    onSenderNonceChange,
+    nonces,
+    byNonce,
+  } = properties;
+  return (
+    <StealthAddressSelect
+      label={label}
+      triggerId="withdrawal-sender-stealth"
+      value={senderNonce}
+      onValueChange={onSenderNonceChange}
+      placeholder={placeholder}
+      nonces={nonces}
+      byNonce={byNonce}
+      labelClassName={stealthAddressSelectLabelClassName}
+    />
+  );
+}
+
 export function CreateWithdrawal() {
   const state = useCreateWithdrawal();
+  const { t: translate } = useTranslation("withdrawal");
 
   return (
-    <div className="p-8" style={{ backgroundColor: "#F6F7F9", minHeight: "100%" }}>
+    <div className="min-h-full bg-[var(--surface-primary)] p-8">
       <div className="mx-auto max-w-5xl">
         <PageHeader onGoBack={state.handleGoBack} />
         <form onSubmit={state.handleSubmit}>
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2">
-              <div className="rounded-xl bg-white p-6" style={{ border: "1px solid #E7EAF0" }}>
+              <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] p-6 shadow-[var(--shadow-card)]">
                 <div className="space-y-6">
+                  <SenderField
+                    label={translate("senderStealth")}
+                    placeholder={translate("senderStealthPlaceholder")}
+                    senderNonce={state.senderNonce}
+                    onSenderNonceChange={state.setSenderNonce}
+                    nonces={state.nonces}
+                    byNonce={state.byNonce}
+                  />
                   <AssetSelector
                     selectedToken={state.selectedToken}
                     onOpenPicker={() => state.setShowTokenPicker(true)}
@@ -61,7 +106,6 @@ export function CreateWithdrawal() {
                   <DestinationInput
                     destinationWallet={state.destinationWallet}
                     onDestinationChange={state.setDestinationWallet}
-                    onOpenContactPicker={() => state.setShowContactPicker(true)}
                   />
                   <InfoBanner />
                 </div>
@@ -74,6 +118,8 @@ export function CreateWithdrawal() {
               receivedAmount={state.receivedAmount}
               destinationWallet={state.destinationWallet}
               canSubmit={state.canSubmit}
+              isSubmitting={state.isSubmitting}
+              submitError={state.submitError}
             />
           </div>
         </form>
@@ -86,12 +132,6 @@ export function CreateWithdrawal() {
           onClose={() => state.setShowTokenPicker(false)}
         />
       )}
-      <PickContactModal
-        open={state.showContactPicker}
-        selectedAddress={state.destinationWallet}
-        onSelect={state.setDestinationWallet}
-        onClose={() => state.setShowContactPicker(false)}
-      />
     </div>
   );
 }

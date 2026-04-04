@@ -27,3 +27,5 @@ export {
   saveSeenTags,
   type SeenTagsByAssetId,
 } from "./lib/persist-seen-tags";
+
+export { postCoinDeliveryBestEffort } from "./lib/post-coin-delivery-best-effort";

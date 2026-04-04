@@ -1,20 +1,22 @@
 import { ArrowLeft } from "lucide-react";
 import React from "react";
+import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 
-interface PageHeaderProperties {
-  onBack: () => void;
-}
-
-export function PageHeader(properties: PageHeaderProperties) {
-  const { onBack } = properties;
+export function PageHeader() {
+  const navigate = useNavigate();
   const { t: translate } = useTranslation("transfer");
+
+  const handleBackToHome = () => {
+    navigate("/", { flushSync: true });
+  };
+
   return (
     <div className="mb-6">
       <button
         type="button"
-        onClick={onBack}
-        className="mb-4 flex items-center gap-2 rounded-lg border border-[var(--border-input)] bg-[var(--surface-card)] px-3 py-2 text-sm leading-5 text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
+        onClick={handleBackToHome}
+        className="mb-4 inline-flex items-center gap-2 rounded-lg border border-[var(--border-input)] bg-[var(--surface-card)] px-3 py-2 text-sm leading-5 text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
       >
         <ArrowLeft className="h-4 w-4" />
         {translate("backToHome")}

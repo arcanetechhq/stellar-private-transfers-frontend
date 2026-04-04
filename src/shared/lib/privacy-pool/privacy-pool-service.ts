@@ -6,11 +6,15 @@ import {
   recipientPublicKeysDecimalFromStealthAddress,
   scalarHexToFrDecimal,
 } from "@auditable/privacy-pool-zk-sdk";
-import type { CoinData, DepositObject } from "@auditable/privacy-pool-zk-sdk";
+import type { CoinData, DepositObject, StateFile } from "@auditable/privacy-pool-zk-sdk";
 import wasmSdkUrl from "@auditable/privacy-pool-zk-sdk/sdk.wasm?url";
 import wasmWitnessCalculatorUrl from "@auditable/privacy-pool-zk-sdk/witness.wasm?url";
 import zkeyFileUrl from "@auditable/privacy-pool-zk-sdk/main.zkey?url";
 import { merkleRootBufferToFrDecimal } from "./merkle-fr";
+import {
+  proveWithdrawTransact,
+  proveWithdrawTransactDual,
+} from "./privacy-pool-withdraw-transact-proof";
 import { Buffer } from "buffer";
 
 const SAMPLE_SCALAR_ATTEMPTS = 10;
@@ -169,6 +173,75 @@ export class PrivacyPoolService {
   async calculateNullifierHash(nullifier: string): Promise<string> {
     const sdk = await this.getInitializedSdk();
     return sdk.calculateNullifierHash(nullifier);
+  }
+
+  async prepareWithdrawTransactProof(parameters: {
+    coin: CoinData;
+    state: StateFile;
+    destinationStellarAddress: string;
+    withdrawSignMessageSignature: string;
+    depositorEphemeralXHex: string;
+    depositorEphemeralYHex: string;
+    withdrawAmountStroops: bigint;
+    changeStealthAddressStpl1: string | undefined;
+  }): Promise<{
+    proof_hex: string;
+    public_hex: string;
+    changeCoin?: { commitment_hex: string; coin: CoinData; depositScalarHex: string };
+  }> {
+    await this.ensureInit();
+    if (!this.sdk) {
+      throw new Error("SDK not initialized");
+    }
+    return proveWithdrawTransact({
+      sdk: this.sdk,
+      buildAlignedDepositSlot: (stpl1, stroops) =>
+        this.buildAlignedDepositSlot(stpl1, stroops),
+      ...parameters,
+    });
+  }
+
+  async prepareWithdrawTransactProofDual(parameters: {
+    coinA: CoinData;
+    coinB: CoinData;
+    state: StateFile;
+    destinationStellarAddress: string;
+    withdrawSignMessageSignature: string;
+    depositorEphemeralAXHex: string;
+    depositorEphemeralAYHex: string;
+    depositorEphemeralBXHex: string;
+    depositorEphemeralBYHex: string;
+    withdrawAmountStroops: bigint;
+    changeStealthAddressStpl1: string | undefined;
+  }): Promise<{
+    proof_hex: string;
+    public_hex: string;
+    changeCoin?: { commitment_hex: string; coin: CoinData; depositScalarHex: string };
+  }> {
+    await this.ensureInit();
+    if (!this.sdk) {
+      throw new Error("SDK not initialized");
+    }
+    return proveWithdrawTransactDual({
+      sdk: this.sdk,
+      buildAlignedDepositSlot: (stpl1, stroops) =>
+        this.buildAlignedDepositSlot(stpl1, stroops),
+      coinA: parameters.coinA,
+      coinB: parameters.coinB,
+      state: parameters.state,
+      destinationStellarAddress: parameters.destinationStellarAddress,
+      withdrawSignMessageSignature: parameters.withdrawSignMessageSignature,
+      ephemeralA: {
+        xHex: parameters.depositorEphemeralAXHex,
+        yHex: parameters.depositorEphemeralAYHex,
+      },
+      ephemeralB: {
+        xHex: parameters.depositorEphemeralBXHex,
+        yHex: parameters.depositorEphemeralBYHex,
+      },
+      withdrawAmountStroops: parameters.withdrawAmountStroops,
+      changeStealthAddressStpl1: parameters.changeStealthAddressStpl1,
+    });
   }
 }
 

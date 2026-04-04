@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet, useLocation } from "react-router";
 import { FileText, HelpCircle, History, Home, Info, Users } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { i18n } from "@/shared/config/i18n-instance";
 import { MainLayoutHeader } from "./main-layout-header";
@@ -16,6 +16,11 @@ import { PollPendingDeposits } from "@/features/poll-deposit";
 export function MainLayout() {
   const { t: translate } = useTranslation(["navigation", "common"]);
   const location = useLocation();
+  const mainReference = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    mainReference.current?.scrollTo(0, 0);
+  }, [location.pathname, location.search, location.key]);
 
   const navigation = useMemo(
     () => [
@@ -79,8 +84,8 @@ export function MainLayout() {
           onSelectLanguage={handleLanguageChange}
         />
 
-        <main className="flex-1 overflow-auto">
-          <Outlet />
+        <main ref={mainReference} className="flex-1 overflow-auto">
+          <Outlet key={`${location.pathname}:${location.key}`} />
         </main>
       </div>
 

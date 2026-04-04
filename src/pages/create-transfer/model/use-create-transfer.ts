@@ -72,7 +72,6 @@ export function useCreateTransfer() {
     handleMaxAmount: amountInputs.handleMaxAmount,
     totalAmount: validation.totalAmount,
     handleSubmit,
-    navigateHome: () => navigate("/"),
     canSubmit: validation.canSubmit,
     isSubmitting,
     submitError,

@@ -61,6 +61,7 @@
   --info-bg: #EEF4FF;
   --info-foreground: #1D4ED8;
   --info-border: #BFDBFE;
+  --warning-border: #FEF0C7;
   --overlay-backdrop: color-mix(in srgb, #0f172a 50%, transparent);
   --surface-selected: #F6F6F4;
   
@@ -213,6 +214,7 @@
   --info-bg: oklch(0.269 0.05 264.376);
   --info-foreground: oklch(0.488 0.243 264.376);
   --info-border: oklch(0.439 0.1 264.376);
+  --warning-border: oklch(0.4 0.1 70.08);
   --overlay-backdrop: oklch(0.05 0 0 / 0.65);
   --surface-selected: oklch(0.269 0 0);
 
@@ -295,6 +297,7 @@
   --color-info-bg: var(--info-bg);
   --color-info-foreground: var(--info-foreground);
   --color-info-border: var(--info-border);
+  --color-warning-border: var(--warning-border);
   --color-overlay-backdrop: var(--overlay-backdrop);
   --color-surface-selected: var(--surface-selected);
   --color-success-bg: var(--success-bg);

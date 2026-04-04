@@ -2,9 +2,9 @@ import { sealAndEncryptTransaction, type ITransaction } from "@auditable/stellar
 import type { CoinWithMetadata } from "@/entities/coin";
 import { getAuditPublicKey, decimalFieldToBytes } from "@/features/deposit/lib/audit-encoding";
 import { prepareConfidentialTransferProof } from "@/shared/lib/privacy-pool/privacy-pool-confidential-proofs";
-import { toAuditNumber } from "./confidential-transfer-audit-helpers";
+import { toAuditNumber } from "@/features/deposit/lib/to-audit-number";
 import type { RunConfidentialTransferInput } from "./confidential-transfer-mutation-types";
-import { submitSorobanConfidentialTransfer } from "./submit-soroban-confidential-transfer";
+import { submitSorobanConfidentialTransfer } from "@/shared/lib/privacy-pool/submit-soroban-confidential-transfer";
 
 type PreparedSingleProof = Awaited<
   ReturnType<typeof prepareConfidentialTransferProof>
