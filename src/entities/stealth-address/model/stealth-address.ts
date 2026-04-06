@@ -48,6 +48,18 @@ const stealthAddressSlice = createSlice({
       const { stealthAddress, createdAt } = action.payload.entry;
       state.byNonce[action.payload.nonce] = { stealthAddress, createdAt };
     },
+    setStealthRecordAndScalar: (
+      state,
+      action: PayloadAction<{
+        nonce: string;
+        entry: StealthNonceEntry;
+        scalarHex: string;
+      }>,
+    ) => {
+      const { stealthAddress, createdAt } = action.payload.entry;
+      state.byNonce[action.payload.nonce] = { stealthAddress, createdAt };
+      state.scalarByNonce[action.payload.nonce] = action.payload.scalarHex;
+    },
     setDefaultNonce: (state, action: PayloadAction<string | undefined>) => {
       state.defaultNonce = action.payload;
     },
@@ -67,6 +79,7 @@ export const {
   hydrateFromStorage,
   resetForWalletChange,
   setStealthRecord,
+  setStealthRecordAndScalar,
   setDefaultNonce,
   setScalarForNonce,
   clearScalars,

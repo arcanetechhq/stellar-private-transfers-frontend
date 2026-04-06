@@ -3,8 +3,7 @@ import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
 import { store, type AppDispatch } from "@/app/store";
 import {
   setDefaultNonce,
-  setScalarForNonce,
-  setStealthRecord,
+  setStealthRecordAndScalar,
 } from "@/entities/stealth-address";
 import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
 import { recipientScalarHexFromStellarSignature } from "@/shared/lib/stealth/recipient-scalar-hex";
@@ -33,14 +32,14 @@ export async function createStealthAddressFromWalletSignature(
       signedMessage,
     );
   const createdAt = Date.now();
+  const scalarHex = await recipientScalarHexFromStellarSignature(signedMessage);
   dispatch(
-    setStealthRecord({
+    setStealthRecordAndScalar({
       nonce: trimmedNonce,
       entry: { stealthAddress, createdAt },
+      scalarHex,
     }),
   );
-  const scalarHex = await recipientScalarHexFromStellarSignature(signedMessage);
-  dispatch(setScalarForNonce({ nonce: trimmedNonce, scalarHex }));
   const currentDefault = store.getState().stealthAddress.defaultNonce;
   if (currentDefault === undefined) {
     dispatch(setDefaultNonce(trimmedNonce));

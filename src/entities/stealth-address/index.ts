@@ -5,6 +5,7 @@ export {
   setDefaultNonce,
   setScalarForNonce,
   setStealthRecord,
+  setStealthRecordAndScalar,
   stealthAddressReducer,
   selectAllStealthNonces,
   selectDefaultNonce,

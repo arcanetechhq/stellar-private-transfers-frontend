@@ -3,8 +3,7 @@ import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
 import { store, type AppDispatch } from "@/app/store";
 import {
   readStealthRecordFromStorage,
-  setScalarForNonce,
-  setStealthRecord,
+  setStealthRecordAndScalar,
   type StealthNonceEntry,
 } from "@/entities/stealth-address";
 import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
@@ -50,7 +49,13 @@ async function trySignAndStoreScalar(
     }
     const scalarHex =
       await recipientScalarHexFromStellarSignature(signedMessage);
-    dispatch(setScalarForNonce({ nonce: trimmed, scalarHex }));
+    dispatch(
+      setStealthRecordAndScalar({
+        nonce: trimmed,
+        entry,
+        scalarHex,
+      }),
+    );
     return { ok: true };
   } catch {
     return { ok: false, reason: "sign_failed" };
@@ -70,14 +75,10 @@ export async function ensureStealthScalarForNonce(
   if (existingScalar) {
     return { ok: true };
   }
-  let entry = store.getState().stealthAddress.byNonce[trimmed];
-  if (!entry) {
-    entry = readStealthRecordFromStorage(publicKey, trimmed);
-    if (entry?.stealthAddress.trim()) {
-      dispatch(setStealthRecord({ nonce: trimmed, entry }));
-    }
-  }
-  if (!entry?.stealthAddress.trim()) {
+  const fromStore = store.getState().stealthAddress.byNonce[trimmed];
+  const entry =
+    fromStore ?? readStealthRecordFromStorage(publicKey, trimmed);
+  if (!entry || !entry.stealthAddress.trim()) {
     return { ok: false, reason: "no_address" };
   }
   return trySignAndStoreScalar({ dispatch, publicKey, trimmed, entry });
