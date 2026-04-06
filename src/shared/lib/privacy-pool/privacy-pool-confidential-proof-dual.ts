@@ -1,48 +1,19 @@
 import type { CoinData, StateFile } from "@auditable/privacy-pool-zk-sdk";
-import type { PrivacyPoolSDK } from "@auditable/privacy-pool-zk-sdk";
 import { privacyPoolService } from "./privacy-pool-service";
 import { buildRecipientAndOptionalChangeDeposits } from "./build-recipient-change-deposits";
 import {
   changeStroopsAfterDualTransfer,
+  dualWithdrawLegsWithSharedRoot,
   requireChangeRecipientWhenPartial,
   senderWithdrawFrAndScalar,
-  withdrawWitnessForCoin,
 } from "./privacy-pool-confidential-proof-helpers";
-
-function dualWithdrawLegsWithSharedRoot(parameters: {
-  sdk: PrivacyPoolSDK;
-  coinA: CoinData;
-  coinB: CoinData;
-  state: StateFile;
-  ephemeralA: { xHex: string; yHex: string };
-  ephemeralB: { xHex: string; yHex: string };
-}) {
-  const legA = withdrawWitnessForCoin({
-    sdk: parameters.sdk,
-    coin: parameters.coinA,
-    state: parameters.state,
-    xHex: parameters.ephemeralA.xHex,
-    yHex: parameters.ephemeralA.yHex,
-  });
-  const legB = withdrawWitnessForCoin({
-    sdk: parameters.sdk,
-    coin: parameters.coinB,
-    state: parameters.state,
-    xHex: parameters.ephemeralB.xHex,
-    yHex: parameters.ephemeralB.yHex,
-  });
-  if (legA.witness.stateRoot !== legB.witness.stateRoot) {
-    throw new Error("Merkle state root mismatch between input coins");
-  }
-  return { legA, legB };
-}
 
 export async function prepareConfidentialTransferProofDual(parameters: {
   coinA: CoinData;
   coinB: CoinData;
   state: StateFile;
   senderGAddress: string;
-  senderWithdrawSignMessageSignature: string;
+  senderPrivKeyScalarHex: string;
   ephemeralA: { xHex: string; yHex: string };
   ephemeralB: { xHex: string; yHex: string };
   transferStroops: bigint;
@@ -78,9 +49,9 @@ export async function prepareConfidentialTransferProofDual(parameters: {
     ephemeralA: parameters.ephemeralA,
     ephemeralB: parameters.ephemeralB,
   });
-  const { hi, lo, privKeyScalar } = await senderWithdrawFrAndScalar({
+  const { hi, lo, privKeyScalar } = senderWithdrawFrAndScalar({
     senderGAddress: parameters.senderGAddress,
-    senderWithdrawSignMessageSignature: parameters.senderWithdrawSignMessageSignature,
+    senderPrivKeyScalarHex: parameters.senderPrivKeyScalarHex,
   });
   const { recipientSlot, deposits, changeCoin } =
     await buildRecipientAndOptionalChangeDeposits({

@@ -6,7 +6,11 @@ import {
   recipientPublicKeysDecimalFromStealthAddress,
   scalarHexToFrDecimal,
 } from "@auditable/privacy-pool-zk-sdk";
-import type { CoinData, DepositObject, StateFile } from "@auditable/privacy-pool-zk-sdk";
+import type {
+  CoinData,
+  DepositObject,
+  StateFile,
+} from "@auditable/privacy-pool-zk-sdk";
 import wasmSdkUrl from "@auditable/privacy-pool-zk-sdk/sdk.wasm?url";
 import wasmWitnessCalculatorUrl from "@auditable/privacy-pool-zk-sdk/witness.wasm?url";
 import zkeyFileUrl from "@auditable/privacy-pool-zk-sdk/main.zkey?url";
@@ -179,7 +183,7 @@ export class PrivacyPoolService {
     coin: CoinData;
     state: StateFile;
     destinationStellarAddress: string;
-    withdrawSignMessageSignature: string;
+    privKeyScalarHex: string;
     depositorEphemeralXHex: string;
     depositorEphemeralYHex: string;
     withdrawAmountStroops: bigint;
@@ -187,7 +191,11 @@ export class PrivacyPoolService {
   }): Promise<{
     proof_hex: string;
     public_hex: string;
-    changeCoin?: { commitment_hex: string; coin: CoinData; depositScalarHex: string };
+    changeCoin?: {
+      commitment_hex: string;
+      coin: CoinData;
+      depositScalarHex: string;
+    };
   }> {
     await this.ensureInit();
     if (!this.sdk) {
@@ -206,7 +214,7 @@ export class PrivacyPoolService {
     coinB: CoinData;
     state: StateFile;
     destinationStellarAddress: string;
-    withdrawSignMessageSignature: string;
+    privKeyScalarHex: string;
     depositorEphemeralAXHex: string;
     depositorEphemeralAYHex: string;
     depositorEphemeralBXHex: string;
@@ -216,7 +224,11 @@ export class PrivacyPoolService {
   }): Promise<{
     proof_hex: string;
     public_hex: string;
-    changeCoin?: { commitment_hex: string; coin: CoinData; depositScalarHex: string };
+    changeCoin?: {
+      commitment_hex: string;
+      coin: CoinData;
+      depositScalarHex: string;
+    };
   }> {
     await this.ensureInit();
     if (!this.sdk) {
@@ -230,7 +242,7 @@ export class PrivacyPoolService {
       coinB: parameters.coinB,
       state: parameters.state,
       destinationStellarAddress: parameters.destinationStellarAddress,
-      withdrawSignMessageSignature: parameters.withdrawSignMessageSignature,
+      privKeyScalarHex: parameters.privKeyScalarHex,
       ephemeralA: {
         xHex: parameters.depositorEphemeralAXHex,
         yHex: parameters.depositorEphemeralAYHex,

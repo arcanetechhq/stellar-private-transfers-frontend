@@ -18,7 +18,7 @@ interface SingleCoinBranchParameters {
   transferStroops: bigint;
   commitments: string[];
   state: { commitments: string[] };
-  signedMessage: string;
+  senderPrivKeyScalarHex: string;
   recipientTrim: string;
   senderTrim: string;
   picked: CoinWithMetadata[];
@@ -37,7 +37,7 @@ async function submitSingleCoinTransfer(
     transferStroops,
     commitments,
     state,
-    signedMessage,
+    senderPrivKeyScalarHex,
     recipientTrim,
     senderTrim,
     picked,
@@ -58,7 +58,7 @@ async function submitSingleCoinTransfer(
     coin: only.coin,
     state,
     senderGAddress: input.walletPublicKey.trim(),
-    senderWithdrawSignMessageSignature: signedMessage,
+    senderPrivKeyScalarHex,
     depositorEphemeralXHex: ephemeral.xHex,
     depositorEphemeralYHex: ephemeral.yHex,
     transferStroops,

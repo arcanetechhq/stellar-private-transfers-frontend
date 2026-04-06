@@ -23,10 +23,7 @@ import type {
   RunPrivateWithdrawalMutationInput,
   RunPrivateWithdrawalMutationResult,
 } from "./private-withdrawal-mutation-contract";
-import {
-  postPrivateWithdrawChangeDeliveryIfNeeded,
-  signWithdrawDestinationStealthMessage,
-} from "./private-withdrawal-sign-and-delivery";
+import { postPrivateWithdrawChangeDeliveryIfNeeded } from "./private-withdrawal-sign-and-delivery";
 import { runPrivateWithdrawalDualCoinMutation } from "./run-private-withdrawal-dual-mutation";
 
 export type {
@@ -166,7 +163,6 @@ async function runPrivateWithdrawalSingleCoinMutation(
     amountDisplay: input.amountDisplay,
   });
   const destinationTrim = input.destinationAddress.trim();
-  const signedMessage = await signWithdrawDestinationStealthMessage(destinationTrim);
   const changeStroops = merkle.noteStroops - merkle.withdrawStroops;
   const changeStealth =
     changeStroops > ZERO_STROOPS ? senderTrim : undefined;
@@ -174,7 +170,7 @@ async function runPrivateWithdrawalSingleCoinMutation(
     coin: pickedCoin.coin,
     state: merkle.state,
     destinationStellarAddress: destinationTrim,
-    withdrawSignMessageSignature: signedMessage,
+    privKeyScalarHex: input.senderPrivKeyScalarHex.trim(),
     depositorEphemeralXHex: merkle.ephemeral.xHex,
     depositorEphemeralYHex: merkle.ephemeral.yHex,
     withdrawAmountStroops: merkle.withdrawStroops,

@@ -1,5 +1,3 @@
-import { PrivacyPoolSDK, DEFAULT_STEALTH_SIGN_NONCE } from "@auditable/privacy-pool-zk-sdk";
-import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
 import { fetchAndMergeMerkleState } from "@/shared/lib/privacy-pool/fetch-contract-merkle";
 import { displayAmountToStroops } from "@/shared/lib/stellar/stroops";
 import { normalizeSorobanContractId } from "@/shared/stellar/normalize-soroban-contract-id";
@@ -40,23 +38,13 @@ export async function runConfidentialTransferMutation(
   });
   const state = { commitments };
 
-  const signMessageText = PrivacyPoolSDK.buildStealthAddressSignMessage(
-    input.walletPublicKey.trim(),
-    DEFAULT_STEALTH_SIGN_NONCE,
-  );
-  const { networkPassphrase } = await StellarWalletsKit.getNetwork();
-  const { signedMessage } = await StellarWalletsKit.signMessage(signMessageText, {
-    address: input.walletPublicKey.trim(),
-    networkPassphrase,
-  });
-
   const branchParameters = {
     input,
     poolContract,
     transferStroops,
     commitments,
     state,
-    signedMessage,
+    senderPrivKeyScalarHex: input.senderPrivKeyScalarHex.trim(),
     recipientTrim,
     senderTrim,
     picked,

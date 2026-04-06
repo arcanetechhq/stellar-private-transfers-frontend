@@ -6,6 +6,7 @@ export interface RunPrivateWithdrawalMutationInput {
   walletPublicKey: string;
   networkPassphrase: string;
   sorobanRpcUrl: string;
+  senderPrivKeyScalarHex: string;
   senderStealthAddress: string;
   assetId: string;
   poolContractRaw: string;

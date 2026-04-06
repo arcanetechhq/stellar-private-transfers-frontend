@@ -1,6 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { AppDispatch, RootState } from "@/app/store";
 import { selectCoinItems } from "@/entities/coin";
+import { selectScalarByStealthAddress } from "@/entities/stealth-address";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
 import { runConfidentialTransferMutation } from "../lib/run-confidential-transfer-mutation";
@@ -32,13 +33,22 @@ export const submitConfidentialTransferThunk = createAsyncThunk<
         item.status === "finalized" &&
         item.assetId === payload.assetId,
     );
-    const { sorobanRpcUrl, networkPassphrase } = getDefaultStellarNetworkConfig();
+    const senderPrivKeyScalarHex =
+      selectScalarByStealthAddress(senderTrim)(state);
+    if (!senderPrivKeyScalarHex?.trim()) {
+      return rejectWithValue(
+        "Stealth key scalar is missing; open stealth settings first",
+      );
+    }
+    const { sorobanRpcUrl, networkPassphrase } =
+      getDefaultStellarNetworkConfig();
     try {
       return await runConfidentialTransferMutation({
         dispatch,
         walletPublicKey,
         networkPassphrase,
         sorobanRpcUrl,
+        senderPrivKeyScalarHex,
         senderStealthAddress: senderTrim,
         recipientStealthStpl1: payload.recipientStealthStpl1.trim(),
         assetId: payload.assetId,
@@ -47,7 +57,8 @@ export const submitConfidentialTransferThunk = createAsyncThunk<
         finalizedCoinsForSenderAndAsset,
       });
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Transfer failed";
+      const message =
+        error instanceof Error ? error.message : "Transfer failed";
       return rejectWithValue(message);
     }
   },

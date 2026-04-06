@@ -23,10 +23,7 @@ import type {
   RunPrivateWithdrawalMutationInput,
   RunPrivateWithdrawalMutationResult,
 } from "./private-withdrawal-mutation-contract";
-import {
-  postPrivateWithdrawChangeDeliveryIfNeeded,
-  signWithdrawDestinationStealthMessage,
-} from "./private-withdrawal-sign-and-delivery";
+import { postPrivateWithdrawChangeDeliveryIfNeeded } from "./private-withdrawal-sign-and-delivery";
 
 function buildDualPrivateWithdrawAuditTransaction(parameters: {
   first: CoinWithMetadata;
@@ -178,7 +175,6 @@ async function buildDualPrivateWithdrawPreparedProof(parameters: {
     commitments,
   });
   const destinationTrim = input.destinationAddress.trim();
-  const signedMessage = await signWithdrawDestinationStealthMessage(destinationTrim);
   const changeStroops = totalNotes - withdrawStroops;
   const changeStealth =
     changeStroops > ZERO_STROOPS ? senderTrim : undefined;
@@ -187,7 +183,7 @@ async function buildDualPrivateWithdrawPreparedProof(parameters: {
     coinB: second.coin,
     state,
     destinationStellarAddress: destinationTrim,
-    withdrawSignMessageSignature: signedMessage,
+    privKeyScalarHex: input.senderPrivKeyScalarHex.trim(),
     depositorEphemeralAXHex: ephemeralA.xHex,
     depositorEphemeralAYHex: ephemeralA.yHex,
     depositorEphemeralBXHex: ephemeralB.xHex,

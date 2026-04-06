@@ -6,6 +6,7 @@ export interface RunConfidentialTransferInput {
   walletPublicKey: string;
   networkPassphrase: string;
   sorobanRpcUrl: string;
+  senderPrivKeyScalarHex: string;
   senderStealthAddress: string;
   recipientStealthStpl1: string;
   assetId: string;

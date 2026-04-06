@@ -90,6 +90,25 @@ export const selectScalarByNonce =
   (nonce: string | undefined) => (state: StealthAddressRootState) =>
     nonce ? state.stealthAddress.scalarByNonce[nonce] : undefined;
 
+export const selectNonceByStealthAddress =
+  (stealthAddress: string | undefined) => (state: StealthAddressRootState) => {
+    const trimmed = stealthAddress?.trim();
+    if (!trimmed) {
+      return;
+    }
+    const { byNonce } = state.stealthAddress;
+    const match = Object.entries(byNonce).find(
+      ([, entry]) => entry.stealthAddress.trim() === trimmed,
+    );
+    return match?.[0];
+  };
+
+export const selectScalarByStealthAddress =
+  (stealthAddress: string | undefined) => (state: StealthAddressRootState) => {
+    const nonce = selectNonceByStealthAddress(stealthAddress)(state);
+    return selectScalarByNonce(nonce)(state);
+  };
+
 const selectStealthByNonceMap = (state: StealthAddressRootState) =>
   state.stealthAddress.byNonce;
 

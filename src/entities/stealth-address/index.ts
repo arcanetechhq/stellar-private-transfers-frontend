@@ -8,7 +8,9 @@ export {
   stealthAddressReducer,
   selectAllStealthNonces,
   selectDefaultNonce,
+  selectNonceByStealthAddress,
   selectScalarByNonce,
+  selectScalarByStealthAddress,
   selectStealthByNonce,
   selectStealthState,
 } from "./model/stealth-address";

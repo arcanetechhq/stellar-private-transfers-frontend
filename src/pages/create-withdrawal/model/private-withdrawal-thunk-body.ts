@@ -28,6 +28,7 @@ export async function submitPrivateWithdrawalThunkBody(
       walletPublicKey: resolved.walletPublicKey,
       networkPassphrase: resolved.networkPassphrase,
       sorobanRpcUrl: resolved.sorobanRpcUrl,
+      senderPrivKeyScalarHex: resolved.senderPrivKeyScalarHex,
       senderStealthAddress: resolved.senderTrim,
       assetId: resolved.payload.assetId,
       poolContractRaw: resolved.payload.poolContractRaw,

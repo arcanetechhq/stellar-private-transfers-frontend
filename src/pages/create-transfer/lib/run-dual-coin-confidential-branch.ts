@@ -19,7 +19,7 @@ interface DualCoinBranchParameters {
   transferStroops: bigint;
   commitments: string[];
   state: { commitments: string[] };
-  signedMessage: string;
+  senderPrivKeyScalarHex: string;
   recipientTrim: string;
   senderTrim: string;
   picked: CoinWithMetadata[];
@@ -38,7 +38,7 @@ async function submitDualCoinTransfer(
     transferStroops,
     commitments,
     state,
-    signedMessage,
+    senderPrivKeyScalarHex,
     recipientTrim,
     senderTrim,
     picked,
@@ -70,7 +70,7 @@ async function submitDualCoinTransfer(
     coinB: second.coin,
     state,
     senderGAddress: input.walletPublicKey.trim(),
-    senderWithdrawSignMessageSignature: signedMessage,
+    senderPrivKeyScalarHex,
     ephemeralA: { xHex: ephemeralA.xHex, yHex: ephemeralA.yHex },
     ephemeralB: { xHex: ephemeralB.xHex, yHex: ephemeralB.yHex },
     transferStroops,

@@ -12,7 +12,7 @@ export async function prepareConfidentialTransferProof(parameters: {
   coin: CoinData;
   state: StateFile;
   senderGAddress: string;
-  senderWithdrawSignMessageSignature: string;
+  senderPrivKeyScalarHex: string;
   depositorEphemeralXHex: string;
   depositorEphemeralYHex: string;
   transferStroops: bigint;
@@ -48,9 +48,9 @@ export async function prepareConfidentialTransferProof(parameters: {
     xHex: parameters.depositorEphemeralXHex,
     yHex: parameters.depositorEphemeralYHex,
   });
-  const { hi, lo, privKeyScalar } = await senderWithdrawFrAndScalar({
+  const { hi, lo, privKeyScalar } = senderWithdrawFrAndScalar({
     senderGAddress: parameters.senderGAddress,
-    senderWithdrawSignMessageSignature: parameters.senderWithdrawSignMessageSignature,
+    senderPrivKeyScalarHex: parameters.senderPrivKeyScalarHex,
   });
   const { recipientSlot, deposits, changeCoin } =
     await buildRecipientAndOptionalChangeDeposits({

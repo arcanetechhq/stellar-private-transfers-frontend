@@ -1,6 +1,5 @@
 import {
   ed25519PubkeyPayloadHexToWithdrawFrDecimals,
-  privKeyScalarDecimalFromStellarSignature,
   withdrawObjectFromMerkleWitness,
 } from "@auditable/privacy-pool-zk-sdk";
 import type {
@@ -11,13 +10,14 @@ import type {
   StateFile,
 } from "@auditable/privacy-pool-zk-sdk";
 import {
+  dualWithdrawLegsWithSharedRoot,
   leafEphemeralCoords,
   MIN_CONFIDENTIAL_TRANSFER_STROOPS,
   requireChangeRecipientWhenPartial,
-  withdrawWitnessForCoin,
   ZERO_STROOPS,
 } from "./privacy-pool-confidential-proof-helpers";
 import { ed25519PublicKeyHexFromStellarAccount } from "@/shared/lib/stellar/ed25519-public-key-hex-from-account";
+import { privKeyScalarDecimalFromRecipientScalarHex } from "./priv-key-scalar-decimal-from-recipient-scalar-hex";
 
 export type AlignedDepositSlotBuilder = (
   stealthAddressStpl1: string,
@@ -63,7 +63,7 @@ export async function proveWithdrawTransact(parameters: {
   coin: CoinData;
   state: StateFile;
   destinationStellarAddress: string;
-  withdrawSignMessageSignature: string;
+  privKeyScalarHex: string;
   depositorEphemeralXHex: string;
   depositorEphemeralYHex: string;
   withdrawAmountStroops: bigint;
@@ -93,8 +93,8 @@ export async function proveWithdrawTransact(parameters: {
     parameters.destinationStellarAddress,
   );
   const { hi, lo } = ed25519PubkeyPayloadHexToWithdrawFrDecimals(pkHex);
-  const privKeyScalar = await privKeyScalarDecimalFromStellarSignature(
-    parameters.withdrawSignMessageSignature,
+  const privKeyScalar = privKeyScalarDecimalFromRecipientScalarHex(
+    parameters.privKeyScalarHex,
   );
   const changeStroops = noteStroops - parameters.withdrawAmountStroops;
   const { deposits, changeCoin } = await resolveWithdrawChangeDeposits({
@@ -115,34 +115,6 @@ export async function proveWithdrawTransact(parameters: {
   return { ...proof, changeCoin };
 }
 
-function dualWithdrawLegsWithSharedStateRoot(parameters: {
-  sdk: PrivacyPoolSDK;
-  coinA: CoinData;
-  coinB: CoinData;
-  state: StateFile;
-  ephemeralA: { xHex: string; yHex: string };
-  ephemeralB: { xHex: string; yHex: string };
-}) {
-  const legA = withdrawWitnessForCoin({
-    sdk: parameters.sdk,
-    coin: parameters.coinA,
-    state: parameters.state,
-    xHex: parameters.ephemeralA.xHex,
-    yHex: parameters.ephemeralA.yHex,
-  });
-  const legB = withdrawWitnessForCoin({
-    sdk: parameters.sdk,
-    coin: parameters.coinB,
-    state: parameters.state,
-    xHex: parameters.ephemeralB.xHex,
-    yHex: parameters.ephemeralB.yHex,
-  });
-  if (legA.witness.stateRoot !== legB.witness.stateRoot) {
-    throw new Error("Merkle state root mismatch between input coins");
-  }
-  return { legA, legB };
-}
-
 export async function proveWithdrawTransactDual(parameters: {
   sdk: PrivacyPoolSDK;
   buildAlignedDepositSlot: AlignedDepositSlotBuilder;
@@ -150,7 +122,7 @@ export async function proveWithdrawTransactDual(parameters: {
   coinB: CoinData;
   state: StateFile;
   destinationStellarAddress: string;
-  withdrawSignMessageSignature: string;
+  privKeyScalarHex: string;
   ephemeralA: { xHex: string; yHex: string };
   ephemeralB: { xHex: string; yHex: string };
   withdrawAmountStroops: bigint;
@@ -174,7 +146,7 @@ export async function proveWithdrawTransactDual(parameters: {
     changeStroops,
     parameters.changeStealthAddressStpl1,
   );
-  const { legA, legB } = dualWithdrawLegsWithSharedStateRoot({
+  const { legA, legB } = dualWithdrawLegsWithSharedRoot({
     sdk: parameters.sdk,
     coinA: parameters.coinA,
     coinB: parameters.coinB,
@@ -186,8 +158,8 @@ export async function proveWithdrawTransactDual(parameters: {
     parameters.destinationStellarAddress,
   );
   const { hi, lo } = ed25519PubkeyPayloadHexToWithdrawFrDecimals(pkHex);
-  const privKeyScalar = await privKeyScalarDecimalFromStellarSignature(
-    parameters.withdrawSignMessageSignature,
+  const privKeyScalar = privKeyScalarDecimalFromRecipientScalarHex(
+    parameters.privKeyScalarHex,
   );
   const { deposits, changeCoin } = await resolveWithdrawChangeDeposits({
     changeStroops,

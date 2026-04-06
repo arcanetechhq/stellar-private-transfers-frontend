@@ -1,11 +1,11 @@
 import {
   ed25519PubkeyPayloadHexToWithdrawFrDecimals,
-  privKeyScalarDecimalFromStellarSignature,
   withdrawObjectFromMerkleWitness,
 } from "@auditable/privacy-pool-zk-sdk";
 import type { CoinData, PrivacyPoolSDK, StateFile } from "@auditable/privacy-pool-zk-sdk";
 import { StrKey } from "@stellar/stellar-sdk";
 import { Buffer } from "buffer";
+import { privKeyScalarDecimalFromRecipientScalarHex } from "./priv-key-scalar-decimal-from-recipient-scalar-hex";
 
 export const MIN_CONFIDENTIAL_TRANSFER_STROOPS = 1n;
 export const ZERO_STROOPS = 0n;
@@ -43,19 +43,47 @@ export function withdrawWitnessForCoin(parameters: {
   return { witness, withdrawObject };
 }
 
-export async function senderWithdrawFrAndScalar(parameters: {
+export function dualWithdrawLegsWithSharedRoot(parameters: {
+  sdk: PrivacyPoolSDK;
+  coinA: CoinData;
+  coinB: CoinData;
+  state: StateFile;
+  ephemeralA: { xHex: string; yHex: string };
+  ephemeralB: { xHex: string; yHex: string };
+}) {
+  const legA = withdrawWitnessForCoin({
+    sdk: parameters.sdk,
+    coin: parameters.coinA,
+    state: parameters.state,
+    xHex: parameters.ephemeralA.xHex,
+    yHex: parameters.ephemeralA.yHex,
+  });
+  const legB = withdrawWitnessForCoin({
+    sdk: parameters.sdk,
+    coin: parameters.coinB,
+    state: parameters.state,
+    xHex: parameters.ephemeralB.xHex,
+    yHex: parameters.ephemeralB.yHex,
+  });
+  if (legA.witness.stateRoot !== legB.witness.stateRoot) {
+    throw new Error("Merkle state root mismatch between input coins");
+  }
+  return { legA, legB };
+}
+
+export function senderWithdrawFrAndScalar(parameters: {
   senderGAddress: string;
-  senderWithdrawSignMessageSignature: string;
-}): Promise<{
+  senderPrivKeyScalarHex: string;
+}): {
   hi: string;
   lo: string;
   privKeyScalar: string;
-}> {
+} {
   const pkRaw = StrKey.decodeEd25519PublicKey(parameters.senderGAddress);
   const pkHex = Buffer.from(pkRaw).toString("hex");
   const { hi, lo } = ed25519PubkeyPayloadHexToWithdrawFrDecimals(pkHex);
-  const privKeyScalar = await privKeyScalarDecimalFromStellarSignature(
-    parameters.senderWithdrawSignMessageSignature,
+  const privKeyScalar = privKeyScalarDecimalFromRecipientScalarHex(
+    parameters.senderPrivKeyScalarHex,
   );
   return { hi, lo, privKeyScalar };
 }
