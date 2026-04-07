@@ -127,6 +127,9 @@ export function CreateWithdrawal() {
       {state.showTokenPicker && (
         <AssetPickerModal
           assets={state.assets}
+          customAssetFilter={(asset) =>
+            Number.parseFloat(asset.balance ?? "0") > 0
+          }
           selectedAssetId={state.selectedToken?.assetId}
           onSelect={state.handleTokenSelect}
           onClose={() => state.setShowTokenPicker(false)}

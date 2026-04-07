@@ -43,6 +43,10 @@ export function CreateDeposit() {
       </div>
       {deposit.showTokenPicker && (
         <AssetPickerModal
+          customAssetFilter={(asset) =>
+            asset.trustlineStatus !== "missing" &&
+            Number.parseFloat(asset.balance ?? "0") > 0
+          }
           assets={deposit.assets}
           selectedAssetId={deposit.selectedToken?.assetId}
           onSelect={deposit.handleTokenSelect}
