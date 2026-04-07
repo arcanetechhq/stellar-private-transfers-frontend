@@ -7,6 +7,9 @@ import { FormErrorAlert } from "@/shared/ui/form-error-alert";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { StealthAddressPicker } from "@/features/pick-stealth-address";
 import { QUICK_PERCENTAGE_OPTIONS } from "../model/create-deposit";
+import { useAppSelector } from "@/app/hooks";
+import { selectAllStealthNonces } from "@/entities/stealth-address";
+import { ManageStealthAddressesWidget } from "@/widgets/manage-stealth-addresses";
 
 interface AssetSelectorProperties {
   selectedToken: AssetWithTrustline | undefined;
@@ -60,7 +63,12 @@ interface AmountInputProperties {
   onPercentage: (percentage: number) => void;
 }
 
-function AmountInput({ amount, onAmountChange, onMaxAmount, onPercentage }: AmountInputProperties) {
+function AmountInput({
+  amount,
+  onAmountChange,
+  onMaxAmount,
+  onPercentage,
+}: AmountInputProperties) {
   const { t: translate } = useTranslation("deposit");
 
   return (
@@ -144,6 +152,8 @@ export function DepositForm({
   errorMessage,
 }: DepositFormProperties) {
   const { t: translate } = useTranslation("deposit");
+  const stealthNonces = useAppSelector(selectAllStealthNonces);
+  const hasStealthNonces = stealthNonces.length > 0;
 
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
@@ -152,17 +162,24 @@ export function DepositForm({
           message={errorMessage}
           title={translate("submitErrorTitle")}
         />
-        <AssetSelector selectedToken={selectedToken} onOpen={onOpenTokenPicker} />
+        <AssetSelector
+          selectedToken={selectedToken}
+          onOpen={onOpenTokenPicker}
+        />
         <AmountInput
           amount={amount}
           onAmountChange={onAmountChange}
           onMaxAmount={onMaxAmount}
           onPercentage={onPercentage}
         />
-        <StealthAddressPicker
-          selectedNonce={selectedStealthNonce}
-          onSelectNonce={onStealthSelect}
-        />
+        {hasStealthNonces ? (
+          <StealthAddressPicker
+            selectedNonce={selectedStealthNonce}
+            onSelectNonce={onStealthSelect}
+          />
+        ) : (
+          <ManageStealthAddressesWidget variant="compact" />
+        )}
         <DepositInfoBanner />
       </div>
     </div>
