@@ -7,11 +7,10 @@ import {
   RefreshCw,
   ChevronDown,
 } from "lucide-react";
-import { useState } from "react";
 import type { ReactNode } from "react";
 import { shortenStellarAddress } from "@/shared/lib/shorten-stellar-address";
 import { ManageStealthAddressesWidget } from "@/widgets/manage-stealth-addresses";
-import { COPY_FEEDBACK_MS } from "./main-layout-constants";
+import { useCopy } from "@/shared/hooks";
 
 type MainLayoutWalletMenuProperties = {
   isOpen: boolean;
@@ -64,6 +63,8 @@ function MainLayoutWalletMenuHeader({
   publicKey,
   translate,
 }: MainLayoutWalletMenuHeaderProperties) {
+  const { copied, handleCopy } = useCopy(publicKey);
+
   return (
     <div className="border-b border-gray-200 px-4 py-4">
       <div className="flex items-start gap-3">
@@ -88,9 +89,23 @@ function MainLayoutWalletMenuHeader({
               </span>
             </div>
           </div>
-          <p className="truncate font-mono text-sm leading-5 font-semibold text-gray-900">
-            {shortenStellarAddress(publicKey)}
-          </p>
+          <div className="flex items-center gap-2">
+            <span className="truncate font-mono text-sm leading-5 font-semibold text-gray-900">
+              {shortenStellarAddress(publicKey)}
+            </span>
+            <button
+              type="button"
+              className="flex shrink-0 items-center gap-1 rounded-md p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+              onClick={handleCopy}
+              aria-label="Copy private address"
+            >
+              {copied ? (
+                <Check className="h-4 w-4 text-emerald-600" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -105,18 +120,6 @@ export function MainLayoutWalletMenu({
   onChangeWallet,
   onDisconnect,
 }: MainLayoutWalletMenuProperties) {
-  const [addressCopied, setAddressCopied] = useState(false);
-
-  const handleCopyAddress = async () => {
-    try {
-      await navigator.clipboard.writeText(publicKey);
-      setAddressCopied(true);
-      setTimeout(() => setAddressCopied(false), COPY_FEEDBACK_MS);
-    } catch (error) {
-      console.error("Unable to copy", error);
-    }
-  };
-
   if (!isOpen) {
     return;
   }
@@ -125,26 +128,14 @@ export function MainLayoutWalletMenu({
     <React.Fragment>
       <div className="fixed inset-0 z-10" onClick={onClose} />
       <div className="absolute top-16 right-6 z-20 w-72 rounded-xl border border-gray-200 bg-white shadow-lg">
-        <MainLayoutWalletMenuHeader publicKey={publicKey} translate={translate} />
+        <MainLayoutWalletMenuHeader
+          publicKey={publicKey}
+          translate={translate}
+        />
 
         <ManageStealthAddressesWidget variant="compact" />
 
         <div className="py-2">
-          <MainLayoutWalletActionButton
-            onClick={handleCopyAddress}
-            icon={
-              addressCopied ? (
-                <Check className="h-4 w-4 text-emerald-500" />
-              ) : (
-                <Copy className="h-4 w-4 text-gray-500" />
-              )
-            }
-            label={
-              addressCopied
-                ? translate("common:addressCopied")
-                : translate("common:copyAddress")
-            }
-          />
           <MainLayoutWalletActionButton
             onClick={onChangeWallet}
             icon={<RefreshCw className="h-4 w-4 text-gray-500" />}

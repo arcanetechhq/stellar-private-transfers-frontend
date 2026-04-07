@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { Check, Copy } from "lucide-react";
+import { useCopy } from "@/shared/hooks";
 
 const ADDRESS_SHORT_MAX_LEN = 14;
 const ADDRESS_HEAD_LEN = 8;
 const ADDRESS_TAIL_LEN = 6;
-const COPY_FEEDBACK_MS_DEFAULT = 2000;
 
 function shortenStealth(address: string): string {
   if (address.length <= ADDRESS_SHORT_MAX_LEN) {
@@ -16,28 +16,16 @@ function shortenStealth(address: string): string {
 type StealthAddressDisplayProperties = {
   stealthAddress: string;
   showFullAddress?: boolean;
-  copyFeedbackMs?: number;
 };
 
 export function StealthAddressDisplay({
   stealthAddress,
   showFullAddress = false,
-  copyFeedbackMs = COPY_FEEDBACK_MS_DEFAULT,
 }: StealthAddressDisplayProperties) {
-  const [copied, setCopied] = useState(false);
+  const { copied, handleCopy } = useCopy(stealthAddress);
   const displayText = showFullAddress
     ? stealthAddress
     : shortenStealth(stealthAddress);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(stealthAddress);
-      setCopied(true);
-      setTimeout(() => setCopied(false), copyFeedbackMs);
-    } catch {
-      return;
-    }
-  };
 
   return (
     <div className="flex min-w-0 items-center gap-2">

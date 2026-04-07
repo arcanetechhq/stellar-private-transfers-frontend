@@ -22,8 +22,6 @@
   "walletProviderMetaMask": "MetaMask",
   "walletProviderStellar": "Stellar",
   "connectWallet": "Connect wallet",
-  "copyAddress": "Copy Address",
-  "addressCopied": "Address Copied!",
   "changeWallet": "Change Wallet",
   "disconnect": "Disconnect",
   "connected": "Connected",

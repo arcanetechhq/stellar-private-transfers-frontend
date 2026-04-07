@@ -1,5 +1,5 @@
 import React from "react";
-import { Bell, Globe, Search } from "lucide-react";
+import { Bell, Globe } from "lucide-react";
 import type { ReactNode } from "react";
 import { MainLayoutHeaderWallet } from "./main-layout-header-wallet";
 import { MainLayoutLanguageMenu } from "./main-layout-language-menu";
