@@ -23,19 +23,6 @@ type MainLayoutHeaderProperties = {
   onSelectLanguage: (code: string) => void;
 };
 
-function MainLayoutSearch({ placeholder }: { placeholder: string }) {
-  return (
-    <div className="relative max-w-md flex-1">
-      <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-500" />
-      <input
-        type="search"
-        placeholder={placeholder}
-        className="w-full rounded-lg border border-gray-200 py-2 pr-4 pl-10 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-gray-300/50 focus:outline-none"
-      />
-    </div>
-  );
-}
-
 type MainLayoutIconButtonProperties = {
   onClick: () => void;
   icon: ReactNode;
@@ -57,7 +44,9 @@ function MainLayoutIconButton({
       aria-expanded={isExpanded}
     >
       {icon}
-      {withBadge && <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />}
+      {withBadge && (
+        <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
+      )}
     </button>
   );
 }
@@ -76,9 +65,7 @@ export function MainLayoutHeader({
     <React.Fragment>
       <header className="border-b border-gray-200 bg-white px-6 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex flex-1 items-center gap-4">
-            <MainLayoutSearch placeholder={translate("common:searchPlaceholder")} />
-          </div>
+          <div className="flex flex-1 items-center gap-4"></div>
 
           <div className="flex items-center gap-4">
             <MainLayoutIconButton
