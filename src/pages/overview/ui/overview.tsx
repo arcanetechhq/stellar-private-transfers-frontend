@@ -1,4 +1,6 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 import { useAppSelector } from "@/app/hooks";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { useAssetsWithTrustlines } from "@/entities/asset";
@@ -6,25 +8,15 @@ import {
   selectTransactions,
   sortTransactionsByDateDesc,
 } from "@/entities/transaction";
-import { useAddTrustline } from "@/features/add-asset-trustline";
 import { RecentTransactionList } from "@/widgets/transaction-list";
-import {
-  MAX_DISPLAY_ASSETS,
-  RECENT_TRANSACTIONS_LIMIT,
-} from "../model/overview";
+import { RECENT_TRANSACTIONS_LIMIT } from "../model/overview";
 import { BalanceHero } from "./balance-hero";
-import { AssetsSection } from "./assets-section";
 import { PrivateAssetTable } from "@/widgets/private-asset-table";
 
 export function Overview() {
+  const { t: translateOverview } = useTranslation("overview");
   const publicKey = useAppSelector(selectWalletPublicKey);
   const { assets } = useAssetsWithTrustlines(publicKey);
-
-  const { addTrustline, pendingAssetId } = useAddTrustline(publicKey);
-
-  const displayAssets = assets
-    .toSorted((left, right) => left.id - right.id)
-    .slice(0, MAX_DISPLAY_ASSETS);
 
   const transactions = useAppSelector(selectTransactions);
   const recentTransactions = sortTransactionsByDateDesc(transactions).slice(
@@ -39,13 +31,18 @@ export function Overview() {
           <BalanceHero balance="—" assetCount={assets.length} />
           <RecentTransactionList transactions={recentTransactions} />
         </div>
-        <AssetsSection
-          assets={displayAssets}
-          pendingAssetId={pendingAssetId}
-          walletPublicKey={publicKey ?? undefined}
-          onAddTrustline={addTrustline}
+        <PrivateAssetTable
+          postAddressPicker={
+            <Link className="shrink-0" to="/assets">
+              <button
+                type="button"
+                className="rounded-[10px] border border-[var(--border)] bg-[var(--secondary)] px-4 py-2 text-[14px] leading-[20px] font-semibold text-[var(--foreground-secondary)] transition-colors hover:border-[var(--border-focus)] hover:bg-[var(--surface-hover)]"
+              >
+                {translateOverview("viewAllAssets")}
+              </button>
+            </Link>
+          }
         />
-        <PrivateAssetTable />
       </div>
     </div>
   );

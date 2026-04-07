@@ -10,6 +10,7 @@ type PrivateAssetStealthSelectProperties = {
   byNonce: StealthAddressState["byNonce"];
   normalizedNonce: string | undefined;
   onViewingChange: (value: string) => void;
+  noLabel?: boolean;
 };
 
 export function PrivateAssetStealthSelect({
@@ -18,6 +19,7 @@ export function PrivateAssetStealthSelect({
   byNonce,
   normalizedNonce,
   onViewingChange,
+  noLabel = false,
 }: PrivateAssetStealthSelectProperties) {
   return (
     <StealthAddressSelect
@@ -28,7 +30,7 @@ export function PrivateAssetStealthSelect({
       placeholder={translate("selectPlaceholder")}
       nonces={nonces}
       byNonce={byNonce}
-      rootClassName="shrink-0 sm:max-w-xs"
+      noLabel={noLabel}
     />
   );
 }

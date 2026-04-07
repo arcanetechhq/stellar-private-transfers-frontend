@@ -41,6 +41,7 @@ export interface StealthAddressSelectProperties {
   byNonce: StealthAddressState["byNonce"];
   rootClassName?: string;
   labelClassName?: string;
+  noLabel?: boolean;
 }
 
 export function StealthAddressSelect({
@@ -53,12 +54,15 @@ export function StealthAddressSelect({
   byNonce,
   rootClassName,
   labelClassName = stealthAddressSelectLabelClassName,
+  noLabel = false,
 }: StealthAddressSelectProperties) {
   return (
     <div className={cn("w-full min-w-0", rootClassName)}>
-      <label className={labelClassName} htmlFor={triggerId}>
-        {label}
-      </label>
+      {noLabel ? undefined : (
+        <label className={labelClassName} htmlFor={triggerId}>
+          {label}
+        </label>
+      )}
       <Select value={value ?? undefined} onValueChange={onValueChange}>
         <SelectTrigger
           id={triggerId}

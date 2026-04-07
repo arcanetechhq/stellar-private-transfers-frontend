@@ -11,11 +11,13 @@ import { StealthAddressSelect } from "./stealth-address-select";
 export interface StealthAddressPickerProperties {
   selectedNonce: string | undefined;
   onSelectNonce: (nonce: string, stealthAddress: string) => void;
+  noLabel?: boolean;
 }
 
 export function StealthAddressPicker({
   selectedNonce,
   onSelectNonce,
+  noLabel = false,
 }: StealthAddressPickerProperties) {
   const { t: translate } = useTranslation("deposit");
   const stealthState = useAppSelector(selectStealthState);
@@ -55,6 +57,7 @@ export function StealthAddressPicker({
       placeholder={translate("stealthPlaceholder")}
       nonces={nonces}
       byNonce={byNonce}
+      noLabel={noLabel}
     />
   );
 }

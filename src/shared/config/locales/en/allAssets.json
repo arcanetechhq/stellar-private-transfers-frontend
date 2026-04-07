@@ -1,17 +1,5 @@
 {
   "backToHome": "Back to Home",
   "pageTitle": "All Assets",
-  "pageSubtitle": "Complete overview of your cryptocurrency portfolio",
-  "totalPortfolioValue": "Total Portfolio Value",
-  "acrossAssets": "Across {{count}} different assets",
-  "searchPlaceholder": "Search assets...",
-  "noAssetsFound": "No assets found matching \"{{query}}\"",
-  "send": "Send",
-  "tableHeaders": {
-    "asset": "Asset",
-    "balance": "Balance",
-    "price": "Price",
-    "value": "Value",
-    "actions": "Actions"
-  }
+  "pageSubtitle": "Complete overview of your cryptocurrency portfolio"
 }

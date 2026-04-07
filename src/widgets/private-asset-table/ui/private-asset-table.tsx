@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppSelector } from "@/app/hooks";
 import { useGetAssetsQuery } from "@/entities/asset";
@@ -12,7 +12,13 @@ import {
 } from "./private-asset-table-body";
 import { PrivateAssetStealthSelect } from "./private-asset-stealth-select";
 
-export function PrivateAssetTable() {
+type PrivateAssetTableProperties = {
+  postAddressPicker?: ReactNode;
+};
+
+export function PrivateAssetTable({
+  postAddressPicker,
+}: PrivateAssetTableProperties) {
   const { t: translateAssets } = useTranslation("assets");
   const { t: translateOverview } = useTranslation("overview");
   const { t: translateStealth } = useTranslation("stealth");
@@ -52,15 +58,23 @@ export function PrivateAssetTable() {
         <h2 className={PRIVATE_ASSET_TITLE_CLASS}>
           {translateOverview("privateAssetsTitle")}
         </h2>
-        {nonces.length > 0 ? (
-          <PrivateAssetStealthSelect
-            translate={translateStealth}
-            nonces={nonces}
-            byNonce={byNonce}
-            normalizedNonce={normalizedNonce}
-            onViewingChange={setViewingNonce}
-          />
-        ) : undefined}
+        <div className="flex min-w-sm flex-row flex-nowrap items-start justify-end gap-3">
+          {nonces.length > 0 ? (
+            <div className="max-w-xs min-w-0 flex-3 shrink">
+              <PrivateAssetStealthSelect
+                translate={translateStealth}
+                nonces={nonces}
+                byNonce={byNonce}
+                normalizedNonce={normalizedNonce}
+                onViewingChange={setViewingNonce}
+                noLabel={true}
+              />
+            </div>
+          ) : undefined}
+          {postAddressPicker ? (
+            <div className="flex-2 shrink-0">{postAddressPicker}</div>
+          ) : undefined}
+        </div>
       </div>
 
       <PrivateAssetTableBody

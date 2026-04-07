@@ -1,4 +1,3 @@
-export const MAX_DISPLAY_ASSETS = 6;
 export const RECENT_TRANSACTIONS_LIMIT = 3;
 
 const SMALL_BALANCE_THRESHOLD = 1;
