@@ -2,114 +2,117 @@
 
 :root {
   --font-size: 16px;
-  
-  /* Layered surface system - Squads теплая серая среда */
-  --background: #F4F4F2;
-  --surface-primary: #F1F1EF;
-  --surface-card: #FCFCFB;
-  --surface-subtle: #F7F7F5;
-  --surface-hover: #F6F6F4;
-  
+
+  /* Layered surface system - Squads */
+  --background: rgb(246, 247, 249);
+  --surface-primary: #f1f1ef;
+  --surface-card: #fcfcfb;
+  --surface-subtle: #f7f7f5;
+  --surface-hover: #f6f6f4;
+
   /* Text hierarchy */
-  --foreground: #1B1D22;
-  --foreground-primary: #1B1D22;
-  --foreground-secondary: #6F7278;
-  --foreground-tertiary: #9A9DA3;
-  --foreground-quaternary: #9A9DA3;
-  
+  --foreground: #1b1d22;
+  --foreground-primary: #1b1d22;
+  --foreground-secondary: #6f7278;
+  --foreground-tertiary: #9a9da3;
+  --foreground-quaternary: #9a9da3;
+
   /* Card and surfaces */
-  --card: #FCFCFB;
-  --card-foreground: #1B1D22;
-  
-  /* Borders - тихие серые границы */
-  --border: #E5E4DF;
-  --border-soft: #ECEBE7;
-  --border-input: #DEDDD7;
-  --border-focus: #D0CFD0;
-  
-  /* Accent color - графитовый, почти черный */
-  --primary: #1E2024;
-  --primary-hover: #15171B;
-  --primary-foreground: #FFFFFF;
+  --card: #fcfcfb;
+  --card-foreground: #1b1d22;
+
+  /* Borders */
+  --border: #e5e4df;
+  --border-soft: #ecebe7;
+  --border-input: #deddd7;
+  --border-focus: #d0cfd0;
+
+  /* Accent color */
+  --primary: #1e2024;
+  --primary-hover: #15171b;
+  --primary-foreground: #ffffff;
   --primary-active: #202328;
-  
+
   /* Secondary actions */
-  --secondary: #FCFCFB;
-  --secondary-foreground: #6F7278;
-  --secondary-border: #E5E4DF;
-  
+  --secondary: #fcfcfb;
+  --secondary-foreground: #6f7278;
+  --secondary-border: #e5e4df;
+
   /* Neutral states */
-  --neutral: #6F7278;
-  --neutral-bg: #F3F3F1;
-  --neutral-foreground: #6F7278;
-  
-  /* Status colors - сдержанные институциональные */
-  --success: #027A48;
-  --success-bg: #ECFDF3;
-  --success-foreground: #027A48;
-  
-  --warning: #C2410C;
-  --warning-bg: #FFF7ED;
-  --warning-foreground: #C2410C;
-  
-  --error: #B42318;
-  --error-bg: #FEF2F2;
-  --error-foreground: #B42318;
-  
-  /* Info/Blue - только для специальных статусов, не основной акцент */
-  --info: #1D4ED8;
-  --info-bg: #EEF4FF;
-  --info-foreground: #1D4ED8;
-  --info-border: #BFDBFE;
-  --warning-border: #FEF0C7;
+  --neutral: #6f7278;
+  --neutral-bg: #f3f3f1;
+  --neutral-foreground: #6f7278;
+
+  /* Status colors */
+  --success: #027a48;
+  --success-bg: #ecfdf3;
+  --success-foreground: #027a48;
+
+  --warning: #c2410c;
+  --warning-bg: #fff7ed;
+  --warning-foreground: #c2410c;
+
+  --error: #b42318;
+  --error-bg: #fef2f2;
+  --error-foreground: #b42318;
+
+  /* Info/Blue */
+  --info: #1d4ed8;
+  --info-bg: #eef4ff;
+  --info-foreground: #1d4ed8;
+  --info-border: #bfdbfe;
+  --warning-border: #fef0c7;
   --overlay-backdrop: color-mix(in srgb, #0f172a 50%, transparent);
-  --surface-selected: #F6F6F4;
-  
+  --surface-selected: #f6f6f4;
+
   /* Legacy variables for compatibility */
-  --popover: #FCFCFB;
-  --popover-foreground: #1B1D22;
-  --muted: #F7F7F5;
-  --muted-foreground: #9A9DA3;
-  --accent: #1E2024;
-  --accent-foreground: #FFFFFF;
-  --destructive: #B42318;
-  --destructive-foreground: #FFFFFF;
+  --popover: #fcfcfb;
+  --popover-foreground: #1b1d22;
+  --muted: #f7f7f5;
+  --muted-foreground: #9a9da3;
+  --accent: #1e2024;
+  --accent-foreground: #ffffff;
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
   --input: transparent;
-  --input-background: #FCFCFB;
-  --switch-background: #E5E4DF;
-  --ring: #D0CFD0;
-  
-  /* Spacing - компактная система */
+  --input-background: #fcfcfb;
+  --switch-background: #e5e4df;
+  --ring: #d0cfd0;
+
+  /* Spacing */
   --spacing-xs: 0.5rem;
   --spacing-sm: 0.75rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.25rem;
   --spacing-xl: 1.5rem;
   --spacing-2xl: 2rem;
-  
-  /* Border radius - Squads spec */
+
+  /* Border radius */
   --radius-s: 0.5rem;
   --radius-m: 0.625rem;
   --radius-l: 0.75rem;
   --radius-xl: 1rem;
   --radius-pill: 62.4375rem;
-  
+
   /* Legacy radius */
   --radius: 0.75rem;
   --radius-sm: 0.5rem;
   --radius-lg: 1rem;
-  
+
   /* Typography weights */
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
-  
-  /* Shadows - очень мягкие */
-  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.03), 0 1px 3px rgba(16, 24, 40, 0.04);
-  --shadow-dropdown: 0 8px 24px rgba(16, 24, 40, 0.08), 0 2px 6px rgba(16, 24, 40, 0.05);
-  --shadow-modal: 0 12px 32px rgba(16, 24, 40, 0.10), 0 2px 8px rgba(16, 24, 40, 0.06);
-  
+
+  /* Shadows */
+  --shadow-card:
+    0 1px 2px rgba(16, 24, 40, 0.03), 0 1px 3px rgba(16, 24, 40, 0.04);
+  --shadow-dropdown:
+    0 8px 24px rgba(16, 24, 40, 0.08), 0 2px 6px rgba(16, 24, 40, 0.05);
+  --shadow-modal:
+    0 12px 32px rgba(16, 24, 40, 0.1), 0 2px 8px rgba(16, 24, 40, 0.06);
+
   /* Component sizes */
   --button-height-default: 2.5rem;
   --button-height-small: 2rem;
@@ -117,24 +120,24 @@
   --badge-height: 1.5rem;
   --table-row-height: 3.5rem;
   --card-padding: 1.5rem;
-  
+
   /* Chart colors */
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  
-  /* Sidebar - теплая нейтральная панель */
-  --sidebar: #F1F1EF;
-  --sidebar-foreground: #5E6168;
-  --sidebar-primary: #1E2024;
-  --sidebar-primary-foreground: #1B1D22;
-  --sidebar-accent: #FFFFFF;
-  --sidebar-accent-foreground: #1B1D22;
-  --sidebar-border: #E5E4DF;
-  --sidebar-ring: #D0CFD0;
-  --sidebar-hover: #F6F6F4;
+
+  /* Sidebar */
+  --sidebar: #f1f1ef;
+  --sidebar-foreground: #5e6168;
+  --sidebar-primary: #1e2024;
+  --sidebar-primary-foreground: #1b1d22;
+  --sidebar-accent: #ffffff;
+  --sidebar-accent-foreground: #1b1d22;
+  --sidebar-border: #e5e4df;
+  --sidebar-ring: #d0cfd0;
+  --sidebar-hover: #f6f6f4;
 
   --outline-button-bg: var(--background);
 
@@ -223,7 +226,8 @@
   --switch-background: oklch(0.371 0 0);
 
   --shadow-card: 0 1px 2px oklch(0 0 0 / 0.2), 0 1px 3px oklch(0 0 0 / 0.24);
-  --shadow-dropdown: 0 8px 24px oklch(0 0 0 / 0.35), 0 2px 6px oklch(0 0 0 / 0.2);
+  --shadow-dropdown:
+    0 8px 24px oklch(0 0 0 / 0.35), 0 2px 6px oklch(0 0 0 / 0.2);
   --shadow-modal: 0 12px 32px oklch(0 0 0 / 0.4), 0 2px 8px oklch(0 0 0 / 0.25);
 
   --outline-button-bg: color-mix(in oklch, var(--input) 30%, transparent);
