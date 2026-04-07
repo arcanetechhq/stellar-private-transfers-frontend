@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { useAppSelector } from "@/app/hooks";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { useAssetsWithTrustlines } from "@/entities/asset";
@@ -18,16 +18,9 @@ import { PrivateAssetTable } from "@/widgets/private-asset-table";
 
 export function Overview() {
   const publicKey = useAppSelector(selectWalletPublicKey);
-  const { assets, refetch } = useAssetsWithTrustlines(publicKey);
+  const { assets } = useAssetsWithTrustlines(publicKey);
 
-  const handleSuccess = useCallback(() => {
-    refetch();
-  }, [refetch]);
-
-  const { addTrustline, pendingAssetId } = useAddTrustline(
-    publicKey,
-    handleSuccess,
-  );
+  const { addTrustline, pendingAssetId } = useAddTrustline(publicKey);
 
   const displayAssets = assets
     .toSorted((left, right) => left.id - right.id)
@@ -51,7 +44,6 @@ export function Overview() {
           pendingAssetId={pendingAssetId}
           walletPublicKey={publicKey ?? undefined}
           onAddTrustline={addTrustline}
-          onMintSuccess={handleSuccess}
         />
         <PrivateAssetTable />
       </div>

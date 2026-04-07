@@ -3,6 +3,7 @@ import { Bell, Globe } from "lucide-react";
 import type { ReactNode } from "react";
 import { MainLayoutHeaderWallet } from "./main-layout-header-wallet";
 import { MainLayoutLanguageMenu } from "./main-layout-language-menu";
+import { HeaderFaucetMenu } from "./header-faucet-menu";
 
 export const LANGUAGES = [
   { code: "en", name: "English", flag: "🇺🇸" },
@@ -16,6 +17,8 @@ type MainLayoutHeaderProperties = {
   translate: (key: string) => string;
   languageOpen: boolean;
   setLanguageOpen: (open: boolean) => void;
+  faucetOpen: boolean;
+  setFaucetOpen: (open: boolean) => void;
   walletOpen: boolean;
   setWalletOpen: (open: boolean) => void;
   onOpenNotifications: () => void;
@@ -55,6 +58,8 @@ export function MainLayoutHeader({
   translate,
   languageOpen,
   setLanguageOpen,
+  faucetOpen,
+  setFaucetOpen,
   walletOpen,
   setWalletOpen,
   onOpenNotifications,
@@ -76,7 +81,12 @@ export function MainLayoutHeader({
 
             <div className="relative">
               <MainLayoutIconButton
-                onClick={() => setLanguageOpen(!languageOpen)}
+                onClick={() => {
+                  setLanguageOpen(!languageOpen);
+                  if (!languageOpen) {
+                    setFaucetOpen(false);
+                  }
+                }}
                 icon={<Globe className="h-5 w-5" />}
                 isExpanded={languageOpen}
               />
@@ -88,6 +98,16 @@ export function MainLayoutHeader({
                 onSelectLanguage={onSelectLanguage}
               />
             </div>
+
+            <HeaderFaucetMenu
+              isOpen={faucetOpen}
+              onOpenChange={(open) => {
+                setFaucetOpen(open);
+                if (open) {
+                  setLanguageOpen(false);
+                }
+              }}
+            />
 
             <MainLayoutHeaderWallet
               translate={translate}

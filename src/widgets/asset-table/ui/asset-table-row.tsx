@@ -1,11 +1,16 @@
-import React, { useEffect } from "react";
+import React from "react";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import { TokenIcon } from "@/shared/ui/token-icon";
 import { Skeleton } from "@/shared/ui/skeleton";
 import type { AssetWithTrustline } from "@/entities/asset";
 import {
+  isAssetFaucetClaimable,
+  selectIsClaimLoadingForAsset,
+} from "@/entities/asset";
+import {
+  claimIssuedAssetThunk,
+  claimNativeFaucetThunk,
   FaucetButton,
-  useFaucetForAsset,
-  useFaucetForNative,
 } from "@/features/faucet";
 import { AssetActionButton } from "./asset-action-button";
 
@@ -36,35 +41,54 @@ interface AssetTableRowProperties {
   showFaucet: boolean;
   walletPublicKey: string | undefined;
   onAddTrustline: (target: TrustlineTarget) => void;
-  onMintSuccess?: () => void;
 }
 
 function AssetFaucetButton({
   asset,
   walletPublicKey,
-  onMintSuccess,
+  showFaucet,
 }: {
   asset: AssetWithTrustline;
   walletPublicKey: string | undefined;
-  onMintSuccess?: () => void;
+  showFaucet: boolean;
 }) {
+  const dispatch = useAppDispatch();
+  const isClaimLoading = useAppSelector((state) =>
+    selectIsClaimLoadingForAsset(state, asset.assetId),
+  );
   const isNative = asset.trustlineStatus === "native";
-  const nativeFaucet = useFaucetForNative();
-  const assetFaucet = useFaucetForAsset(asset.assetId);
 
-  const faucet = isNative ? nativeFaucet : assetFaucet;
+  const status = isClaimLoading ? "loading" : "idle";
 
-  useEffect(() => {
-    if (faucet.status === "success") {
-      onMintSuccess?.();
+  function handleMint(address: string) {
+    if (!walletPublicKey) {
+      return Promise.resolve();
     }
-  }, [faucet.status, onMintSuccess]);
+    if (isNative) {
+      return dispatch(
+        claimNativeFaucetThunk({
+          publicKey: address,
+          assetId: asset.assetId,
+        }),
+      ).unwrap();
+    }
+    return dispatch(
+      claimIssuedAssetThunk({
+        publicKey: address,
+        assetId: asset.assetId,
+      }),
+    ).unwrap();
+  }
+
+  if (!isAssetFaucetClaimable(showFaucet, asset)) {
+    return;
+  }
 
   return (
     <FaucetButton
       address={walletPublicKey ?? ""}
-      status={faucet.status}
-      onMint={faucet.mint}
+      status={status}
+      onMint={handleMint}
     />
   );
 }
@@ -75,16 +99,9 @@ export function AssetTableRow({
   showFaucet,
   walletPublicKey,
   onAddTrustline,
-  onMintSuccess,
 }: AssetTableRowProperties) {
   const isSubmitting =
     pendingAssetId !== undefined && pendingAssetId === asset.assetId;
-
-  const isNative = asset.trustlineStatus === "native";
-  const canFaucet =
-    showFaucet &&
-    (isNative ||
-      (asset.mintable && asset.trustlineStatus === "exists"));
 
   function renderBalance() {
     if (asset.trustlineStatus === "loading") {
@@ -92,14 +109,14 @@ export function AssetTableRow({
     }
     if (asset.balance !== undefined && asset.balance !== null) {
       return (
-        <>
+        <React.Fragment>
           <p className="text-[15px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
             {formatBalance(asset.balance)}
           </p>
           <p className="text-[13px] leading-[18px] text-[var(--foreground-secondary)]">
             {asset.assetId.toUpperCase()}
           </p>
-        </>
+        </React.Fragment>
       );
     }
     return (
@@ -131,13 +148,11 @@ export function AssetTableRow({
         <div className="col-span-4">{renderBalance()}</div>
 
         <div className="col-span-3 flex items-center justify-end gap-2">
-          {canFaucet && (
-            <AssetFaucetButton
-              asset={asset}
-              walletPublicKey={walletPublicKey}
-              onMintSuccess={onMintSuccess}
-            />
-          )}
+          <AssetFaucetButton
+            asset={asset}
+            walletPublicKey={walletPublicKey}
+            showFaucet={showFaucet}
+          />
           <AssetActionButton
             assetId={asset.assetId}
             assetCode={asset.assetId.toUpperCase()}

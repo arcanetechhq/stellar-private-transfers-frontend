@@ -13,7 +13,10 @@
   },
   "faucet": {
     "mint": "Mint",
-    "hint": "Get test tokens"
+    "hint": "Get test tokens",
+    "headerLabel": "Faucet",
+    "menuTitle": "Faucet claim",
+    "claimWithAmount": "Claim {{amount}} {{symbol}}"
   },
   "noAssetsFound": "No assets found",
   "tableHeaders": {

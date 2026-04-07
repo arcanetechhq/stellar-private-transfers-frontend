@@ -17,7 +17,6 @@ interface AssetTableProperties {
   pendingAssetId: string | undefined;
   walletPublicKey?: string;
   onAddTrustline: (target: TrustlineTarget) => void;
-  onMintSuccess?: () => void;
   className?: string;
   showColumnHeaders?: boolean;
 }
@@ -30,7 +29,6 @@ export function AssetTable({
   pendingAssetId,
   walletPublicKey,
   onAddTrustline,
-  onMintSuccess,
   className = "rounded-[20px] border border-[var(--border)]",
   showColumnHeaders = true,
 }: AssetTableProperties) {
@@ -72,7 +70,6 @@ export function AssetTable({
             showFaucet={isTestnet}
             walletPublicKey={walletPublicKey}
             onAddTrustline={onAddTrustline}
-            onMintSuccess={onMintSuccess}
           />
         ))}
       </div>

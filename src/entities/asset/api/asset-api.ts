@@ -15,12 +15,14 @@ export interface AssetDto {
 
 export const assetApi = createApi({
   reducerPath: "assetApi",
+  tagTypes: ["Asset"],
   baseQuery: fetchBaseQuery({
     baseUrl: import.meta.env.VITE_API_BASE_URL as string,
   }),
   endpoints: (builder) => ({
     getAssets: builder.query<AssetDto[], void>({
       query: () => "/assets",
+      providesTags: [{ type: "Asset", id: "LIST" }],
     }),
   }),
 });

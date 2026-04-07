@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
+import { useAppSelector } from "@/app/hooks";
 import {
   fetchAccountBalances,
   type StellarBalance,
 } from "@/shared/stellar/fetch-account-balances";
 import { horizonServer } from "@/shared/stellar/horizon-server";
 import { useGetAssetsQuery } from "../api/asset-api";
+import { selectAssetTrustlineRefreshGeneration } from "./asset-trustline-refresh-slice";
 import type { AssetDto } from "../api/asset-api";
 import type { AssetWithTrustline } from "./asset";
 
@@ -68,6 +70,10 @@ export function useAssetsWithTrustlines(publicKey: string | undefined): {
   const { data: backendAssets, isLoading: isBackendLoading } =
     useGetAssetsQuery();
 
+  const trustlineRefreshGeneration = useAppSelector(
+    selectAssetTrustlineRefreshGeneration,
+  );
+
   const [stellarBalances, setStellarBalances] =
     useState<StellarBalance[] | undefined>();
   const [isTrustlineLoading, setIsTrustlineLoading] = useState(false);
@@ -103,7 +109,7 @@ export function useAssetsWithTrustlines(publicKey: string | undefined): {
     return () => {
       cancelled = true;
     };
-  }, [publicKey, backendAssets, fetchCounter]);
+  }, [publicKey, backendAssets, fetchCounter, trustlineRefreshGeneration]);
 
   const assets = resolveAssets({
     backendAssets,

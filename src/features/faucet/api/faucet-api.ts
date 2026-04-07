@@ -11,6 +11,7 @@ export const faucetApi = assetApi.injectEndpoints({
         method: "POST",
         body: { address },
       }),
+      invalidatesTags: [{ type: "Asset", id: "LIST" }],
     }),
   }),
   overrideExisting: false,

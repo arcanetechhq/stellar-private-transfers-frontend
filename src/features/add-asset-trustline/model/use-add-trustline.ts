@@ -1,9 +1,7 @@
-import { useState, useCallback } from "react";
-import { StellarWalletsKit as StellarWalletsKitSdk } from "@creit-tech/stellar-wallets-kit/sdk";
-import { useAppDispatch } from "@/app/hooks";
-import { submitHorizonTransaction } from "@/features/stellar-wallet-connect";
-import { buildChangeTrustTx } from "@/shared/stellar/build-change-trust-tx";
-import { HORIZON_URL, horizonServer } from "@/shared/stellar/horizon-server";
+import { useCallback } from "react";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { selectTrustlinePendingAssetId } from "@/entities/asset";
+import { addAssetTrustlineThunk } from "./add-asset-trustline-thunk";
 
 interface TrustlineTarget {
   assetId: string;
@@ -11,41 +9,23 @@ interface TrustlineTarget {
   issuerAddress: string;
 }
 
-export function useAddTrustline(
-  publicKey: string | undefined,
-  onSuccess: () => void,
-) {
+export function useAddTrustline(publicKey: string | undefined) {
   const dispatch = useAppDispatch();
-  const [pendingAssetId, setPendingAssetId] = useState<string | undefined>();
+  const pendingAssetId = useAppSelector(selectTrustlinePendingAssetId);
 
   const addTrustline = useCallback(
-    async (target: TrustlineTarget) => {
-      if (!publicKey) return;
-
-      setPendingAssetId(target.assetId);
-      try {
-        const { networkPassphrase } = await StellarWalletsKitSdk.getNetwork();
-        const xdr = await buildChangeTrustTx({
-          server: horizonServer,
-          publicKey,
-          assetCode: target.assetCode,
-          issuerAddress: target.issuerAddress,
-          networkPassphrase,
-        });
-        await dispatch(
-          submitHorizonTransaction({
-            horizonUrl: HORIZON_URL,
-            networkPassphrase,
-            publicKey,
-            xdr,
-          }),
-        ).unwrap();
-        onSuccess();
-      } finally {
-        setPendingAssetId(undefined);
+    (target: TrustlineTarget) => {
+      if (!publicKey) {
+        return;
       }
+      void dispatch(
+        addAssetTrustlineThunk({
+          ...target,
+          publicKey,
+        }),
+      );
     },
-    [dispatch, onSuccess, publicKey],
+    [dispatch, publicKey],
   );
 
   return {

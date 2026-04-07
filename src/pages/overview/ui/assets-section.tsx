@@ -15,7 +15,6 @@ interface AssetsSectionProperties {
   pendingAssetId: string | undefined;
   walletPublicKey?: string;
   onAddTrustline: (target: TrustlineTarget) => void;
-  onMintSuccess?: () => void;
 }
 
 export function AssetsSection({
@@ -23,7 +22,6 @@ export function AssetsSection({
   pendingAssetId,
   walletPublicKey,
   onAddTrustline,
-  onMintSuccess,
 }: AssetsSectionProperties) {
   const { t: translate } = useTranslation("overview");
 
@@ -44,7 +42,6 @@ export function AssetsSection({
         pendingAssetId={pendingAssetId}
         walletPublicKey={walletPublicKey}
         onAddTrustline={onAddTrustline}
-        onMintSuccess={onMintSuccess}
         className=""
         showColumnHeaders={false}
       />

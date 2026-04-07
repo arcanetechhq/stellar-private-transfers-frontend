@@ -53,6 +53,7 @@ export function MainLayout() {
   );
 
   const [languageOpen, setLanguageOpen] = useState(false);
+  const [faucetOpen, setFaucetOpen] = useState(false);
   const [walletOpen, setWalletOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState(i18n.language ?? "en");
@@ -77,6 +78,8 @@ export function MainLayout() {
           translate={translate}
           languageOpen={languageOpen}
           setLanguageOpen={setLanguageOpen}
+          faucetOpen={faucetOpen}
+          setFaucetOpen={setFaucetOpen}
           walletOpen={walletOpen}
           setWalletOpen={setWalletOpen}
           onOpenNotifications={() => setNotificationsOpen(true)}

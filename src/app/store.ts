@@ -1,10 +1,15 @@
-import { configureStore, Tuple } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import {
   contactReducer,
   loadContactState,
   saveContactState,
 } from "@/entities/contact";
-import { assetApi } from "@/entities/asset";
+import {
+  assetApi,
+  assetTrustlineRefreshReducer,
+  assetUiOperationsReducer,
+} from "@/entities/asset";
+import "@/features/faucet/api/faucet-api";
 import { walletReducer } from "@/entities/wallet";
 import {
   buildStealthPersistPayload,
@@ -46,15 +51,16 @@ export const store = configureStore({
     transaction: transactionReducer,
     coinDelivery: coinDeliveryReducer,
     coin: coinReducer,
+    assetTrustlineRefresh: assetTrustlineRefreshReducer,
+    assetUiOperations: assetUiOperationsReducer,
     [assetApi.reducerPath]: assetApi.reducer,
     [coinDeliveryApi.reducerPath]: coinDeliveryApi.reducer,
   },
-  middleware: (getDefaultMiddleware) =>
-    new Tuple(
-      ...getDefaultMiddleware(),
-      assetApi.middleware,
-      coinDeliveryApi.middleware,
-    ),
+  middleware: (getDefaultMiddleware) => [
+    ...getDefaultMiddleware(),
+    assetApi.middleware,
+    coinDeliveryApi.middleware,
+  ],
   preloadedState: loadedContact ? { contact: loadedContact } : undefined,
 });
 

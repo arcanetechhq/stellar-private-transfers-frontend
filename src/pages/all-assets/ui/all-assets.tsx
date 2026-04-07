@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import { useAppSelector } from "@/app/hooks";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { useAssetsWithTrustlines } from "@/entities/asset";
@@ -12,16 +12,9 @@ export function AllAssets() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const publicKey = useAppSelector(selectWalletPublicKey);
-  const { assets, refetch } = useAssetsWithTrustlines(publicKey);
+  const { assets } = useAssetsWithTrustlines(publicKey);
 
-  const handleSuccess = useCallback(() => {
-    refetch();
-  }, [refetch]);
-
-  const { addTrustline, pendingAssetId } = useAddTrustline(
-    publicKey,
-    handleSuccess,
-  );
+  const { addTrustline, pendingAssetId } = useAddTrustline(publicKey);
 
   const filteredAssets = assets.filter(
     (asset) =>
@@ -48,7 +41,6 @@ export function AllAssets() {
           pendingAssetId={pendingAssetId}
           walletPublicKey={publicKey ?? undefined}
           onAddTrustline={addTrustline}
-          onMintSuccess={handleSuccess}
         />
         <PrivateAssetTable />
       </div>
