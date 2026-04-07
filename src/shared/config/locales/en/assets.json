@@ -22,6 +22,7 @@
   "tableHeaders": {
     "asset": "Asset",
     "balance": "Balance",
+    "usd": "USD",
     "actions": "Actions"
   },
   "picker": {

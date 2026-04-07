@@ -9,6 +9,7 @@ const SMALL_BALANCE_THRESHOLD = 1;
 const SMALL_BALANCE_MIN_FRACTION_DIGITS = 3;
 const SMALL_BALANCE_MAX_FRACTION_DIGITS = 8;
 const REGULAR_BALANCE_FRACTION_DIGITS = 2;
+const USD_FRACTION_DIGITS = 2;
 
 function formatAggregatedBalance(value: number): string {
   if (value < SMALL_BALANCE_THRESHOLD) {
@@ -23,16 +24,25 @@ function formatAggregatedBalance(value: number): string {
   });
 }
 
+function formatUsdAmount(value: number): string {
+  return value.toLocaleString("en-US", {
+    minimumFractionDigits: USD_FRACTION_DIGITS,
+    maximumFractionDigits: USD_FRACTION_DIGITS,
+  });
+}
+
 type PrivateAssetRowProperties = {
   row: AggregatedPrivateAssetRow;
   assetName: string;
   logoUrl?: string | null;
+  usdAmount: number;
 };
 
 export function PrivateAssetRow({
   row,
   assetName,
   logoUrl,
+  usdAmount,
 }: PrivateAssetRowProperties) {
   const { t: translate } = useTranslation("assets");
   const ticker = row.assetId.toUpperCase();
@@ -40,7 +50,7 @@ export function PrivateAssetRow({
   return (
     <div className="px-6 py-4 transition-colors hover:bg-[var(--surface-hover)]">
       <div className="grid grid-cols-12 items-center gap-4">
-        <div className="col-span-5 flex items-center gap-4">
+        <div className="col-span-4 flex items-center gap-4">
           <TokenIcon ticker={ticker} logoUrl={logoUrl} size={44} />
           <div>
             <p className="mb-0.5 text-[15px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
@@ -52,12 +62,18 @@ export function PrivateAssetRow({
           </div>
         </div>
 
-        <div className="col-span-4">
+        <div className="col-span-3">
           <p className="text-[15px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
             {formatAggregatedBalance(row.totalAmountDisplay)}
           </p>
           <p className="text-[13px] leading-[18px] text-[var(--foreground-secondary)]">
             {ticker}
+          </p>
+        </div>
+
+        <div className="col-span-2 text-right">
+          <p className="text-[15px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
+            ${formatUsdAmount(usdAmount)}
           </p>
         </div>
 

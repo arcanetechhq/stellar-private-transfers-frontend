@@ -1,5 +1,6 @@
 import type { AssetDto, AssetWithTrustline } from "../model/asset";
 import type { AggregatedPrivateAssetRow } from "@/entities/coin";
+import { getAssetUsdPrice, initializeAssetUsdPrices } from "./asset-usd-price";
 
 function privateBalanceToDisplayString(value: number): string {
   if (value === 0) {
@@ -18,6 +19,7 @@ export function buildPrivateTransferAssets(
   if (!assetCatalog) {
     return [];
   }
+  initializeAssetUsdPrices(assetCatalog.map((asset) => asset.assetId));
   const rows: AssetWithTrustline[] = [];
   for (const row of aggregates) {
     if (row.totalAmountDisplay <= 0) {
@@ -32,6 +34,7 @@ export function buildPrivateTransferAssets(
       poolContract: row.poolContract,
       trustlineStatus: "exists",
       balance: privateBalanceToDisplayString(row.totalAmountDisplay),
+      usdPrice: getAssetUsdPrice(dto.assetId),
     });
   }
   return rows.toSorted((left, right) =>

@@ -5,4 +5,5 @@ export type TrustlineStatus = "native" | "loading" | "exists" | "missing";
 export interface AssetWithTrustline extends AssetDto {
   trustlineStatus: TrustlineStatus;
   balance: string | undefined;
+  usdPrice: number;
 }

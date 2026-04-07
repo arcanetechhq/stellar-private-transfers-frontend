@@ -9,6 +9,10 @@ import { useGetAssetsQuery } from "../api/asset-api";
 import { selectAssetTrustlineRefreshGeneration } from "./asset-trustline-refresh-slice";
 import type { AssetDto } from "../api/asset-api";
 import type { AssetWithTrustline } from "./asset";
+import {
+  getAssetUsdPrice,
+  initializeAssetUsdPrices,
+} from "../lib/asset-usd-price";
 
 interface ResolveOptions {
   backendAssets: AssetDto[] | undefined;
@@ -19,8 +23,10 @@ interface ResolveOptions {
 function resolveAssets(options: ResolveOptions): AssetWithTrustline[] {
   const { backendAssets, stellarBalances, isTrustlineLoading } = options;
   if (!backendAssets) return [];
+  initializeAssetUsdPrices(backendAssets.map((asset) => asset.assetId));
 
   return backendAssets.map((asset) => {
+    const usdPrice = getAssetUsdPrice(asset.assetId);
     if (asset.issuerAddress === undefined || asset.issuerAddress === null) {
       const nativeEntry = stellarBalances?.find(
         (entry) => entry.assetType === "native",
@@ -29,6 +35,7 @@ function resolveAssets(options: ResolveOptions): AssetWithTrustline[] {
         ...asset,
         trustlineStatus: "native",
         balance: nativeEntry?.balance ?? undefined,
+        usdPrice,
       } as AssetWithTrustline;
     }
 
@@ -37,6 +44,7 @@ function resolveAssets(options: ResolveOptions): AssetWithTrustline[] {
         ...asset,
         trustlineStatus: "loading",
         balance: undefined,
+        usdPrice,
       } as AssetWithTrustline;
     }
 
@@ -51,6 +59,7 @@ function resolveAssets(options: ResolveOptions): AssetWithTrustline[] {
         ...asset,
         trustlineStatus: "exists",
         balance: match.balance,
+        usdPrice,
       } as AssetWithTrustline;
     }
 
@@ -58,6 +67,7 @@ function resolveAssets(options: ResolveOptions): AssetWithTrustline[] {
       ...asset,
       trustlineStatus: "missing",
       balance: undefined,
+      usdPrice,
     } as AssetWithTrustline;
   });
 }

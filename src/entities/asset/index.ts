@@ -16,6 +16,7 @@ export {
 } from "./api/asset-api";
 
 export { buildPrivateTransferAssets } from "./lib/private-asset-list";
+export { getAssetUsdPrice, initializeAssetUsdPrices } from "./lib/asset-usd-price";
 
 export {
   bumpAssetTrustlineRefetch,
