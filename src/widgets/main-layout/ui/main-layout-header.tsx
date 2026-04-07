@@ -64,7 +64,7 @@ export function MainLayoutHeader({
   return (
     <React.Fragment>
       <header className="border-b border-gray-200 bg-white px-6 py-4">
-        <div className="flex items-center justify-between">
+        <div className="flex min-h-[50px] items-center justify-between">
           <div className="flex flex-1 items-center gap-4"></div>
 
           <div className="flex items-center gap-4">
