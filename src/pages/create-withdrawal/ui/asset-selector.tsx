@@ -9,8 +9,29 @@ interface AssetSelectorProperties {
   onOpenPicker: () => void;
 }
 
+function formatBalance(raw: string | undefined): string {
+  if (raw === undefined) return "—";
+  const value = Number.parseFloat(raw);
+  if (Number.isNaN(value)) return raw;
+  if (value === 0) return "0";
+  if (value < 1) {
+    return value.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 8,
+    });
+  }
+  return value.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
 export function AssetSelector({ selectedToken, onOpenPicker }: AssetSelectorProperties) {
   const { t: translate } = useTranslation("withdrawal");
+  const selectedTokenBalance = React.useMemo(
+    () => formatBalance(selectedToken?.balance),
+    [selectedToken?.balance],
+  );
 
   return (
     <div>
@@ -43,7 +64,14 @@ export function AssetSelector({ selectedToken, onOpenPicker }: AssetSelectorProp
             {translate("asset")}
           </p>
         )}
-        <ChevronDown className="h-4 w-4 text-[var(--foreground-secondary)]" />
+        <div className="flex items-center gap-3">
+          {selectedToken ? (
+            <p className="text-right text-[14px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
+              {selectedTokenBalance}
+            </p>
+          ) : undefined}
+          <ChevronDown className="h-4 w-4 text-[var(--foreground-secondary)]" />
+        </div>
       </button>
     </div>
   );
