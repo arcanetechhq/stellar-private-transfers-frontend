@@ -126,7 +126,7 @@ export function TransferForm(properties: TransferFormProperties) {
     translate,
   );
   return (
-    <div className="lg:col-span-2">
+    <div className="col-span-2">
       <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] p-6 shadow-[var(--shadow-card)]">
         <div className="space-y-6">
           <AssetField

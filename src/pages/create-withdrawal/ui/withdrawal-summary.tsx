@@ -10,7 +10,11 @@ interface SummaryLineItemsProperties {
   networkFee: number;
 }
 
-function SummaryLineItems({ selectedToken, amount, networkFee }: SummaryLineItemsProperties) {
+function SummaryLineItems({
+  selectedToken,
+  amount,
+  networkFee,
+}: SummaryLineItemsProperties) {
   const ticker = selectedToken?.assetId.toUpperCase() ?? "—";
   const { t: translate } = useTranslation("withdrawal");
 
@@ -92,7 +96,7 @@ export function WithdrawalSummary({
     trimmedDestination === "" ? "—" : shortenStellarAddress(trimmedDestination);
 
   return (
-    <div className="lg:col-span-1">
+    <div className="col-span-1">
       <div className="sticky top-6 rounded-xl border border-[var(--border)] bg-[var(--surface-card)] p-6 shadow-[var(--shadow-card)]">
         <h3 className="mb-4 text-base leading-6 font-semibold text-[var(--foreground-primary)]">
           {translate("summary")}

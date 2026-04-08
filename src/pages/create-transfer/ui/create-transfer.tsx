@@ -11,10 +11,10 @@ export function CreateTransfer() {
   return (
     <React.Fragment>
       <div className="min-h-full bg-[var(--background)] p-8">
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-7xl">
           <PageHeader />
           <form onSubmit={transfer.handleSubmit}>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="grid grid-cols-3 gap-6">
               <TransferForm
                 selectedToken={transfer.selectedToken}
                 amount={transfer.amount}

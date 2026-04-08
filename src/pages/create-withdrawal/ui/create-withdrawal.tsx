@@ -40,11 +40,11 @@ export function CreateWithdrawal() {
 
   return (
     <div className="min-h-full bg-[var(--background)] p-8">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-7xl">
         <PageHeader onGoBack={state.handleGoBack} />
         <form onSubmit={state.handleSubmit}>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-3 gap-6">
+            <div className="col-span-2">
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] p-6 shadow-[var(--shadow-card)]">
                 <div className="space-y-6">
                   <AssetSelector

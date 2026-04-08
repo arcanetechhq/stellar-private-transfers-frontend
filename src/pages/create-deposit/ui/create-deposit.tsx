@@ -10,11 +10,11 @@ export function CreateDeposit() {
 
   return (
     <div className="min-h-full bg-[var(--background)] p-8">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-7xl">
         <PageHeader onBack={() => deposit.navigate("/")} />
         <form onSubmit={deposit.handleSubmit}>
-          <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-3 gap-2">
+            <div className="col-span-2">
               <DepositForm
                 selectedToken={deposit.selectedToken}
                 amount={deposit.amount}
@@ -22,11 +22,10 @@ export function CreateDeposit() {
                 onMaxAmount={deposit.handleMaxAmount}
                 onPercentage={deposit.handlePercentage}
                 onOpenTokenPicker={() => deposit.setShowTokenPicker(true)}
-                selectedStealthNonce={deposit.selectedStealthNonce}
                 errorMessage={deposit.submitErrorMessage}
               />
             </div>
-            <div className="lg:col-span-1">
+            <div className="col-span-1">
               <DepositSummary
                 selectedToken={deposit.selectedToken}
                 amount={deposit.amount}
