@@ -4,6 +4,7 @@
   "backToHistory": "Back to History",
   "title": "Transaction Details",
   "idPrefix": "ID: ",
+  "openInStellarExpert": "Open in Stellar Expert",
   "downloadReceipt": "Download Receipt",
   "shareReceipt": "Share Receipt",
   "transactionInformation": "Transaction Information",

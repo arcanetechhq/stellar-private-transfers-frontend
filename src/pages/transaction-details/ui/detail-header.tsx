@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 
 interface DetailHeaderProperties {
   transactionId: string | undefined;
@@ -10,6 +10,13 @@ interface DetailHeaderProperties {
 export function DetailHeader(properties: DetailHeaderProperties) {
   const { transactionId } = properties;
   const { t: translate } = useTranslation("transactionDetails");
+  const stellarExpertTransactionUrl = React.useMemo(
+    () =>
+      transactionId
+        ? `https://stellar.expert/explorer/testnet/tx/${encodeURIComponent(transactionId)}`
+        : undefined,
+    [transactionId],
+  );
 
   return (
     <div className="mb-6">
@@ -38,9 +45,21 @@ export function DetailHeader(properties: DetailHeaderProperties) {
           <h1 className="mb-2 text-2xl font-semibold text-[var(--foreground-primary)]">
             {translate("title")}
           </h1>
-          <p className="text-[var(--foreground-secondary)]">
+          <p className="flex items-center gap-2 text-[var(--foreground-secondary)]">
             {translate("idPrefix")}
             {transactionId}
+            {stellarExpertTransactionUrl ? (
+              <a
+                href={stellarExpertTransactionUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-lg p-1 text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
+                title={translate("openInStellarExpert")}
+                aria-label={translate("openInStellarExpert")}
+              >
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            ) : undefined}
           </p>
         </div>
       </div>
