@@ -58,6 +58,10 @@ export function saveTransactionState(
   items: Transaction[],
 ): void {
   try {
+    const previousItems = loadTransactionState(publicKey);
+    if (previousItems && items.length < previousItems.length) {
+      return;
+    }
     localStorage.setItem(storageKeyForWallet(publicKey), JSON.stringify(items));
   } catch {
     return;
