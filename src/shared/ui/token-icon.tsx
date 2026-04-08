@@ -49,13 +49,7 @@ function FallbackIcon({ symbol }: { symbol: string }) {
   );
 }
 
-function RemoteIcon({
-  logoUrl,
-  ticker,
-}: {
-  logoUrl: string;
-  ticker: string;
-}) {
+function RemoteIcon({ logoUrl, ticker }: { logoUrl: string; ticker: string }) {
   const [failed, setFailed] = useState(false);
 
   if (failed) {
@@ -66,7 +60,7 @@ function RemoteIcon({
     <img
       src={logoUrl}
       alt={ticker}
-      className="size-full rounded-full object-cover"
+      className="size-full object-cover"
       onError={() => {
         setFailed(true);
       }}

@@ -26,7 +26,10 @@ function formatBalance(raw: string | undefined): string {
   });
 }
 
-export function AssetSelector({ selectedToken, onOpenPicker }: AssetSelectorProperties) {
+export function AssetSelector({
+  selectedToken,
+  onOpenPicker,
+}: AssetSelectorProperties) {
   const { t: translate } = useTranslation("withdrawal");
   const selectedTokenBalance = React.useMemo(
     () => formatBalance(selectedToken?.balance),
