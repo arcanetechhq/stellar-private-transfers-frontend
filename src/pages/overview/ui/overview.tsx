@@ -5,6 +5,7 @@ import { useAppSelector } from "@/app/hooks";
 import { getAssetUsdPrice } from "@/entities/asset";
 import { selectCoinItems } from "@/entities/coin";
 import {
+  selectAreTransactionsHydrated,
   selectTransactions,
   sortTransactionsByDateDesc,
 } from "@/entities/transaction";
@@ -25,6 +26,7 @@ export function Overview() {
   const privateCoinItems = useAppSelector(selectCoinItems);
 
   const transactions = useAppSelector(selectTransactions);
+  const transactionsHydrated = useAppSelector(selectAreTransactionsHydrated);
   const recentTransactions = sortTransactionsByDateDesc(transactions).slice(
     0,
     RECENT_TRANSACTIONS_LIMIT,
@@ -58,7 +60,10 @@ export function Overview() {
               balance={formatUsdBalance(totalUsdBalance)}
               assetCount={privateAssetCount}
             />
-            <RecentTransactionList transactions={recentTransactions} />
+            <RecentTransactionList
+              transactions={recentTransactions}
+              isHydrated={transactionsHydrated}
+            />
           </div>
           <PrivateAssetTable
             postAddressPicker={

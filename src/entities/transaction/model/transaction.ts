@@ -26,11 +26,13 @@ export type ChainDetailsEntry =
 export interface TransactionState {
   items: Transaction[];
   chainDetailsByHash: Record<string, ChainDetailsEntry>;
+  transactionsHydrated: boolean;
 }
 
 const initialState: TransactionState = {
   items: [],
   chainDetailsByHash: {},
+  transactionsHydrated: false,
 };
 
 const transactionSlice = createSlice({
@@ -39,6 +41,7 @@ const transactionSlice = createSlice({
   reducers: {
     hydrateTransactions: (state, action: PayloadAction<Transaction[]>) => {
       state.items = action.payload;
+      state.transactionsHydrated = true;
     },
     addTransaction: (state, action: PayloadAction<Transaction>) => {
       const index = state.items.findIndex(
@@ -90,6 +93,9 @@ export type TransactionRootState = { transaction: TransactionState };
 
 export const selectTransactions = (state: TransactionRootState) =>
   state.transaction.items;
+
+export const selectAreTransactionsHydrated = (state: TransactionRootState) =>
+  state.transaction.transactionsHydrated;
 
 export const selectTransactionById =
   (id: string) => (state: TransactionRootState) =>

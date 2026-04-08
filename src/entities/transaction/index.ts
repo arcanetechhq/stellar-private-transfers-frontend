@@ -4,6 +4,7 @@ export {
   resetForWalletChange,
   transactionReducer,
   selectTransactions,
+  selectAreTransactionsHydrated,
   selectTransactionById,
   selectChainDetailsForHash,
   type Transaction,

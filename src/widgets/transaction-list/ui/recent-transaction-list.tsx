@@ -7,12 +7,14 @@ import { RecentTransactionRow } from "./recent-transaction-row";
 
 interface RecentTransactionListProperties {
   transactions: Transaction[];
+  isHydrated: boolean;
 }
 
 export function RecentTransactionList(
   properties: RecentTransactionListProperties,
 ) {
   const { transactions } = properties;
+  const { isHydrated } = properties;
   const { t: translate } = useTranslation("overview");
 
   return (
@@ -35,9 +37,17 @@ export function RecentTransactionList(
         </Link>
       </div>
       <div className="flex-1 divide-y divide-[var(--border)]">
-        {transactions.map((transaction) => (
-          <RecentTransactionRow key={transaction.id} transaction={transaction} />
-        ))}
+        {transactions.length > 0 &&
+          transactions.map((transaction) => (
+            <RecentTransactionRow key={transaction.id} transaction={transaction} />
+          ))}
+        {isHydrated && transactions.length === 0 && (
+          <div className="flex h-full items-center justify-center px-5 text-center">
+            <p className="text-[13px] leading-[18px] text-[var(--foreground-secondary)]">
+              {translate("noRecentTransactions")}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
   "privateAssetsTitle": "Assets on Balance",
   "viewAllAssets": "View All Assets",
   "recentTransactions": "Recent Transactions",
+  "noRecentTransactions": "No transactions yet",
   "viewAll": "View All",
   "privateBalance": "Private Balance",
   "assetsInWallet": "{{count}} assets in your wallet",
