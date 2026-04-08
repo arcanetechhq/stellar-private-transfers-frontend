@@ -2,10 +2,12 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 export interface WalletState {
   publicKey: string | undefined;
+  isWalletKitLoaded: boolean;
 }
 
 const initialState: WalletState = {
   publicKey: undefined,
+  isWalletKitLoaded: false,
 };
 
 const walletSlice = createSlice({
@@ -18,10 +20,14 @@ const walletSlice = createSlice({
     clearWallet: (state) => {
       state.publicKey = undefined;
     },
+    setWalletKitLoaded: (state) => {
+      state.isWalletKitLoaded = true;
+    },
   },
 });
 
-export const { setPublicKey, clearWallet } = walletSlice.actions;
+export const { setPublicKey, clearWallet, setWalletKitLoaded } =
+  walletSlice.actions;
 export const walletReducer = walletSlice.reducer;
 
 export const selectWalletPublicKey = (state: { wallet: WalletState }) =>
@@ -29,3 +35,6 @@ export const selectWalletPublicKey = (state: { wallet: WalletState }) =>
 
 export const selectIsWalletConnected = (state: { wallet: WalletState }) =>
   state.wallet.publicKey !== undefined;
+
+export const selectIsWalletKitLoaded = (state: { wallet: WalletState }) =>
+  state.wallet.isWalletKitLoaded;

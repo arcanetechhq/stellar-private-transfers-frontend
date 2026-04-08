@@ -5,6 +5,7 @@ import { StellarWalletsKit as StellarWalletsKitSdk } from "@creit-tech/stellar-w
 import {
   clearWallet,
   setPublicKey,
+  setWalletKitLoaded,
 } from "@/entities/wallet";
 
 export const syncWalletAddressFromKit = createAsyncThunk(
@@ -15,6 +16,8 @@ export const syncWalletAddressFromKit = createAsyncThunk(
       dispatch(setPublicKey(address));
     } catch {
       await Promise.resolve();
+    } finally {
+      dispatch(setWalletKitLoaded());
     }
   },
 );

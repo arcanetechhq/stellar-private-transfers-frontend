@@ -4,6 +4,7 @@ import "@/shared/lib/stellar-wallet-kit";
 import { I18nProvider } from "./providers/i18n-provider";
 import { MerkleTreeSyncProvider } from "./providers/merkle-tree-sync-provider";
 import { StoreProvider } from "./providers/store-provider";
+import { ConnectWalletGuard } from "@/widgets/connect-wallet-guard";
 import { router } from "./routes";
 
 export default function App() {
@@ -12,6 +13,7 @@ export default function App() {
       <MerkleTreeSyncProvider>
         <I18nProvider>
           <RouterProvider router={router} unstable_useTransitions={false} />
+          <ConnectWalletGuard />
         </I18nProvider>
       </MerkleTreeSyncProvider>
     </StoreProvider>
