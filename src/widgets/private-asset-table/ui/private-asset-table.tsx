@@ -3,14 +3,14 @@ import { useTranslation } from "react-i18next";
 import { useAppSelector } from "@/app/hooks";
 import { getAssetUsdPrice, useGetAssetsQuery } from "@/entities/asset";
 import { selectFinalizedAggregatesForStealth } from "@/entities/coin";
-import { selectStealthState } from "@/entities/stealth-address";
-import { selectWalletPublicKey } from "@/entities/wallet";
-import { usePrivateAssetStealthNonce } from "../lib/use-private-asset-stealth-nonce";
+import {
+  selectDefaultNonce,
+  selectStealthByNonce,
+} from "@/entities/stealth-address";
 import {
   PrivateAssetTableBody,
   PRIVATE_ASSET_TITLE_CLASS,
 } from "./private-asset-table-body";
-import { PrivateAssetStealthSelect } from "./private-asset-stealth-select";
 
 type PrivateAssetTableProperties = {
   postAddressPicker?: ReactNode;
@@ -21,20 +21,37 @@ export function PrivateAssetTable({
 }: PrivateAssetTableProperties) {
   const { t: translateAssets } = useTranslation("assets");
   const { t: translateOverview } = useTranslation("overview");
-  const { t: translateStealth } = useTranslation("stealth");
-  const { byNonce, defaultNonce } = useAppSelector(selectStealthState);
-  const nonces = useMemo(() => Object.keys(byNonce).toSorted(), [byNonce]);
-  const { setViewingNonce, normalizedNonce } = usePrivateAssetStealthNonce(
-    defaultNonce,
-    nonces,
+  const defaultNonce = useAppSelector(selectDefaultNonce);
+  const selectedStealthAddress = useAppSelector(
+    selectStealthByNonce(defaultNonce ?? ""),
   );
-  const selectedStealthAddress = normalizedNonce
-    ? byNonce[normalizedNonce]?.stealthAddress
-    : undefined;
   const aggregates = useAppSelector(
-    selectFinalizedAggregatesForStealth(selectedStealthAddress),
+    selectFinalizedAggregatesForStealth(
+      selectedStealthAddress?.stealthAddress ?? undefined,
+    ),
   );
   const { data: assetCatalog } = useGetAssetsQuery();
+
+  const aggregatesWithZeroAssets = useMemo(() => {
+    const byAssetId = new Map(
+      aggregates.map((aggregate) => [aggregate.assetId, aggregate]),
+    );
+    if (assetCatalog) {
+      for (const asset of assetCatalog) {
+        if (byAssetId.has(asset.assetId)) {
+          continue;
+        }
+        byAssetId.set(asset.assetId, {
+          assetId: asset.assetId,
+          poolContract: asset.poolContract ?? "",
+          totalAmountDisplay: 0,
+        });
+      }
+    }
+    return [...byAssetId.values()].toSorted((left, right) =>
+      left.assetId.localeCompare(right.assetId),
+    );
+  }, [aggregates, assetCatalog]);
 
   const assetMetaById = useMemo(() => {
     const map = new Map<string, { name: string; logoUrl: string | null }>();
@@ -75,8 +92,8 @@ export function PrivateAssetTable({
 
         <PrivateAssetTableBody
           translateAssets={translateAssets}
-          noncesLength={nonces.length}
-          aggregates={aggregates}
+          noncesLength={selectedStealthAddress ? 1 : 0}
+          aggregates={aggregatesWithZeroAssets}
           assetMetaById={assetMetaById}
           assetUsdPriceById={assetUsdPriceById}
         />

@@ -1,8 +1,11 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { useGetAssetsQuery } from "@/entities/asset";
-import { selectFinalizedAggregatesForStealth } from "@/entities/coin";
+import { type AssetDto, useGetAssetsQuery } from "@/entities/asset";
+import {
+  type AggregatedPrivateAssetRow,
+  selectFinalizedAggregatesForStealth,
+} from "@/entities/coin";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { buildPrivateTransferAssets } from "../lib/private-transfer-asset-list";
 import { QUICK_PERCENTAGE_OPTIONS } from "./create-transfer";
@@ -12,6 +15,30 @@ import { useSelectedPrivateToken } from "./use-selected-private-token";
 import { useTransferAmountInputs } from "./use-transfer-amount-inputs";
 import { useTransferRecipientAndSubmitGates } from "./use-transfer-validation";
 import { useTransferSender } from "./use-transfer-sender";
+
+function withZeroAmountAssets(
+  aggregates: AggregatedPrivateAssetRow[],
+  assetCatalog: AssetDto[] | undefined,
+): AggregatedPrivateAssetRow[] {
+  const byAssetId = new Map(
+    aggregates.map((aggregate) => [aggregate.assetId, aggregate]),
+  );
+  if (assetCatalog) {
+    for (const asset of assetCatalog) {
+      if (byAssetId.has(asset.assetId)) {
+        continue;
+      }
+      byAssetId.set(asset.assetId, {
+        assetId: asset.assetId,
+        poolContract: asset.poolContract ?? "",
+        totalAmountDisplay: 0,
+      });
+    }
+  }
+  return [...byAssetId.values()].toSorted((left, right) =>
+    left.assetId.localeCompare(right.assetId),
+  );
+}
 
 export function useCreateTransfer() {
   const dispatch = useAppDispatch();
@@ -28,9 +55,12 @@ export function useCreateTransfer() {
     ),
   );
   const { data: assetCatalog } = useGetAssetsQuery();
+  const aggregatesWithZeroAssets = useMemo(() => {
+    return withZeroAmountAssets(aggregates, assetCatalog);
+  }, [aggregates, assetCatalog]);
   const privateTransferAssets = useMemo(
-    () => buildPrivateTransferAssets(aggregates, assetCatalog),
-    [aggregates, assetCatalog],
+    () => buildPrivateTransferAssets(aggregatesWithZeroAssets, assetCatalog),
+    [aggregatesWithZeroAssets, assetCatalog],
   );
   const tokenUi = useSelectedPrivateToken(
     privateTransferAssets,

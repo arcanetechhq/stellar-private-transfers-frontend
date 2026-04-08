@@ -22,9 +22,6 @@ export function buildPrivateTransferAssets(
   initializeAssetUsdPrices(assetCatalog.map((asset) => asset.assetId));
   const rows: AssetWithTrustline[] = [];
   for (const row of aggregates) {
-    if (row.totalAmountDisplay <= 0) {
-      continue;
-    }
     const dto = assetCatalog.find((asset) => asset.assetId === row.assetId);
     if (!dto) {
       continue;
