@@ -1,5 +1,4 @@
 import React from "react";
-import { Droplets } from "lucide-react";
 import { Networks } from "@stellar/stellar-sdk";
 import { useTranslation } from "react-i18next";
 import { useAppSelector } from "@/app/hooks";
@@ -33,15 +32,12 @@ export function HeaderFaucetMenu({
     <div className="relative">
       <button
         type="button"
-        className="flex items-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2 transition-colors hover:bg-gray-50"
+        className="flex min-h-[48px] items-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2 transition-colors hover:bg-gray-50"
         aria-expanded={isOpen}
         onClick={() => {
           onOpenChange(!isOpen);
         }}
       >
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-50">
-          <Droplets className="h-4 w-4 text-gray-900" />
-        </div>
         <span className="hidden text-[13px] leading-[18px] font-semibold text-gray-900 sm:inline">
           {translate("faucet.headerLabel")}
         </span>
@@ -56,9 +52,7 @@ export function HeaderFaucetMenu({
               onOpenChange(false);
             }}
           />
-          <div
-            className="absolute top-full right-0 z-20 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-dropdown)]"
-          >
+          <div className="absolute top-full right-0 z-20 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-dropdown)]">
             <div className="border-b border-[var(--border-soft)] px-3 py-2.5 text-sm font-medium text-[var(--foreground-primary)]">
               {translate("faucet.menuTitle")}
             </div>
