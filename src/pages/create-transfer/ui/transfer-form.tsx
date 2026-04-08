@@ -39,15 +39,6 @@ function RecipientField(properties: RecipientFieldProperties) {
               errorMessage ? "transfer-recipient-error" : undefined
             }
           />
-          {errorMessage ? (
-            <p
-              id="transfer-recipient-error"
-              className="mt-1.5 text-xs text-[var(--error)]"
-              role="alert"
-            >
-              {errorMessage}
-            </p>
-          ) : undefined}
         </div>
         <button
           type="button"
@@ -58,6 +49,16 @@ function RecipientField(properties: RecipientFieldProperties) {
           {translate("selectFromContacts")}
         </button>
       </div>
+
+      {errorMessage ? (
+        <p
+          id="transfer-recipient-error"
+          className="mt-1.5 text-xs text-[var(--error)]"
+          role="alert"
+        >
+          {errorMessage}
+        </p>
+      ) : undefined}
     </div>
   );
 }
