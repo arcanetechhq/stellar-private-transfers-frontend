@@ -1,7 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
-import { ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router";
 import { useAssetLookup } from "@/entities/asset";
 import { StatusBadge } from "@/shared/ui/status-badge";
 import { TokenIcon } from "@/shared/ui/token-icon";
@@ -44,30 +43,10 @@ function TransactionDateCell(properties: TransactionDateCellProperties) {
   );
 }
 
-interface ViewDetailsCellProperties {
-  id: string;
-  title: string;
-}
-
-function ViewDetailsCell(properties: ViewDetailsCellProperties) {
-  return (
-    <td className="px-6 py-4 whitespace-nowrap">
-      <Link to={`/transaction/${properties.id}`}>
-        <button
-          type="button"
-          className="rounded-lg p-2 text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
-          title={properties.title}
-        >
-          <ExternalLink className="h-4 w-4" />
-        </button>
-      </Link>
-    </td>
-  );
-}
-
 export function TransactionTableRow(properties: TransactionTableRowProperties) {
   const { t: translate } = useTranslation("history");
   const { transaction } = properties;
+  const navigate = useNavigate();
   const assetMap = useAssetLookup();
   const asset = assetMap.get(transaction.assetId);
   const assetLabel = asset?.name ?? transaction.assetId;
@@ -77,9 +56,31 @@ export function TransactionTableRow(properties: TransactionTableRowProperties) {
     counterpartyTrimmed === ""
       ? "—"
       : formatSenderCounterpartyForDisplay(counterpartyTrimmed);
+  const detailsPath = `/transaction/${transaction.id}`;
+
+  const handleRowClick = () => {
+    navigate(detailsPath);
+  };
+
+  const handleRowKeyDown: React.KeyboardEventHandler<HTMLTableRowElement> = (
+    event,
+  ) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    navigate(detailsPath);
+  };
 
   return (
-    <tr className="transition-colors hover:bg-[var(--surface-hover)]">
+    <tr
+      className="cursor-pointer transition-colors hover:bg-[var(--surface-hover)] focus-visible:bg-[var(--surface-hover)] focus-visible:outline-none"
+      role="link"
+      tabIndex={0}
+      onClick={handleRowClick}
+      onKeyDown={handleRowKeyDown}
+    >
       <TransactionDateCell date={transaction.date} />
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center gap-3">
@@ -123,7 +124,6 @@ export function TransactionTableRow(properties: TransactionTableRowProperties) {
           {getStatusLabel(transaction.status, translate)}
         </StatusBadge>
       </td>
-      <ViewDetailsCell id={transaction.id} title={translate("viewDetails")} />
     </tr>
   );
 }

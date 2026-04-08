@@ -15,7 +15,6 @@ const headerKeys = [
   "tableHeaders.amount",
   "tableHeaders.counterparty",
   "tableHeaders.status",
-  "tableHeaders.actions",
 ] as const;
 
 export function TransactionTable(properties: TransactionTableProperties) {
