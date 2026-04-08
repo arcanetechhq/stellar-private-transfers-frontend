@@ -23,7 +23,6 @@ export function CreateDeposit() {
                 onPercentage={deposit.handlePercentage}
                 onOpenTokenPicker={() => deposit.setShowTokenPicker(true)}
                 selectedStealthNonce={deposit.selectedStealthNonce}
-                onStealthSelect={deposit.handleStealthSelect}
                 errorMessage={deposit.submitErrorMessage}
               />
             </div>

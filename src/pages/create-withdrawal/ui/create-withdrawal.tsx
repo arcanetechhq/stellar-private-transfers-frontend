@@ -2,11 +2,6 @@ import React from "react";
 import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AssetPickerModal } from "@/features/pick-asset";
-import {
-  StealthAddressSelect,
-  stealthAddressSelectLabelClassName,
-} from "@/features/pick-stealth-address";
-import type { StealthAddressState } from "@/entities/stealth-address";
 import { useCreateWithdrawal } from "../model/use-create-withdrawal";
 import { AssetSelector } from "./asset-selector";
 import { AmountInput } from "./amount-input";
@@ -40,41 +35,8 @@ function PageHeader({ onGoBack }: PageHeaderProperties) {
   );
 }
 
-interface SenderFieldProperties {
-  label: string;
-  placeholder: string;
-  senderNonce: string | undefined;
-  onSenderNonceChange: (value: string) => void;
-  nonces: string[];
-  byNonce: StealthAddressState["byNonce"];
-}
-
-function SenderField(properties: SenderFieldProperties) {
-  const {
-    label,
-    placeholder,
-    senderNonce,
-    onSenderNonceChange,
-    nonces,
-    byNonce,
-  } = properties;
-  return (
-    <StealthAddressSelect
-      label={label}
-      triggerId="withdrawal-sender-stealth"
-      value={senderNonce}
-      onValueChange={onSenderNonceChange}
-      placeholder={placeholder}
-      nonces={nonces}
-      byNonce={byNonce}
-      labelClassName={stealthAddressSelectLabelClassName}
-    />
-  );
-}
-
 export function CreateWithdrawal() {
   const state = useCreateWithdrawal();
-  const { t: translate } = useTranslation("withdrawal");
 
   return (
     <div className="min-h-full bg-[var(--background)] p-8">
@@ -85,14 +47,6 @@ export function CreateWithdrawal() {
             <div className="lg:col-span-2">
               <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] p-6 shadow-[var(--shadow-card)]">
                 <div className="space-y-6">
-                  <SenderField
-                    label={translate("senderStealth")}
-                    placeholder={translate("senderStealthPlaceholder")}
-                    senderNonce={state.senderNonce}
-                    onSenderNonceChange={state.setSenderNonce}
-                    nonces={state.nonces}
-                    byNonce={state.byNonce}
-                  />
                   <AssetSelector
                     selectedToken={state.selectedToken}
                     onOpenPicker={() => state.setShowTokenPicker(true)}

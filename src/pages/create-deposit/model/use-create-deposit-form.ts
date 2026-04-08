@@ -6,7 +6,11 @@ import {
   useAssetsWithTrustlines,
   type AssetWithTrustline,
 } from "@/entities/asset";
-import { selectScalarByNonce } from "@/entities/stealth-address";
+import {
+  selectDefaultNonce,
+  selectScalarByNonce,
+  selectStealthByNonce,
+} from "@/entities/stealth-address";
 import { NETWORK_FEE } from "./create-deposit";
 import { resolveSelectedDepositAsset } from "./resolve-selected-deposit-asset";
 import { computeDepositCanSubmit } from "./compute-deposit-can-submit";
@@ -17,7 +21,9 @@ export interface UseCreateDepositFormOptions {
   isSubmitting: boolean;
 }
 
-export function useCreateDepositForm({ isSubmitting }: UseCreateDepositFormOptions) {
+export function useCreateDepositForm({
+  isSubmitting,
+}: UseCreateDepositFormOptions) {
   const [searchParameters] = useSearchParams();
   const assetIdFromUrl = searchParameters.get("assetId");
   const publicKey = useAppSelector(selectWalletPublicKey);
@@ -28,10 +34,11 @@ export function useCreateDepositForm({ isSubmitting }: UseCreateDepositFormOptio
     AssetWithTrustline | undefined
   >();
   const [amount, setAmount] = useState("");
-  const [selectedStealthNonce, setSelectedStealthNonce] = useState<
-    string | undefined
-  >();
-  const [selectedStealthAddress, setSelectedStealthAddress] = useState("");
+  const selectedStealthNonce = useAppSelector(selectDefaultNonce);
+  const selectedStealthAddress = useAppSelector(
+    (state) =>
+      selectStealthByNonce(selectedStealthNonce)(state)?.stealthAddress ?? "",
+  );
 
   const recipientScalar = useAppSelector(
     selectScalarByNonce(selectedStealthNonce ?? ""),
@@ -48,7 +55,6 @@ export function useCreateDepositForm({ isSubmitting }: UseCreateDepositFormOptio
     : 0;
 
   const {
-    handleStealthSelect,
     handleTokenSelect,
     handleAmountChange,
     handlePercentage,
@@ -59,14 +65,9 @@ export function useCreateDepositForm({ isSubmitting }: UseCreateDepositFormOptio
     setAmount,
     setSelectedToken,
     setShowTokenPicker,
-    setSelectedStealthNonce,
-    setSelectedStealthAddress,
   });
 
-  const receivedAmount = useMemo(
-    () => computeReceivedAmount(amount),
-    [amount],
-  );
+  const receivedAmount = useMemo(() => computeReceivedAmount(amount), [amount]);
 
   const numericAmount = Number.parseFloat(amount);
   const hasPoolContract = Boolean(selectedAsset?.poolContract?.trim());
@@ -98,7 +99,6 @@ export function useCreateDepositForm({ isSubmitting }: UseCreateDepositFormOptio
     receivedAmount,
     canSubmit,
     selectedStealthNonce,
-    handleStealthSelect,
     destinationStealthPreview: selectedStealthAddress,
     selectedAsset,
     numericAmount,

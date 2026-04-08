@@ -1,10 +1,7 @@
 import { type FormEvent, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useAppDispatch } from "@/app/hooks";
-import {
-  addTransaction,
-  buildUserTransaction,
-} from "@/entities/transaction";
+import { addTransaction, buildUserTransaction } from "@/entities/transaction";
 import { useDepositTransaction } from "@/features/deposit";
 import { useCreateDepositForm } from "./use-create-deposit-form";
 
@@ -82,7 +79,6 @@ export function useCreateDeposit() {
     handleSubmit,
     canSubmit: form.canSubmit,
     selectedStealthNonce: form.selectedStealthNonce,
-    handleStealthSelect: form.handleStealthSelect,
     destinationStealthPreview: form.destinationStealthPreview,
     isSubmitting,
     submitErrorMessage: submitError?.message,

@@ -9,8 +9,6 @@ export interface UseDepositFormHandlersInput {
   setAmount: Dispatch<SetStateAction<string>>;
   setSelectedToken: Dispatch<SetStateAction<AssetWithTrustline | undefined>>;
   setShowTokenPicker: Dispatch<SetStateAction<boolean>>;
-  setSelectedStealthNonce: Dispatch<SetStateAction<string | undefined>>;
-  setSelectedStealthAddress: Dispatch<SetStateAction<string>>;
 }
 
 export function useDepositFormHandlers({
@@ -19,17 +17,7 @@ export function useDepositFormHandlers({
   setAmount,
   setSelectedToken,
   setShowTokenPicker,
-  setSelectedStealthNonce,
-  setSelectedStealthAddress,
 }: UseDepositFormHandlersInput) {
-  const handleStealthSelect = useCallback(
-    (nonce: string, address: string) => {
-      setSelectedStealthNonce(nonce);
-      setSelectedStealthAddress(address);
-    },
-    [setSelectedStealthAddress, setSelectedStealthNonce],
-  );
-
   const handleTokenSelect = useCallback(
     (asset: AssetWithTrustline) => {
       setSelectedToken(asset);
@@ -62,7 +50,6 @@ export function useDepositFormHandlers({
   }, [selectedAsset?.balance, setAmount]);
 
   return {
-    handleStealthSelect,
     handleTokenSelect,
     handleAmountChange,
     handlePercentage,

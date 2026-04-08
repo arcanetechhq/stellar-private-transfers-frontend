@@ -26,10 +26,6 @@ export function CreateTransfer() {
                 onOpenContactPicker={() => transfer.setShowContactPicker(true)}
                 onPercentage={transfer.handlePercentage}
                 onMaxAmount={transfer.handleMaxAmount}
-                senderNonce={transfer.senderNonce}
-                onSenderNonceChange={transfer.setSenderNonce}
-                nonces={transfer.nonces}
-                byNonce={transfer.byNonce}
               />
               <TransferSummary
                 selectedToken={transfer.selectedToken}
@@ -60,7 +56,6 @@ export function CreateTransfer() {
           onSelect={transfer.setRecipient}
           onClose={() => transfer.setShowContactPicker(false)}
           excludeStealthAddress={transfer.senderStealthAddress}
-          stealthRows={transfer.stealthRowsForPicker}
         />
       </div>
     </React.Fragment>

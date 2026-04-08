@@ -2,46 +2,9 @@ import { Users, Info } from "lucide-react";
 import React from "react";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
-import type { StealthAddressState } from "@/entities/stealth-address";
 import type { AssetWithTrustline } from "@/entities/asset";
-import {
-  StealthAddressSelect,
-  stealthAddressSelectLabelClassName,
-} from "@/features/pick-stealth-address";
 import { AssetField } from "./asset-field";
 import { AmountField } from "./amount-field";
-
-interface SenderFieldProperties {
-  label: string;
-  placeholder: string;
-  senderNonce: string | undefined;
-  onSenderNonceChange: (value: string) => void;
-  nonces: string[];
-  byNonce: StealthAddressState["byNonce"];
-}
-
-function SenderField(properties: SenderFieldProperties) {
-  const {
-    label,
-    placeholder,
-    senderNonce,
-    onSenderNonceChange,
-    nonces,
-    byNonce,
-  } = properties;
-  return (
-    <StealthAddressSelect
-      label={label}
-      triggerId="transfer-sender-stealth"
-      value={senderNonce}
-      onValueChange={onSenderNonceChange}
-      placeholder={placeholder}
-      nonces={nonces}
-      byNonce={byNonce}
-      labelClassName={stealthAddressSelectLabelClassName}
-    />
-  );
-}
 
 interface RecipientFieldProperties {
   recipient: string;
@@ -51,12 +14,8 @@ interface RecipientFieldProperties {
 }
 
 function RecipientField(properties: RecipientFieldProperties) {
-  const {
-    recipient,
-    onRecipientChange,
-    onOpenContactPicker,
-    errorMessage,
-  } = properties;
+  const { recipient, onRecipientChange, onOpenContactPicker, errorMessage } =
+    properties;
   const { t: translate } = useTranslation("transfer");
   return (
     <div>
@@ -133,10 +92,6 @@ export interface TransferFormProperties {
   onOpenContactPicker: () => void;
   onPercentage: (percentage: number) => void;
   onMaxAmount: () => void;
-  senderNonce: string | undefined;
-  onSenderNonceChange: (value: string) => void;
-  nonces: string[];
-  byNonce: StealthAddressState["byNonce"];
 }
 
 function recipientErrorMessageFromKey(
@@ -164,10 +119,6 @@ export function TransferForm(properties: TransferFormProperties) {
     onOpenContactPicker,
     onPercentage,
     onMaxAmount,
-    senderNonce,
-    onSenderNonceChange,
-    nonces,
-    byNonce,
   } = properties;
   const { t: translate } = useTranslation("transfer");
   const recipientErrorMessage = recipientErrorMessageFromKey(
@@ -178,14 +129,6 @@ export function TransferForm(properties: TransferFormProperties) {
     <div className="lg:col-span-2">
       <div className="rounded-xl border border-[var(--border)] bg-[var(--surface-card)] p-6 shadow-[var(--shadow-card)]">
         <div className="space-y-6">
-          <SenderField
-            label={translate("senderStealth")}
-            placeholder={translate("senderStealthPlaceholder")}
-            senderNonce={senderNonce}
-            onSenderNonceChange={onSenderNonceChange}
-            nonces={nonces}
-            byNonce={byNonce}
-          />
           <AssetField
             selectedToken={selectedToken}
             onOpenTokenPicker={onOpenTokenPicker}

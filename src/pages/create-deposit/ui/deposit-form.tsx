@@ -5,11 +5,7 @@ import { useTranslation } from "react-i18next";
 import { TokenIcon } from "@/shared/ui/token-icon";
 import { FormErrorAlert } from "@/shared/ui/form-error-alert";
 import type { AssetWithTrustline } from "@/entities/asset";
-import { StealthAddressPicker } from "@/features/pick-stealth-address";
 import { QUICK_PERCENTAGE_OPTIONS } from "../model/create-deposit";
-import { useAppSelector } from "@/app/hooks";
-import { selectAllStealthNonces } from "@/entities/stealth-address";
-import { ManageStealthAddressesWidget } from "@/widgets/manage-stealth-addresses";
 
 interface AssetSelectorProperties {
   selectedToken: AssetWithTrustline | undefined;
@@ -135,8 +131,6 @@ interface DepositFormProperties {
   onMaxAmount: () => void;
   onPercentage: (percentage: number) => void;
   onOpenTokenPicker: () => void;
-  selectedStealthNonce: string | undefined;
-  onStealthSelect: (nonce: string, stealthAddress: string) => void;
   errorMessage?: string;
 }
 
@@ -147,13 +141,9 @@ export function DepositForm({
   onMaxAmount,
   onPercentage,
   onOpenTokenPicker,
-  selectedStealthNonce,
-  onStealthSelect,
   errorMessage,
 }: DepositFormProperties) {
   const { t: translate } = useTranslation("deposit");
-  const stealthNonces = useAppSelector(selectAllStealthNonces);
-  const hasStealthNonces = stealthNonces.length > 0;
 
   return (
     <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
@@ -172,14 +162,6 @@ export function DepositForm({
           onMaxAmount={onMaxAmount}
           onPercentage={onPercentage}
         />
-        {hasStealthNonces ? (
-          <StealthAddressPicker
-            selectedNonce={selectedStealthNonce}
-            onSelectNonce={onStealthSelect}
-          />
-        ) : (
-          <ManageStealthAddressesWidget variant="compact" />
-        )}
         <DepositInfoBanner />
       </div>
     </div>

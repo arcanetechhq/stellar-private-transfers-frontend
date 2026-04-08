@@ -66,18 +66,7 @@ export function PrivateAssetTable({
             {translateOverview("privateAssetsTitle")}
           </h2>
           <div className="flex min-w-sm flex-row flex-nowrap items-start justify-end gap-3">
-            <div className="max-w-xs min-w-0 flex-3 shrink">
-              {nonces.length > 0 ? (
-                <PrivateAssetStealthSelect
-                  translate={translateStealth}
-                  nonces={nonces}
-                  byNonce={byNonce}
-                  normalizedNonce={normalizedNonce}
-                  onViewingChange={setViewingNonce}
-                  noLabel={true}
-                />
-              ) : undefined}
-            </div>
+            <div className="max-w-xs min-w-0 flex-3 shrink" />
             {postAddressPicker ? (
               <div className="flex-2 shrink-0">{postAddressPicker}</div>
             ) : undefined}

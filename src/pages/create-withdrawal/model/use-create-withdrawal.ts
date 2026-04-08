@@ -32,7 +32,9 @@ function computeWithdrawalCanSubmit(input: WithdrawalCanSubmitInput): boolean {
   );
 }
 
-function useWithdrawalAmountInputs(selectedAsset: AssetWithTrustline | undefined) {
+function useWithdrawalAmountInputs(
+  selectedAsset: AssetWithTrustline | undefined,
+) {
   const [amount, setAmount] = useState("");
   const numericBalance = selectedAsset
     ? Number.parseFloat(selectedAsset.balance ?? "0")
@@ -54,7 +56,14 @@ function useWithdrawalAmountInputs(selectedAsset: AssetWithTrustline | undefined
       setAmount(value);
     }
   };
-  return { amount, handleAmountChange, handlePercentage, handleMaxAmount, receivedAmount, numericBalance };
+  return {
+    amount,
+    handleAmountChange,
+    handlePercentage,
+    handleMaxAmount,
+    receivedAmount,
+    numericBalance,
+  };
 }
 
 export function useCreateWithdrawal() {
@@ -115,8 +124,5 @@ export function useCreateWithdrawal() {
     isSubmitting,
     submitError,
     senderNonce: withdrawalSender.effectiveSenderNonce,
-    setSenderNonce: withdrawalSender.setSenderNonce,
-    nonces: withdrawalSender.nonces,
-    byNonce: withdrawalSender.byNonce,
   };
 }

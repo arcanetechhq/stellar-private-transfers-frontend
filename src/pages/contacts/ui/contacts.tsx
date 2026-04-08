@@ -68,7 +68,6 @@ export function Contacts() {
     >
       <div className="mx-auto max-w-7xl">
         <ContactsHeader onAddClick={() => setShowAddModal(true)} />
-        <ManageStealthAddressesWidget variant="full" />
         <ContactList />
       </div>
       {showAddModal && (
