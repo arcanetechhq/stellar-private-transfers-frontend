@@ -14,7 +14,7 @@ function SummaryLineItems({
   selectedToken,
   amount,
   networkFee,
-}: SummaryLineItemsProperties) {
+}: SummaryLineItemsProperties): React.JSX.Element {
   const { t: translate } = useTranslation("deposit");
   const ticker = selectedToken?.assetId.toUpperCase() ?? "—";
 
@@ -58,7 +58,7 @@ function SummaryReceiveInfo({
   receivedAmount,
   ticker,
   destinationPreview,
-}: SummaryReceiveInfoProperties) {
+}: SummaryReceiveInfoProperties): React.JSX.Element {
   const { t: translate } = useTranslation("deposit");
   const preview = destinationPreview.trim()
     ? shortenStealthForDisplay(destinationPreview.trim())
@@ -94,6 +94,7 @@ interface DepositSummaryProperties {
   canSubmit: boolean;
   isSubmitting: boolean;
   destinationPreview: string;
+  shouldGeneratePrivateAddress: boolean;
 }
 
 export function DepositSummary({
@@ -104,7 +105,8 @@ export function DepositSummary({
   canSubmit,
   isSubmitting,
   destinationPreview,
-}: DepositSummaryProperties) {
+  shouldGeneratePrivateAddress,
+}: DepositSummaryProperties): React.JSX.Element {
   const { t: translate } = useTranslation("deposit");
   const ticker = selectedToken?.assetId.toUpperCase() ?? "—";
 
@@ -133,7 +135,9 @@ export function DepositSummary({
         ) : (
           <Download className="h-4 w-4" />
         )}
-        {translate("confirmDeposit")}
+        {shouldGeneratePrivateAddress
+          ? translate("generateDepositAddress")
+          : translate("confirmDeposit")}
       </button>
     </div>
   );

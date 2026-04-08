@@ -20,5 +20,6 @@
   "stealthDestination": "Private destination",
   "stealthPlaceholder": "Select private address",
   "noStealthAddresses": "Create a private address on the overview page first.",
-  "submitErrorTitle": "Could not complete deposit"
+  "submitErrorTitle": "Could not complete deposit",
+  "generateDepositAddress": "Generate Deposit Address"
 }

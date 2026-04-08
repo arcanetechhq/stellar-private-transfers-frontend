@@ -5,7 +5,7 @@ import { PageHeader } from "./page-header";
 import { DepositForm } from "./deposit-form";
 import { DepositSummary } from "./deposit-summary";
 
-export function CreateDeposit() {
+export function CreateDeposit(): React.JSX.Element {
   const deposit = useCreateDeposit();
 
   return (
@@ -34,6 +34,9 @@ export function CreateDeposit() {
                 canSubmit={deposit.canSubmit}
                 isSubmitting={deposit.isSubmitting}
                 destinationPreview={deposit.destinationStealthPreview}
+                shouldGeneratePrivateAddress={
+                  deposit.shouldGeneratePrivateAddress
+                }
               />
             </div>
           </div>
