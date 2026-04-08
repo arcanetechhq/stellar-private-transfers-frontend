@@ -22,7 +22,6 @@ export function PrivateAssetTable({
   const { t: translateAssets } = useTranslation("assets");
   const { t: translateOverview } = useTranslation("overview");
   const { t: translateStealth } = useTranslation("stealth");
-  const publicKey = useAppSelector(selectWalletPublicKey);
   const { byNonce, defaultNonce } = useAppSelector(selectStealthState);
   const nonces = useMemo(() => Object.keys(byNonce).toSorted(), [byNonce]);
   const { setViewingNonce, normalizedNonce } = usePrivateAssetStealthNonce(
@@ -59,10 +58,6 @@ export function PrivateAssetTable({
     return map;
   }, [assetCatalog]);
 
-  if (!publicKey) {
-    return;
-  }
-
   return (
     <React.Fragment>
       <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--card)]">
@@ -71,8 +66,8 @@ export function PrivateAssetTable({
             {translateOverview("privateAssetsTitle")}
           </h2>
           <div className="flex min-w-sm flex-row flex-nowrap items-start justify-end gap-3">
-            {nonces.length > 0 ? (
-              <div className="max-w-xs min-w-0 flex-3 shrink">
+            <div className="max-w-xs min-w-0 flex-3 shrink">
+              {nonces.length > 0 ? (
                 <PrivateAssetStealthSelect
                   translate={translateStealth}
                   nonces={nonces}
@@ -81,8 +76,8 @@ export function PrivateAssetTable({
                   onViewingChange={setViewingNonce}
                   noLabel={true}
                 />
-              </div>
-            ) : undefined}
+              ) : undefined}
+            </div>
             {postAddressPicker ? (
               <div className="flex-2 shrink-0">{postAddressPicker}</div>
             ) : undefined}

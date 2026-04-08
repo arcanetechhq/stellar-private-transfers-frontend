@@ -13,7 +13,7 @@ export function CreateDeposit() {
       <div className="mx-auto max-w-5xl">
         <PageHeader onBack={() => deposit.navigate("/")} />
         <form onSubmit={deposit.handleSubmit}>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <DepositForm
                 selectedToken={deposit.selectedToken}
