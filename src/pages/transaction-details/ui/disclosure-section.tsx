@@ -7,8 +7,9 @@ import { DISCLOSURE_OPTIONS } from "../model/transaction-details";
 
 export function DisclosureSection() {
   const { t: translate } = useTranslation("transactionDetails");
-  const [selectedDisclosure, setSelectedDisclosure] =
-    useState<string | undefined>();
+  const [selectedDisclosure, setSelectedDisclosure] = useState<
+    string | undefined
+  >();
 
   return (
     <>
@@ -33,9 +34,7 @@ export function DisclosureSection() {
                 name="disclosure"
                 value={option.id}
                 checked={selectedDisclosure === option.id}
-                onChange={(event) =>
-                  setSelectedDisclosure(event.target.value)
-                }
+                onChange={(event) => setSelectedDisclosure(event.target.value)}
                 className="mt-1 h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <div className="flex-1">

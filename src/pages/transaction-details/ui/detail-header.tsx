@@ -30,22 +30,6 @@ export function DetailHeader(properties: DetailHeaderProperties) {
             {transactionId}
           </p>
         </div>
-        <div className="flex gap-3">
-          <button
-            type="button"
-            className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-medium text-[var(--foreground-primary)] transition-colors hover:bg-[var(--surface-hover)]"
-          >
-            <Download className="h-4 w-4" />
-            {translate("downloadReceipt")}
-          </button>
-          <button
-            type="button"
-            className="flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--card)] px-4 py-2 text-sm font-medium text-[var(--foreground-primary)] transition-colors hover:bg-[var(--surface-hover)]"
-          >
-            <Share2 className="h-4 w-4" />
-            {translate("shareReceipt")}
-          </button>
-        </div>
       </div>
     </div>
   );
