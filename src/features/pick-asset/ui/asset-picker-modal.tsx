@@ -27,11 +27,7 @@ interface AssetListItemProperties {
   onSelect: (asset: AssetWithTrustline) => void;
 }
 
-function AssetListItem({
-  asset,
-  isSelected,
-  onSelect,
-}: AssetListItemProperties) {
+function AssetListItem({ asset, isSelected, onSelect }: AssetListItemProperties) {
   const hasBalance =
     asset.balance !== undefined && Number.parseFloat(asset.balance) > 0;
 
@@ -83,7 +79,6 @@ export interface AssetPickerModalProperties {
   selectedAssetId: string | undefined;
   onSelect: (asset: AssetWithTrustline) => void;
   onClose: () => void;
-  customAssetFilter?: (asset: AssetWithTrustline) => boolean;
 }
 
 export function AssetPickerModal({
@@ -91,7 +86,6 @@ export function AssetPickerModal({
   selectedAssetId,
   onSelect,
   onClose,
-  customAssetFilter,
 }: AssetPickerModalProperties) {
   const { t: translate } = useTranslation("assets");
   const [searchQuery, setSearchQuery] = useState("");
@@ -102,7 +96,6 @@ export function AssetPickerModal({
         asset.assetId.toLowerCase().includes(searchQuery.toLowerCase()) ||
         asset.name.toLowerCase().includes(searchQuery.toLowerCase()),
     )
-    .filter((asset) => customAssetFilter?.(asset) ?? true)
     .toSorted((left, right) => left.id - right.id);
 
   return (

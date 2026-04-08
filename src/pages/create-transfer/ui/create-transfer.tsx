@@ -42,9 +42,6 @@ export function CreateTransfer() {
         {transfer.showTokenPicker ? (
           <AssetPickerModal
             assets={transfer.assets}
-            customAssetFilter={(asset) =>
-              Number.parseFloat(asset.balance ?? "0") > 0
-            }
             selectedAssetId={transfer.selectedToken?.assetId}
             onSelect={transfer.handleTokenSelect}
             onClose={() => transfer.setShowTokenPicker(false)}
@@ -58,6 +55,21 @@ export function CreateTransfer() {
           excludeStealthAddress={transfer.senderStealthAddress}
         />
       </div>
+      {transfer.showTokenPicker ? (
+        <AssetPickerModal
+          assets={transfer.assets}
+          selectedAssetId={transfer.selectedToken?.assetId}
+          onSelect={transfer.handleTokenSelect}
+          onClose={() => transfer.setShowTokenPicker(false)}
+        />
+      ) : undefined}
+      <PickContactModal
+        open={transfer.showContactPicker}
+        selectedAddress={transfer.recipient}
+        onSelect={transfer.setRecipient}
+        onClose={() => transfer.setShowContactPicker(false)}
+        excludeStealthAddress={transfer.senderStealthAddress}
+      />
     </React.Fragment>
   );
 }
