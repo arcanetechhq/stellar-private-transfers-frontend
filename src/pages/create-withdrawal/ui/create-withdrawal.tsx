@@ -77,7 +77,7 @@ export function CreateWithdrawal() {
   const { t: translate } = useTranslation("withdrawal");
 
   return (
-    <div className="min-h-full bg-[var(--surface-primary)] p-8">
+    <div className="min-h-full bg-[var(--background)] p-8">
       <div className="mx-auto max-w-5xl">
         <PageHeader onGoBack={state.handleGoBack} />
         <form onSubmit={state.handleSubmit}>

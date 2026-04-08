@@ -10,7 +10,7 @@ export function CreateTransfer() {
   const transfer = useCreateTransfer();
   return (
     <React.Fragment>
-      <div className="min-h-full bg-[var(--surface-primary)] p-8">
+      <div className="min-h-full bg-[var(--background)] p-8">
         <div className="mx-auto max-w-5xl">
           <PageHeader />
           <form onSubmit={transfer.handleSubmit}>
