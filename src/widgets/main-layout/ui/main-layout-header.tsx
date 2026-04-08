@@ -1,8 +1,6 @@
 import React from "react";
-import { Bell, Globe } from "lucide-react";
 import type { ReactNode } from "react";
 import { MainLayoutHeaderWallet } from "./main-layout-header-wallet";
-import { MainLayoutLanguageMenu } from "./main-layout-language-menu";
 import { HeaderFaucetMenu } from "./header-faucet-menu";
 
 export const LANGUAGES = [
@@ -73,32 +71,6 @@ export function MainLayoutHeader({
           <div className="flex flex-1 items-center gap-4"></div>
 
           <div className="flex items-center gap-4">
-            <MainLayoutIconButton
-              onClick={onOpenNotifications}
-              icon={<Bell className="h-5 w-5" />}
-              withBadge
-            />
-
-            <div className="relative">
-              <MainLayoutIconButton
-                onClick={() => {
-                  setLanguageOpen(!languageOpen);
-                  if (!languageOpen) {
-                    setFaucetOpen(false);
-                  }
-                }}
-                icon={<Globe className="h-5 w-5" />}
-                isExpanded={languageOpen}
-              />
-              <MainLayoutLanguageMenu
-                isOpen={languageOpen}
-                onClose={() => setLanguageOpen(false)}
-                languages={[...LANGUAGES]}
-                currentLanguage={currentLanguage}
-                onSelectLanguage={onSelectLanguage}
-              />
-            </div>
-
             <HeaderFaucetMenu
               isOpen={faucetOpen}
               onOpenChange={(open) => {
