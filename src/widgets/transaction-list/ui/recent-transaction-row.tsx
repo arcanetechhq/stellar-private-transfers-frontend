@@ -10,6 +10,7 @@ import {
   getAmountToneClass,
   getAmountPrefix,
 } from "../lib/transaction-display";
+import { TransactionTypeIcon } from "./transaction-type-icon";
 
 interface RecentTransactionRowProperties {
   transaction: Transaction;
@@ -34,6 +35,7 @@ export function RecentTransactionRow(
       )}
     >
       <div className="flex w-full items-center gap-3">
+        <TransactionTypeIcon type={transaction.type} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <p className="truncate text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
