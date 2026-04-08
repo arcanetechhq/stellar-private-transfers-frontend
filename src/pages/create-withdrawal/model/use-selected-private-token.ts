@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import type { AssetWithTrustline } from "@/entities/asset";
 
 export function useSelectedPrivateToken(
@@ -6,30 +6,36 @@ export function useSelectedPrivateToken(
   assetIdFromUrl: string | null,
 ) {
   const [showTokenPicker, setShowTokenPicker] = useState(false);
-  const [selectedToken, setSelectedToken] = useState<
-    AssetWithTrustline | undefined
+  const [userSelectedAssetId, setUserSelectedAssetId] = useState<
+    string | undefined
   >();
-  useEffect(() => {
+
+  const selectedAssetId = useMemo(() => {
     if (privateAssets.length === 0) {
-      setSelectedToken(undefined);
       return;
     }
-    setSelectedToken((previous) => {
-      const matchPrevious = previous
-        ? privateAssets.find((asset) => asset.assetId === previous.assetId)
-        : undefined;
-      if (matchPrevious) {
-        return matchPrevious;
-      }
-      const fromUrl = assetIdFromUrl
-        ? privateAssets.find((asset) => asset.assetId === assetIdFromUrl)
-        : undefined;
-      return fromUrl ?? privateAssets[0];
-    });
-  }, [privateAssets, assetIdFromUrl]);
+    if (
+      userSelectedAssetId &&
+      privateAssets.some((asset) => asset.assetId === userSelectedAssetId)
+    ) {
+      return userSelectedAssetId;
+    }
+    const fromUrl = assetIdFromUrl
+      ? privateAssets.find((asset) => asset.assetId === assetIdFromUrl)
+      : undefined;
+    return fromUrl?.assetId ?? privateAssets[0]?.assetId;
+  }, [privateAssets, assetIdFromUrl, userSelectedAssetId]);
+
+  const selectedToken = useMemo(
+    () =>
+      selectedAssetId
+        ? privateAssets.find((asset) => asset.assetId === selectedAssetId)
+        : undefined,
+    [privateAssets, selectedAssetId],
+  );
 
   const handleTokenSelect = (asset: AssetWithTrustline) => {
-    setSelectedToken(asset);
+    setUserSelectedAssetId(asset.assetId);
     setShowTokenPicker(false);
   };
 

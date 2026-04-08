@@ -55,21 +55,6 @@ export function CreateTransfer() {
           excludeStealthAddress={transfer.senderStealthAddress}
         />
       </div>
-      {transfer.showTokenPicker ? (
-        <AssetPickerModal
-          assets={transfer.assets}
-          selectedAssetId={transfer.selectedToken?.assetId}
-          onSelect={transfer.handleTokenSelect}
-          onClose={() => transfer.setShowTokenPicker(false)}
-        />
-      ) : undefined}
-      <PickContactModal
-        open={transfer.showContactPicker}
-        selectedAddress={transfer.recipient}
-        onSelect={transfer.setRecipient}
-        onClose={() => transfer.setShowContactPicker(false)}
-        excludeStealthAddress={transfer.senderStealthAddress}
-      />
     </React.Fragment>
   );
 }

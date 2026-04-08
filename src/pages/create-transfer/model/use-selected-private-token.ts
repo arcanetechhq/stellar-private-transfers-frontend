@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import type { AssetWithTrustline } from "@/entities/asset";
 
 export function useSelectedPrivateToken(
@@ -7,34 +7,36 @@ export function useSelectedPrivateToken(
 ) {
   const [showTokenPicker, setShowTokenPicker] = useState(false);
   const [showContactPicker, setShowContactPicker] = useState(false);
-  const [selectedToken, setSelectedToken] = useState<
-    AssetWithTrustline | undefined
+  const [userSelectedAssetId, setUserSelectedAssetId] = useState<
+    string | undefined
   >();
-  useEffect(() => {
+
+  const selectedAssetId = useMemo(() => {
     if (privateTransferAssets.length === 0) {
-      setSelectedToken(undefined);
       return;
     }
-    setSelectedToken((previous) => {
-      const matchPrevious = previous
-        ? privateTransferAssets.find(
-            (asset) => asset.assetId === previous.assetId,
-          )
-        : undefined;
-      if (matchPrevious) {
-        return matchPrevious;
-      }
-      const fromUrl = assetIdFromUrl
-        ? privateTransferAssets.find(
-            (asset) => asset.assetId === assetIdFromUrl,
-          )
-        : undefined;
-      return fromUrl ?? privateTransferAssets[0];
-    });
-  }, [privateTransferAssets, assetIdFromUrl]);
+    if (
+      userSelectedAssetId &&
+      privateTransferAssets.some((asset) => asset.assetId === userSelectedAssetId)
+    ) {
+      return userSelectedAssetId;
+    }
+    const fromUrl = assetIdFromUrl
+      ? privateTransferAssets.find((asset) => asset.assetId === assetIdFromUrl)
+      : undefined;
+    return fromUrl?.assetId ?? privateTransferAssets[0]?.assetId;
+  }, [privateTransferAssets, assetIdFromUrl, userSelectedAssetId]);
+
+  const selectedToken = useMemo(
+    () =>
+      selectedAssetId
+        ? privateTransferAssets.find((asset) => asset.assetId === selectedAssetId)
+        : undefined,
+    [privateTransferAssets, selectedAssetId],
+  );
 
   const handleTokenSelect = (asset: AssetWithTrustline) => {
-    setSelectedToken(asset);
+    setUserSelectedAssetId(asset.assetId);
     setShowTokenPicker(false);
   };
 
