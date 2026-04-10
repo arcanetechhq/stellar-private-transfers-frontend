@@ -9,7 +9,7 @@ import {
   assetTrustlineRefreshReducer,
   assetUiOperationsReducer,
 } from "@/entities/asset";
-import "@/features/faucet/api/faucet-api";
+import "@/features/faucet";
 import { walletReducer } from "@/entities/wallet";
 import {
   buildStealthPersistPayload,

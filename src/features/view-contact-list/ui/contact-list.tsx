@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Users } from "lucide-react";
-import { useAppSelector } from "@/app/hooks";
+import { useAppSelector } from "@/store";
 import { COPY_FEEDBACK_TIMEOUT_MS, selectContacts } from "@/entities/contact";
-import { ContactRow } from "./contact-row";
+import { ContactRow } from "@/features/view-contact-list";
 
 export function ContactList() {
   const contacts = useAppSelector(selectContacts);

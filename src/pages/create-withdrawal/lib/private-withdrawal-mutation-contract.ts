@@ -1,4 +1,4 @@
-import type { AppDispatch } from "@/app/store";
+import type { AppDispatch } from "@/store";
 import type { CoinWithMetadata } from "@/entities/coin";
 
 export interface RunPrivateWithdrawalMutationInput {

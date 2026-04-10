@@ -3,14 +3,17 @@ import {
   type ITransaction,
 } from "@auditable/stellar-audit";
 import type { PostCoinDeliveryBody } from "@/entities/coin-deliveries";
-import type { AppDispatch } from "@/app/store";
+import type { AppDispatch } from "@/store";
 import { addCoin } from "@/entities/coin";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
 import { normalizeSorobanContractId } from "@/shared/stellar/normalize-soroban-contract-id";
-import { getAuditPublicKey, decimalFieldToBytes } from "./audit-encoding";
-import { submitSorobanDeposit } from "./submit-soroban-deposit";
-import { buildCoinDeliveryPostBody } from "./build-coin-delivery-post-body";
+import {
+  buildCoinDeliveryPostBody,
+  getAuditPublicKey,
+  decimalFieldToBytes,
+  submitSorobanDeposit,
+} from "@/features/deposit";
 
 const STROOPS_PER_UNIT = 10_000_000;
 

@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router";
-import { useAppSelector } from "@/app/hooks";
+import { useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import {
   useAssetsWithTrustlines,

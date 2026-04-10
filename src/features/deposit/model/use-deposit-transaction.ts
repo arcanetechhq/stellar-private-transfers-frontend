@@ -2,10 +2,10 @@ import { useCallback, useState } from "react";
 import { StellarWalletsKit as StellarWalletsKitSdk } from "@creit-tech/stellar-wallets-kit/sdk";
 import { usePostCoinDeliveryMutation } from "@/entities/coin-deliveries";
 import type { AssetWithTrustline } from "@/entities/asset";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
-import { runDepositMutation } from "../lib/run-deposit-mutation";
+import { runDepositMutation } from "@/features/deposit";
 
 export interface DepositTransactionInput {
   asset: AssetWithTrustline;

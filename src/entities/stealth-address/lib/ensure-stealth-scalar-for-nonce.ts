@@ -1,26 +1,30 @@
 import { PrivacyPoolSDK } from "@auditable/privacy-pool-zk-sdk";
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
-import { store, type AppDispatch } from "@/app/store";
-import {
-  readStealthRecordFromStorage,
-  setStealthRecordAndScalar,
-  type StealthNonceEntry,
-} from "@/entities/stealth-address";
+import type { Dispatch, UnknownAction } from "redux";
+import { readStealthRecordFromStorage } from "./persist-stealth";
+import { setStealthRecordAndScalar } from "../model/stealth-address";
+import type { StealthNonceEntry } from "../model/types";
 import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
 import { recipientScalarHexFromStellarSignature } from "@/shared/lib/stealth/recipient-scalar-hex";
+import type { StealthAddressState } from "../model/types";
 
 export type EnsureScalarResult =
   | { ok: true }
   | { ok: false; reason: "invalid" | "no_address" | "mismatch" | "sign_failed" };
 
+type MinimalRootForEnsure = {
+  stealthAddress: StealthAddressState;
+};
+
 type EnsureStealthScalarParameters = {
-  dispatch: AppDispatch;
+  dispatch: Dispatch<UnknownAction>;
+  getState: () => MinimalRootForEnsure;
   publicKey: string;
   nonce: string;
 };
 
 type SignScalarParameters = {
-  dispatch: AppDispatch;
+  dispatch: Dispatch<UnknownAction>;
   publicKey: string;
   trimmed: string;
   entry: StealthNonceEntry;
@@ -65,17 +69,16 @@ async function trySignAndStoreScalar(
 export async function ensureStealthScalarForNonce(
   parameters: EnsureStealthScalarParameters,
 ): Promise<EnsureScalarResult> {
-  const { dispatch, publicKey, nonce } = parameters;
+  const { dispatch, getState, publicKey, nonce } = parameters;
   const trimmed = nonce.trim();
   if (!trimmed) {
     return { ok: false, reason: "invalid" };
   }
-  const existingScalar =
-    store.getState().stealthAddress.scalarByNonce[trimmed];
+  const existingScalar = getState().stealthAddress.scalarByNonce[trimmed];
   if (existingScalar) {
     return { ok: true };
   }
-  const fromStore = store.getState().stealthAddress.byNonce[trimmed];
+  const fromStore = getState().stealthAddress.byNonce[trimmed];
   const entry =
     fromStore ?? readStealthRecordFromStorage(publicKey, trimmed);
   if (!entry || !entry.stealthAddress.trim()) {

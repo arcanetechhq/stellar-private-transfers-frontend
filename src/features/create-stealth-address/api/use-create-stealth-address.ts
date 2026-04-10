@@ -1,9 +1,8 @@
 import { useCallback, useState } from "react";
 import { DEFAULT_STEALTH_SIGN_NONCE } from "@auditable/privacy-pool-zk-sdk";
-import { store, type AppDispatch } from "@/app/store";
-import { useAppDispatch } from "@/app/hooks";
+import { store, useAppDispatch, type AppDispatch } from "@/store";
 import { readStealthRecordFromStorage, setStealthRecord } from "@/entities/stealth-address";
-import { runWalletCreateStealthFlow } from "../lib/run-wallet-create-stealth";
+import { runWalletCreateStealthFlow } from "@/features/create-stealth-address";
 
 export type CreateStealthStatus = "idle" | "pending" | "success" | "error";
 

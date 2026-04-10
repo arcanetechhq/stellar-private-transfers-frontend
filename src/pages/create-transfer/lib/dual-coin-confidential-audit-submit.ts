@@ -1,8 +1,11 @@
 import { sealAndEncryptTransaction, type ITransaction } from "@auditable/stellar-audit";
 import type { CoinWithMetadata } from "@/entities/coin";
-import { getAuditPublicKey, decimalFieldToBytes } from "@/features/deposit/lib/audit-encoding";
+import {
+  getAuditPublicKey,
+  decimalFieldToBytes,
+  toAuditNumber,
+} from "@/features/deposit";
 import { prepareConfidentialTransferProofDual } from "@/shared/lib/privacy-pool/privacy-pool-confidential-proofs";
-import { toAuditNumber } from "@/features/deposit/lib/to-audit-number";
 import type { RunConfidentialTransferInput } from "./confidential-transfer-mutation-types";
 import { submitSorobanConfidentialTransfer } from "@/shared/lib/privacy-pool/submit-soroban-confidential-transfer";
 

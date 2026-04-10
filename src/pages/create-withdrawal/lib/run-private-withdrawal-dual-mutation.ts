@@ -8,8 +8,8 @@ import {
 import {
   decimalFieldToBytes,
   getAuditPublicKey,
-} from "@/features/deposit/lib/audit-encoding";
-import { toAuditNumber } from "@/features/deposit/lib/to-audit-number";
+  toAuditNumber,
+} from "@/features/deposit";
 import {
   fetchAndMergeMerkleState,
   readLeafEphemeralHex,

@@ -13,7 +13,7 @@ Short overview of **stellar-payment-client-v2**: a React client for Stellar paym
 | Styling             | **Tailwind CSS** 4, **shadcn/ui**-style primitives (**Radix UI**), **MUI** + **Emotion**, `class-variance-authority`, `tailwind-merge`                                                                                                                               |
 | i18n                | **i18next**, **react-i18next** (`shared/config/locales/`)                                                                                                                                                                                                            |
 | Blockchain / wallet | `@creit-tech/stellar-wallets-kit` (JSR)                                                                                                                                                                                                                              |
-| Global client state | **Redux Toolkit** (`@reduxjs/toolkit`), **react-redux** — store in `app/`, contact slice in `entities/contact/`                                                                                                                                                      |
+| Global client state | **Redux Toolkit** (`@reduxjs/toolkit`), **react-redux** — store and typed hooks in `src/store/`, contact slice in `entities/contact/`                                                                                                                                                      |
 | Linting             | **ESLint** 9 (flat config: `eslint.config.ts`) — `typescript-eslint`, `eslint-plugin-react`, `eslint-plugin-sonarjs`, `eslint-plugin-unicorn`, `eslint-plugin-tailwindcss`, `eslint-plugin-better-max-params`, custom **no-comments** rule (`eslint/no-comments.js`) |
 | Path alias          | `@/*` → `src/*`                                                                                                                                                                                                                                                      |
 
@@ -29,15 +29,16 @@ JSR registry for scoped packages: see `.npmrc` (`@jsr:registry`).
 
 **Feature-Sliced Design (FSD)** layout. Layers in this repo include `app/`, `pages/`, `widgets/`, `shared/`, **`entities/`**, and **`features/`**. Import direction is top-down (`app` → `pages` → `widgets` → `features` → `entities` → `shared`); no cross-imports between sibling slices on the same layer. Export through a slice’s **`index.ts`** when present (do not deep-import internal segments from outside). `features` siblings should include the action in its name
 
-### Redux store (`app/`)
+### Redux store (`src/store/`)
 
 | Piece                                                                          | Role                                                                                                                                                                                                           |
 | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`src/app/store.ts`](src/app/store.ts)                                         | `configureStore` with reducer key **`contact`**. Optional `preloadedState.contact` from `loadContactState()` (localStorage). `store.subscribe` calls `saveContactState` on the `contact` branch after updates. |
-| [`src/app/hooks.ts`](src/app/hooks.ts)                                         | Typed **`useAppDispatch`** and **`useAppSelector`** (`RootState`, `AppDispatch` exported from `store.ts`).                                                                                                     |
+| [`src/store/store.ts`](src/store/store.ts)                                   | `configureStore` with reducer key **`contact`**. Optional `preloadedState.contact` from `loadContactState()` (localStorage). `store.subscribe` calls `saveContactState` on the `contact` branch after updates. |
+| [`src/store/hooks.ts`](src/store/hooks.ts)                                     | Typed **`useAppDispatch`** and **`useAppSelector`**.                                                                                                                                                           |
+| [`src/store/redux-hooks.d.ts`](src/store/redux-hooks.d.ts)                     | Type alias **`UseAppSelector`** (`TypedUseSelectorHook<RootState>`). Import from `@/store` or `@/store/redux-hooks`.                                                                                             |
 | [`src/app/providers/store-provider.tsx`](src/app/providers/store-provider.tsx) | Wraps the tree with **`Provider`** from `react-redux`. Composed in [`src/app/app.tsx`](src/app/app.tsx) (outside `I18nProvider`, inside is fine too if order changes).                                         |
 
-**`RootState.contact`**: `{ items: Contact[] }` — list and `addContact` live in **`src/entities/contact/model/contact.ts`**. Persistence (read/write JSON, key `stellar-payment-contact-v1`) is in **`src/entities/contact/lib/persist-contact.ts`** and is only wired from `store.ts`, not from feature UI.
+**`RootState.contact`**: `{ items: Contact[] }` — list and `addContact` live in **`src/entities/contact/model/contact.ts`**. Persistence (read/write JSON, key `stellar-payment-contact-v1`) is in **`src/entities/contact/lib/persist-contact.ts`** and is only wired from `src/store/store.ts`, not from feature UI.
 
 ### Contact-related FSD slices (example)
 
@@ -68,3 +69,14 @@ Extra material (`references/`, `templates/`) sits inside each skill folder.
 - Respect project **ESLint** rules (including function/file size limits, `better-max-params`, and the custom comment rule with TODO/FIXME/NOTE allowed). Use the ESLint MPC to perform the linting
 - Keep diffs focused: change only what the task needs; match style of surrounding code.
 - Do not add markdown documentation unless explicitly requested; this file is the exception as the agent convention.
+
+## Learned User Preferences
+
+- When asked to fix lint or build issues without changing tooling, prefer edits in application code over changes to `eslint.config.ts` or other ESLint config.
+- For new or expanded UI strings, add English entries under `src/shared/config/locales/`; add other languages only when the user explicitly asks.
+- When implementing an attached Cursor plan, do not edit the plan file; follow existing todos without recreating them.
+
+## Learned Workspace Facts
+
+- Local Node version is pinned in **`.nvmrc`** at the repo root; use it when switching versions for commands in this project.
+- **`index.html`** uses the product title **Arcane private payments** (not generic Stellar wording).

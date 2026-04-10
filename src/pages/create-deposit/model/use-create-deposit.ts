@@ -1,6 +1,6 @@
 import { type FormEvent, useCallback } from "react";
 import { useNavigate } from "react-router";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/store";
 import { useCreateStealthAddress } from "@/features/create-stealth-address";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";

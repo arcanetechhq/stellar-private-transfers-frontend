@@ -6,7 +6,7 @@ import {
   DEFAULT_BLOOM_K,
   bloomByteLength,
 } from "@/shared/lib/coin-delivery";
-import { base64ToBytes } from "../lib/base64-to-bytes";
+import { base64ToBytes } from "@/features/poll-coin-deliveries";
 
 const EMPTY_BLOOM_BITS_BASE64 = bloomBitsToBase64(
   Buffer.alloc(bloomByteLength(DEFAULT_BLOOM_M), 0),

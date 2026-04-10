@@ -5,7 +5,7 @@ import {
   trustlineSubmitFinished,
   trustlineSubmitStarted,
 } from "@/entities/asset";
-import { submitHorizonTransaction } from "@/features/stellar-wallet-connect";
+import { submitHorizonTransactionWithWallet } from "@/shared/lib/stellar/submit-horizon-transaction-with-wallet";
 import { buildChangeTrustTx } from "@/shared/stellar/build-change-trust-tx";
 import { HORIZON_URL, horizonServer } from "@/shared/stellar/horizon-server";
 
@@ -33,14 +33,12 @@ export const addAssetTrustlineThunk = createAsyncThunk<
       issuerAddress: target.issuerAddress,
       networkPassphrase,
     });
-    await dispatch(
-      submitHorizonTransaction({
-        horizonUrl: HORIZON_URL,
-        networkPassphrase,
-        publicKey: target.publicKey,
-        xdr,
-      }),
-    ).unwrap();
+    await submitHorizonTransactionWithWallet({
+      horizonUrl: HORIZON_URL,
+      networkPassphrase,
+      publicKey: target.publicKey,
+      xdr,
+    });
     await dispatch(refreshAssetsWithTrustlinesThunk()).unwrap();
   } finally {
     dispatch(trustlineSubmitFinished());

@@ -1,8 +1,7 @@
 import React, { type ReactNode, useEffect } from "react";
 import { Provider } from "react-redux";
-import { useAppDispatch } from "@/app/hooks";
+import { store, useAppDispatch } from "@/store";
 import { syncWalletAddressFromKit } from "@/features/stellar-wallet-connect";
-import { store } from "../store";
 
 function StellarWalletSync() {
   const dispatch = useAppDispatch();

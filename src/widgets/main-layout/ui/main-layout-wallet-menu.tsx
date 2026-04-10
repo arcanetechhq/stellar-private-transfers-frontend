@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { shortenStellarAddress } from "@/shared/lib/shorten-stellar-address";
-import { ManageStealthAddressesWidget } from "@/widgets/manage-stealth-addresses";
+import { ManageStealthAddressesWidget } from "../manage-stealth-addresses";
 import { useCopy } from "@/shared/hooks";
 
 type MainLayoutWalletMenuProperties = {

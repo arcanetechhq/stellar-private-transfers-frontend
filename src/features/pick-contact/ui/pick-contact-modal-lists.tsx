@@ -3,7 +3,7 @@ import type { TFunction } from "i18next";
 import React from "react";
 import type { Contact } from "@/entities/contact";
 import { shortenStealthForDisplay } from "@/shared/lib/stealth/shorten-stealth-for-display";
-import type { StealthPickerRow } from "../model/stealth-picker-row";
+import type { StealthPickerRow } from "@/features/pick-contact";
 
 interface ContactListItemProperties {
   contact: Contact;

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, type ReactNode } from "react";
-import { useAppSelector } from "@/app/hooks";
+import { useAppSelector } from "@/store";
 import { selectCoinItems } from "@/entities/coin";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { fetchAndMergeMerkleState } from "@/shared/lib/privacy-pool/fetch-contract-merkle";

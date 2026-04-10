@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import type { AppDispatch, RootState } from "@/app/store";
+import type { AppDispatch, RootState } from "@/store";
 import type { RunPrivateWithdrawalMutationResult } from "../lib/run-private-withdrawal-mutation";
 import type { SubmitPrivateWithdrawalPayload } from "./private-withdrawal-submit-payload";
 import { submitPrivateWithdrawalThunkBody } from "./private-withdrawal-thunk-body";

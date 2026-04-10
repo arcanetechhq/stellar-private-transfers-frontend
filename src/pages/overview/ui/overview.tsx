@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { useAppSelector } from "@/app/hooks";
+import { useAppSelector } from "@/store";
 import { getAssetUsdPrice } from "@/entities/asset";
 import { selectCoinItems } from "@/entities/coin";
 import {

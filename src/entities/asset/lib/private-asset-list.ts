@@ -1,5 +1,10 @@
 import type { AssetDto, AssetWithTrustline } from "../model/asset";
-import type { AggregatedPrivateAssetRow } from "@/entities/coin";
+
+type PrivateAssetAggregateInput = {
+  assetId: string;
+  poolContract: string;
+  totalAmountDisplay: number;
+};
 import { getAssetUsdPrice, initializeAssetUsdPrices } from "./asset-usd-price";
 
 function privateBalanceToDisplayString(value: number): string {
@@ -13,7 +18,7 @@ function privateBalanceToDisplayString(value: number): string {
 }
 
 export function buildPrivateTransferAssets(
-  aggregates: AggregatedPrivateAssetRow[],
+  aggregates: PrivateAssetAggregateInput[],
   assetCatalog: AssetDto[] | undefined,
 ): AssetWithTrustline[] {
   if (!assetCatalog) {

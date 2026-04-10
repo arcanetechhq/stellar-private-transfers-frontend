@@ -1,7 +1,7 @@
 import React from "react";
 import { RouterProvider } from "react-router/dom";
 import "@/shared/lib/stellar-wallet-kit";
-import { useAppSelector } from "@/app/hooks";
+import { useAppSelector } from "@/store";
 import {
   selectIsWalletConnected,
   selectIsWalletKitLoaded,

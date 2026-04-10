@@ -1,5 +1,4 @@
 import React from "react";
-import type { ReactNode } from "react";
 import { MainLayoutHeaderWallet } from "./main-layout-header-wallet";
 import { HeaderFaucetMenu } from "./header-faucet-menu";
 
@@ -19,50 +18,15 @@ type MainLayoutHeaderProperties = {
   setFaucetOpen: (open: boolean) => void;
   walletOpen: boolean;
   setWalletOpen: (open: boolean) => void;
-  onOpenNotifications: () => void;
-  currentLanguage: string;
-  onSelectLanguage: (code: string) => void;
 };
-
-type MainLayoutIconButtonProperties = {
-  onClick: () => void;
-  icon: ReactNode;
-  withBadge?: boolean;
-  isExpanded?: boolean;
-};
-
-function MainLayoutIconButton({
-  onClick,
-  icon,
-  withBadge = false,
-  isExpanded,
-}: MainLayoutIconButtonProperties) {
-  return (
-    <button
-      type="button"
-      className="relative rounded-lg p-2 text-gray-500 transition-colors hover:bg-gray-100"
-      onClick={onClick}
-      aria-expanded={isExpanded}
-    >
-      {icon}
-      {withBadge && (
-        <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
-      )}
-    </button>
-  );
-}
 
 export function MainLayoutHeader({
   translate,
-  languageOpen,
   setLanguageOpen,
   faucetOpen,
   setFaucetOpen,
   walletOpen,
   setWalletOpen,
-  onOpenNotifications,
-  currentLanguage,
-  onSelectLanguage,
 }: MainLayoutHeaderProperties) {
   return (
     <React.Fragment>

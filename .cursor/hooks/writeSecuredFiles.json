@@ -12,7 +12,15 @@
         "reason": "Editing generated/** is forbidden. The source is eventually regenerated"
     },
     {
-        "pathGlob": ".cursor/**",
-        "reason": "Editing .cursor/** is forbidden. Only user can modify this directory. If you believe a rule makes your task impossible, report this to the user and explain why."
+        "pathGlob": ".cursor/lintAttempts/*",
+        "reason": "Editing .cursor/lintAttempts/* is forbidden. Only user can modify this directory. If you believe a rule makes your task impossible, report this to the user and explain why."
+    },
+    {
+        "pathGlob": ".cursor/**/*.js",
+        "reason": "Editing .cursor/**/*.js is forbidden. Only user can modify this directory. If you believe a rule makes your task impossible, report this to the user and explain why."
+    },
+    {
+        "pathGlob": ".cursor/writeSecuredFiles.json",
+        "reason": "Editing .cursor/writeSecuredFiles.json is forbidden. Only user can modify this directory. If you believe a rule makes your task impossible, report this to the user and explain why."
     }
 ]

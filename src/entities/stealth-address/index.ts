@@ -28,5 +28,9 @@ export {
   readStealthRecordFromStorage,
   saveStealthState,
 } from "./lib/persist-stealth";
+export {
+  ensureStealthScalarForNonce,
+  type EnsureScalarResult,
+} from "./lib/ensure-stealth-scalar-for-nonce";
 export { isValidStealthAddressString } from "@/shared/lib/stealth/validate-stealth-address";
 export { StealthAddressDisplay } from "./ui/stealth-address-display";

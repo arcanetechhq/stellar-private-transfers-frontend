@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useAppSelector } from "@/app/hooks";
+import { useAppSelector } from "@/store";
 import {
   selectAllStealthNonces,
   selectDefaultNonce,
   selectStealthState,
 } from "@/entities/stealth-address";
-import { StealthAddressSelect } from "./stealth-address-select";
+import { StealthAddressSelect } from "@/features/pick-stealth-address";
 
 export interface StealthAddressPickerProperties {
   selectedNonce: string | undefined;

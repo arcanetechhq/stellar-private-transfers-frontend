@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useAppSelector } from "@/app/hooks";
+import { useAppSelector } from "@/store";
 import {
   DEFAULT_STEALTH_SIGN_NONCE,
   useCreateStealthAddress,

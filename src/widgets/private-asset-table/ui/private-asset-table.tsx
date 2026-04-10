@@ -1,6 +1,6 @@
 import React, { useMemo, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { useAppSelector } from "@/app/hooks";
+import { useAppSelector } from "@/store";
 import { getAssetUsdPrice, useGetAssetsQuery } from "@/entities/asset";
 import { selectFinalizedAggregatesForStealth } from "@/entities/coin";
 import {

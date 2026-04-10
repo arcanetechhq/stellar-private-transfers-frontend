@@ -1,4 +1,4 @@
-export { StealthAddressPicker } from "./ui/stealth-address-picker";
+export { StealthAddressOptionRows } from "./ui/stealth-address-option-rows";
 export {
   StealthAddressSelect,
   stealthAddressSelectLabelClassName,
@@ -6,5 +6,5 @@ export {
   stealthAddressSelectContentClassName,
   stealthAddressSelectItemClassName,
 } from "./ui/stealth-address-select";
-export { StealthAddressOptionRows } from "./ui/stealth-address-option-rows";
+export { StealthAddressPicker } from "./ui/stealth-address-picker";
 export { shortenStealthForDisplay } from "@/shared/lib/stealth/shorten-stealth-for-display";

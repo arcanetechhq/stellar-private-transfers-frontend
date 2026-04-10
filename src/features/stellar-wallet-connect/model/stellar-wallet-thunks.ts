@@ -1,5 +1,4 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { TransactionBuilder, Horizon } from "@stellar/stellar-sdk";
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit";
 import { StellarWalletsKit as StellarWalletsKitSdk } from "@creit-tech/stellar-wallets-kit/sdk";
 import {
@@ -41,28 +40,3 @@ export const disconnectStellarWallet = createAsyncThunk(
   },
 );
 
-export interface SubmitHorizonTransactionPayload {
-  horizonUrl: string;
-  networkPassphrase: string;
-  publicKey: string;
-  xdr: string;
-}
-
-export const submitHorizonTransaction = createAsyncThunk<
-  void,
-  SubmitHorizonTransactionPayload
->(
-  "wallet/submitHorizonTransaction",
-  async ({ horizonUrl, networkPassphrase, publicKey, xdr }) => {
-    const server = new Horizon.Server(horizonUrl);
-    const { signedTxXdr } = await StellarWalletsKitSdk.signTransaction(xdr, {
-      networkPassphrase,
-      address: publicKey,
-    });
-    const transaction = TransactionBuilder.fromXDR(
-      signedTxXdr,
-      networkPassphrase,
-    );
-    await server.submitTransaction(transaction);
-  },
-);

@@ -1,7 +1,6 @@
 import React from "react";
 import { Plus, X } from "lucide-react";
-import { useAddContactForm } from "../lib/use-add-contact-form";
-import { ContactTextField } from "./contact-text-field";
+import { ContactTextField, useAddContactForm } from "@/features/add-contact";
 
 type AddContactModalProperties = {
   onClose: () => void;

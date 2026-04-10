@@ -1,6 +1,6 @@
 import { PrivacyPoolSDK } from "@auditable/privacy-pool-zk-sdk";
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
-import { store, type AppDispatch } from "@/app/store";
+import { store, type AppDispatch } from "@/store";
 import {
   setDefaultNonce,
   setStealthRecordAndScalar,

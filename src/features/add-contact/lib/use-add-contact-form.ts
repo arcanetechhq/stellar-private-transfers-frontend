@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useAppDispatch } from "@/app/hooks";
+import { useAppDispatch } from "@/store";
 import { addContact } from "@/entities/contact";
 import { isValidStealthAddressString } from "@/shared/lib/stealth/validate-stealth-address";
 

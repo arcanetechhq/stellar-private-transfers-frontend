@@ -1,4 +1,4 @@
-import type { AppDispatch } from "@/app/store";
+import type { AppDispatch } from "@/store";
 import type { PostCoinDeliveryBody } from "../api/coin-delivery-api";
 import { coinDeliveryApi } from "../api/coin-delivery-api";
 

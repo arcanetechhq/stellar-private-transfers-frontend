@@ -1,10 +1,12 @@
 import { X } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { useAppSelector } from "@/app/hooks";
+import { useAppSelector } from "@/store";
 import { selectContacts } from "@/entities/contact";
-import type { StealthPickerRow } from "../model/stealth-picker-row";
-import { PickContactModalLists } from "./pick-contact-modal-lists";
+import {
+  PickContactModalLists,
+  type StealthPickerRow,
+} from "@/features/pick-contact";
 
 interface PickContactModalProperties {
   open: boolean;

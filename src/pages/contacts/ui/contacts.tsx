@@ -3,7 +3,6 @@ import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AddContactModal } from "@/features/add-contact";
 import { ContactList } from "@/features/view-contact-list";
-import { ManageStealthAddressesWidget } from "@/widgets/manage-stealth-addresses";
 
 function ContactsHeader({ onAddClick }: { onAddClick: () => void }) {
   const { t: translate } = useTranslation("contacts");

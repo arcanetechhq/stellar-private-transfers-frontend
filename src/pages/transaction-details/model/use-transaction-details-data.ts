@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/store";
 import {
   fetchSorobanTransactionDetails,
   selectChainDetailsForHash,

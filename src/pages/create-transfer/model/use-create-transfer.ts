@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/store";
 import { type AssetDto, useGetAssetsQuery } from "@/entities/asset";
 import {
   type AggregatedPrivateAssetRow,

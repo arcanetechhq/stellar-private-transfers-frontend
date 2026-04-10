@@ -6,7 +6,7 @@ import {
   type SetStateAction,
 } from "react";
 import type { NavigateFunction } from "react-router";
-import type { AppDispatch } from "@/app/store";
+import type { AppDispatch } from "@/store";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";
 

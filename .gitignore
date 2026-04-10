@@ -1,5 +1,6 @@
 .agents
 .cursor/hooks/lintAttempts
+.cursor/hooks/state
 dist
 node_modules
 package-lock.json

@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useRef } from "react";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
-import { selectStealthState } from "@/entities/stealth-address";
+import { useStore } from "react-redux";
+import { useAppDispatch, useAppSelector } from "@/store";
+import {
+  ensureStealthScalarForNonce,
+  selectStealthState,
+} from "@/entities/stealth-address";
 import { selectWalletPublicKey } from "@/entities/wallet";
-import { ensureStealthScalarForNonce } from "@/features/create-stealth-address";
 
 export function EnsureMissingStealthScalars() {
   const dispatch = useAppDispatch();
+  const store = useStore();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const { byNonce, scalarByNonce } = useAppSelector(selectStealthState);
   const attemptedReference = useRef(new Set<string>());
@@ -40,7 +44,12 @@ export function EnsureMissingStealthScalars() {
         if (attemptedReference.current.has(nonce)) {
           continue;
         }
-        await ensureStealthScalarForNonce({ dispatch, publicKey, nonce });
+        await ensureStealthScalarForNonce({
+          dispatch,
+          getState: store.getState,
+          publicKey,
+          nonce,
+        });
         if (cancelled) {
           return;
         }
@@ -51,5 +60,5 @@ export function EnsureMissingStealthScalars() {
     return () => {
       cancelled = true;
     };
-  }, [publicKey, missingSignature, dispatch]);
+  }, [publicKey, missingSignature, dispatch, store]);
 }

@@ -8,7 +8,7 @@ import {
 } from "@/shared/ui/select";
 import { cn } from "@/shared/lib/cn";
 import type { StealthAddressState } from "@/entities/stealth-address";
-import { StealthAddressOptionRows } from "./stealth-address-option-rows";
+import { StealthAddressOptionRows } from "@/features/pick-stealth-address";
 
 export const stealthAddressSelectTriggerClassName = cn(
   "h-auto min-h-10 w-full min-w-0 items-start gap-2 border-border-input bg-input-background px-3 py-2 text-foreground shadow-sm",

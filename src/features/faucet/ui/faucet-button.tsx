@@ -1,7 +1,7 @@
 import React from "react";
 import { Droplets, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import type { FaucetStatus } from "../lib/use-faucet";
+import type { FaucetStatus } from "@/features/faucet";
 
 const BASE_CLASSES =
   "inline-flex w-24 items-center justify-center gap-1.5 rounded-[10px] px-3 py-2 text-[13px] font-semibold leading-[18px] transition-colors";

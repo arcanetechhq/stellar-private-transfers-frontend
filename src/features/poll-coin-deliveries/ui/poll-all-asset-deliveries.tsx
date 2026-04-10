@@ -1,10 +1,12 @@
 import React, { useMemo } from "react";
-import { useAppSelector } from "@/app/hooks";
+import { useAppSelector } from "@/store";
 import { useGetAssetsQuery } from "@/entities/asset";
 import { selectStealthState } from "@/entities/stealth-address";
 import { selectWalletPublicKey } from "@/entities/wallet";
-import { usePollAssetDeliveries } from "../model/use-poll-asset-deliveries";
-import { useSpentNullifierPolling } from "../model/use-spent-nullifier-polling";
+import {
+  usePollAssetDeliveries,
+  useSpentNullifierPolling,
+} from "@/features/poll-coin-deliveries";
 
 interface AssetPollerProperties {
   stealthAddress: string;

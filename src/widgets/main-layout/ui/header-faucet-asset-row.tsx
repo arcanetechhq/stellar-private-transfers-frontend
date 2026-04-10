@@ -2,7 +2,7 @@ import React from "react";
 import { Loader2 } from "lucide-react";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/store";
 import type { AssetWithTrustline } from "@/entities/asset";
 import {
   faucetClaimAmountLabel,

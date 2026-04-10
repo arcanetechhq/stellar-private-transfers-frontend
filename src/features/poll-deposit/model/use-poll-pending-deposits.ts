@@ -1,9 +1,12 @@
 import { useEffect } from "react";
 import { rpc } from "@stellar/stellar-sdk";
-import type { AppDispatch } from "@/app/store";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import {
+  store,
+  useAppDispatch,
+  useAppSelector,
+  type AppDispatch,
+} from "@/store";
 import { finalizeCoin, type CoinWithMetadata } from "@/entities/coin";
-import { store } from "@/app/store";
 import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
 
 const { sorobanRpcUrl: pollSorobanRpcUrl } = getDefaultStellarNetworkConfig();

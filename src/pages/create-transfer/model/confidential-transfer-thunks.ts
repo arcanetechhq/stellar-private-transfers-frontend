@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import type { AppDispatch, RootState } from "@/app/store";
+import type { AppDispatch, RootState } from "@/store";
 import { selectCoinItems } from "@/entities/coin";
 import { selectScalarByStealthAddress } from "@/entities/stealth-address";
 import { selectWalletPublicKey } from "@/entities/wallet";

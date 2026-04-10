@@ -1,6 +1,6 @@
 import { ZERO_STROOPS } from "@/shared/lib/privacy-pool/privacy-pool-confidential-proof-helpers";
 import { addCoin, markCoinSpent, type CoinWithMetadata } from "@/entities/coin";
-import { buildCoinDeliveryPostBody } from "@/features/deposit/lib/build-coin-delivery-post-body";
+import { buildCoinDeliveryPostBody } from "@/features/deposit";
 import { prepareConfidentialTransferProofDual } from "@/shared/lib/privacy-pool/privacy-pool-confidential-proofs";
 import { readLeafEphemeralHex } from "@/shared/lib/privacy-pool/fetch-contract-merkle";
 import { stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops";

@@ -2,7 +2,7 @@ import React from "react";
 import { ChevronRight, Wallet } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/store";
 import Arcn from "@/shared/assets/logo-arcn";
 import {
   selectIsWalletConnected,

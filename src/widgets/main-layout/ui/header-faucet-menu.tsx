@@ -1,7 +1,7 @@
 import React from "react";
 import { Networks } from "@stellar/stellar-sdk";
 import { useTranslation } from "react-i18next";
-import { useAppSelector } from "@/app/hooks";
+import { useAppSelector } from "@/store";
 import { useAssetsWithTrustlines } from "@/entities/asset";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { STELLAR_NETWORK_PASSPHRASE } from "@/shared/stellar/horizon-server";

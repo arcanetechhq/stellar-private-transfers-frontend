@@ -1,6 +1,6 @@
 import { skipToken } from "@reduxjs/toolkit/query/react";
 import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/store";
 import {
   useGetIncomingDeliveriesQuery,
   addSeenTag,
@@ -25,8 +25,10 @@ import {
 } from "@/shared/lib/coin-delivery";
 import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
 import { selectWalletPublicKey } from "@/entities/wallet";
-import { base64ToBytes } from "../lib/base64-to-bytes";
-import { useBloomBitsForSeenTags } from "./use-bloom-bits-for-seen-tags";
+import {
+  base64ToBytes,
+  useBloomBitsForSeenTags,
+} from "@/features/poll-coin-deliveries";
 
 const POLL_INTERVAL_MS = 12_000;
 

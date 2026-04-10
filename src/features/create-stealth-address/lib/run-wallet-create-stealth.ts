@@ -1,6 +1,8 @@
-import type { AppDispatch } from "@/app/store";
-import { createStealthAddressFromWalletSignature } from "./create-stealth-address-flow";
-import { isSignMessageUnsupportedError } from "./sign-message-errors";
+import type { AppDispatch } from "@/store";
+import {
+  createStealthAddressFromWalletSignature,
+  isSignMessageUnsupportedError,
+} from "@/features/create-stealth-address";
 
 type CreateStealthStatus = "idle" | "pending" | "success" | "error";
 

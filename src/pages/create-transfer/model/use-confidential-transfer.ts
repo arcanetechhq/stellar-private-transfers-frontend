@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useAppDispatch } from "@/app/hooks";
+import { useAppDispatch } from "@/store";
 import {
   submitConfidentialTransferThunk,
   type SubmitConfidentialTransferPayload,
