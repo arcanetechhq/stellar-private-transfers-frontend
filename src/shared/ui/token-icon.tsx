@@ -60,7 +60,7 @@ function RemoteIcon({ logoUrl, ticker }: { logoUrl: string; ticker: string }) {
     <img
       src={logoUrl}
       alt={ticker}
-      className="size-full object-cover"
+      className="size-full object-fill"
       onError={() => {
         setFailed(true);
       }}
