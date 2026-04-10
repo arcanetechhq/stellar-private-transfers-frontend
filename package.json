@@ -8,7 +8,8 @@
     "prebuild": "cd generated/contract && npm install && npm run build",
     "dev": "vite",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
-    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix"
+    "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
+    "test": "jest --config jest.config.mjs"
   },
   "engines": {
     "node": ">=20.10.0"
@@ -53,8 +54,8 @@
     "buffer": "^6.0.3",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
-    "contract": "file:generated/contract",
     "cmdk": "1.1.1",
+    "contract": "file:generated/contract",
     "date-fns": "3.6.0",
     "embla-carousel-react": "8.6.0",
     "i18next": "24.2.3",
@@ -82,6 +83,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@tailwindcss/vite": "4.1.12",
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.10.0",
     "@vitejs/plugin-react": "4.7.0",
     "eslint": "^9.39.4",
@@ -90,7 +92,10 @@
     "eslint-plugin-sonarjs": "^4.0.2",
     "eslint-plugin-tailwindcss": "^4.0.0-beta.0",
     "eslint-plugin-unicorn": "^64.0.0",
+    "jest": "^30.3.0",
     "tailwindcss": "4.1.12",
+    "ts-jest": "^29.4.9",
+    "tsarch": "^5.4.1",
     "typescript-eslint": "^8.57.2",
     "vite": "6.3.5"
   },
