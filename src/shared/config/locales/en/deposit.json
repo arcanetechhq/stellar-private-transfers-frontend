@@ -5,6 +5,7 @@
   "asset": "Asset",
   "amount": "Amount",
   "max": "MAX",
+  "availableForMax": "Available: {{amount}}",
   "aboutDeposits": "About Deposits",
   "aboutDepositsText": "Funds will be moved from your public wallet into your private balance. Once confirmed, they will become available for private transfers with full confidentiality.",
   "summary": "Summary",

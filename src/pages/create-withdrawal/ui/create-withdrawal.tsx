@@ -53,6 +53,7 @@ export function CreateWithdrawal() {
                   />
                   <AmountInput
                     amount={state.amount}
+                    availableBalance={state.selectedToken?.balance}
                     onAmountChange={state.handleAmountChange}
                     onPercentage={state.handlePercentage}
                     onMaxAmount={state.handleMaxAmount}

@@ -20,6 +20,7 @@
   "destinationPlaceholder": "G… or M… Stellar address",
   "selectFromContacts": "Select from Contacts",
   "max": "MAX",
+  "availableForMax": "Available: {{amount}}",
   "maxButton": "Max",
   "selectContact": "Select Contact",
   "noContactsFound": "No contacts found",

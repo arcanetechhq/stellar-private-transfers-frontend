@@ -24,6 +24,7 @@
   "invalidRecipientStealth": "Enter a valid private recipient address (stpl1…).",
   "recipientSameAsSender": "Recipient must differ from the sender address.",
   "max": "MAX",
+  "availableForMax": "Available: {{amount}}",
   "maxButton": "Max",
   "selectContact": "Select Contact",
   "noContactsFound": "No contacts found",

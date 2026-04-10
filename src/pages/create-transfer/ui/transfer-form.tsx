@@ -136,6 +136,7 @@ export function TransferForm(properties: TransferFormProperties) {
           />
           <AmountField
             amount={amount}
+            availableBalance={selectedToken?.balance}
             onAmountChange={onAmountChange}
             onPercentage={onPercentage}
             onMaxAmount={onMaxAmount}

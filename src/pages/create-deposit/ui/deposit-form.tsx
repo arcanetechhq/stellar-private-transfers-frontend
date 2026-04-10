@@ -82,6 +82,7 @@ function AssetSelector({ selectedToken, onOpen }: AssetSelectorProperties) {
 
 interface AmountInputProperties {
   amount: string;
+  availableBalance: string | undefined;
   onAmountChange: (value: string) => void;
   onMaxAmount: () => void;
   onPercentage: (percentage: number) => void;
@@ -89,11 +90,16 @@ interface AmountInputProperties {
 
 function AmountInput({
   amount,
+  availableBalance,
   onAmountChange,
   onMaxAmount,
   onPercentage,
 }: AmountInputProperties) {
   const { t: translate } = useTranslation("deposit");
+  const maxAvailableBalance = React.useMemo(
+    () => formatBalance(availableBalance),
+    [availableBalance],
+  );
 
   return (
     <div>
@@ -106,15 +112,22 @@ function AmountInput({
           value={amount}
           onChange={(event) => onAmountChange(event.target.value)}
           placeholder="0.00"
-          className="w-full rounded-lg border border-[var(--border)] px-4 py-4 pr-20 text-[20px] font-semibold text-[var(--foreground-primary)] focus:ring-2 focus:ring-[var(--ring)] focus:outline-none"
+          className="w-full rounded-lg border border-[var(--border)] px-4 py-4 pr-28 text-[20px] font-semibold text-[var(--foreground-primary)] focus:ring-2 focus:ring-[var(--ring)] focus:outline-none"
         />
-        <button
-          type="button"
-          onClick={onMaxAmount}
-          className="absolute top-1/2 right-4 -translate-y-1/2 rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-3 py-1.5 text-[13px] font-semibold text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
-        >
-          {translate("max")}
-        </button>
+        <div className="absolute top-1/2 right-4 flex -translate-y-1/2 flex-col items-end">
+          {maxAvailableBalance === "—" ? undefined : (
+            <p className="mb-1 text-[12px] leading-[16px] text-[var(--foreground-secondary)]">
+              {translate("availableForMax", { amount: maxAvailableBalance })}
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={onMaxAmount}
+            className="rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-3 py-1.5 text-[13px] font-semibold text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
+          >
+            {translate("max")}
+          </button>
+        </div>
       </div>
       <div className="mt-3 flex gap-2">
         {QUICK_PERCENTAGE_OPTIONS.map((percentage) => (
@@ -186,6 +199,7 @@ export function DepositForm({
         />
         <AmountInput
           amount={amount}
+          availableBalance={selectedToken?.balance}
           onAmountChange={onAmountChange}
           onMaxAmount={onMaxAmount}
           onPercentage={onPercentage}
