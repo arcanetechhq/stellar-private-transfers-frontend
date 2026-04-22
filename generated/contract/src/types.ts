@@ -9,7 +9,7 @@ export interface EphemeralKeyCoords {
 }
 
 /**
- * Storage key for tree leaves - each leaf stored by index for O(1) write on deposit
+ * Storage key for tree leaves — each leaf stored by index for O(1) write on deposit.
  */
  export type TreeDataKey =
   { tag: "Leaf"; values: readonly [number] } |
@@ -17,13 +17,30 @@ export interface EphemeralKeyCoords {
   /**
    * Ephemeral public key (ECDH point x, y) stored per leaf; not part of the Merkle hash.
    */
-  { tag: "LeafEphemeral"; values: readonly [number] };
+  { tag: "LeafEphemeral"; values: readonly [number] } |
+  /**
+   * Right-spine / filled-subtree frontier after the last `insert_two` (length `merkle_depth - 1`).
+   */
+  { tag: "PairwiseFrontier"; values: void };
 
 /**
- * Storage key for nullifiers - each nullifier hash maps to bool (consumed or not)
+ * Storage key for nullifiers — each nullifier hash maps to bool (consumed or not).
  */
  export type NulifierDataKey =
   { tag: "Nulifier"; values: readonly [Buffer] };
+
+/**
+ * Ring buffer of historical Merkle roots (for proofs generated against recent states).
+ */
+ export type RootHistoryKey =
+  /**
+   * Newest root slot index in the ring buffer.
+   */
+  { tag: "CurrentRootIndex"; values: void } |
+  /**
+   * Root value at slot `i` (0..ROOT_HISTORY_SIZE).
+   */
+  { tag: "Root"; values: readonly [number] };
 
 /**
  * Error Enum: Error
@@ -36,7 +53,19 @@ export const Error = {
   5 : { message: "TreeAtCapacity" },
   6 : { message: "AssociationRootMismatch" },
   7 : { message: "InvalidPublicSignals" },
-  8 : { message: "InvalidTokenAmount" }
+  8 : { message: "InvalidTokenAmount" },
+  /**
+   * Proof `state_root` is not in the recent root history window.
+   */
+  9 : { message: "UnknownRoot" },
+  /**
+   * Exactly one output commitment is non-zero; only zero/zero or two non-zero outputs are allowed.
+   */
+  10 : { message: "InvalidCommitmentPair" },
+  /**
+   * Stored Merkle frontier length does not match tree depth (corrupt or outdated storage layout).
+   */
+  11 : { message: "InvalidMerkleFrontier" }
 }
 
 /**
