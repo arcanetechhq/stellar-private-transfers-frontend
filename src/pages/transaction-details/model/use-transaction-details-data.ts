@@ -1,11 +1,11 @@
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import {
   fetchSorobanTransactionDetails,
   selectChainDetailsForHash,
   selectTransactionById,
 } from "@/entities/transaction";
-import { useGetAssetsQuery, type AssetDto } from "@/entities/asset";
+import type { AssetDto } from "@/entities/asset";
 
 export function useTransactionDetailsData(transactionId: string | undefined) {
   const dispatch = useAppDispatch();
@@ -16,7 +16,6 @@ export function useTransactionDetailsData(transactionId: string | undefined) {
     selectTransactionById(decodedId),
   );
   const chainEntry = useAppSelector(selectChainDetailsForHash(decodedId));
-  const { data: assets } = useGetAssetsQuery();
 
   useEffect(() => {
     if (!decodedId) {
@@ -25,16 +24,7 @@ export function useTransactionDetailsData(transactionId: string | undefined) {
     void dispatch(fetchSorobanTransactionDetails(decodedId));
   }, [decodedId, dispatch]);
 
-  const chainMatchedAsset: AssetDto | undefined = useMemo(() => {
-    if (chainEntry?.status !== "succeeded") {
-      return;
-    }
-    const poolId = chainEntry.data.invokedPoolContractId?.trim();
-    if (!poolId || !assets) {
-      return;
-    }
-    return assets.find((asset) => asset.poolContract?.trim() === poolId);
-  }, [assets, chainEntry]);
+  const chainMatchedAsset: AssetDto | undefined = undefined;
 
   const chainTransferAmountRaw =
     chainEntry?.status === "succeeded"

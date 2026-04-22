@@ -33,6 +33,7 @@ export interface BuildCoinDeliveryPostBodyInput {
   commitmentHex: string;
   coin: CoinData;
   depositScalarHex: string;
+  precommitementHex?: string;
   assetId: string;
   amountDisplay: number;
   txId: string;
@@ -56,6 +57,7 @@ export async function buildCoinDeliveryPostBody(
     commitmentHex: input.commitmentHex,
     coin: input.coin,
     depositScalarHex,
+    precommitementHex: input.precommitementHex,
     asset: input.assetId,
     amountDisplay: input.amountDisplay,
     txId: input.txId,

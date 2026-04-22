@@ -9,7 +9,7 @@ export interface RunPrivateWithdrawalMutationInput {
   senderPrivKeyScalarHex: string;
   senderStealthAddress: string;
   assetId: string;
-  poolContractRaw: string;
+  tokenContractRaw: string;
   amountDisplay: number;
   destinationAddress: string;
   pickedCoins: CoinWithMetadata[];

@@ -15,8 +15,8 @@
     "node": ">=20.10.0"
   },
   "dependencies": {
-    "@auditable/privacy-pool-zk-sdk": "^0.1.0",
-    "@auditable/stellar-audit": "^0.3.0",
+    "@auditable/privacy-pool-zk-sdk": "^0.4.0",
+    "@auditable/stellar-audit": "^0.3.1-rc.1",
     "@creit-tech/stellar-wallets-kit": "npm:@jsr/creit-tech__stellar-wallets-kit@^2.1.0",
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",

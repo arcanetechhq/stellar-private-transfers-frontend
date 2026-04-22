@@ -9,11 +9,12 @@ import type { NavigateFunction } from "react-router";
 import type { AppDispatch } from "@/store";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";
+import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 
 type PrivateWithdrawalSubmit = (payload: {
   senderStealthAddress: string;
   assetId: string;
-  poolContractRaw: string;
+  tokenContractRaw: string;
   amountDisplay: number;
   destinationAddress: string;
 }) => Promise<{ txId: string; coinDeliveryWarning?: string }>;
@@ -33,16 +34,17 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!parameters.canSubmit || !parameters.selectedAsset?.poolContract?.trim()) {
+    if (!parameters.canSubmit) {
       return;
     }
+    const poolContract = getRequiredPrivacyPoolContractId();
     parameters.setIsSubmitting(true);
     setSubmitError(undefined);
     try {
       const result = await parameters.submit({
         senderStealthAddress: parameters.senderStealthAddress,
         assetId: parameters.selectedAsset.assetId,
-        poolContractRaw: parameters.selectedAsset.poolContract.trim(),
+        tokenContractRaw: parameters.selectedAsset.clientContract ?? "",
         amountDisplay: parameters.numericAmount,
         destinationAddress: parameters.destinationTrim,
       });
@@ -63,7 +65,7 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
           txId: result.txId,
           amount: parameters.numericAmount,
           assetId: parameters.selectedAsset.assetId,
-          poolContract: parameters.selectedAsset.poolContract.trim(),
+          poolContract,
           coinDeliveryWarning: result.coinDeliveryWarning,
         },
       });

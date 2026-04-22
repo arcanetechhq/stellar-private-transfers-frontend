@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { isValidStealthAddressString } from "@/entities/stealth-address";
+import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import { NETWORK_FEE } from "./create-transfer";
 
 function recipientFieldErrorKey(parameters: {
@@ -99,7 +100,13 @@ export function useTransferRecipientAndSubmitGates(parameters: {
     parameters.senderStealthAddress.length > 0 &&
     recipientTrim !== parameters.senderStealthAddress;
   const numericAmount = Number.parseFloat(parameters.amount);
-  const poolReady = Boolean(parameters.selectedAsset?.poolContract?.trim());
+  const poolReady = (() => {
+    try {
+      return Boolean(getRequiredPrivacyPoolContractId());
+    } catch {
+      return false;
+    }
+  })();
   const canSubmit = transferFormCanSubmit({
     publicKey: parameters.publicKey,
     senderStealthAddress: parameters.senderStealthAddress,

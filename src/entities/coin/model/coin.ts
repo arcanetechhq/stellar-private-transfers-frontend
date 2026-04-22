@@ -6,6 +6,7 @@ export interface CoinWithMetadata {
   commitmentHex: string;
   coin: CoinData;
   depositScalarHex?: string;
+  precommitementHex?: string;
   stealthAddress: string;
   assetId: string;
   poolContract: string;
@@ -18,6 +19,7 @@ export interface CoinEntry {
   commitmentHex: string;
   coin: CoinData;
   depositScalarHex?: string;
+  precommitementHex?: string;
 }
 
 export { type CoinData } from "@auditable/privacy-pool-zk-sdk";

@@ -10,6 +10,7 @@ export async function postPrivateWithdrawChangeDeliveryIfNeeded(parameters: {
     commitment_hex: string;
     coin: CoinWithMetadata["coin"];
     depositScalarHex: string;
+    precommitementHex: string;
   };
   senderTrim: string;
   assetId: string;
@@ -25,6 +26,7 @@ export async function postPrivateWithdrawChangeDeliveryIfNeeded(parameters: {
       commitmentHex: parameters.changeCoin.commitment_hex,
       coin: parameters.changeCoin.coin,
       depositScalarHex: parameters.changeCoin.depositScalarHex,
+      precommitementHex: parameters.changeCoin.precommitementHex,
       assetId: parameters.assetId,
       amountDisplay: changeDisplay,
       txId: parameters.txId,

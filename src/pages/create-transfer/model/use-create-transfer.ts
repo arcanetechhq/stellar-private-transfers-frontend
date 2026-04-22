@@ -15,11 +15,13 @@ import { useSelectedPrivateToken } from "./use-selected-private-token";
 import { useTransferAmountInputs } from "./use-transfer-amount-inputs";
 import { useTransferRecipientAndSubmitGates } from "./use-transfer-validation";
 import { useTransferSender } from "./use-transfer-sender";
+import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 
 function withZeroAmountAssets(
   aggregates: AggregatedPrivateAssetRow[],
   assetCatalog: AssetDto[] | undefined,
 ): AggregatedPrivateAssetRow[] {
+  const poolContract = getRequiredPrivacyPoolContractId();
   const byAssetId = new Map(
     aggregates.map((aggregate) => [aggregate.assetId, aggregate]),
   );
@@ -30,7 +32,7 @@ function withZeroAmountAssets(
       }
       byAssetId.set(asset.assetId, {
         assetId: asset.assetId,
-        poolContract: asset.poolContract ?? "",
+        poolContract,
         totalAmountDisplay: 0,
       });
     }

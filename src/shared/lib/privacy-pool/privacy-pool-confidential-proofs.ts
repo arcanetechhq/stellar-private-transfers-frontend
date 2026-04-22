@@ -1,6 +1,8 @@
 import type { CoinData, StateFile } from "@auditable/privacy-pool-zk-sdk";
 import { privacyPoolService } from "./privacy-pool-service";
 import { buildRecipientAndOptionalChangeDeposits } from "./build-recipient-change-deposits";
+import { withTokenAddressPublicInputs } from "./prove-transaction-input";
+import { buildZeroPublicLegs } from "./prove-transaction-input";
 import {
   MIN_CONFIDENTIAL_TRANSFER_STROOPS,
   requireChangeRecipientWhenPartial,
@@ -8,7 +10,14 @@ import {
   withdrawWitnessForCoin,
 } from "./privacy-pool-confidential-proof-helpers";
 
-export async function prepareConfidentialTransferProof(parameters: {
+type GeneratedOutputCoin = {
+  commitment_hex: string;
+  coin: CoinData;
+  depositScalarHex: string;
+  precommitementHex: string;
+};
+
+type PrepareConfidentialTransferProofParameters = {
   coin: CoinData;
   state: StateFile;
   senderGAddress: string;
@@ -18,16 +27,19 @@ export async function prepareConfidentialTransferProof(parameters: {
   transferStroops: bigint;
   recipientStealthStpl1: string;
   selfStealthStpl1ForChange: string | undefined;
-}): Promise<{
+  tokenAddress: string;
+};
+
+type PrepareConfidentialTransferProofResult = {
   proof_hex: string;
   public_hex: string;
-  recipientCoin: {
-    commitment_hex: string;
-    coin: CoinData;
-    depositScalarHex: string;
-  };
-  changeCoin?: { commitment_hex: string; coin: CoinData; depositScalarHex: string };
-}> {
+  recipientCoin: GeneratedOutputCoin;
+  changeCoin?: GeneratedOutputCoin;
+};
+
+export async function prepareConfidentialTransferProof(
+  parameters: PrepareConfidentialTransferProofParameters,
+): Promise<PrepareConfidentialTransferProofResult> {
   const sdk = await privacyPoolService.getInitializedSdk();
   const noteStroops = BigInt(parameters.coin.value);
   if (parameters.transferStroops < MIN_CONFIDENTIAL_TRANSFER_STROOPS) {
@@ -58,14 +70,20 @@ export async function prepareConfidentialTransferProof(parameters: {
       transferStroops: parameters.transferStroops,
       changeStroops,
       selfStealthStpl1ForChange: parameters.selfStealthStpl1ForChange,
+      tokenAddress: parameters.tokenAddress,
     });
-  const proof = await sdk.proveTransaction(
+  const publicInput = withTokenAddressPublicInputs(
     {
       stateRoot: witness.stateRoot,
       withdrawAddressHi: hi,
       withdrawAddressLo: lo,
       privKeyScalar,
     },
+    parameters.tokenAddress,
+  );
+  const proof = await sdk.proveTransaction(
+    publicInput as unknown as Parameters<typeof sdk.proveTransaction>[0],
+    buildZeroPublicLegs(),
     [withdrawObject, "dummy"],
     deposits,
   );
@@ -75,6 +93,7 @@ export async function prepareConfidentialTransferProof(parameters: {
       commitment_hex: recipientSlot.commitment_hex,
       coin: recipientSlot.coin,
       depositScalarHex: recipientSlot.depositScalarHex,
+      precommitementHex: recipientSlot.precommitementHex,
     },
     changeCoin,
   };

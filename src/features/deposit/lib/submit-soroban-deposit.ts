@@ -3,6 +3,7 @@ import { Client as PrivacyPoolContractClient } from "contract";
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
 import type { CoinData } from "@auditable/privacy-pool-zk-sdk";
 import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
+import { runTtlPreflight } from "@/shared/lib/privacy-pool/ttl-preflight";
 import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
 
 function hexToBuffer(hex: string): Buffer {
@@ -16,6 +17,7 @@ export interface SubmitSorobanDepositInput {
   stealthAddressStpl1: string;
   coin: CoinData;
   depositScalarHex: string;
+  tokenAddress: string;
   encoded: Uint8Array;
   networkPassphrase?: string;
   sorobanRpcUrl?: string;
@@ -58,6 +60,7 @@ export async function submitSorobanDeposit(
       coin: input.coin,
       depositScalarHex: input.depositScalarHex,
       merkleRootBytes: merkleRootBuffer,
+      tokenAddress: input.tokenAddress,
     });
 
   const assembledTransaction = await contractClient.transact({
@@ -67,6 +70,7 @@ export async function submitSorobanDeposit(
     encoded: Buffer.from(input.encoded),
   });
 
+  await runTtlPreflight(assembledTransaction);
   const sentTransaction = await assembledTransaction.signAndSend();
   const transactionHash = sentTransaction.sendTransactionResponse?.hash ?? "";
   if (!transactionHash) {

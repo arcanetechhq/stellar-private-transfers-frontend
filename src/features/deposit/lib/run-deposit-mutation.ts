@@ -7,13 +7,16 @@ import type { AppDispatch } from "@/store";
 import { addCoin } from "@/entities/coin";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
-import { normalizeSorobanContractId } from "@/shared/stellar/normalize-soroban-contract-id";
+import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import {
   buildCoinDeliveryPostBody,
   getAuditPublicKey,
-  decimalFieldToBytes,
   submitSorobanDeposit,
+  toAuditNumber,
 } from "@/features/deposit";
+import { resolveTokenContractId } from "@/shared/stellar/resolve-token-contract-id";
+import { buildAuditDepositLeg } from "@/shared/lib/audit/build-audit-transaction-leg";
+import { resolveAuditPrecommitementHex } from "@/shared/lib/audit/resolve-audit-precommitement-hex";
 
 const STROOPS_PER_UNIT = 10_000_000;
 
@@ -49,32 +52,33 @@ export async function runDepositMutation(
   context: RunDepositMutationContext,
   input: RunDepositMutationInput,
 ): Promise<RunDepositMutationResult> {
-  const poolRaw = input.asset.poolContract?.trim();
-  if (!poolRaw) {
-    throw new Error("Asset has no pool contract");
-  }
-  const poolContract = normalizeSorobanContractId(poolRaw);
+  const poolContract = getRequiredPrivacyPoolContractId();
   const stealth = input.stealthAddress.trim();
   if (!stealth) {
     throw new Error("Stealth address required");
   }
 
   const amountStroops = displayAmountToStroops(input.amountDisplay);
-  const { commitment_hex, coin, depositScalarHex } =
-    await privacyPoolService.createAlignedShieldCoinData(
-      stealth,
+  const tokenContract = resolveTokenContractId(input.asset.clientContract);
+  const { commitment_hex, coin, depositScalarHex, precommitementHex } =
+    await privacyPoolService.createAlignedShieldCoinData({
+      stealthAddressStpl1: stealth,
       amountStroops,
-    );
+      tokenAddress: tokenContract,
+    });
 
   const auditPublicKey = getAuditPublicKey();
-  const auditTx: ITransaction = {
-    deposit1: {
-      receiver: stealth,
-      value: Number(coin.value),
-      secret: decimalFieldToBytes(coin.secret),
-      nullifier: decimalFieldToBytes(coin.nullifier),
-    },
-  };
+  const auditTx = {
+    deposit1: buildAuditDepositLeg(stealth, {
+      value: toAuditNumber(BigInt(coin.value), "Deposit amount"),
+      precommitementHex: resolveAuditPrecommitementHex(
+        precommitementHex,
+        "deposit1",
+      ),
+      nullifierDecimal: coin.nullifier,
+      tokenAddress: tokenContract,
+    }),
+  } as unknown as ITransaction;
   const encoded = await sealAndEncryptTransaction(auditTx, auditPublicKey);
 
   const txId = await submitSorobanDeposit({
@@ -83,6 +87,7 @@ export async function runDepositMutation(
     stealthAddressStpl1: stealth,
     coin,
     depositScalarHex,
+    tokenAddress: tokenContract,
     encoded,
     networkPassphrase: input.networkPassphrase,
     sorobanRpcUrl: input.sorobanRpcUrl,
@@ -93,6 +98,7 @@ export async function runDepositMutation(
       commitmentHex: commitment_hex,
       coin,
       depositScalarHex,
+      precommitementHex,
       stealthAddress: stealth,
       assetId: input.asset.assetId,
       poolContract,
@@ -108,6 +114,7 @@ export async function runDepositMutation(
       commitmentHex: commitment_hex,
       coin,
       depositScalarHex,
+      precommitementHex,
       assetId: input.asset.assetId,
       amountDisplay: input.amountDisplay,
       txId,

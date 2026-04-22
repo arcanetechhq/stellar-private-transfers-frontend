@@ -1,6 +1,7 @@
 import { fetchAndMergeMerkleState } from "@/shared/lib/privacy-pool/fetch-contract-merkle";
 import { displayAmountToStroops } from "@/shared/lib/stellar/stroops";
-import { normalizeSorobanContractId } from "@/shared/stellar/normalize-soroban-contract-id";
+import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
+import { resolveTokenContractId } from "@/shared/stellar/resolve-token-contract-id";
 import { stealthAddressesEqual } from "./confidential-transfer-audit-helpers";
 import type {
   RunConfidentialTransferInput,
@@ -18,7 +19,8 @@ export type {
 export async function runConfidentialTransferMutation(
   input: RunConfidentialTransferInput,
 ): Promise<RunConfidentialTransferResult> {
-  const poolContract = normalizeSorobanContractId(input.poolContractRaw.trim());
+  const poolContract = getRequiredPrivacyPoolContractId();
+  const tokenContract = resolveTokenContractId(input.tokenContractRaw);
   const recipientTrim = input.recipientStealthStpl1.trim();
   const senderTrim = input.senderStealthAddress.trim();
   if (stealthAddressesEqual(recipientTrim, senderTrim)) {
@@ -47,6 +49,7 @@ export async function runConfidentialTransferMutation(
     senderPrivKeyScalarHex: input.senderPrivKeyScalarHex.trim(),
     recipientTrim,
     senderTrim,
+    tokenContract,
     picked,
   };
 

@@ -10,7 +10,7 @@ export interface SubmitConfidentialTransferPayload {
   senderStealthAddress: string;
   recipientStealthStpl1: string;
   assetId: string;
-  poolContractRaw: string;
+  tokenContractRaw: string;
   amountDisplay: number;
 }
 
@@ -52,7 +52,7 @@ export const submitConfidentialTransferThunk = createAsyncThunk<
         senderStealthAddress: senderTrim,
         recipientStealthStpl1: payload.recipientStealthStpl1.trim(),
         assetId: payload.assetId,
-        poolContractRaw: payload.poolContractRaw,
+        tokenContractRaw: payload.tokenContractRaw,
         amountDisplay: payload.amountDisplay,
         finalizedCoinsForSenderAndAsset,
       });

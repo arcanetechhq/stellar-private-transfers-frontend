@@ -1,15 +1,6 @@
 import { sealAndEncryptTransaction, type ITransaction } from "@auditable/stellar-audit";
-import {
-  addCoin,
-  findCommitmentLeafIndex,
-  markCoinSpent,
-  type CoinWithMetadata,
-} from "@/entities/coin";
-import {
-  decimalFieldToBytes,
-  getAuditPublicKey,
-  toAuditNumber,
-} from "@/features/deposit";
+import { addCoin, findCommitmentLeafIndex, markCoinSpent, type CoinWithMetadata } from "@/entities/coin";
+import { getAuditPublicKey, toAuditNumber } from "@/features/deposit";
 import {
   fetchAndMergeMerkleState,
   readLeafEphemeralHex,
@@ -18,13 +9,15 @@ import { ZERO_STROOPS } from "@/shared/lib/privacy-pool/privacy-pool-confidentia
 import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
 import { submitSorobanConfidentialTransfer } from "@/shared/lib/privacy-pool/submit-soroban-confidential-transfer";
 import { displayAmountToStroops, stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops";
-import { normalizeSorobanContractId } from "@/shared/stellar/normalize-soroban-contract-id";
+import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
+import { resolveTokenContractId } from "@/shared/stellar/resolve-token-contract-id";
+import { buildAuditDepositLeg, buildAuditWithdrawLeg } from "@/shared/lib/audit/build-audit-transaction-leg";
+import { resolveAuditPrecommitementHex } from "@/shared/lib/audit/resolve-audit-precommitement-hex";
 import type {
   RunPrivateWithdrawalMutationInput,
   RunPrivateWithdrawalMutationResult,
 } from "./private-withdrawal-mutation-contract";
 import { postPrivateWithdrawChangeDeliveryIfNeeded } from "./private-withdrawal-sign-and-delivery";
-
 function buildDualPrivateWithdrawAuditTransaction(parameters: {
   first: CoinWithMetadata;
   second: CoinWithMetadata;
@@ -32,40 +25,48 @@ function buildDualPrivateWithdrawAuditTransaction(parameters: {
   noteB: bigint;
   changeStroops: bigint;
   senderTrim: string;
-  preparedDual: Awaited<
-    ReturnType<typeof privacyPoolService.prepareWithdrawTransactProofDual>
-  >;
+  tokenContract: string;
+  preparedDual: Awaited<ReturnType<typeof privacyPoolService.prepareWithdrawTransactProofDual>>;
 }): ITransaction {
-  const auditTxDual: ITransaction = {
-    withdraw1: {
+  const auditTxDual = {
+    withdraw1: buildAuditWithdrawLeg({
       value: toAuditNumber(parameters.noteA, "Note value"),
-      secret: decimalFieldToBytes(parameters.first.coin.secret),
-      nullifier: decimalFieldToBytes(parameters.first.coin.nullifier),
-    },
-    withdraw2: {
-      value: toAuditNumber(parameters.noteB, "Note value"),
-      secret: decimalFieldToBytes(parameters.second.coin.secret),
-      nullifier: decimalFieldToBytes(parameters.second.coin.nullifier),
-    },
-  };
-  if (parameters.preparedDual.changeCoin) {
-    auditTxDual.deposit1 = {
-      receiver: parameters.senderTrim,
-      value: toAuditNumber(parameters.changeStroops, "Change amount"),
-      secret: decimalFieldToBytes(parameters.preparedDual.changeCoin.coin.secret),
-      nullifier: decimalFieldToBytes(
-        parameters.preparedDual.changeCoin.coin.nullifier,
+      precommitementHex: resolveAuditPrecommitementHex(
+        parameters.first.precommitementHex,
+        "withdraw1",
       ),
-    };
+      nullifierDecimal: parameters.first.coin.nullifier,
+      tokenAddress: parameters.tokenContract,
+    }),
+    withdraw2: buildAuditWithdrawLeg({
+      value: toAuditNumber(parameters.noteB, "Note value"),
+      precommitementHex: resolveAuditPrecommitementHex(
+        parameters.second.precommitementHex,
+        "withdraw2",
+      ),
+      nullifierDecimal: parameters.second.coin.nullifier,
+      tokenAddress: parameters.tokenContract,
+    }),
+  } as unknown as ITransaction;
+  if (parameters.preparedDual.changeCoin) {
+    (auditTxDual as Record<string, unknown>)["deposit1"] = buildAuditDepositLeg(
+      parameters.senderTrim,
+      {
+        value: toAuditNumber(parameters.changeStroops, "Change amount"),
+        precommitementHex: resolveAuditPrecommitementHex(
+          parameters.preparedDual.changeCoin.precommitementHex,
+          "deposit1",
+        ),
+        nullifierDecimal: parameters.preparedDual.changeCoin.coin.nullifier,
+        tokenAddress: parameters.tokenContract,
+      },
+    );
   }
   return auditTxDual;
 }
-
 async function applyDualPrivateWithdrawPostSubmitEffects(parameters: {
   dispatch: RunPrivateWithdrawalMutationInput["dispatch"];
-  preparedDual: Awaited<
-    ReturnType<typeof privacyPoolService.prepareWithdrawTransactProofDual>
-  >;
+  preparedDual: Awaited<ReturnType<typeof privacyPoolService.prepareWithdrawTransactProofDual>>;
   first: CoinWithMetadata;
   second: CoinWithMetadata;
   senderTrim: string;
@@ -86,6 +87,7 @@ async function applyDualPrivateWithdrawPostSubmitEffects(parameters: {
       commitmentHex: parameters.preparedDual.changeCoin.commitment_hex,
       coin: parameters.preparedDual.changeCoin.coin,
       depositScalarHex: parameters.preparedDual.changeCoin.depositScalarHex,
+      precommitementHex: parameters.preparedDual.changeCoin.precommitementHex,
       stealthAddress: parameters.senderTrim,
       assetId: parameters.assetId,
       poolContract: parameters.poolContract,
@@ -103,17 +105,13 @@ async function applyDualPrivateWithdrawPostSubmitEffects(parameters: {
     txId: parameters.txId,
   });
 }
-
 async function readDualWithdrawEphemerals(parameters: {
   poolContract: string;
   input: RunPrivateWithdrawalMutationInput;
   first: CoinWithMetadata;
   second: CoinWithMetadata;
   commitments: string[];
-}): Promise<{
-  ephemeralA: Awaited<ReturnType<typeof readLeafEphemeralHex>>;
-  ephemeralB: Awaited<ReturnType<typeof readLeafEphemeralHex>>;
-}> {
+}): Promise<{ ephemeralA: Awaited<ReturnType<typeof readLeafEphemeralHex>>; ephemeralB: Awaited<ReturnType<typeof readLeafEphemeralHex>> }> {
   const leafIndexA = findCommitmentLeafIndex(parameters.commitments, parameters.first);
   const leafIndexB = findCommitmentLeafIndex(parameters.commitments, parameters.second);
   if (leafIndexA < 0 || leafIndexB < 0) {
@@ -135,24 +133,23 @@ async function readDualWithdrawEphemerals(parameters: {
   });
   return { ephemeralA, ephemeralB };
 }
-
 async function buildDualPrivateWithdrawPreparedProof(parameters: {
   input: RunPrivateWithdrawalMutationInput;
   first: CoinWithMetadata;
   second: CoinWithMetadata;
 }): Promise<{
   poolContract: string;
+  tokenContract: string;
   senderTrim: string;
   noteA: bigint;
   noteB: bigint;
   changeStroops: bigint;
-  preparedDual: Awaited<
-    ReturnType<typeof privacyPoolService.prepareWithdrawTransactProofDual>
-  >;
+  preparedDual: Awaited<ReturnType<typeof privacyPoolService.prepareWithdrawTransactProofDual>>;
 }> {
   const { input, first, second } = parameters;
   const senderTrim = input.senderStealthAddress.trim();
-  const poolContract = normalizeSorobanContractId(input.poolContractRaw.trim());
+  const poolContract = getRequiredPrivacyPoolContractId();
+  const tokenContract = resolveTokenContractId(input.tokenContractRaw);
   const withdrawStroops = displayAmountToStroops(input.amountDisplay);
   const noteA = BigInt(first.coin.value);
   const noteB = BigInt(second.coin.value);
@@ -190,9 +187,11 @@ async function buildDualPrivateWithdrawPreparedProof(parameters: {
     depositorEphemeralBYHex: ephemeralB.yHex,
     withdrawAmountStroops: withdrawStroops,
     changeStealthAddressStpl1: changeStealth,
+    tokenAddress: tokenContract,
   });
   return {
     poolContract,
+    tokenContract,
     senderTrim,
     noteA,
     noteB,
@@ -200,7 +199,6 @@ async function buildDualPrivateWithdrawPreparedProof(parameters: {
     preparedDual,
   };
 }
-
 export async function runPrivateWithdrawalDualCoinMutation(
   input: RunPrivateWithdrawalMutationInput,
 ): Promise<RunPrivateWithdrawalMutationResult> {
@@ -220,6 +218,7 @@ export async function runPrivateWithdrawalDualCoinMutation(
     noteB: built.noteB,
     changeStroops: built.changeStroops,
     senderTrim: built.senderTrim,
+    tokenContract: built.tokenContract,
     preparedDual: built.preparedDual,
   });
   const auditPublicKey = getAuditPublicKey();

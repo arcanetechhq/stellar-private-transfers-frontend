@@ -7,6 +7,7 @@ import {
 import { selectFinalizedAggregatesForStealth } from "@/entities/coin";
 import { useWithdrawalSender } from "./use-withdrawal-sender";
 import { useSelectedPrivateToken } from "./use-selected-private-token";
+import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 
 export function useWithdrawalPrivateAssets(assetIdFromUrl: string | null) {
   const withdrawalSender = useWithdrawalSender();
@@ -17,6 +18,7 @@ export function useWithdrawalPrivateAssets(assetIdFromUrl: string | null) {
   );
   const { data: assetCatalog } = useGetAssetsQuery();
   const aggregatesWithZeroAssets = useMemo(() => {
+    const poolContract = getRequiredPrivacyPoolContractId();
     const byAssetId = new Map(
       aggregates.map((aggregate) => [aggregate.assetId, aggregate]),
     );
@@ -27,7 +29,7 @@ export function useWithdrawalPrivateAssets(assetIdFromUrl: string | null) {
         }
         byAssetId.set(asset.assetId, {
           assetId: asset.assetId,
-          poolContract: asset.poolContract ?? "",
+          poolContract,
           totalAmountDisplay: 0,
         });
       }

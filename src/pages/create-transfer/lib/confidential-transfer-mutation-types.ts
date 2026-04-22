@@ -10,7 +10,7 @@ export interface RunConfidentialTransferInput {
   senderStealthAddress: string;
   recipientStealthStpl1: string;
   assetId: string;
-  poolContractRaw: string;
+  tokenContractRaw: string;
   amountDisplay: number;
   finalizedCoinsForSenderAndAsset: CoinWithMetadata[];
 }

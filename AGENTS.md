@@ -80,3 +80,4 @@ Extra material (`references/`, `templates/`) sits inside each skill folder.
 
 - Local Node version is pinned in **`.nvmrc`** at the repo root; use it when switching versions for commands in this project.
 - **`index.html`** uses the product title **Arcane private payments** (not generic Stellar wording).
+- For privacy-pool prove transaction inputs, `tokenAddress` should come from the asset API field `clientContract` (not from a token symbol/code field).

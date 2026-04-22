@@ -1,6 +1,8 @@
 import type { CoinData, StateFile } from "@auditable/privacy-pool-zk-sdk";
 import { privacyPoolService } from "./privacy-pool-service";
 import { buildRecipientAndOptionalChangeDeposits } from "./build-recipient-change-deposits";
+import { withTokenAddressPublicInputs } from "./prove-transaction-input";
+import { buildZeroPublicLegs } from "./prove-transaction-input";
 import {
   changeStroopsAfterDualTransfer,
   dualWithdrawLegsWithSharedRoot,
@@ -8,7 +10,14 @@ import {
   senderWithdrawFrAndScalar,
 } from "./privacy-pool-confidential-proof-helpers";
 
-export async function prepareConfidentialTransferProofDual(parameters: {
+type GeneratedOutputCoin = {
+  commitment_hex: string;
+  coin: CoinData;
+  depositScalarHex: string;
+  precommitementHex: string;
+};
+
+type PrepareConfidentialTransferProofDualParameters = {
   coinA: CoinData;
   coinB: CoinData;
   state: StateFile;
@@ -19,16 +28,19 @@ export async function prepareConfidentialTransferProofDual(parameters: {
   transferStroops: bigint;
   recipientStealthStpl1: string;
   selfStealthStpl1ForChange: string | undefined;
-}): Promise<{
+  tokenAddress: string;
+};
+
+type PrepareConfidentialTransferProofDualResult = {
   proof_hex: string;
   public_hex: string;
-  recipientCoin: {
-    commitment_hex: string;
-    coin: CoinData;
-    depositScalarHex: string;
-  };
-  changeCoin?: { commitment_hex: string; coin: CoinData; depositScalarHex: string };
-}> {
+  recipientCoin: GeneratedOutputCoin;
+  changeCoin?: GeneratedOutputCoin;
+};
+
+export async function prepareConfidentialTransferProofDual(
+  parameters: PrepareConfidentialTransferProofDualParameters,
+): Promise<PrepareConfidentialTransferProofDualResult> {
   const sdk = await privacyPoolService.getInitializedSdk();
   const noteA = BigInt(parameters.coinA.value);
   const noteB = BigInt(parameters.coinB.value);
@@ -59,14 +71,20 @@ export async function prepareConfidentialTransferProofDual(parameters: {
       transferStroops: parameters.transferStroops,
       changeStroops,
       selfStealthStpl1ForChange: parameters.selfStealthStpl1ForChange,
+      tokenAddress: parameters.tokenAddress,
     });
-  const proof = await sdk.proveTransaction(
+  const publicInput = withTokenAddressPublicInputs(
     {
       stateRoot: legA.witness.stateRoot,
       withdrawAddressHi: hi,
       withdrawAddressLo: lo,
       privKeyScalar,
     },
+    parameters.tokenAddress,
+  );
+  const proof = await sdk.proveTransaction(
+    publicInput as unknown as Parameters<typeof sdk.proveTransaction>[0],
+    buildZeroPublicLegs(),
     [legA.withdrawObject, legB.withdrawObject],
     deposits,
   );
@@ -76,6 +94,7 @@ export async function prepareConfidentialTransferProofDual(parameters: {
       commitment_hex: recipientSlot.commitment_hex,
       coin: recipientSlot.coin,
       depositScalarHex: recipientSlot.depositScalarHex,
+      precommitementHex: recipientSlot.precommitementHex,
     },
     changeCoin,
   };

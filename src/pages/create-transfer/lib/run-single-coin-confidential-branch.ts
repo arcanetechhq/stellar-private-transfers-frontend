@@ -15,6 +15,7 @@ type PreparedSingleProof = Awaited<
 interface SingleCoinBranchParameters {
   input: RunConfidentialTransferInput;
   poolContract: string;
+  tokenContract: string;
   transferStroops: bigint;
   commitments: string[];
   state: { commitments: string[] };
@@ -40,6 +41,7 @@ async function submitSingleCoinTransfer(
     senderPrivKeyScalarHex,
     recipientTrim,
     senderTrim,
+    tokenContract,
     picked,
   } = parameters;
   const [only] = picked;
@@ -65,6 +67,7 @@ async function submitSingleCoinTransfer(
     recipientStealthStpl1: recipientTrim,
     selfStealthStpl1ForChange:
       transferStroops < BigInt(only.coin.value) ? senderTrim : undefined,
+    tokenAddress: tokenContract,
   });
   const noteStroops = BigInt(only.coin.value);
   const txId = await sealEncryptAndSubmitSingleCoinConfidentialTransfer({
@@ -76,6 +79,7 @@ async function submitSingleCoinTransfer(
     senderTrim,
     input,
     poolContract,
+    tokenContract,
   });
   return {
     txId,
@@ -113,6 +117,7 @@ async function finalizeSingleCoinDeliveries(
         commitmentHex: changeCoin.commitment_hex,
         coin: changeCoin.coin,
         depositScalarHex: changeCoin.depositScalarHex,
+        precommitementHex: changeCoin.precommitementHex,
         stealthAddress: senderTrim,
         assetId: input.assetId,
         poolContract,
@@ -129,6 +134,7 @@ async function finalizeSingleCoinDeliveries(
       commitmentHex: recipientCoin.commitment_hex,
       coin: recipientCoin.coin,
       depositScalarHex: recipientCoin.depositScalarHex,
+      precommitementHex: recipientCoin.precommitementHex,
       assetId: input.assetId,
       amountDisplay: input.amountDisplay,
       txId,
@@ -144,6 +150,7 @@ async function finalizeSingleCoinDeliveries(
         commitmentHex: changeCoin.commitment_hex,
         coin: changeCoin.coin,
         depositScalarHex: changeCoin.depositScalarHex,
+        precommitementHex: changeCoin.precommitementHex,
         assetId: input.assetId,
         amountDisplay: stroopsToDisplayAmount(BigInt(changeCoin.coin.value)),
         txId,

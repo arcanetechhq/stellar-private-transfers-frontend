@@ -6,7 +6,6 @@ import {
   type CoinWithMetadata,
 } from "@/entities/coin";
 import {
-  decimalFieldToBytes,
   getAuditPublicKey,
   toAuditNumber,
 } from "@/features/deposit";
@@ -18,7 +17,13 @@ import { ZERO_STROOPS } from "@/shared/lib/privacy-pool/privacy-pool-confidentia
 import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
 import { submitSorobanConfidentialTransfer } from "@/shared/lib/privacy-pool/submit-soroban-confidential-transfer";
 import { displayAmountToStroops, stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops";
-import { normalizeSorobanContractId } from "@/shared/stellar/normalize-soroban-contract-id";
+import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
+import { resolveTokenContractId } from "@/shared/stellar/resolve-token-contract-id";
+import {
+  buildAuditDepositLeg,
+  buildAuditWithdrawLeg,
+} from "@/shared/lib/audit/build-audit-transaction-leg";
+import { resolveAuditPrecommitementHex } from "@/shared/lib/audit/resolve-audit-precommitement-hex";
 import type {
   RunPrivateWithdrawalMutationInput,
   RunPrivateWithdrawalMutationResult,
@@ -32,7 +37,6 @@ export type {
 } from "./private-withdrawal-mutation-contract";
 
 async function loadSinglePrivateWithdrawMerkleContext(parameters: {
-  poolContractRaw: string;
   walletPublicKey: string;
   networkPassphrase: string;
   sorobanRpcUrl: string;
@@ -45,7 +49,7 @@ async function loadSinglePrivateWithdrawMerkleContext(parameters: {
   state: { commitments: string[] };
   ephemeral: Awaited<ReturnType<typeof readLeafEphemeralHex>>;
 }> {
-  const poolContract = normalizeSorobanContractId(parameters.poolContractRaw.trim());
+  const poolContract = getRequiredPrivacyPoolContractId();
   const withdrawStroops = displayAmountToStroops(parameters.amountDisplay);
   const noteStroops = BigInt(parameters.pickedCoin.coin.value);
   if (withdrawStroops > noteStroops) {
@@ -72,6 +76,80 @@ async function loadSinglePrivateWithdrawMerkleContext(parameters: {
   return { poolContract, withdrawStroops, noteStroops, state, ephemeral };
 }
 
+function buildSinglePrivateWithdrawAuditTransaction(parameters: {
+  withdrawStroops: bigint;
+  pickedCoin: CoinWithMetadata;
+  senderTrim: string;
+  tokenContract: string;
+  changeStroops: bigint;
+  prepared: Awaited<ReturnType<typeof privacyPoolService.prepareWithdrawTransactProof>>;
+}): ITransaction {
+  const base = {
+    withdraw1: buildAuditWithdrawLeg({
+      value: toAuditNumber(parameters.withdrawStroops, "Withdraw amount"),
+      precommitementHex: resolveAuditPrecommitementHex(
+        parameters.pickedCoin.precommitementHex,
+        "withdraw1",
+      ),
+      nullifierDecimal: parameters.pickedCoin.coin.nullifier,
+      tokenAddress: parameters.tokenContract,
+    }),
+  };
+  if (!parameters.prepared.changeCoin) {
+    return base as unknown as ITransaction;
+  }
+  return {
+    ...base,
+    deposit1: buildAuditDepositLeg(parameters.senderTrim, {
+      value: toAuditNumber(parameters.changeStroops, "Change amount"),
+      precommitementHex: resolveAuditPrecommitementHex(
+        parameters.prepared.changeCoin.precommitementHex,
+        "deposit1",
+      ),
+      nullifierDecimal: parameters.prepared.changeCoin.coin.nullifier,
+      tokenAddress: parameters.tokenContract,
+    }),
+  } as unknown as ITransaction;
+}
+
+async function applySingleWithdrawChangeEffects(parameters: {
+  prepared: Awaited<ReturnType<typeof privacyPoolService.prepareWithdrawTransactProof>>;
+  dispatch: RunPrivateWithdrawalMutationInput["dispatch"];
+  senderTrim: string;
+  assetId: string;
+  poolContract: string;
+  txId: string;
+}): Promise<string | undefined> {
+  if (!parameters.prepared.changeCoin) {
+    return undefined;
+  }
+  const changeDisplay = stroopsToDisplayAmount(
+    BigInt(parameters.prepared.changeCoin.coin.value),
+  );
+  parameters.dispatch(
+    addCoin({
+      commitmentHex: parameters.prepared.changeCoin.commitment_hex,
+      coin: parameters.prepared.changeCoin.coin,
+      depositScalarHex: parameters.prepared.changeCoin.depositScalarHex,
+      precommitementHex: parameters.prepared.changeCoin.precommitementHex,
+      stealthAddress: parameters.senderTrim,
+      assetId: parameters.assetId,
+      poolContract: parameters.poolContract,
+      amountDisplay: changeDisplay,
+      status: "pending",
+      txId: parameters.txId,
+    }),
+  );
+  return postPrivateWithdrawChangeDeliveryIfNeeded({
+    dispatch: parameters.dispatch,
+    changeCoin: parameters.prepared.changeCoin,
+    senderTrim: parameters.senderTrim,
+    assetId: parameters.assetId,
+    poolContract: parameters.poolContract,
+    txId: parameters.txId,
+  });
+}
+
 async function sealSubmitAndApplySinglePrivateWithdrawEffects(parameters: {
   dispatch: RunPrivateWithdrawalMutationInput["dispatch"];
   prepared: Awaited<ReturnType<typeof privacyPoolService.prepareWithdrawTransactProof>>;
@@ -80,28 +158,14 @@ async function sealSubmitAndApplySinglePrivateWithdrawEffects(parameters: {
   pickedCoin: CoinWithMetadata;
   senderTrim: string;
   assetId: string;
+  tokenContract: string;
   poolContract: string;
   walletPublicKey: string;
   networkPassphrase: string;
   sorobanRpcUrl: string;
 }): Promise<RunPrivateWithdrawalMutationResult> {
-  const auditPublicKey = getAuditPublicKey();
-  const auditTx: ITransaction = {
-    withdraw1: {
-      value: toAuditNumber(parameters.withdrawStroops, "Withdraw amount"),
-      secret: decimalFieldToBytes(parameters.pickedCoin.coin.secret),
-      nullifier: decimalFieldToBytes(parameters.pickedCoin.coin.nullifier),
-    },
-  };
-  if (parameters.prepared.changeCoin) {
-    auditTx.deposit1 = {
-      receiver: parameters.senderTrim,
-      value: toAuditNumber(parameters.changeStroops, "Change amount"),
-      secret: decimalFieldToBytes(parameters.prepared.changeCoin.coin.secret),
-      nullifier: decimalFieldToBytes(parameters.prepared.changeCoin.coin.nullifier),
-    };
-  }
-  const encoded = await sealAndEncryptTransaction(auditTx, auditPublicKey);
+  const auditTx = buildSinglePrivateWithdrawAuditTransaction(parameters);
+  const encoded = await sealAndEncryptTransaction(auditTx, getAuditPublicKey());
   const txId = await submitSorobanConfidentialTransfer({
     contractId: parameters.poolContract,
     walletPublicKey: parameters.walletPublicKey,
@@ -112,40 +176,17 @@ async function sealSubmitAndApplySinglePrivateWithdrawEffects(parameters: {
     sorobanRpcUrl: parameters.sorobanRpcUrl,
   });
   parameters.dispatch(markCoinSpent(parameters.pickedCoin.coin.commitment));
-  const warnings: string[] = [];
-  if (parameters.prepared.changeCoin) {
-    const changeDisplay = stroopsToDisplayAmount(
-      BigInt(parameters.prepared.changeCoin.coin.value),
-    );
-    parameters.dispatch(
-      addCoin({
-        commitmentHex: parameters.prepared.changeCoin.commitment_hex,
-        coin: parameters.prepared.changeCoin.coin,
-        depositScalarHex: parameters.prepared.changeCoin.depositScalarHex,
-        stealthAddress: parameters.senderTrim,
-        assetId: parameters.assetId,
-        poolContract: parameters.poolContract,
-        amountDisplay: changeDisplay,
-        status: "pending",
-        txId,
-      }),
-    );
-    const deliveryWarning = await postPrivateWithdrawChangeDeliveryIfNeeded({
-      dispatch: parameters.dispatch,
-      changeCoin: parameters.prepared.changeCoin,
-      senderTrim: parameters.senderTrim,
-      assetId: parameters.assetId,
-      poolContract: parameters.poolContract,
-      txId,
-    });
-    if (deliveryWarning) {
-      warnings.push(deliveryWarning);
-    }
-  }
+  const deliveryWarning = await applySingleWithdrawChangeEffects({
+    prepared: parameters.prepared,
+    dispatch: parameters.dispatch,
+    senderTrim: parameters.senderTrim,
+    assetId: parameters.assetId,
+    poolContract: parameters.poolContract,
+    txId,
+  });
   return {
     txId,
-    coinDeliveryWarning:
-      warnings.length > 0 ? warnings.join("; ") : undefined,
+    coinDeliveryWarning: deliveryWarning,
   };
 }
 
@@ -154,8 +195,8 @@ async function runPrivateWithdrawalSingleCoinMutation(
   pickedCoin: CoinWithMetadata,
 ): Promise<RunPrivateWithdrawalMutationResult> {
   const senderTrim = input.senderStealthAddress.trim();
+  const tokenContract = resolveTokenContractId(input.tokenContractRaw);
   const merkle = await loadSinglePrivateWithdrawMerkleContext({
-    poolContractRaw: input.poolContractRaw,
     walletPublicKey: input.walletPublicKey,
     networkPassphrase: input.networkPassphrase,
     sorobanRpcUrl: input.sorobanRpcUrl,
@@ -175,6 +216,7 @@ async function runPrivateWithdrawalSingleCoinMutation(
     depositorEphemeralYHex: merkle.ephemeral.yHex,
     withdrawAmountStroops: merkle.withdrawStroops,
     changeStealthAddressStpl1: changeStealth,
+    tokenAddress: tokenContract,
   });
   return sealSubmitAndApplySinglePrivateWithdrawEffects({
     dispatch: input.dispatch,
@@ -184,6 +226,7 @@ async function runPrivateWithdrawalSingleCoinMutation(
     pickedCoin,
     senderTrim,
     assetId: input.assetId,
+    tokenContract,
     poolContract: merkle.poolContract,
     walletPublicKey: input.walletPublicKey,
     networkPassphrase: input.networkPassphrase,

@@ -31,7 +31,7 @@ export async function submitPrivateWithdrawalThunkBody(
       senderPrivKeyScalarHex: resolved.senderPrivKeyScalarHex,
       senderStealthAddress: resolved.senderTrim,
       assetId: resolved.payload.assetId,
-      poolContractRaw: resolved.payload.poolContractRaw,
+      tokenContractRaw: resolved.payload.tokenContractRaw,
       amountDisplay: resolved.payload.amountDisplay,
       destinationAddress: resolved.payload.destinationAddress,
       pickedCoins: resolved.pickedCoins,

@@ -7,6 +7,7 @@ export interface CoinDeliveryPayloadV1 {
   commitmentHex: string;
   coin: CoinData;
   depositScalarHex: string;
+  precommitementHex?: string;
   asset: string;
   amountDisplay: number;
   txId: string;
@@ -21,7 +22,9 @@ function hasValidCoinFields(coinRecord: Record<string, unknown>): boolean {
     typeof coinRecord["value"] === "string" &&
     typeof coinRecord["nullifier"] === "string" &&
     typeof coinRecord["secret"] === "string" &&
-    typeof coinRecord["commitment"] === "string"
+    typeof coinRecord["commitment"] === "string" &&
+    typeof coinRecord["asset_hi"] === "string" &&
+    typeof coinRecord["asset_lo"] === "string"
   );
 }
 
@@ -47,6 +50,17 @@ function buildOptionalFields(payload: Record<string, unknown>): OptionalPayloadF
   };
 }
 
+function optionalPrecommitementHex(
+  payload: Record<string, unknown>,
+): string | undefined {
+  const value = payload["precommitementHex"];
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const normalized = value.trim().toLowerCase();
+  return normalized || undefined;
+}
+
 export function parseCoinDeliveryPayloadV1(
   payload: unknown,
 ): CoinDeliveryPayloadV1 | undefined {
@@ -65,8 +79,11 @@ export function parseCoinDeliveryPayloadV1(
       nullifier: coinData["nullifier"] as string,
       secret: coinData["secret"] as string,
       commitment: coinData["commitment"] as string,
+      asset_hi: coinData["asset_hi"] as string,
+      asset_lo: coinData["asset_lo"] as string,
     },
     depositScalarHex: (payload["depositScalarHex"] as string).trim(),
+    precommitementHex: optionalPrecommitementHex(payload),
     ...buildOptionalFields(payload),
   };
 }

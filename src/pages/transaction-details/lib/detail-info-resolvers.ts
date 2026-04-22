@@ -26,9 +26,14 @@ export function resolveStoredDetailAsset(
 
 export function resolveChainDetailAssetDisplay(
   chainMatchedAsset: AssetDto | undefined,
+  unknownAssetLabel: string,
 ): ResolvedDetailAsset {
   if (!chainMatchedAsset) {
-    return { asset: undefined, assetLabel: "—", ticker: "" };
+    return {
+      asset: undefined,
+      assetLabel: unknownAssetLabel,
+      ticker: "UNKNOWN",
+    };
   }
   return {
     asset: chainMatchedAsset,
@@ -42,6 +47,7 @@ export interface DetailAmountContentInput {
   storedTransaction: Transaction | undefined;
   chainTransferAmountRaw: string | undefined;
   chainMatchedAsset: AssetDto | undefined;
+  unknownTicker: string;
   translate: TFunction<"transactionDetails", undefined>;
 }
 
@@ -53,6 +59,7 @@ export function resolveDetailAmountContent(
     storedTransaction,
     chainTransferAmountRaw,
     chainMatchedAsset,
+    unknownTicker,
     translate,
   } = input;
   if (hasPrivateRecord && storedTransaction) {
@@ -70,7 +77,11 @@ export function resolveDetailAmountContent(
         return `${formatted} ${chainMatchedAsset.assetId.toUpperCase()}`;
       }
     }
-    return chainTransferAmountRaw;
+    const fallback = formatRawAmountToDecimalString(
+      chainTransferAmountRaw,
+      STELLAR_DEFAULT_ISSUED_ASSET_DECIMALS,
+    );
+    return `${fallback ?? chainTransferAmountRaw} ${unknownTicker}`;
   }
   if (!hasPrivateRecord) {
     return translate("privateLabel");

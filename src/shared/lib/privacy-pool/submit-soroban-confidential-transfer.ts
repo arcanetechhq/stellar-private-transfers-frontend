@@ -2,6 +2,7 @@ import { Buffer } from "buffer";
 import { Client as PrivacyPoolContractClient } from "contract";
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
 import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
+import { runTtlPreflight } from "./ttl-preflight";
 
 function hexToBuffer(hex: string): Buffer {
   const clean = hex.startsWith("0x") ? hex.slice(2) : hex;
@@ -53,6 +54,7 @@ export async function submitSorobanConfidentialTransfer(
     encoded: Buffer.from(input.encoded),
   });
 
+  await runTtlPreflight(assembledTransaction);
   const sentTransaction = await assembledTransaction.signAndSend();
   const transactionHash = sentTransaction.sendTransactionResponse?.hash ?? "";
   if (!transactionHash) {

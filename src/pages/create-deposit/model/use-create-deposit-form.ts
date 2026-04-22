@@ -11,6 +11,7 @@ import {
   selectScalarByNonce,
   selectStealthByNonce,
 } from "@/entities/stealth-address";
+import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import { NETWORK_FEE } from "./create-deposit";
 import { resolveSelectedDepositAsset } from "./resolve-selected-deposit-asset";
 import { computeDepositCanSubmit } from "./compute-deposit-can-submit";
@@ -70,7 +71,13 @@ export function useCreateDepositForm({
   const receivedAmount = useMemo(() => computeReceivedAmount(amount), [amount]);
 
   const numericAmount = Number.parseFloat(amount);
-  const hasPoolContract = Boolean(selectedAsset?.poolContract?.trim());
+  const hasPoolContract = (() => {
+    try {
+      return Boolean(getRequiredPrivacyPoolContractId());
+    } catch {
+      return false;
+    }
+  })();
   const hasStealthScalar = Boolean(recipientScalar?.trim());
   const hasStealthAddress = Boolean(selectedStealthAddress.trim());
 

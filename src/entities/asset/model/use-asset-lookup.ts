@@ -22,8 +22,6 @@ export function useAssetByPoolContract(
     if (!normalized) {
       return;
     }
-    return data?.find(
-      (asset) => asset.poolContract?.trim() === normalized,
-    );
+    return data?.find((asset) => asset.poolContract.trim() === normalized);
   }, [data, poolContract]);
 }

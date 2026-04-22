@@ -1,12 +1,15 @@
 import type { CoinStatus, CoinWithMetadata } from "../model/coin";
+import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 
-const STORAGE_KEY_PREFIX = "coin-state-v2";
+const STORAGE_KEY_PREFIX = "coin-state-v3";
 
 function storageKeyForWallet(publicKey: string): string {
   return `${STORAGE_KEY_PREFIX}:${publicKey}`;
 }
 
-export function normalizeCommitmentHex(hex: string | undefined): string | undefined {
+export function normalizeCommitmentHex(
+  hex: string | undefined,
+): string | undefined {
   if (!hex?.trim()) return undefined;
   return hex.trim().replace(/^0x/iu, "").toLowerCase();
 }
@@ -22,13 +25,16 @@ function isCoinData(value: unknown): boolean {
     typeof record["value"] === "string" &&
     typeof record["nullifier"] === "string" &&
     typeof record["secret"] === "string" &&
-    typeof record["commitment"] === "string"
+    typeof record["commitment"] === "string" &&
+    typeof record["asset_hi"] === "string" &&
+    typeof record["asset_lo"] === "string"
   );
 }
 
 function hasFiniteAmountDisplay(record: Record<string, unknown>): boolean {
   return (
-    typeof record["amountDisplay"] === "number" && Number.isFinite(record["amountDisplay"])
+    typeof record["amountDisplay"] === "number" &&
+    Number.isFinite(record["amountDisplay"])
   );
 }
 
@@ -36,6 +42,15 @@ function hasOptionalDepositScalarHex(record: Record<string, unknown>): boolean {
   return (
     record["depositScalarHex"] === undefined ||
     typeof record["depositScalarHex"] === "string"
+  );
+}
+
+function hasOptionalPrecommitementHex(
+  record: Record<string, unknown>,
+): boolean {
+  return (
+    record["precommitementHex"] === undefined ||
+    typeof record["precommitementHex"] === "string"
   );
 }
 
@@ -60,6 +75,7 @@ function isCoinWithMetadata(value: unknown): value is CoinWithMetadata {
   const record = value as Record<string, unknown>;
   if (!hasCoreCoinMetadata(record)) return false;
   if (!hasOptionalDepositScalarHex(record)) return false;
+  if (!hasOptionalPrecommitementHex(record)) return false;
   return hasOptionalTxId(record);
 }
 
@@ -69,7 +85,16 @@ export function loadCoinState(publicKey: string): CoinWithMetadata[] {
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((item): item is CoinWithMetadata => isCoinWithMetadata(item));
+    const loaded = parsed.filter((item): item is CoinWithMetadata =>
+      isCoinWithMetadata(item),
+    );
+    let poolContract: string;
+    try {
+      poolContract = getRequiredPrivacyPoolContractId();
+    } catch {
+      return loaded;
+    }
+    return loaded.map((item) => ({ ...item, poolContract }));
   } catch {
     return [];
   }
@@ -84,6 +109,9 @@ function safeSetItem(itemKey: string, value: string): boolean {
   }
 }
 
-export function saveCoinState(publicKey: string, items: CoinWithMetadata[]): void {
+export function saveCoinState(
+  publicKey: string,
+  items: CoinWithMetadata[],
+): void {
   void safeSetItem(storageKeyForWallet(publicKey), JSON.stringify(items));
 }

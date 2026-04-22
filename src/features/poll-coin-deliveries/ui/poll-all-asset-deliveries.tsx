@@ -7,6 +7,7 @@ import {
   usePollAssetDeliveries,
   useSpentNullifierPolling,
 } from "@/features/poll-coin-deliveries";
+import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 
 interface AssetPollerProperties {
   stealthAddress: string;
@@ -57,18 +58,18 @@ export function PollAllAssetDeliveries() {
     return <></>;
   }
 
-  const poolAssets = assets.filter((asset) => asset.poolContract !== null);
+  const poolContract = getRequiredPrivacyPoolContractId();
 
   return (
     <>
       {pollerTargets.flatMap((target) =>
-        poolAssets.map((asset) => (
+        assets.map((asset) => (
           <AssetPoller
             key={`${target.nonceKey}:${asset.assetId}`}
             stealthAddress={target.stealthAddress}
             recipientScalarHex={target.scalarHex}
             assetId={asset.assetId}
-            poolContract={asset.poolContract as string}
+            poolContract={poolContract}
           />
         )),
       )}

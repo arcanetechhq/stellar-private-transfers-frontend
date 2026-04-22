@@ -16,6 +16,7 @@ type PreparedDualProof = Awaited<
 interface DualCoinBranchParameters {
   input: RunConfidentialTransferInput;
   poolContract: string;
+  tokenContract: string;
   transferStroops: bigint;
   commitments: string[];
   state: { commitments: string[] };
@@ -41,6 +42,7 @@ async function submitDualCoinTransfer(
     senderPrivKeyScalarHex,
     recipientTrim,
     senderTrim,
+    tokenContract,
     picked,
   } = parameters;
   const [first, second] = picked;
@@ -77,6 +79,7 @@ async function submitDualCoinTransfer(
     recipientStealthStpl1: recipientTrim,
     selfStealthStpl1ForChange:
       changeStroopsDual > ZERO_STROOPS ? senderTrim : undefined,
+    tokenAddress: tokenContract,
   });
   const noteA = BigInt(first.coin.value);
   const noteB = BigInt(second.coin.value);
@@ -92,6 +95,7 @@ async function submitDualCoinTransfer(
     senderTrim,
     input,
     poolContract,
+    tokenContract,
   });
   return {
     txId,
@@ -131,6 +135,7 @@ async function finalizeDualCoinDeliveries(
         commitmentHex: changeCoin.commitment_hex,
         coin: changeCoin.coin,
         depositScalarHex: changeCoin.depositScalarHex,
+        precommitementHex: changeCoin.precommitementHex,
         stealthAddress: senderTrim,
         assetId: input.assetId,
         poolContract,
@@ -147,6 +152,7 @@ async function finalizeDualCoinDeliveries(
       commitmentHex: recipientCoin.commitment_hex,
       coin: recipientCoin.coin,
       depositScalarHex: recipientCoin.depositScalarHex,
+      precommitementHex: recipientCoin.precommitementHex,
       assetId: input.assetId,
       amountDisplay: input.amountDisplay,
       txId,
@@ -162,6 +168,7 @@ async function finalizeDualCoinDeliveries(
         commitmentHex: changeCoin.commitment_hex,
         coin: changeCoin.coin,
         depositScalarHex: changeCoin.depositScalarHex,
+        precommitementHex: changeCoin.precommitementHex,
         assetId: input.assetId,
         amountDisplay: stroopsToDisplayAmount(BigInt(changeCoin.coin.value)),
         txId,

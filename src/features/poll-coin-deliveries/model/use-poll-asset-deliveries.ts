@@ -49,6 +49,7 @@ interface DecryptedDeliveryCoin {
   commitmentHex: string;
   coin: CoinData;
   depositScalarHex?: string;
+  precommitementHex?: string;
   amountDisplay: number;
 }
 
@@ -88,6 +89,7 @@ async function decryptDeliveryRow(
     commitmentHex,
     coin: v1.coin,
     depositScalarHex: v1.depositScalarHex,
+    precommitementHex: v1.precommitementHex,
     amountDisplay: v1.amountDisplay,
   };
 }
@@ -155,6 +157,7 @@ export function usePollAssetDeliveries({
             commitmentHex: decrypted.commitmentHex,
             coin: decrypted.coin,
             depositScalarHex: decrypted.depositScalarHex,
+            precommitementHex: decrypted.precommitementHex,
             stealthAddress,
             assetId,
             poolContract,

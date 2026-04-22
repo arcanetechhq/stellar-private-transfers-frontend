@@ -37,13 +37,17 @@ export function DetailInfo(properties: DetailInfoProperties) {
   const { t: translate } = useTranslation("transactionDetails");
   const assetMap = useAssetLookup();
   const storedResolved = resolveStoredDetailAsset(storedTransaction, assetMap);
-  const chainResolved = resolveChainDetailAssetDisplay(chainMatchedAsset);
+  const chainResolved = resolveChainDetailAssetDisplay(
+    chainMatchedAsset,
+    translate("unknownAsset"),
+  );
   const displayAsset = hasPrivateRecord ? storedResolved : chainResolved;
   const amountContent = resolveDetailAmountContent({
     hasPrivateRecord,
     storedTransaction,
     chainTransferAmountRaw,
     chainMatchedAsset,
+    unknownTicker: chainResolved.ticker,
     translate,
   });
   const chainHint = resolveDetailChainHint(chainEntry, translate);
