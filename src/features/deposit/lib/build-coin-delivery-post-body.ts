@@ -1,8 +1,8 @@
 import {
-  decodeStealthAddress,
   encodeDecodedEphemeralKey,
   type CoinData,
 } from "@auditable/privacy-pool-zk-sdk";
+import { decodePrivateAddress } from "@/shared/lib/private-address/privacy-pool-sdk-private-address";
 import type { PostCoinDeliveryBody } from "@/entities/coin-deliveries";
 import {
   encryptCoinPayload,
@@ -29,7 +29,7 @@ function uint8ToBase64(bytes: Uint8Array): string {
 }
 
 export interface BuildCoinDeliveryPostBodyInput {
-  recipientStealthStpl1: string;
+  recipientPrivateAddressStpl1: string;
   commitmentHex: string;
   coin: CoinData;
   depositScalarHex: string;
@@ -44,12 +44,12 @@ export async function buildCoinDeliveryPostBody(
 ): Promise<PostCoinDeliveryBody> {
   const sdk = await privacyPoolService.getInitializedSdk();
   const depositScalarHex = input.depositScalarHex;
-  const recipientStealthAddress = decodeStealthAddress(
-    input.recipientStealthStpl1.trim(),
+  const recipientPrivateAddress = decodePrivateAddress(
+    input.recipientPrivateAddressStpl1.trim(),
   );
   const shared = sdk.sharedSecretFromDepositorPreimage({
     randomNonceScalar: depositScalarHex,
-    recipientStealthAddress,
+    recipientPrivateAddress,
   });
 
   const payload: CoinDeliveryPayloadV1 = {
@@ -71,7 +71,7 @@ export async function buildCoinDeliveryPostBody(
   const ephemeralKey = encodeDecodedEphemeralKey(point);
 
   return {
-    recipientStealthAddress: input.recipientStealthStpl1.trim(),
+    recipientPrivateAddress: input.recipientPrivateAddressStpl1.trim(),
     assetId: input.assetId,
     ciphertextBase64: uint8ToBase64(cipherBytes),
     ephemeralKey,

@@ -2,7 +2,7 @@ import React from "react";
 import { Download, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { AssetWithTrustline } from "@/entities/asset";
-import { shortenStealthForDisplay } from "@/shared/lib/stealth/shorten-stealth-for-display";
+import { shortenPrivateAddressForDisplay } from "@/shared/lib/private-address/shorten-private-address-for-display";
 
 interface SummaryLineItemsProperties {
   selectedToken: AssetWithTrustline | undefined;
@@ -61,7 +61,7 @@ function SummaryReceiveInfo({
 }: SummaryReceiveInfoProperties): React.JSX.Element {
   const { t: translate } = useTranslation("deposit");
   const preview = destinationPreview.trim()
-    ? shortenStealthForDisplay(destinationPreview.trim())
+    ? shortenPrivateAddressForDisplay(destinationPreview.trim())
     : "—";
 
   return (

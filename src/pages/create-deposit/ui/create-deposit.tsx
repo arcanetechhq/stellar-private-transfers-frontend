@@ -33,7 +33,7 @@ export function CreateDeposit(): React.JSX.Element {
                 receivedAmount={deposit.receivedAmount}
                 canSubmit={deposit.canSubmit}
                 isSubmitting={deposit.isSubmitting}
-                destinationPreview={deposit.destinationStealthPreview}
+                destinationPreview={deposit.destinationPrivateAddressPreview}
                 shouldGeneratePrivateAddress={
                   deposit.shouldGeneratePrivateAddress
                 }

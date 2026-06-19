@@ -22,7 +22,7 @@ export async function postPrivateWithdrawChangeDeliveryIfNeeded(parameters: {
   );
   return postCoinDeliveryBestEffort(parameters.dispatch, () =>
     buildCoinDeliveryPostBody({
-      recipientStealthStpl1: parameters.senderTrim,
+      recipientPrivateAddressStpl1: parameters.senderTrim,
       commitmentHex: parameters.changeCoin.commitment_hex,
       coin: parameters.changeCoin.coin,
       depositScalarHex: parameters.changeCoin.depositScalarHex,

@@ -1,7 +1,7 @@
 import { type FormEvent, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { useCreateStealthAddress } from "@/features/create-stealth-address";
+import { useCreatePrivateAddress } from "@/features/create-private-address";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";
 import { selectWalletPublicKey } from "@/entities/wallet";
@@ -18,7 +18,7 @@ type SubmitDepositResult = {
 type SubmitDepositFunction = (parameters: {
   asset: AssetWithTrustline;
   amountDisplay: number;
-  stealthAddress: string;
+  privateAddress: string;
 }) => Promise<SubmitDepositResult>;
 
 type SubmitDepositSuccessParameters = {
@@ -27,7 +27,7 @@ type SubmitDepositSuccessParameters = {
   navigate: ReturnType<typeof useNavigate>;
   selectedAsset: AssetWithTrustline;
   numericAmount: number;
-  destinationStealthPreview: string;
+  destinationPrivateAddressPreview: string;
 };
 
 async function submitDepositSuccessFlow({
@@ -36,13 +36,13 @@ async function submitDepositSuccessFlow({
   navigate,
   selectedAsset,
   numericAmount,
-  destinationStealthPreview,
+  destinationPrivateAddressPreview,
 }: SubmitDepositSuccessParameters) {
-  const trimmedDestinationStealth = destinationStealthPreview.trim();
+  const trimmedDestinationPrivateAddress = destinationPrivateAddressPreview.trim();
   const result = await submitDeposit({
     asset: selectedAsset,
     amountDisplay: numericAmount,
-    stealthAddress: trimmedDestinationStealth,
+    privateAddress: trimmedDestinationPrivateAddress,
   });
   dispatch(
     addTransaction(
@@ -51,8 +51,8 @@ async function submitDepositSuccessFlow({
         type: "deposit",
         assetId: result.assetId,
         amount: result.amountDisplay,
-        counterparty: trimmedDestinationStealth,
-        senderStealthAddress: trimmedDestinationStealth,
+        counterparty: trimmedDestinationPrivateAddress,
+        senderPrivateAddress: trimmedDestinationPrivateAddress,
       }),
     ),
   );
@@ -70,8 +70,8 @@ export function useCreateDeposit() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const publicKey = useAppSelector(selectWalletPublicKey);
-  const { create: createStealthAddress, status: createStealthStatus } =
-    useCreateStealthAddress(publicKey);
+  const { create: createPrivateAddress, status: createPrivateAddressStatus } =
+    useCreatePrivateAddress(publicKey);
   const {
     mutateAsync: submitDeposit,
     isPending: isSubmitting,
@@ -79,8 +79,8 @@ export function useCreateDeposit() {
   } = useDepositTransaction();
   const form = useCreateDepositForm({ isSubmitting });
   const shouldGeneratePrivateAddress =
-    !form.destinationStealthPreview.trim();
-  const isGeneratingPrivateAddress = createStealthStatus === "pending";
+    !form.destinationPrivateAddressPreview.trim();
+  const isGeneratingPrivateAddress = createPrivateAddressStatus === "pending";
   const isActionPending = isSubmitting || isGeneratingPrivateAddress;
   const canSubmitAction = shouldGeneratePrivateAddress
     ? Boolean(publicKey?.trim()) && !isActionPending
@@ -89,11 +89,11 @@ export function useCreateDeposit() {
   const handleSubmit = useCallback(async (event: FormEvent) => {
     event.preventDefault();
     if (shouldGeneratePrivateAddress) {
-      if (form.selectedStealthNonce?.trim()) {
-        await createStealthAddress(form.selectedStealthNonce);
+      if (form.selectedPrivateAddressNonce?.trim()) {
+        await createPrivateAddress(form.selectedPrivateAddressNonce);
         return;
       }
-      await createStealthAddress();
+      await createPrivateAddress();
       return;
     }
     if (!form.canSubmit || !form.selectedAsset) {
@@ -106,19 +106,19 @@ export function useCreateDeposit() {
         navigate,
         selectedAsset: form.selectedAsset,
         numericAmount: form.numericAmount,
-        destinationStealthPreview: form.destinationStealthPreview,
+        destinationPrivateAddressPreview: form.destinationPrivateAddressPreview,
       });
     } catch {
       return;
     }
   }, [
-    createStealthAddress,
+    createPrivateAddress,
     dispatch,
     form.canSubmit,
-    form.destinationStealthPreview,
+    form.destinationPrivateAddressPreview,
     form.numericAmount,
     form.selectedAsset,
-    form.selectedStealthNonce,
+    form.selectedPrivateAddressNonce,
     navigate,
     shouldGeneratePrivateAddress,
     submitDeposit,
@@ -139,8 +139,8 @@ export function useCreateDeposit() {
     receivedAmount: form.receivedAmount,
     handleSubmit,
     canSubmit: canSubmitAction,
-    selectedStealthNonce: form.selectedStealthNonce,
-    destinationStealthPreview: form.destinationStealthPreview,
+    selectedPrivateAddressNonce: form.selectedPrivateAddressNonce,
+    destinationPrivateAddressPreview: form.destinationPrivateAddressPreview,
     isSubmitting: isActionPending,
     shouldGeneratePrivateAddress,
     submitErrorMessage: submitError?.message,

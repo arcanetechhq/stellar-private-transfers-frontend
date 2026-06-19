@@ -1,5 +1,5 @@
 export interface SubmitPrivateWithdrawalPayload {
-  senderStealthAddress: string;
+  senderPrivateAddress: string;
   assetId: string;
   tokenContractRaw: string;
   amountDisplay: number;

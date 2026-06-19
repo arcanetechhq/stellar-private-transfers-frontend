@@ -1,5 +1,5 @@
 import { shortenStellarAddress } from "@/shared/lib/shorten-stellar-address";
-import { shortenStealthForDisplay } from "@/shared/lib/stealth/shorten-stealth-for-display";
+import { shortenPrivateAddressForDisplay } from "@/shared/lib/private-address/shorten-private-address-for-display";
 
 const STELLAR_ACCOUNT_OR_CONTRACT_STRKEY_LENGTH = 56;
 
@@ -14,5 +14,5 @@ export function formatSenderCounterpartyForDisplay(address: string): string {
   ) {
     return shortenStellarAddress(trimmed);
   }
-  return shortenStealthForDisplay(trimmed);
+  return shortenPrivateAddressForDisplay(trimmed);
 }

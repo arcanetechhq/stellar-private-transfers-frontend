@@ -4,7 +4,7 @@ import {
   buildPrivateTransferAssets,
   useGetAssetsQuery,
 } from "@/entities/asset";
-import { selectFinalizedAggregatesForStealth } from "@/entities/coin";
+import { selectFinalizedAggregatesForPrivateAddress } from "@/entities/coin";
 import { useWithdrawalSender } from "./use-withdrawal-sender";
 import { useSelectedPrivateToken } from "./use-selected-private-token";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
@@ -12,8 +12,8 @@ import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-netwo
 export function useWithdrawalPrivateAssets(assetIdFromUrl: string | null) {
   const withdrawalSender = useWithdrawalSender();
   const aggregates = useAppSelector(
-    selectFinalizedAggregatesForStealth(
-      withdrawalSender.senderStealthAddress || undefined,
+    selectFinalizedAggregatesForPrivateAddress(
+      withdrawalSender.senderPrivateAddress || undefined,
     ),
   );
   const { data: assetCatalog } = useGetAssetsQuery();

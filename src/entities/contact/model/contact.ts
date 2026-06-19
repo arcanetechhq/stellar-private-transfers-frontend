@@ -3,7 +3,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 export interface Contact {
   id: number;
   name: string;
-  stealthAddress: string;
+  privateAddress: string;
 }
 
 export const COPY_FEEDBACK_TIMEOUT_MS = 2000;
@@ -34,13 +34,13 @@ const contactSlice = createSlice({
   reducers: {
     addContact: (
       state,
-      action: PayloadAction<{ name: string; stealthAddress: string }>,
+      action: PayloadAction<{ name: string; privateAddress: string }>,
     ) => {
       const id = nextContactId(state.items);
       state.items.push({
         id,
         name: action.payload.name,
-        stealthAddress: action.payload.stealthAddress,
+        privateAddress: action.payload.privateAddress,
       });
     },
   },

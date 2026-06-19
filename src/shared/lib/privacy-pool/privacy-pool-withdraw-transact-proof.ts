@@ -23,7 +23,7 @@ import { withTokenAddressPublicInputs } from "./prove-transaction-input";
 
 export type AlignedDepositSlotBuilder = (
   parameters: {
-    stealthAddressStpl1: string;
+    privateAddressStpl1: string;
     amountStroops: bigint;
     tokenAddress: string;
   },
@@ -37,7 +37,7 @@ export type AlignedDepositSlotBuilder = (
 
 async function resolveWithdrawChangeDeposits(parameters: {
   changeStroops: bigint;
-  changeStealthAddressStpl1: string | undefined;
+  changePrivateAddressStpl1: string | undefined;
   buildAlignedDepositSlot: AlignedDepositSlotBuilder;
   tokenAddress: string;
 }): Promise<{
@@ -52,14 +52,14 @@ async function resolveWithdrawChangeDeposits(parameters: {
   if (parameters.changeStroops <= ZERO_STROOPS) {
     return { deposits: ["dummy", "dummy"] };
   }
-  const stpl1 = parameters.changeStealthAddressStpl1?.trim() ?? "";
+  const stpl1 = parameters.changePrivateAddressStpl1?.trim() ?? "";
   if (!stpl1) {
     throw new Error(
-      "Stealth address is required to return the unused balance to the pool (partial withdraw)",
+      "Private address is required to return the unused balance to the pool (partial withdraw)",
     );
   }
   const slot = await parameters.buildAlignedDepositSlot({
-    stealthAddressStpl1: stpl1,
+    privateAddressStpl1: stpl1,
     amountStroops: parameters.changeStroops,
     tokenAddress: parameters.tokenAddress,
   });
@@ -84,7 +84,7 @@ export async function proveWithdrawTransact(parameters: {
   depositorEphemeralXHex: string;
   depositorEphemeralYHex: string;
   withdrawAmountStroops: bigint;
-  changeStealthAddressStpl1: string | undefined;
+  changePrivateAddressStpl1: string | undefined;
   tokenAddress: string;
 }): Promise<{
   proof_hex: string;
@@ -122,7 +122,7 @@ export async function proveWithdrawTransact(parameters: {
   const changeStroops = noteStroops - parameters.withdrawAmountStroops;
   const { deposits, changeCoin } = await resolveWithdrawChangeDeposits({
     changeStroops,
-    changeStealthAddressStpl1: parameters.changeStealthAddressStpl1,
+    changePrivateAddressStpl1: parameters.changePrivateAddressStpl1,
     buildAlignedDepositSlot: parameters.buildAlignedDepositSlot,
     tokenAddress: parameters.tokenAddress,
   });
@@ -158,7 +158,7 @@ export async function proveWithdrawTransactDual(parameters: {
   ephemeralA: { xHex: string; yHex: string };
   ephemeralB: { xHex: string; yHex: string };
   withdrawAmountStroops: bigint;
-  changeStealthAddressStpl1: string | undefined;
+  changePrivateAddressStpl1: string | undefined;
   tokenAddress: string;
 }): Promise<{
   proof_hex: string;
@@ -182,7 +182,7 @@ export async function proveWithdrawTransactDual(parameters: {
   const changeStroops = totalNotes - parameters.withdrawAmountStroops;
   requireChangeRecipientWhenPartial(
     changeStroops,
-    parameters.changeStealthAddressStpl1,
+    parameters.changePrivateAddressStpl1,
   );
   const { legA, legB } = dualWithdrawLegsWithSharedRoot({
     sdk: parameters.sdk,
@@ -201,7 +201,7 @@ export async function proveWithdrawTransactDual(parameters: {
   );
   const { deposits, changeCoin } = await resolveWithdrawChangeDeposits({
     changeStroops,
-    changeStealthAddressStpl1: parameters.changeStealthAddressStpl1,
+    changePrivateAddressStpl1: parameters.changePrivateAddressStpl1,
     buildAlignedDepositSlot: parameters.buildAlignedDepositSlot,
     tokenAddress: parameters.tokenAddress,
   });

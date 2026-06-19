@@ -1,9 +1,7 @@
 import {
   PrivacyPoolSDK,
   decodeDecodedEphemeralKey,
-  decodeStealthAddress,
   randomFrDecimal253,
-  recipientPublicKeysDecimalFromStealthAddress,
   scalarHexToFrDecimal,
 } from "@auditable/privacy-pool-zk-sdk";
 import type { CoinData, DepositObject, StateFile } from "@auditable/privacy-pool-zk-sdk";
@@ -11,13 +9,10 @@ import wasmSdkUrl from "@auditable/privacy-pool-zk-sdk/sdk.wasm?url";
 import wasmWitnessCalculatorUrl from "@auditable/privacy-pool-zk-sdk/witness.wasm?url";
 import zkeyFileUrl from "@auditable/privacy-pool-zk-sdk/main.zkey?url";
 import { merkleRootBufferToFrDecimal } from "./merkle-fr";
+import { decodePrivateAddress, privateAddressSdk, recipientPublicKeysDecimalFromPrivateAddress } from "@/shared/lib/private-address/privacy-pool-sdk-private-address";
 import { proveWithdrawTransact, proveWithdrawTransactDual } from "./privacy-pool-withdraw-transact-proof";
 import { Buffer } from "buffer";
-import { withTokenAddressPublicInputs } from "./prove-transaction-input";
-import {
-  buildPublicDepositLegs,
-  tokenAddressToAssetLeg,
-} from "./prove-transaction-input";
+import { buildPublicDepositLegs, tokenAddressToAssetLeg, withTokenAddressPublicInputs } from "./prove-transaction-input";
 
 const SAMPLE_SCALAR_ATTEMPTS = 10;
 type AlignedDepositSlot = {
@@ -71,14 +66,16 @@ export class PrivacyPoolService {
     return this.sdk;
   }
 
-  async generateStealthAddressFromStellarSignature(
+  async generatePrivateAddressFromStellarSignature(
     signature: string,
   ): Promise<string> {
     await this.ensureInit();
     if (!this.sdk) {
       throw new Error("SDK not initialized");
     }
-    return this.sdk.generateStealthAddressFromStellarSignature(signature);
+    return privateAddressSdk(this.sdk).generatePrivateAddressFromStellarSignature(
+      signature,
+    );
   }
 
   async sharedSecretX(
@@ -111,14 +108,14 @@ export class PrivacyPoolService {
   }
 
   async buildAlignedDepositSlot(parameters: {
-    stealthAddressStpl1: string;
+    privateAddressStpl1: string;
     amountStroops: bigint;
     tokenAddress: string;
   }): Promise<AlignedDepositSlot> {
     const sdk = await this.getInitializedSdk();
-    const stealthPoint = decodeStealthAddress(parameters.stealthAddressStpl1);
+    const privateAddressPoint = decodePrivateAddress(parameters.privateAddressStpl1);
     const scalarHex = this.sampleValidDepositScalarHex();
-    const shared = sdk.ecdhSharedKey(scalarHex, stealthPoint.x, stealthPoint.y);
+    const shared = sdk.ecdhSharedKey(scalarHex, privateAddressPoint.x, privateAddressPoint.y);
     const [assetHi, assetLo] = tokenAddressToAssetLeg(parameters.tokenAddress);
     const generated = sdk.generateCoinForDepositWithSharedHex(
       scalarHex,
@@ -129,7 +126,7 @@ export class PrivacyPoolService {
       assetLo,
     );
     const recipientPublicKeys =
-      recipientPublicKeysDecimalFromStealthAddress(parameters.stealthAddressStpl1);
+      recipientPublicKeysDecimalFromPrivateAddress(parameters.privateAddressStpl1);
     const deposit: DepositObject = {
       value: generated.coin.value,
       nullifier: generated.coin.nullifier,
@@ -147,7 +144,7 @@ export class PrivacyPoolService {
   }
 
   async createAlignedShieldCoinData(parameters: {
-    stealthAddressStpl1: string;
+    privateAddressStpl1: string;
     amountStroops: bigint;
     tokenAddress: string;
   }): Promise<Omit<AlignedDepositSlot, "deposit">> {
@@ -157,7 +154,7 @@ export class PrivacyPoolService {
   }
 
   async prepareDepositTransactProof(parameters: {
-    stealthAddressStpl1: string;
+    privateAddressStpl1: string;
     coin: CoinData;
     depositScalarHex: string;
     merkleRootBytes: Buffer;
@@ -165,8 +162,8 @@ export class PrivacyPoolService {
   }): Promise<ProofResult> {
     const sdk = await this.getInitializedSdk();
     const stateRoot = merkleRootBufferToFrDecimal(parameters.merkleRootBytes);
-    const recipientPublicKeys = recipientPublicKeysDecimalFromStealthAddress(
-      parameters.stealthAddressStpl1,
+    const recipientPublicKeys = recipientPublicKeysDecimalFromPrivateAddress(
+      parameters.privateAddressStpl1,
     );
     const deposit = {
       value: parameters.coin.value,
@@ -204,7 +201,7 @@ export class PrivacyPoolService {
     depositorEphemeralXHex: string;
     depositorEphemeralYHex: string;
     withdrawAmountStroops: bigint;
-    changeStealthAddressStpl1: string | undefined;
+    changePrivateAddressStpl1: string | undefined;
     tokenAddress: string;
   }): Promise<ProofWithChange> {
     await this.ensureInit();
@@ -228,7 +225,7 @@ export class PrivacyPoolService {
     depositorEphemeralBXHex: string;
     depositorEphemeralBYHex: string;
     withdrawAmountStroops: bigint;
-    changeStealthAddressStpl1: string | undefined;
+    changePrivateAddressStpl1: string | undefined;
     tokenAddress: string;
   }): Promise<ProofWithChange> {
     await this.ensureInit();
@@ -252,7 +249,7 @@ export class PrivacyPoolService {
         yHex: parameters.depositorEphemeralBYHex,
       },
       withdrawAmountStroops: parameters.withdrawAmountStroops,
-      changeStealthAddressStpl1: parameters.changeStealthAddressStpl1,
+      changePrivateAddressStpl1: parameters.changePrivateAddressStpl1,
       tokenAddress: parameters.tokenAddress,
     });
   }

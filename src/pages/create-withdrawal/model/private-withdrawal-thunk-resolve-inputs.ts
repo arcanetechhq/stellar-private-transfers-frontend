@@ -4,7 +4,7 @@ import {
   selectCoinItems,
   type CoinWithMetadata,
 } from "@/entities/coin";
-import { selectScalarByStealthAddress } from "@/entities/stealth-address";
+import { selectScalarByPrivateAddress } from "@/entities/private-address";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
 import { displayAmountToStroops } from "@/shared/lib/stellar/stroops";
@@ -65,9 +65,9 @@ function pickCoinsForPrivateWithdraw(parameters: {
 
 function readTrimmedSenderPrivKeyScalarHex(
   state: RootState,
-  senderStealthAddress: string,
+  senderPrivateAddress: string,
 ): string | undefined {
-  const hex = selectScalarByStealthAddress(senderStealthAddress)(state)?.trim();
+  const hex = selectScalarByPrivateAddress(senderPrivateAddress)(state)?.trim();
   return hex || undefined;
 }
 
@@ -83,10 +83,10 @@ export function resolvePrivateWithdrawThunkInputs(parameters: {
       rejected: parameters.rejectWithValue("Wallet not connected"),
     };
   }
-  const senderTrim = parameters.payload.senderStealthAddress.trim();
+  const senderTrim = parameters.payload.senderPrivateAddress.trim();
   const finalizedForSenderAndAsset = selectCoinItems(parameters.state).filter(
     (item) =>
-      item.stealthAddress === senderTrim &&
+      item.privateAddress === senderTrim &&
       item.status === "finalized" &&
       item.assetId === parameters.payload.assetId,
   );
@@ -107,7 +107,7 @@ export function resolvePrivateWithdrawThunkInputs(parameters: {
     return {
       kind: "reject",
       rejected: parameters.rejectWithValue(
-        "Stealth key scalar is missing; open stealth settings first",
+        "PrivateAddress key scalar is missing; open private address settings first",
       ),
     };
   }

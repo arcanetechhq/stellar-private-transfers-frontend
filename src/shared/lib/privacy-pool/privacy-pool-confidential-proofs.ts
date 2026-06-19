@@ -25,8 +25,8 @@ type PrepareConfidentialTransferProofParameters = {
   depositorEphemeralXHex: string;
   depositorEphemeralYHex: string;
   transferStroops: bigint;
-  recipientStealthStpl1: string;
-  selfStealthStpl1ForChange: string | undefined;
+  recipientPrivateAddressStpl1: string;
+  selfPrivateAddressStpl1ForChange: string | undefined;
   tokenAddress: string;
 };
 
@@ -51,7 +51,7 @@ export async function prepareConfidentialTransferProof(
   const changeStroops = noteStroops - parameters.transferStroops;
   requireChangeRecipientWhenPartial(
     changeStroops,
-    parameters.selfStealthStpl1ForChange,
+    parameters.selfPrivateAddressStpl1ForChange,
   );
   const { witness, withdrawObject } = withdrawWitnessForCoin({
     sdk,
@@ -66,10 +66,10 @@ export async function prepareConfidentialTransferProof(
   });
   const { recipientSlot, deposits, changeCoin } =
     await buildRecipientAndOptionalChangeDeposits({
-      recipientStealthStpl1: parameters.recipientStealthStpl1,
+      recipientPrivateAddressStpl1: parameters.recipientPrivateAddressStpl1,
       transferStroops: parameters.transferStroops,
       changeStroops,
-      selfStealthStpl1ForChange: parameters.selfStealthStpl1ForChange,
+      selfPrivateAddressStpl1ForChange: parameters.selfPrivateAddressStpl1ForChange,
       tokenAddress: parameters.tokenAddress,
     });
   const publicInput = withTokenAddressPublicInputs(

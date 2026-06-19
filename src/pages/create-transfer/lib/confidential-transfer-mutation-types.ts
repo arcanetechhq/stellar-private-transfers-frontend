@@ -7,8 +7,8 @@ export interface RunConfidentialTransferInput {
   networkPassphrase: string;
   sorobanRpcUrl: string;
   senderPrivKeyScalarHex: string;
-  senderStealthAddress: string;
-  recipientStealthStpl1: string;
+  senderPrivateAddress: string;
+  recipientPrivateAddressStpl1: string;
   assetId: string;
   tokenContractRaw: string;
   amountDisplay: number;

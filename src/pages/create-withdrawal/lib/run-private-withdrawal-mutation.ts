@@ -132,7 +132,7 @@ async function applySingleWithdrawChangeEffects(parameters: {
       coin: parameters.prepared.changeCoin.coin,
       depositScalarHex: parameters.prepared.changeCoin.depositScalarHex,
       precommitementHex: parameters.prepared.changeCoin.precommitementHex,
-      stealthAddress: parameters.senderTrim,
+      privateAddress: parameters.senderTrim,
       assetId: parameters.assetId,
       poolContract: parameters.poolContract,
       amountDisplay: changeDisplay,
@@ -194,7 +194,7 @@ async function runPrivateWithdrawalSingleCoinMutation(
   input: RunPrivateWithdrawalMutationInput,
   pickedCoin: CoinWithMetadata,
 ): Promise<RunPrivateWithdrawalMutationResult> {
-  const senderTrim = input.senderStealthAddress.trim();
+  const senderTrim = input.senderPrivateAddress.trim();
   const tokenContract = resolveTokenContractId(input.tokenContractRaw);
   const merkle = await loadSinglePrivateWithdrawMerkleContext({
     walletPublicKey: input.walletPublicKey,
@@ -205,7 +205,7 @@ async function runPrivateWithdrawalSingleCoinMutation(
   });
   const destinationTrim = input.destinationAddress.trim();
   const changeStroops = merkle.noteStroops - merkle.withdrawStroops;
-  const changeStealth =
+  const changePrivateAddress =
     changeStroops > ZERO_STROOPS ? senderTrim : undefined;
   const prepared = await privacyPoolService.prepareWithdrawTransactProof({
     coin: pickedCoin.coin,
@@ -215,7 +215,7 @@ async function runPrivateWithdrawalSingleCoinMutation(
     depositorEphemeralXHex: merkle.ephemeral.xHex,
     depositorEphemeralYHex: merkle.ephemeral.yHex,
     withdrawAmountStroops: merkle.withdrawStroops,
-    changeStealthAddressStpl1: changeStealth,
+    changePrivateAddressStpl1: changePrivateAddress,
     tokenAddress: tokenContract,
   });
   return sealSubmitAndApplySinglePrivateWithdrawEffects({

@@ -10,7 +10,7 @@ import { runDepositMutation } from "@/features/deposit";
 export interface DepositTransactionInput {
   asset: AssetWithTrustline;
   amountDisplay: number;
-  stealthAddress: string;
+  privateAddress: string;
 }
 
 export type DepositTransactionResult = Awaited<

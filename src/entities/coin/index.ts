@@ -14,9 +14,9 @@ export {
   markCoinSpent,
   resetCoinState,
   selectCoinItems,
-  selectCoinsByStealthAddress,
-  selectStealthAddressesWithCoins,
-  selectFinalizedAggregatesForStealth,
+  selectCoinsByPrivateAddress,
+  selectPrivateAddressesWithCoins,
+  selectFinalizedAggregatesForPrivateAddress,
   type CoinState,
   type CoinRootState,
 } from "./model/coin-slice";

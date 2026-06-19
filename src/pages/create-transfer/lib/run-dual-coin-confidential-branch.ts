@@ -76,8 +76,8 @@ async function submitDualCoinTransfer(
     ephemeralA: { xHex: ephemeralA.xHex, yHex: ephemeralA.yHex },
     ephemeralB: { xHex: ephemeralB.xHex, yHex: ephemeralB.yHex },
     transferStroops,
-    recipientStealthStpl1: recipientTrim,
-    selfStealthStpl1ForChange:
+    recipientPrivateAddressStpl1: recipientTrim,
+    selfPrivateAddressStpl1ForChange:
       changeStroopsDual > ZERO_STROOPS ? senderTrim : undefined,
     tokenAddress: tokenContract,
   });
@@ -136,7 +136,7 @@ async function finalizeDualCoinDeliveries(
         coin: changeCoin.coin,
         depositScalarHex: changeCoin.depositScalarHex,
         precommitementHex: changeCoin.precommitementHex,
-        stealthAddress: senderTrim,
+        privateAddress: senderTrim,
         assetId: input.assetId,
         poolContract,
         amountDisplay: changeDisplayDual,
@@ -148,7 +148,7 @@ async function finalizeDualCoinDeliveries(
   const warningsDual: string[] = [];
   const recipientWarning = await postCoinDeliveryBestEffort(input.dispatch, () =>
     buildCoinDeliveryPostBody({
-      recipientStealthStpl1: recipientTrim,
+      recipientPrivateAddressStpl1: recipientTrim,
       commitmentHex: recipientCoin.commitment_hex,
       coin: recipientCoin.coin,
       depositScalarHex: recipientCoin.depositScalarHex,
@@ -164,7 +164,7 @@ async function finalizeDualCoinDeliveries(
   if (changeCoin) {
     const changeWarn = await postCoinDeliveryBestEffort(input.dispatch, () =>
       buildCoinDeliveryPostBody({
-        recipientStealthStpl1: senderTrim,
+        recipientPrivateAddressStpl1: senderTrim,
         commitmentHex: changeCoin.commitment_hex,
         coin: changeCoin.coin,
         depositScalarHex: changeCoin.depositScalarHex,

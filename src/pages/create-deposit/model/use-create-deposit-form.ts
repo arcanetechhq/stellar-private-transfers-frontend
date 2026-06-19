@@ -9,8 +9,8 @@ import {
 import {
   selectDefaultNonce,
   selectScalarByNonce,
-  selectStealthByNonce,
-} from "@/entities/stealth-address";
+  selectPrivateAddressByNonce,
+} from "@/entities/private-address";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import { NETWORK_FEE } from "./create-deposit";
 import { resolveSelectedDepositAsset } from "./resolve-selected-deposit-asset";
@@ -35,14 +35,14 @@ export function useCreateDepositForm({
     AssetWithTrustline | undefined
   >();
   const [amount, setAmount] = useState("");
-  const selectedStealthNonce = useAppSelector(selectDefaultNonce);
-  const selectedStealthAddress = useAppSelector(
+  const selectedPrivateAddressNonce = useAppSelector(selectDefaultNonce);
+  const selectedPrivateAddress = useAppSelector(
     (state) =>
-      selectStealthByNonce(selectedStealthNonce)(state)?.stealthAddress ?? "",
+      selectPrivateAddressByNonce(selectedPrivateAddressNonce)(state)?.privateAddress ?? "",
   );
 
   const recipientScalar = useAppSelector(
-    selectScalarByNonce(selectedStealthNonce ?? ""),
+    selectScalarByNonce(selectedPrivateAddressNonce ?? ""),
   );
 
   const selectedAsset = resolveSelectedDepositAsset({
@@ -78,8 +78,8 @@ export function useCreateDepositForm({
       return false;
     }
   })();
-  const hasStealthScalar = Boolean(recipientScalar?.trim());
-  const hasStealthAddress = Boolean(selectedStealthAddress.trim());
+  const hasPrivateAddressScalar = Boolean(recipientScalar?.trim());
+  const hasPrivateAddress = Boolean(selectedPrivateAddress.trim());
 
   const canSubmit = computeDepositCanSubmit({
     selectedAsset,
@@ -87,8 +87,8 @@ export function useCreateDepositForm({
     numericAmount,
     numericBalance,
     hasPoolContract,
-    hasStealthAddress,
-    hasStealthScalar,
+    hasPrivateAddress,
+    hasPrivateAddressScalar,
     isSubmitting,
   });
 
@@ -105,8 +105,8 @@ export function useCreateDepositForm({
     networkFee: NETWORK_FEE,
     receivedAmount,
     canSubmit,
-    selectedStealthNonce,
-    destinationStealthPreview: selectedStealthAddress,
+    selectedPrivateAddressNonce,
+    destinationPrivateAddressPreview: selectedPrivateAddress,
     selectedAsset,
     numericAmount,
   };

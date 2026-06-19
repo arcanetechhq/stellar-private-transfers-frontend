@@ -17,8 +17,8 @@ function hasRequiredStringFields(record: Record<string, unknown>): boolean {
   );
 }
 
-function hasOptionalSenderStealthField(record: Record<string, unknown>): boolean {
-  const value = record.senderStealthAddress;
+function hasOptionalSenderPrivateAddressField(record: Record<string, unknown>): boolean {
+  const value = record.senderPrivateAddress;
   return value === undefined || typeof value === "string";
 }
 
@@ -30,7 +30,7 @@ function isTransactionItem(value: unknown): value is Transaction {
   return (
     hasRequiredStringFields(record) &&
     typeof record.amount === "number" &&
-    hasOptionalSenderStealthField(record)
+    hasOptionalSenderPrivateAddressField(record)
   );
 }
 

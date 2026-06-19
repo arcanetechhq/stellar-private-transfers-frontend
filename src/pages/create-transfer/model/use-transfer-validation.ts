@@ -1,13 +1,13 @@
 import { useMemo } from "react";
 import type { AssetWithTrustline } from "@/entities/asset";
-import { isValidStealthAddressString } from "@/entities/stealth-address";
+import { isValidPrivateAddressString } from "@/entities/private-address";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import { NETWORK_FEE } from "./create-transfer";
 
 function recipientFieldErrorKey(parameters: {
   recipientTrim: string;
   recipientValid: boolean;
-  senderStealthAddress: string;
+  senderPrivateAddress: string;
 }): "invalidRecipient" | "sameAsSender" | undefined {
   if (!parameters.recipientTrim) {
     return undefined;
@@ -15,7 +15,7 @@ function recipientFieldErrorKey(parameters: {
   if (!parameters.recipientValid) {
     return "invalidRecipient";
   }
-  if (parameters.recipientTrim === parameters.senderStealthAddress) {
+  if (parameters.recipientTrim === parameters.senderPrivateAddress) {
     return "sameAsSender";
   }
   return undefined;
@@ -23,7 +23,7 @@ function recipientFieldErrorKey(parameters: {
 
 function transferIdentityAndRecipientReady(parameters: {
   publicKey: string | undefined;
-  senderStealthAddress: string;
+  senderPrivateAddress: string;
   recipientValid: boolean;
   recipientDiffersFromSender: boolean;
   selectedAsset: AssetWithTrustline | undefined;
@@ -31,7 +31,7 @@ function transferIdentityAndRecipientReady(parameters: {
 }): boolean {
   return (
     Boolean(parameters.publicKey?.trim()) &&
-    parameters.senderStealthAddress.length > 0 &&
+    parameters.senderPrivateAddress.length > 0 &&
     parameters.recipientValid &&
     parameters.recipientDiffersFromSender &&
     parameters.selectedAsset !== undefined &&
@@ -54,7 +54,7 @@ function transferAmountWithinBalance(parameters: {
 
 function transferFormCanSubmit(parameters: {
   publicKey: string | undefined;
-  senderStealthAddress: string;
+  senderPrivateAddress: string;
   recipientValid: boolean;
   recipientDiffersFromSender: boolean;
   selectedAsset: AssetWithTrustline | undefined;
@@ -67,7 +67,7 @@ function transferFormCanSubmit(parameters: {
   return (
     transferIdentityAndRecipientReady({
       publicKey: parameters.publicKey,
-      senderStealthAddress: parameters.senderStealthAddress,
+      senderPrivateAddress: parameters.senderPrivateAddress,
       recipientValid: parameters.recipientValid,
       recipientDiffersFromSender: parameters.recipientDiffersFromSender,
       selectedAsset: parameters.selectedAsset,
@@ -84,7 +84,7 @@ function transferFormCanSubmit(parameters: {
 
 export function useTransferRecipientAndSubmitGates(parameters: {
   publicKey: string | undefined;
-  senderStealthAddress: string;
+  senderPrivateAddress: string;
   recipient: string;
   selectedAsset: AssetWithTrustline | undefined;
   amount: string;
@@ -94,11 +94,11 @@ export function useTransferRecipientAndSubmitGates(parameters: {
     ? Number.parseFloat(parameters.selectedAsset.balance ?? "0")
     : 0;
   const recipientTrim = parameters.recipient.trim();
-  const recipientValid = isValidStealthAddressString(recipientTrim);
+  const recipientValid = isValidPrivateAddressString(recipientTrim);
   const recipientDiffersFromSender =
     recipientTrim.length > 0 &&
-    parameters.senderStealthAddress.length > 0 &&
-    recipientTrim !== parameters.senderStealthAddress;
+    parameters.senderPrivateAddress.length > 0 &&
+    recipientTrim !== parameters.senderPrivateAddress;
   const numericAmount = Number.parseFloat(parameters.amount);
   const poolReady = (() => {
     try {
@@ -109,7 +109,7 @@ export function useTransferRecipientAndSubmitGates(parameters: {
   })();
   const canSubmit = transferFormCanSubmit({
     publicKey: parameters.publicKey,
-    senderStealthAddress: parameters.senderStealthAddress,
+    senderPrivateAddress: parameters.senderPrivateAddress,
     recipientValid,
     recipientDiffersFromSender,
     selectedAsset: parameters.selectedAsset,
@@ -125,9 +125,9 @@ export function useTransferRecipientAndSubmitGates(parameters: {
       recipientFieldErrorKey({
         recipientTrim,
         recipientValid,
-        senderStealthAddress: parameters.senderStealthAddress,
+        senderPrivateAddress: parameters.senderPrivateAddress,
       }),
-    [recipientTrim, recipientValid, parameters.senderStealthAddress],
+    [recipientTrim, recipientValid, parameters.senderPrivateAddress],
   );
 
   const totalAmount = useMemo(() => {

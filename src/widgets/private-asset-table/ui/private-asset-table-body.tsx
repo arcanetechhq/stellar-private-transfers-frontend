@@ -24,7 +24,7 @@ type PrivateAssetTableBodyProperties = {
   assetUsdPriceById: Map<string, number>;
 };
 
-function NoStealthMessage({
+function NoPrivateAddressMessage({
   translateAssets,
 }: {
   translateAssets: TranslateAssets;
@@ -32,7 +32,7 @@ function NoStealthMessage({
   return (
     <div className="px-6 py-12 text-center">
       <p className="text-[15px] leading-[22px] text-[var(--muted-foreground)]">
-        {translateAssets("privateAssets.noStealthAddresses")}
+        {translateAssets("privateAssets.noPrivateAddresses")}
       </p>
     </div>
   );
@@ -105,7 +105,7 @@ export function PrivateAssetTableBody({
   assetUsdPriceById,
 }: PrivateAssetTableBodyProperties) {
   if (noncesLength === 0) {
-    return <NoStealthMessage translateAssets={translateAssets} />;
+    return <NoPrivateAddressMessage translateAssets={translateAssets} />;
   }
   if (aggregates.length === 0) {
     return <NoCoinsMessage translateAssets={translateAssets} />;

@@ -7,7 +7,7 @@ export interface RunPrivateWithdrawalMutationInput {
   networkPassphrase: string;
   sorobanRpcUrl: string;
   senderPrivKeyScalarHex: string;
-  senderStealthAddress: string;
+  senderPrivateAddress: string;
   assetId: string;
   tokenContractRaw: string;
   amountDisplay: number;

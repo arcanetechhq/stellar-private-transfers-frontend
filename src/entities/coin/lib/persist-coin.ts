@@ -62,7 +62,7 @@ function hasCoreCoinMetadata(record: Record<string, unknown>): boolean {
   return (
     typeof record["commitmentHex"] === "string" &&
     isCoinData(record["coin"]) &&
-    typeof record["stealthAddress"] === "string" &&
+    typeof record["privateAddress"] === "string" &&
     typeof record["assetId"] === "string" &&
     typeof record["poolContract"] === "string" &&
     hasFiniteAmountDisplay(record) &&

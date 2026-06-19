@@ -6,8 +6,8 @@ export interface DepositCanSubmitInput {
   numericAmount: number;
   numericBalance: number;
   hasPoolContract: boolean;
-  hasStealthAddress: boolean;
-  hasStealthScalar: boolean;
+  hasPrivateAddress: boolean;
+  hasPrivateAddressScalar: boolean;
   isSubmitting: boolean;
 }
 
@@ -30,10 +30,10 @@ export function computeDepositCanSubmit(input: DepositCanSubmitInput): boolean {
   if (!input.hasPoolContract) {
     return false;
   }
-  if (!input.hasStealthAddress) {
+  if (!input.hasPrivateAddress) {
     return false;
   }
-  if (!input.hasStealthScalar) {
+  if (!input.hasPrivateAddressScalar) {
     return false;
   }
   return !input.isSubmitting;

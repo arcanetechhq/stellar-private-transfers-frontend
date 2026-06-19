@@ -63,13 +63,13 @@ export function ContactRow(properties: ContactRowProperties) {
                 color: "#667085",
               }}
             >
-              {contact.stealthAddress}
+              {contact.privateAddress}
             </div>
           </div>
         </div>
         <button
           type="button"
-          onClick={() => onCopyAddress(contact.id, contact.stealthAddress)}
+          onClick={() => onCopyAddress(contact.id, contact.privateAddress)}
           className="flex items-center gap-2 rounded-lg px-3 py-2 transition-colors"
           style={{
             fontSize: "14px",

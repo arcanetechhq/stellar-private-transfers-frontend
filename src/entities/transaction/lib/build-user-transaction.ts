@@ -8,7 +8,7 @@ export interface BuildUserTransactionInput {
   assetId: string;
   amount: number;
   counterparty: string;
-  senderStealthAddress: string;
+  senderPrivateAddress: string;
 }
 
 export function buildUserTransaction(
@@ -21,7 +21,7 @@ export function buildUserTransaction(
     assetId: input.assetId,
     amount: input.amount,
     counterparty: input.counterparty,
-    senderStealthAddress: input.senderStealthAddress,
+    senderPrivateAddress: input.senderPrivateAddress,
     status: "completed",
     confirmationStatus: "none",
     disclosureStatus: "none",

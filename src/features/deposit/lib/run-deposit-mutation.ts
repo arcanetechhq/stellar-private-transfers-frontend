@@ -27,7 +27,7 @@ function displayAmountToStroops(amount: number): bigint {
 export interface RunDepositMutationInput {
   asset: AssetWithTrustline;
   amountDisplay: number;
-  stealthAddress: string;
+  privateAddress: string;
   walletPublicKey: string;
   networkPassphrase: string;
   sorobanRpcUrl: string;
@@ -53,23 +53,23 @@ export async function runDepositMutation(
   input: RunDepositMutationInput,
 ): Promise<RunDepositMutationResult> {
   const poolContract = getRequiredPrivacyPoolContractId();
-  const stealth = input.stealthAddress.trim();
-  if (!stealth) {
-    throw new Error("Stealth address required");
+  const privateAddress = input.privateAddress.trim();
+  if (!privateAddress) {
+    throw new Error("Private address required");
   }
 
   const amountStroops = displayAmountToStroops(input.amountDisplay);
   const tokenContract = resolveTokenContractId(input.asset.clientContract);
   const { commitment_hex, coin, depositScalarHex, precommitementHex } =
     await privacyPoolService.createAlignedShieldCoinData({
-      stealthAddressStpl1: stealth,
+      privateAddressStpl1: privateAddress,
       amountStroops,
       tokenAddress: tokenContract,
     });
 
   const auditPublicKey = getAuditPublicKey();
   const auditTx = {
-    deposit1: buildAuditDepositLeg(stealth, {
+    deposit1: buildAuditDepositLeg(privateAddress, {
       value: toAuditNumber(BigInt(coin.value), "Deposit amount"),
       precommitementHex: resolveAuditPrecommitementHex(
         precommitementHex,
@@ -84,7 +84,7 @@ export async function runDepositMutation(
   const txId = await submitSorobanDeposit({
     contractId: poolContract,
     walletPublicKey: input.walletPublicKey,
-    stealthAddressStpl1: stealth,
+    privateAddressStpl1: privateAddress,
     coin,
     depositScalarHex,
     tokenAddress: tokenContract,
@@ -99,7 +99,7 @@ export async function runDepositMutation(
       coin,
       depositScalarHex,
       precommitementHex,
-      stealthAddress: stealth,
+      privateAddress: privateAddress,
       assetId: input.asset.assetId,
       poolContract,
       amountDisplay: input.amountDisplay,
@@ -110,7 +110,7 @@ export async function runDepositMutation(
 
   try {
     const body = await buildCoinDeliveryPostBody({
-      recipientStealthStpl1: stealth,
+      recipientPrivateAddressStpl1: privateAddress,
       commitmentHex: commitment_hex,
       coin,
       depositScalarHex,

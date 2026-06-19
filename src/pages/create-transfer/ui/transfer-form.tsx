@@ -100,7 +100,7 @@ function recipientErrorMessageFromKey(
   translate: TFunction<"transfer", undefined>,
 ): string | undefined {
   if (recipientErrorKey === "invalidRecipient") {
-    return translate("invalidRecipientStealth");
+    return translate("invalidRecipientPrivateAddress");
   }
   if (recipientErrorKey === "sameAsSender") {
     return translate("recipientSameAsSender");

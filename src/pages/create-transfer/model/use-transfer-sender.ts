@@ -2,20 +2,20 @@ import { useMemo } from "react";
 import { useAppSelector } from "@/store";
 import {
   selectDefaultNonce,
-  selectStealthState,
-} from "@/entities/stealth-address";
+  selectPrivateAddressState,
+} from "@/entities/private-address";
 
 export function useTransferSender() {
-  const { byNonce } = useAppSelector(selectStealthState);
+  const { byNonce } = useAppSelector(selectPrivateAddressState);
   const defaultNonceValue = useAppSelector(selectDefaultNonce);
-  const senderStealthAddress = useMemo(() => {
+  const senderPrivateAddress = useMemo(() => {
     const entry = defaultNonceValue
-      ? byNonce[defaultNonceValue]?.stealthAddress
+      ? byNonce[defaultNonceValue]?.privateAddress
       : undefined;
     return entry ? entry.trim() : "";
   }, [byNonce, defaultNonceValue]);
   return {
     effectiveSenderNonce: defaultNonceValue,
-    senderStealthAddress,
+    senderPrivateAddress,
   };
 }

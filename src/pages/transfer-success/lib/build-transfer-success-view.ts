@@ -1,5 +1,5 @@
 import type { AssetDto } from "@/entities/asset";
-import { shortenStealthForDisplay } from "@/shared/lib/stealth/shorten-stealth-for-display";
+import { shortenPrivateAddressForDisplay } from "@/shared/lib/private-address/shorten-private-address-for-display";
 
 export interface TransferSuccessLocationState {
   amount?: number;
@@ -75,7 +75,7 @@ export function buildTransferSuccessViewModel(
   });
 
   const transactionIdShort =
-    txId.length > 0 ? shortenStealthForDisplay(txId) : "—";
+    txId.length > 0 ? shortenPrivateAddressForDisplay(txId) : "—";
 
   return {
     txId,

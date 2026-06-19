@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from "@/store";
 import { type AssetDto, useGetAssetsQuery } from "@/entities/asset";
 import {
   type AggregatedPrivateAssetRow,
-  selectFinalizedAggregatesForStealth,
+  selectFinalizedAggregatesForPrivateAddress,
 } from "@/entities/coin";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { buildPrivateTransferAssets } from "../lib/private-transfer-asset-list";
@@ -52,8 +52,8 @@ export function useCreateTransfer() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const transferSender = useTransferSender();
   const aggregates = useAppSelector(
-    selectFinalizedAggregatesForStealth(
-      transferSender.senderStealthAddress || undefined,
+    selectFinalizedAggregatesForPrivateAddress(
+      transferSender.senderPrivateAddress || undefined,
     ),
   );
   const { data: assetCatalog } = useGetAssetsQuery();
@@ -72,7 +72,7 @@ export function useCreateTransfer() {
   const amountInputs = useTransferAmountInputs(selectedAsset);
   const validation = useTransferRecipientAndSubmitGates({
     publicKey,
-    senderStealthAddress: transferSender.senderStealthAddress,
+    senderPrivateAddress: transferSender.senderPrivateAddress,
     recipient: amountInputs.recipient,
     selectedAsset,
     amount: amountInputs.amount,
@@ -85,7 +85,7 @@ export function useCreateTransfer() {
     selectedAsset,
     submit,
     navigate,
-    senderStealthAddress: transferSender.senderStealthAddress,
+    senderPrivateAddress: transferSender.senderPrivateAddress,
     recipientTrim: validation.recipientTrim,
     numericAmount: validation.numericAmount,
   });
@@ -110,7 +110,7 @@ export function useCreateTransfer() {
     isSubmitting,
     submitError,
     senderNonce: transferSender.effectiveSenderNonce,
-    senderStealthAddress: transferSender.senderStealthAddress,
+    senderPrivateAddress: transferSender.senderPrivateAddress,
     recipientValid: validation.recipientValid,
     recipientDiffersFromSender: validation.recipientDiffersFromSender,
     recipientErrorKey: validation.recipientErrorKey,

@@ -2,11 +2,11 @@ import React, { useMemo, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppSelector } from "@/store";
 import { getAssetUsdPrice, useGetAssetsQuery } from "@/entities/asset";
-import { selectFinalizedAggregatesForStealth } from "@/entities/coin";
+import { selectFinalizedAggregatesForPrivateAddress } from "@/entities/coin";
 import {
   selectDefaultNonce,
-  selectStealthByNonce,
-} from "@/entities/stealth-address";
+  selectPrivateAddressByNonce,
+} from "@/entities/private-address";
 import {
   PrivateAssetTableBody,
   PRIVATE_ASSET_TITLE_CLASS,
@@ -23,12 +23,12 @@ export function PrivateAssetTable({
   const { t: translateAssets } = useTranslation("assets");
   const { t: translateOverview } = useTranslation("overview");
   const defaultNonce = useAppSelector(selectDefaultNonce);
-  const selectedStealthAddress = useAppSelector(
-    selectStealthByNonce(defaultNonce ?? ""),
+  const selectedPrivateAddress = useAppSelector(
+    selectPrivateAddressByNonce(defaultNonce ?? ""),
   );
   const aggregates = useAppSelector(
-    selectFinalizedAggregatesForStealth(
-      selectedStealthAddress?.stealthAddress ?? undefined,
+    selectFinalizedAggregatesForPrivateAddress(
+      selectedPrivateAddress?.privateAddress ?? undefined,
     ),
   );
   const { data: assetCatalog } = useGetAssetsQuery();
@@ -92,7 +92,7 @@ export function PrivateAssetTable({
       </div>
       <PrivateAssetTableBody
         translateAssets={translateAssets}
-        noncesLength={selectedStealthAddress ? 1 : 0}
+        noncesLength={selectedPrivateAddress ? 1 : 0}
         aggregates={aggregatesWithZeroAssets}
         assetMetaById={assetMetaById}
         assetUsdPriceById={assetUsdPriceById}

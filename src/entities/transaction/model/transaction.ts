@@ -11,7 +11,7 @@ export interface Transaction {
   assetId: string;
   amount: number;
   counterparty: string;
-  senderStealthAddress?: string;
+  senderPrivateAddress?: string;
   status: "completed" | "pending" | "processing" | "created" | "failed";
   confirmationStatus: "created" | "sent" | "viewed" | "used" | "none";
   disclosureStatus: "none" | "partial" | "full" | "pending";

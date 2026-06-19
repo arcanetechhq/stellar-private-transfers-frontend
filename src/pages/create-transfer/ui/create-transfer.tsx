@@ -52,7 +52,7 @@ export function CreateTransfer() {
           selectedAddress={transfer.recipient}
           onSelect={transfer.setRecipient}
           onClose={() => transfer.setShowContactPicker(false)}
-          excludeStealthAddress={transfer.senderStealthAddress}
+          excludePrivateAddress={transfer.senderPrivateAddress}
         />
       </div>
     </React.Fragment>

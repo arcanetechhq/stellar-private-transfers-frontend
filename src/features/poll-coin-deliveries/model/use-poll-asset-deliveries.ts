@@ -95,14 +95,14 @@ async function decryptDeliveryRow(
 }
 
 export interface UsePollAssetDeliveriesParameters {
-  stealthAddress: string;
+  privateAddress: string;
   recipientScalarHex: string;
   assetId: string;
   poolContract: string;
 }
 
 export function usePollAssetDeliveries({
-  stealthAddress,
+  privateAddress,
   recipientScalarHex,
   assetId,
   poolContract,
@@ -116,7 +116,7 @@ export function usePollAssetDeliveries({
   const isSeenTagsBloomReady = bloomBitsBase64 !== undefined;
 
   const canPollIncomingDeliveries =
-    Boolean(stealthAddress) &&
+    Boolean(privateAddress) &&
     Boolean(recipientScalarHex) &&
     Boolean(publicKey) &&
     isSeenTagsBloomReady &&
@@ -125,7 +125,7 @@ export function usePollAssetDeliveries({
   const { data } = useGetIncomingDeliveriesQuery(
     canPollIncomingDeliveries
       ? {
-          stealthAddress,
+          privateAddress,
           assetId,
           bloomM: DEFAULT_BLOOM_M,
           bloomK: DEFAULT_BLOOM_K,
@@ -158,7 +158,7 @@ export function usePollAssetDeliveries({
             coin: decrypted.coin,
             depositScalarHex: decrypted.depositScalarHex,
             precommitementHex: decrypted.precommitementHex,
-            stealthAddress,
+            privateAddress,
             assetId,
             poolContract,
             amountDisplay: decrypted.amountDisplay,
@@ -178,7 +178,7 @@ export function usePollAssetDeliveries({
     recipientScalarHex,
     assetId,
     poolContract,
-    stealthAddress,
+    privateAddress,
     dispatch,
   ]);
 }

@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { shortenStellarAddress } from "@/shared/lib/shorten-stellar-address";
-import { ManageStealthAddressesWidget } from "../manage-stealth-addresses";
+import { ManagePrivateAddressesWidget } from "../manage-private-addresses";
 import { useCopy } from "@/shared/hooks";
 
 type MainLayoutWalletMenuProperties = {
@@ -133,7 +133,7 @@ export function MainLayoutWalletMenu({
           translate={translate}
         />
 
-        <ManageStealthAddressesWidget variant="compact" />
+        <ManagePrivateAddressesWidget variant="compact" />
 
         <div className="py-2">
           <MainLayoutWalletActionButton

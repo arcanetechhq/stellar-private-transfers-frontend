@@ -72,36 +72,36 @@ export type CoinRootState = { coin: CoinState };
 export const selectCoinItems = (state: CoinRootState): CoinWithMetadata[] =>
   state.coin.items;
 
-export const selectCoinsByStealthAddress =
-  (stealthAddress: string | undefined) =>
+export const selectCoinsByPrivateAddress =
+  (privateAddress: string | undefined) =>
   (state: CoinRootState): CoinWithMetadata[] => {
-    if (!stealthAddress) {
+    if (!privateAddress) {
       return [];
     }
     return state.coin.items.filter(
-      (item) => item.stealthAddress === stealthAddress,
+      (item) => item.privateAddress === privateAddress,
     );
   };
 
-export const selectStealthAddressesWithCoins = (
+export const selectPrivateAddressesWithCoins = (
   state: CoinRootState,
 ): string[] => {
   const unique = new Set<string>();
   for (const item of state.coin.items) {
-    unique.add(item.stealthAddress);
+    unique.add(item.privateAddress);
   }
   return [...unique];
 };
 
-export const selectFinalizedAggregatesForStealth =
-  (stealthAddress: string | undefined) =>
+export const selectFinalizedAggregatesForPrivateAddress =
+  (privateAddress: string | undefined) =>
   (state: CoinRootState): AggregatedPrivateAssetRow[] => {
-    if (!stealthAddress) {
+    if (!privateAddress) {
       return [];
     }
     const finalized = state.coin.items.filter(
       (item) =>
-        item.stealthAddress === stealthAddress && item.status === "finalized",
+        item.privateAddress === privateAddress && item.status === "finalized",
     );
     const byAsset = new Map<string, AggregatedPrivateAssetRow>();
     for (const item of finalized) {

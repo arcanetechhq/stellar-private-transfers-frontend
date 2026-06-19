@@ -1,7 +1,7 @@
 import { Send } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { shortenStealthForDisplay } from "@/shared/lib/stealth/shorten-stealth-for-display";
+import { shortenPrivateAddressForDisplay } from "@/shared/lib/private-address/shorten-private-address-for-display";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { NETWORK_FEE } from "../model/create-transfer";
 
@@ -19,7 +19,7 @@ function SummaryDetails({
   const { t: translate } = useTranslation("transfer");
   const ticker = selectedToken?.assetId.toUpperCase() ?? "—";
   const displayRecipient = recipient
-    ? shortenStealthForDisplay(recipient.trim())
+    ? shortenPrivateAddressForDisplay(recipient.trim())
     : "—";
 
   return (

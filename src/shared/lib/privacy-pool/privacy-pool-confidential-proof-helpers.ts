@@ -90,13 +90,13 @@ export function senderWithdrawFrAndScalar(parameters: {
 
 export function requireChangeRecipientWhenPartial(
   changeStroops: bigint,
-  selfStealthStpl1ForChange: string | undefined,
+  selfPrivateAddressStpl1ForChange: string | undefined,
 ): void {
   if (changeStroops > ZERO_STROOPS) {
-    const stpl1 = selfStealthStpl1ForChange?.trim() ?? "";
+    const stpl1 = selfPrivateAddressStpl1ForChange?.trim() ?? "";
     if (!stpl1) {
       throw new Error(
-        "Stealth address is required to receive the remaining balance after a partial transfer",
+        "Private address is required to receive the remaining balance after a partial transfer",
       );
     }
   }

@@ -18,9 +18,9 @@
   "selectAsset": "Select Asset",
   "searchAssetPlaceholder": "Search by name or ticker...",
   "noTokensFound": "No tokens found",
-  "stealthDestination": "Private destination",
-  "stealthPlaceholder": "Select private address",
-  "noStealthAddresses": "Create a private address on the overview page first.",
+  "privateDestination": "Private destination",
+  "privatePlaceholder": "Select private address",
+  "noPrivateAddresses": "Create a private address on the overview page first.",
   "submitErrorTitle": "Could not complete deposit",
   "generateDepositAddress": "Generate Deposit Address"
 }

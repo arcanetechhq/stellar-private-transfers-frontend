@@ -2,7 +2,7 @@ import { fetchAndMergeMerkleState } from "@/shared/lib/privacy-pool/fetch-contra
 import { displayAmountToStroops } from "@/shared/lib/stellar/stroops";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import { resolveTokenContractId } from "@/shared/stellar/resolve-token-contract-id";
-import { stealthAddressesEqual } from "./confidential-transfer-audit-helpers";
+import { privateAddressesEqual } from "./confidential-transfer-audit-helpers";
 import type {
   RunConfidentialTransferInput,
   RunConfidentialTransferResult,
@@ -21,10 +21,10 @@ export async function runConfidentialTransferMutation(
 ): Promise<RunConfidentialTransferResult> {
   const poolContract = getRequiredPrivacyPoolContractId();
   const tokenContract = resolveTokenContractId(input.tokenContractRaw);
-  const recipientTrim = input.recipientStealthStpl1.trim();
-  const senderTrim = input.senderStealthAddress.trim();
-  if (stealthAddressesEqual(recipientTrim, senderTrim)) {
-    throw new Error("Recipient must differ from sender stealth address");
+  const recipientTrim = input.recipientPrivateAddressStpl1.trim();
+  const senderTrim = input.senderPrivateAddress.trim();
+  if (privateAddressesEqual(recipientTrim, senderTrim)) {
+    throw new Error("Recipient must differ from sender private address");
   }
   const transferStroops = displayAmountToStroops(input.amountDisplay);
   const picked = pickCoinsForTransfer({

@@ -29,7 +29,7 @@ export async function submitPrivateWithdrawalThunkBody(
       networkPassphrase: resolved.networkPassphrase,
       sorobanRpcUrl: resolved.sorobanRpcUrl,
       senderPrivKeyScalarHex: resolved.senderPrivKeyScalarHex,
-      senderStealthAddress: resolved.senderTrim,
+      senderPrivateAddress: resolved.senderTrim,
       assetId: resolved.payload.assetId,
       tokenContractRaw: resolved.payload.tokenContractRaw,
       amountDisplay: resolved.payload.amountDisplay,

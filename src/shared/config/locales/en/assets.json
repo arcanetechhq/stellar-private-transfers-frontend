@@ -8,7 +8,7 @@
   "privateAssets": {
     "title": "Private assets",
     "noCoins": "No finalized private coins for this address yet.",
-    "noStealthAddresses": "Create a private address on the Contacts page to receive private assets.",
+    "noPrivateAddresses": "Create a private address on the Contacts page to receive private assets.",
     "selectAddress": "Private address"
   },
   "faucet": {

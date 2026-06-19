@@ -18,7 +18,7 @@ import enAbout from "./locales/en/about.json";
 import enPrivacyPolicy from "./locales/en/privacyPolicy.json";
 import enDataExport from "./locales/en/dataExport.json";
 import enAccess from "./locales/en/access.json";
-import enStealth from "./locales/en/stealth.json";
+import enPrivateAddress from "./locales/en/private-address.json";
 import enAssets from "./locales/en/assets.json";
 
 const NAMESPACES = [
@@ -40,7 +40,7 @@ const NAMESPACES = [
   "privacyPolicy",
   "dataExport",
   "access",
-  "stealth",
+  "privateAddress",
   "assets",
 ] as const;
 
@@ -70,7 +70,7 @@ i18n.use(initReactI18next).init({
       privacyPolicy: enPrivacyPolicy,
       dataExport: enDataExport,
       access: enAccess,
-      stealth: enStealth,
+      privateAddress: enPrivateAddress,
       assets: enAssets,
     },
   },

@@ -11,7 +11,7 @@ import { usePrivateWithdrawalSubmitHandler } from "./use-private-withdrawal-subm
 import { useWithdrawalPrivateAssets } from "./use-withdrawal-private-assets";
 
 interface WithdrawalCanSubmitInput {
-  senderStealthAddress: string;
+  senderPrivateAddress: string;
   selectedAsset: AssetWithTrustline | undefined;
   amount: string;
   numericBalance: number;
@@ -21,7 +21,7 @@ interface WithdrawalCanSubmitInput {
 function computeWithdrawalCanSubmit(input: WithdrawalCanSubmitInput): boolean {
   const numericAmount = Number.parseFloat(input.amount);
   return (
-    input.senderStealthAddress !== "" &&
+    input.senderPrivateAddress !== "" &&
     input.selectedAsset !== undefined &&
     input.amount !== "" &&
     !Number.isNaN(numericAmount) &&
@@ -85,7 +85,7 @@ export function useCreateWithdrawal() {
   const selectedAsset = tokenUi.selectedToken;
   const amountInputs = useWithdrawalAmountInputs(selectedAsset);
   const canSubmit = computeWithdrawalCanSubmit({
-    senderStealthAddress: withdrawalSender.senderStealthAddress,
+    senderPrivateAddress: withdrawalSender.senderPrivateAddress,
     selectedAsset,
     amount: amountInputs.amount,
     numericBalance: amountInputs.numericBalance,
@@ -100,7 +100,7 @@ export function useCreateWithdrawal() {
     selectedAsset,
     submit,
     navigate,
-    senderStealthAddress: withdrawalSender.senderStealthAddress,
+    senderPrivateAddress: withdrawalSender.senderPrivateAddress,
     destinationTrim,
     numericAmount: Number.isNaN(numericAmount) ? 0 : numericAmount,
   });

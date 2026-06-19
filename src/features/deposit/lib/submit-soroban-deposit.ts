@@ -14,7 +14,7 @@ function hexToBuffer(hex: string): Buffer {
 export interface SubmitSorobanDepositInput {
   contractId: string;
   walletPublicKey: string;
-  stealthAddressStpl1: string;
+  privateAddressStpl1: string;
   coin: CoinData;
   depositScalarHex: string;
   tokenAddress: string;
@@ -56,7 +56,7 @@ export async function submitSorobanDeposit(
 
   const { proof_hex, public_hex } =
     await privacyPoolService.prepareDepositTransactProof({
-      stealthAddressStpl1: input.stealthAddressStpl1,
+      privateAddressStpl1: input.privateAddressStpl1,
       coin: input.coin,
       depositScalarHex: input.depositScalarHex,
       merkleRootBytes: merkleRootBuffer,

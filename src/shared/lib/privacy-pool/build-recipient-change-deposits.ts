@@ -3,10 +3,10 @@ import { privacyPoolService } from "./privacy-pool-service";
 import { ZERO_STROOPS } from "./privacy-pool-confidential-proof-helpers";
 
 export async function buildRecipientAndOptionalChangeDeposits(parameters: {
-  recipientStealthStpl1: string;
+  recipientPrivateAddressStpl1: string;
   transferStroops: bigint;
   changeStroops: bigint;
-  selfStealthStpl1ForChange: string | undefined;
+  selfPrivateAddressStpl1ForChange: string | undefined;
   tokenAddress: string;
 }): Promise<{
   recipientSlot: Awaited<ReturnType<typeof privacyPoolService.buildAlignedDepositSlot>>;
@@ -19,7 +19,7 @@ export async function buildRecipientAndOptionalChangeDeposits(parameters: {
   };
 }> {
   const recipientSlot = await privacyPoolService.buildAlignedDepositSlot({
-    stealthAddressStpl1: parameters.recipientStealthStpl1.trim(),
+    privateAddressStpl1: parameters.recipientPrivateAddressStpl1.trim(),
     amountStroops: parameters.transferStroops,
     tokenAddress: parameters.tokenAddress,
   });
@@ -34,7 +34,7 @@ export async function buildRecipientAndOptionalChangeDeposits(parameters: {
     | undefined;
   if (parameters.changeStroops > ZERO_STROOPS) {
     const changeSlot = await privacyPoolService.buildAlignedDepositSlot({
-      stealthAddressStpl1: parameters.selfStealthStpl1ForChange!.trim(),
+      privateAddressStpl1: parameters.selfPrivateAddressStpl1ForChange!.trim(),
       amountStroops: parameters.changeStroops,
       tokenAddress: parameters.tokenAddress,
     });

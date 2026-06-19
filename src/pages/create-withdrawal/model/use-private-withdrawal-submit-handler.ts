@@ -12,7 +12,7 @@ import { addTransaction, buildUserTransaction } from "@/entities/transaction";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 
 type PrivateWithdrawalSubmit = (payload: {
-  senderStealthAddress: string;
+  senderPrivateAddress: string;
   assetId: string;
   tokenContractRaw: string;
   amountDisplay: number;
@@ -26,7 +26,7 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
   selectedAsset: AssetWithTrustline | undefined;
   submit: PrivateWithdrawalSubmit;
   navigate: NavigateFunction;
-  senderStealthAddress: string;
+  senderPrivateAddress: string;
   destinationTrim: string;
   numericAmount: number;
 }) {
@@ -42,7 +42,7 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
     setSubmitError(undefined);
     try {
       const result = await parameters.submit({
-        senderStealthAddress: parameters.senderStealthAddress,
+        senderPrivateAddress: parameters.senderPrivateAddress,
         assetId: parameters.selectedAsset.assetId,
         tokenContractRaw: parameters.selectedAsset.clientContract ?? "",
         amountDisplay: parameters.numericAmount,
@@ -56,7 +56,7 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
             assetId: parameters.selectedAsset.assetId,
             amount: parameters.numericAmount,
             counterparty: parameters.destinationTrim,
-            senderStealthAddress: parameters.senderStealthAddress.trim(),
+            senderPrivateAddress: parameters.senderPrivateAddress.trim(),
           }),
         ),
       );

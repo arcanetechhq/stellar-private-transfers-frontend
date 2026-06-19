@@ -1,4 +1,4 @@
-import { isValidStealthAddressString } from "@/shared/lib/stealth/validate-stealth-address";
+import { isValidPrivateAddressString } from "@/shared/lib/private-address/validate-private-address";
 import type { Contact, ContactState } from "../model/contact";
 
 const STORAGE_KEY = "stellar-payment-contact-v1";
@@ -11,20 +11,20 @@ function migrateItem(value: unknown): Contact | undefined {
   if (typeof record.id !== "number" || typeof record.name !== "string") {
     return undefined;
   }
-  if (typeof record.stealthAddress === "string") {
+  if (typeof record.privateAddress === "string") {
     return {
       id: record.id,
       name: record.name,
-      stealthAddress: record.stealthAddress,
+      privateAddress: record.privateAddress,
     };
   }
   if (typeof record.address === "string") {
     const trimmed = record.address.trim();
-    if (isValidStealthAddressString(trimmed)) {
+    if (isValidPrivateAddressString(trimmed)) {
       return {
         id: record.id,
         name: record.name,
-        stealthAddress: trimmed,
+        privateAddress: trimmed,
       };
     }
     return undefined;

@@ -12,8 +12,8 @@ import { addTransaction, buildUserTransaction } from "@/entities/transaction";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 
 type ConfidentialTransferSubmit = (payload: {
-  senderStealthAddress: string;
-  recipientStealthStpl1: string;
+  senderPrivateAddress: string;
+  recipientPrivateAddressStpl1: string;
   assetId: string;
   tokenContractRaw: string;
   amountDisplay: number;
@@ -26,7 +26,7 @@ export function useConfidentialTransferSubmitHandler(parameters: {
   selectedAsset: AssetWithTrustline | undefined;
   submit: ConfidentialTransferSubmit;
   navigate: NavigateFunction;
-  senderStealthAddress: string;
+  senderPrivateAddress: string;
   recipientTrim: string;
   numericAmount: number;
 }) {
@@ -42,8 +42,8 @@ export function useConfidentialTransferSubmitHandler(parameters: {
     setSubmitError(undefined);
     try {
       const result = await parameters.submit({
-        senderStealthAddress: parameters.senderStealthAddress,
-        recipientStealthStpl1: parameters.recipientTrim,
+        senderPrivateAddress: parameters.senderPrivateAddress,
+        recipientPrivateAddressStpl1: parameters.recipientTrim,
         assetId: parameters.selectedAsset.assetId,
         tokenContractRaw: parameters.selectedAsset.clientContract ?? "",
         amountDisplay: parameters.numericAmount,
@@ -56,7 +56,7 @@ export function useConfidentialTransferSubmitHandler(parameters: {
             assetId: parameters.selectedAsset.assetId,
             amount: parameters.numericAmount,
             counterparty: parameters.recipientTrim,
-            senderStealthAddress: parameters.senderStealthAddress.trim(),
+            senderPrivateAddress: parameters.senderPrivateAddress.trim(),
           }),
         ),
       );

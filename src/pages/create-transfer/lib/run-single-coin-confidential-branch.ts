@@ -64,8 +64,8 @@ async function submitSingleCoinTransfer(
     depositorEphemeralXHex: ephemeral.xHex,
     depositorEphemeralYHex: ephemeral.yHex,
     transferStroops,
-    recipientStealthStpl1: recipientTrim,
-    selfStealthStpl1ForChange:
+    recipientPrivateAddressStpl1: recipientTrim,
+    selfPrivateAddressStpl1ForChange:
       transferStroops < BigInt(only.coin.value) ? senderTrim : undefined,
     tokenAddress: tokenContract,
   });
@@ -118,7 +118,7 @@ async function finalizeSingleCoinDeliveries(
         coin: changeCoin.coin,
         depositScalarHex: changeCoin.depositScalarHex,
         precommitementHex: changeCoin.precommitementHex,
-        stealthAddress: senderTrim,
+        privateAddress: senderTrim,
         assetId: input.assetId,
         poolContract,
         amountDisplay: changeDisplay,
@@ -130,7 +130,7 @@ async function finalizeSingleCoinDeliveries(
   const warnings: string[] = [];
   const warning = await postCoinDeliveryBestEffort(input.dispatch, () =>
     buildCoinDeliveryPostBody({
-      recipientStealthStpl1: recipientTrim,
+      recipientPrivateAddressStpl1: recipientTrim,
       commitmentHex: recipientCoin.commitment_hex,
       coin: recipientCoin.coin,
       depositScalarHex: recipientCoin.depositScalarHex,
@@ -146,7 +146,7 @@ async function finalizeSingleCoinDeliveries(
   if (changeCoin) {
     const changeWarning = await postCoinDeliveryBestEffort(input.dispatch, () =>
       buildCoinDeliveryPostBody({
-        recipientStealthStpl1: senderTrim,
+        recipientPrivateAddressStpl1: senderTrim,
         commitmentHex: changeCoin.commitment_hex,
         coin: changeCoin.coin,
         depositScalarHex: changeCoin.depositScalarHex,

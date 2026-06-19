@@ -7,7 +7,7 @@ export interface CoinWithMetadata {
   coin: CoinData;
   depositScalarHex?: string;
   precommitementHex?: string;
-  stealthAddress: string;
+  privateAddress: string;
   assetId: string;
   poolContract: string;
   amountDisplay: number;

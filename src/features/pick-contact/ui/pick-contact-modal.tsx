@@ -5,7 +5,7 @@ import { useAppSelector } from "@/store";
 import { selectContacts } from "@/entities/contact";
 import {
   PickContactModalLists,
-  type StealthPickerRow,
+  type PrivateAddressPickerRow,
 } from "@/features/pick-contact";
 
 interface PickContactModalProperties {
@@ -13,8 +13,8 @@ interface PickContactModalProperties {
   selectedAddress: string;
   onSelect: (address: string) => void;
   onClose: () => void;
-  excludeStealthAddress?: string;
-  stealthRows?: StealthPickerRow[];
+  excludePrivateAddress?: string;
+  privateAddressRows?: PrivateAddressPickerRow[];
 }
 
 export function PickContactModal(properties: PickContactModalProperties) {
@@ -23,12 +23,12 @@ export function PickContactModal(properties: PickContactModalProperties) {
     selectedAddress,
     onSelect,
     onClose,
-    excludeStealthAddress,
-    stealthRows = [],
+    excludePrivateAddress,
+    privateAddressRows = [],
   } = properties;
   const contacts = useAppSelector(selectContacts);
   const { t: translate } = useTranslation("contacts");
-  const excludeTrim = excludeStealthAddress?.trim() ?? "";
+  const excludeTrim = excludePrivateAddress?.trim() ?? "";
 
   if (!open) {
     return;
@@ -43,7 +43,7 @@ export function PickContactModal(properties: PickContactModalProperties) {
     if (!excludeTrim) {
       return true;
     }
-    return contact.stealthAddress.trim() !== excludeTrim;
+    return contact.privateAddress.trim() !== excludeTrim;
   });
 
   return (
@@ -76,7 +76,7 @@ export function PickContactModal(properties: PickContactModalProperties) {
         </div>
         <div className="flex-1 overflow-y-auto px-3 pb-3">
           <PickContactModalLists
-            stealthRows={stealthRows}
+            privateAddressRows={privateAddressRows}
             filteredContacts={filteredContacts}
             selectedAddress={selectedAddress}
             onSelectAddress={handleSelect}

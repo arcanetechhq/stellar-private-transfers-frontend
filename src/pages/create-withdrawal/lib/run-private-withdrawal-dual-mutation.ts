@@ -88,7 +88,7 @@ async function applyDualPrivateWithdrawPostSubmitEffects(parameters: {
       coin: parameters.preparedDual.changeCoin.coin,
       depositScalarHex: parameters.preparedDual.changeCoin.depositScalarHex,
       precommitementHex: parameters.preparedDual.changeCoin.precommitementHex,
-      stealthAddress: parameters.senderTrim,
+      privateAddress: parameters.senderTrim,
       assetId: parameters.assetId,
       poolContract: parameters.poolContract,
       amountDisplay: changeDisplayDual,
@@ -147,7 +147,7 @@ async function buildDualPrivateWithdrawPreparedProof(parameters: {
   preparedDual: Awaited<ReturnType<typeof privacyPoolService.prepareWithdrawTransactProofDual>>;
 }> {
   const { input, first, second } = parameters;
-  const senderTrim = input.senderStealthAddress.trim();
+  const senderTrim = input.senderPrivateAddress.trim();
   const poolContract = getRequiredPrivacyPoolContractId();
   const tokenContract = resolveTokenContractId(input.tokenContractRaw);
   const withdrawStroops = displayAmountToStroops(input.amountDisplay);
@@ -173,7 +173,7 @@ async function buildDualPrivateWithdrawPreparedProof(parameters: {
   });
   const destinationTrim = input.destinationAddress.trim();
   const changeStroops = totalNotes - withdrawStroops;
-  const changeStealth =
+  const changePrivateAddress =
     changeStroops > ZERO_STROOPS ? senderTrim : undefined;
   const preparedDual = await privacyPoolService.prepareWithdrawTransactProofDual({
     coinA: first.coin,
@@ -186,7 +186,7 @@ async function buildDualPrivateWithdrawPreparedProof(parameters: {
     depositorEphemeralBXHex: ephemeralB.xHex,
     depositorEphemeralBYHex: ephemeralB.yHex,
     withdrawAmountStroops: withdrawStroops,
-    changeStealthAddressStpl1: changeStealth,
+    changePrivateAddressStpl1: changePrivateAddress,
     tokenAddress: tokenContract,
   });
   return {

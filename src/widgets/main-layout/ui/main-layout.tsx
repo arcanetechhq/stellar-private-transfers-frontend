@@ -8,7 +8,7 @@ import { MainLayoutHeader } from "./main-layout-header";
 import { MainLayoutSidebar } from "./main-layout-sidebar";
 import { NotificationsModal } from "./notifications-modal";
 import {
-  EnsureMissingStealthScalars,
+  EnsureMissingPrivateAddressScalars,
   PollAllAssetDeliveries,
 } from "@/features/poll-coin-deliveries";
 import { PollPendingDeposits } from "@/features/poll-deposit";
@@ -97,7 +97,7 @@ export function MainLayout() {
         onClose={() => setNotificationsOpen(false)}
       />
 
-      <EnsureMissingStealthScalars />
+      <EnsureMissingPrivateAddressScalars />
       <PollAllAssetDeliveries />
       <PollPendingDeposits />
     </div>

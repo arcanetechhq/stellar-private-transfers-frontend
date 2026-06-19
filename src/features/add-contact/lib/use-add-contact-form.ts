@@ -2,28 +2,28 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch } from "@/store";
 import { addContact } from "@/entities/contact";
-import { isValidStealthAddressString } from "@/shared/lib/stealth/validate-stealth-address";
+import { isValidPrivateAddressString } from "@/shared/lib/private-address/validate-private-address";
 
 export function useAddContactForm(onClose: () => void) {
   const dispatch = useAppDispatch();
   const { t: translate } = useTranslation("contacts");
   const [name, setName] = useState("");
-  const [stealthAddress, setStealthAddress] = useState("");
+  const [privateAddress, setPrivateAddress] = useState("");
   const [error, setError] = useState<string | undefined>();
 
   const handleAdd = () => {
     const trimmedName = name.trim();
-    const trimmedStealth = stealthAddress.trim();
+    const trimmedPrivateAddress = privateAddress.trim();
     setError(undefined);
-    if (!trimmedName || !trimmedStealth) {
+    if (!trimmedName || !trimmedPrivateAddress) {
       return;
     }
-    if (!isValidStealthAddressString(trimmedStealth)) {
+    if (!isValidPrivateAddressString(trimmedPrivateAddress)) {
       setError(translate("invalidPrivateAddress"));
       return;
     }
     dispatch(
-      addContact({ name: trimmedName, stealthAddress: trimmedStealth }),
+      addContact({ name: trimmedName, privateAddress: trimmedPrivateAddress }),
     );
     onClose();
   };
@@ -32,8 +32,8 @@ export function useAddContactForm(onClose: () => void) {
     translate,
     name,
     setName,
-    stealthAddress,
-    setStealthAddress,
+    privateAddress,
+    setPrivateAddress,
     error,
     handleAdd,
   };

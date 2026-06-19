@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export interface PostCoinDeliveryBody {
-  recipientStealthAddress: string;
+  recipientPrivateAddress: string;
   assetId: string;
   ciphertextBase64: string;
   ephemeralKey: string;
@@ -35,7 +35,7 @@ export interface IncomingListResponse {
 }
 
 export interface FetchIncomingParameters {
-  stealthAddress: string;
+  privateAddress: string;
   assetId: string;
   bloomM: number;
   bloomK: number;
@@ -51,10 +51,10 @@ export const coinDeliveryApi = createApi({
   }),
   endpoints: (builder) => ({
     getIncomingDeliveries: builder.query<IncomingListResponse, FetchIncomingParameters>({
-      query: ({ stealthAddress, assetId, bloomM, bloomK, bloomBitsBase64, page, limit }) => ({
+      query: ({ privateAddress, assetId, bloomM, bloomK, bloomBitsBase64, page, limit }) => ({
         url: "/coin-deliveries/incoming",
         params: {
-          stealthAddress,
+          privateAddress,
           assetId,
           bloomM,
           bloomK,

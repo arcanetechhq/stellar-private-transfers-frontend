@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { useAppSelector } from "@/store";
 import { useGetAssetsQuery } from "@/entities/asset";
-import { selectStealthState } from "@/entities/stealth-address";
+import { selectPrivateAddressState } from "@/entities/private-address";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import {
   usePollAssetDeliveries,
@@ -10,20 +10,20 @@ import {
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 
 interface AssetPollerProperties {
-  stealthAddress: string;
+  privateAddress: string;
   recipientScalarHex: string;
   assetId: string;
   poolContract: string;
 }
 
 function AssetPoller({
-  stealthAddress,
+  privateAddress,
   recipientScalarHex,
   assetId,
   poolContract,
 }: AssetPollerProperties) {
   usePollAssetDeliveries({
-    stealthAddress,
+    privateAddress,
     recipientScalarHex,
     assetId,
     poolContract,
@@ -34,19 +34,19 @@ function AssetPoller({
 export function PollAllAssetDeliveries() {
   useSpentNullifierPolling();
   const publicKey = useAppSelector(selectWalletPublicKey);
-  const { byNonce, scalarByNonce } = useAppSelector(selectStealthState);
+  const { byNonce, scalarByNonce } = useAppSelector(selectPrivateAddressState);
   const { data: assets } = useGetAssetsQuery();
 
   const pollerTargets = useMemo(() => {
-    const entries: { nonceKey: string; stealthAddress: string; scalarHex: string }[] = [];
+    const entries: { nonceKey: string; privateAddress: string; scalarHex: string }[] = [];
     const nonces = Object.keys(byNonce).toSorted();
     for (const nonceKey of nonces) {
       const entry = byNonce[nonceKey];
       const scalarHex = scalarByNonce[nonceKey];
-      if (entry?.stealthAddress && scalarHex) {
+      if (entry?.privateAddress && scalarHex) {
         entries.push({
           nonceKey,
-          stealthAddress: entry.stealthAddress,
+          privateAddress: entry.privateAddress,
           scalarHex,
         });
       }
@@ -66,7 +66,7 @@ export function PollAllAssetDeliveries() {
         assets.map((asset) => (
           <AssetPoller
             key={`${target.nonceKey}:${asset.assetId}`}
-            stealthAddress={target.stealthAddress}
+            privateAddress={target.privateAddress}
             recipientScalarHex={target.scalarHex}
             assetId={asset.assetId}
             poolContract={poolContract}

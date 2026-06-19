@@ -26,12 +26,12 @@ export function resolveDetailSenderDisplay(input: {
   if (!hasPrivateRecord) {
     return { text: privateLabel, title: undefined };
   }
-  const trimmed = storedTransaction?.senderStealthAddress?.trim() ?? "";
+  const trimmed = storedTransaction?.senderPrivateAddress?.trim() ?? "";
   if (trimmed === "") {
     return { text: privateLabel, title: undefined };
   }
   return {
     text: formatSenderCounterpartyForDisplay(trimmed),
-    title: storedTransaction?.senderStealthAddress,
+    title: storedTransaction?.senderPrivateAddress,
   };
 }

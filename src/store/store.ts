@@ -12,13 +12,13 @@ import {
 import "@/features/faucet";
 import { walletReducer } from "@/entities/wallet";
 import {
-  buildStealthPersistPayload,
+  buildPrivateAddressPersistPayload,
   hydrateFromStorage,
-  loadStealthState,
-  resetForWalletChange as resetStealthForWalletChange,
-  saveStealthState,
-  stealthAddressReducer,
-} from "@/entities/stealth-address";
+  loadPrivateAddressState,
+  resetForWalletChange as resetPrivateAddressForWalletChange,
+  savePrivateAddressState,
+  privateAddressReducer,
+} from "@/entities/private-address";
 import {
   hydrateTransactions,
   loadTransactionState,
@@ -47,7 +47,7 @@ export const store = configureStore({
   reducer: {
     contact: contactReducer,
     wallet: walletReducer,
-    stealthAddress: stealthAddressReducer,
+    privateAddress: privateAddressReducer,
     transaction: transactionReducer,
     coinDelivery: coinDeliveryReducer,
     coin: coinReducer,
@@ -74,8 +74,8 @@ store.subscribe(() => {
   }
   lastWalletPublicKey = publicKey;
   if (publicKey) {
-    const loadedStealth = loadStealthState(publicKey);
-    store.dispatch(hydrateFromStorage(loadedStealth));
+    const loadedPrivateAddress = loadPrivateAddressState(publicKey);
+    store.dispatch(hydrateFromStorage(loadedPrivateAddress));
     const loadedTransactions = loadTransactionState(publicKey);
     store.dispatch(hydrateTransactions(loadedTransactions ?? []));
     const loadedTags = loadSeenTags(publicKey);
@@ -83,7 +83,7 @@ store.subscribe(() => {
     const loadedCoins = loadCoinState(publicKey);
     store.dispatch(hydrateCoinState(loadedCoins));
   } else {
-    store.dispatch(resetStealthForWalletChange());
+    store.dispatch(resetPrivateAddressForWalletChange());
     store.dispatch(resetTransactionsForWalletChange());
     store.dispatch(resetSeenTags());
     store.dispatch(resetCoinState());
@@ -96,7 +96,7 @@ store.subscribe(() => {
   if (!publicKey) {
     return;
   }
-  saveStealthState(publicKey, buildStealthPersistPayload(state.stealthAddress));
+  savePrivateAddressState(publicKey, buildPrivateAddressPersistPayload(state.privateAddress));
 });
 
 store.subscribe(() => {
