@@ -1,13 +1,14 @@
 import { useMemo } from "react";
 import type { AssetWithTrustline } from "@/entities/asset";
-import { isValidPrivateAddressString } from "@/entities/private-address";
+import { isValidStellarPublicAddress } from "@/shared/lib/stellar/is-valid-stellar-public-address";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
+import type { RecipientRegistryStatus } from "./use-recipient-registry-status";
 import { NETWORK_FEE } from "./create-transfer";
 
 function recipientFieldErrorKey(parameters: {
   recipientTrim: string;
   recipientValid: boolean;
-  senderPrivateAddress: string;
+  walletPublicKey: string;
 }): "invalidRecipient" | "sameAsSender" | undefined {
   if (!parameters.recipientTrim) {
     return undefined;
@@ -15,7 +16,7 @@ function recipientFieldErrorKey(parameters: {
   if (!parameters.recipientValid) {
     return "invalidRecipient";
   }
-  if (parameters.recipientTrim === parameters.senderPrivateAddress) {
+  if (parameters.recipientTrim === parameters.walletPublicKey) {
     return "sameAsSender";
   }
   return undefined;
@@ -28,14 +29,20 @@ function transferIdentityAndRecipientReady(parameters: {
   recipientDiffersFromSender: boolean;
   selectedAsset: AssetWithTrustline | undefined;
   poolReady: boolean;
+  actionsEnabled: boolean;
+  recipientRegistryStatus: RecipientRegistryStatus;
 }): boolean {
+  const recipientLookupReady =
+    parameters.recipientRegistryStatus !== "checking";
   return (
     Boolean(parameters.publicKey?.trim()) &&
     parameters.senderPrivateAddress.length > 0 &&
     parameters.recipientValid &&
     parameters.recipientDiffersFromSender &&
     parameters.selectedAsset !== undefined &&
-    parameters.poolReady
+    parameters.poolReady &&
+    parameters.actionsEnabled &&
+    recipientLookupReady
   );
 }
 
@@ -63,6 +70,8 @@ function transferFormCanSubmit(parameters: {
   numericAmount: number;
   numericBalance: number;
   isSubmitting: boolean;
+  actionsEnabled: boolean;
+  recipientRegistryStatus: RecipientRegistryStatus;
 }): boolean {
   return (
     transferIdentityAndRecipientReady({
@@ -72,6 +81,8 @@ function transferFormCanSubmit(parameters: {
       recipientDiffersFromSender: parameters.recipientDiffersFromSender,
       selectedAsset: parameters.selectedAsset,
       poolReady: parameters.poolReady,
+      actionsEnabled: parameters.actionsEnabled,
+      recipientRegistryStatus: parameters.recipientRegistryStatus,
     }) &&
     transferAmountWithinBalance({
       amount: parameters.amount,
@@ -89,16 +100,19 @@ export function useTransferRecipientAndSubmitGates(parameters: {
   selectedAsset: AssetWithTrustline | undefined;
   amount: string;
   isSubmitting: boolean;
+  actionsEnabled: boolean;
+  recipientRegistryStatus: RecipientRegistryStatus;
 }) {
   const numericBalance = parameters.selectedAsset
     ? Number.parseFloat(parameters.selectedAsset.balance ?? "0")
     : 0;
   const recipientTrim = parameters.recipient.trim();
-  const recipientValid = isValidPrivateAddressString(recipientTrim);
+  const recipientValid = isValidStellarPublicAddress(recipientTrim);
+  const walletPublicKey = parameters.publicKey?.trim() ?? "";
   const recipientDiffersFromSender =
     recipientTrim.length > 0 &&
-    parameters.senderPrivateAddress.length > 0 &&
-    recipientTrim !== parameters.senderPrivateAddress;
+    walletPublicKey.length > 0 &&
+    recipientTrim !== walletPublicKey;
   const numericAmount = Number.parseFloat(parameters.amount);
   const poolReady = (() => {
     try {
@@ -118,6 +132,8 @@ export function useTransferRecipientAndSubmitGates(parameters: {
     numericAmount,
     numericBalance,
     isSubmitting: parameters.isSubmitting,
+    actionsEnabled: parameters.actionsEnabled,
+    recipientRegistryStatus: parameters.recipientRegistryStatus,
   });
 
   const recipientErrorKey = useMemo(
@@ -125,9 +141,9 @@ export function useTransferRecipientAndSubmitGates(parameters: {
       recipientFieldErrorKey({
         recipientTrim,
         recipientValid,
-        senderPrivateAddress: parameters.senderPrivateAddress,
+        walletPublicKey,
       }),
-    [recipientTrim, recipientValid, parameters.senderPrivateAddress],
+    [recipientTrim, recipientValid, walletPublicKey],
   );
 
   const totalAmount = useMemo(() => {

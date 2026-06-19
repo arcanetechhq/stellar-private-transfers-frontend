@@ -1,3 +1,4 @@
+import type { OnboardingPayload } from "contract";
 import { ZERO_STROOPS } from "@/shared/lib/privacy-pool/privacy-pool-confidential-proof-helpers";
 import { addCoin, markCoinSpent, type CoinWithMetadata } from "@/entities/coin";
 import { buildCoinDeliveryPostBody } from "@/features/deposit";
@@ -6,7 +7,9 @@ import { readLeafEphemeralHex } from "@/shared/lib/privacy-pool/fetch-contract-m
 import { stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops";
 import { findCommitmentLeafIndex } from "@/entities/coin";
 import { postCoinDeliveryBestEffort } from "@/entities/coin-deliveries";
+import { buildOnboardingPayload } from "@/shared/lib/registry/build-onboarding-payload";
 import type { RunConfidentialTransferInput } from "./confidential-transfer-mutation-types";
+import type { RecipientTransferTarget } from "./run-confidential-transfer-mutation";
 import { sealEncryptAndSubmitDualCoinConfidentialTransfer } from "./dual-coin-confidential-audit-submit";
 
 type PreparedDualProof = Awaited<
@@ -24,6 +27,21 @@ interface DualCoinBranchParameters {
   recipientTrim: string;
   senderTrim: string;
   picked: CoinWithMetadata[];
+  recipientTarget: RecipientTransferTarget;
+}
+
+function buildDualOnboardingPayload(
+  parameters: DualCoinBranchParameters,
+  preparedDual: PreparedDualProof,
+): OnboardingPayload | undefined {
+  if (!parameters.recipientTarget.temporaryKeyMaterial) {
+    return undefined;
+  }
+  return buildOnboardingPayload({
+    ownerStellarAddress: parameters.input.recipientStellarAddress,
+    temporaryKey: parameters.recipientTarget.temporaryKeyMaterial,
+    recipientNotes: [preparedDual.recipientCoin.coin],
+  });
 }
 
 async function submitDualCoinTransfer(
@@ -83,6 +101,7 @@ async function submitDualCoinTransfer(
   });
   const noteA = BigInt(first.coin.value);
   const noteB = BigInt(second.coin.value);
+  const onboarding = buildDualOnboardingPayload(parameters, preparedDual);
   const txId = await sealEncryptAndSubmitDualCoinConfidentialTransfer({
     preparedDual,
     first,
@@ -96,6 +115,7 @@ async function submitDualCoinTransfer(
     input,
     poolContract,
     tokenContract,
+    onboarding,
   });
   return {
     txId,
@@ -146,20 +166,25 @@ async function finalizeDualCoinDeliveries(
     );
   }
   const warningsDual: string[] = [];
-  const recipientWarning = await postCoinDeliveryBestEffort(input.dispatch, () =>
-    buildCoinDeliveryPostBody({
-      recipientPrivateAddressStpl1: recipientTrim,
-      commitmentHex: recipientCoin.commitment_hex,
-      coin: recipientCoin.coin,
-      depositScalarHex: recipientCoin.depositScalarHex,
-      precommitementHex: recipientCoin.precommitementHex,
-      assetId: input.assetId,
-      amountDisplay: input.amountDisplay,
-      txId,
-    }),
+  const suppressDeliveryWarningsDual = Boolean(
+    parameters.recipientTarget.temporaryKeyMaterial,
   );
-  if (recipientWarning) {
-    warningsDual.push(recipientWarning);
+  if (!parameters.recipientTarget.temporaryKeyMaterial) {
+    const recipientWarning = await postCoinDeliveryBestEffort(input.dispatch, () =>
+      buildCoinDeliveryPostBody({
+        recipientPrivateAddressStpl1: recipientTrim,
+        commitmentHex: recipientCoin.commitment_hex,
+        coin: recipientCoin.coin,
+        depositScalarHex: recipientCoin.depositScalarHex,
+        precommitementHex: recipientCoin.precommitementHex,
+        assetId: input.assetId,
+        amountDisplay: input.amountDisplay,
+        txId,
+      }),
+    );
+    if (recipientWarning) {
+      warningsDual.push(recipientWarning);
+    }
   }
   if (changeCoin) {
     const changeWarn = await postCoinDeliveryBestEffort(input.dispatch, () =>
@@ -174,7 +199,7 @@ async function finalizeDualCoinDeliveries(
         txId,
       }),
     );
-    if (changeWarn) {
+    if (changeWarn && !suppressDeliveryWarningsDual) {
       warningsDual.push(changeWarn);
     }
   }

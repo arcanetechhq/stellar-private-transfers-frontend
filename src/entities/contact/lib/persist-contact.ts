@@ -1,4 +1,4 @@
-import { isValidPrivateAddressString } from "@/shared/lib/private-address/validate-private-address";
+import { isValidStellarPublicAddress } from "@/shared/lib/stellar/is-valid-stellar-public-address";
 import type { Contact, ContactState } from "../model/contact";
 
 const STORAGE_KEY = "stellar-payment-contact-v1";
@@ -11,23 +11,16 @@ function migrateItem(value: unknown): Contact | undefined {
   if (typeof record.id !== "number" || typeof record.name !== "string") {
     return undefined;
   }
-  if (typeof record.privateAddress === "string") {
+  if (typeof record.stellarAddress === "string") {
+    const trimmed = record.stellarAddress.trim();
+    if (!isValidStellarPublicAddress(trimmed)) {
+      return undefined;
+    }
     return {
       id: record.id,
       name: record.name,
-      privateAddress: record.privateAddress,
+      stellarAddress: trimmed,
     };
-  }
-  if (typeof record.address === "string") {
-    const trimmed = record.address.trim();
-    if (isValidPrivateAddressString(trimmed)) {
-      return {
-        id: record.id,
-        name: record.name,
-        privateAddress: trimmed,
-      };
-    }
-    return undefined;
   }
   return undefined;
 }

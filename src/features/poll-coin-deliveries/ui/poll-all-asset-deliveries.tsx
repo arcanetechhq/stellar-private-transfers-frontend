@@ -3,6 +3,7 @@ import { useAppSelector } from "@/store";
 import { useGetAssetsQuery } from "@/entities/asset";
 import { selectPrivateAddressState } from "@/entities/private-address";
 import { selectWalletPublicKey } from "@/entities/wallet";
+import { useWalletPrivateAddress } from "@/features/register-private-address";
 import {
   usePollAssetDeliveries,
   useSpentNullifierPolling,
@@ -14,6 +15,7 @@ interface AssetPollerProperties {
   recipientScalarHex: string;
   assetId: string;
   poolContract: string;
+  pollingEnabled: boolean;
 }
 
 function AssetPoller({
@@ -21,18 +23,21 @@ function AssetPoller({
   recipientScalarHex,
   assetId,
   poolContract,
+  pollingEnabled,
 }: AssetPollerProperties) {
   usePollAssetDeliveries({
     privateAddress,
     recipientScalarHex,
     assetId,
     poolContract,
+    pollingEnabled,
   });
   return <></>;
 }
 
 export function PollAllAssetDeliveries() {
   useSpentNullifierPolling();
+  const { actionsEnabled } = useWalletPrivateAddress();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const { byNonce, scalarByNonce } = useAppSelector(selectPrivateAddressState);
   const { data: assets } = useGetAssetsQuery();
@@ -54,7 +59,7 @@ export function PollAllAssetDeliveries() {
     return entries;
   }, [byNonce, scalarByNonce]);
 
-  if (!publicKey || !assets || pollerTargets.length === 0) {
+  if (!publicKey || !assets || !actionsEnabled || pollerTargets.length === 0) {
     return <></>;
   }
 
@@ -70,6 +75,7 @@ export function PollAllAssetDeliveries() {
             recipientScalarHex={target.scalarHex}
             assetId={asset.assetId}
             poolContract={poolContract}
+            pollingEnabled={actionsEnabled}
           />
         )),
       )}

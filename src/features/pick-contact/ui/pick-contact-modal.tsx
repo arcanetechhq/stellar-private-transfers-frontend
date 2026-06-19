@@ -3,18 +3,14 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { useAppSelector } from "@/store";
 import { selectContacts } from "@/entities/contact";
-import {
-  PickContactModalLists,
-  type PrivateAddressPickerRow,
-} from "@/features/pick-contact";
+import { PickContactModalLists } from "@/features/pick-contact";
 
 interface PickContactModalProperties {
   open: boolean;
   selectedAddress: string;
   onSelect: (address: string) => void;
   onClose: () => void;
-  excludePrivateAddress?: string;
-  privateAddressRows?: PrivateAddressPickerRow[];
+  excludeStellarAddress?: string;
 }
 
 export function PickContactModal(properties: PickContactModalProperties) {
@@ -23,12 +19,11 @@ export function PickContactModal(properties: PickContactModalProperties) {
     selectedAddress,
     onSelect,
     onClose,
-    excludePrivateAddress,
-    privateAddressRows = [],
+    excludeStellarAddress,
   } = properties;
   const contacts = useAppSelector(selectContacts);
   const { t: translate } = useTranslation("contacts");
-  const excludeTrim = excludePrivateAddress?.trim() ?? "";
+  const excludeTrim = excludeStellarAddress?.trim() ?? "";
 
   if (!open) {
     return;
@@ -43,7 +38,7 @@ export function PickContactModal(properties: PickContactModalProperties) {
     if (!excludeTrim) {
       return true;
     }
-    return contact.privateAddress.trim() !== excludeTrim;
+    return contact.stellarAddress.trim() !== excludeTrim;
   });
 
   return (
@@ -76,7 +71,6 @@ export function PickContactModal(properties: PickContactModalProperties) {
         </div>
         <div className="flex-1 overflow-y-auto px-3 pb-3">
           <PickContactModalLists
-            privateAddressRows={privateAddressRows}
             filteredContacts={filteredContacts}
             selectedAddress={selectedAddress}
             onSelectAddress={handleSelect}

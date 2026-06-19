@@ -14,13 +14,14 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
       buffer: "buffer",
       contract: path.resolve(__dirname, "./generated/contract/src/index.ts"),
+      "registry-contract": path.resolve(__dirname, "./generated/registry/src/index.ts"),
       fs: path.resolve(__dirname, "./src/shims/node-fs.ts"),
       path: path.resolve(__dirname, "./src/shims/node-path.ts"),
       url: path.resolve(__dirname, "./src/shims/node-url.ts"),
     },
   },
   optimizeDeps: {
-    include: ["buffer", "@auditable/stellar-audit", "contract"],
+    include: ["buffer", "@auditable/stellar-audit", "contract", "registry-contract"],
     esbuildOptions: {
       alias: {
         fs: path.resolve(__dirname, "./src/shims/node-fs.ts"),

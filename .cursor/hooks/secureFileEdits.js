@@ -16,7 +16,7 @@ function checkForbidenFileEdits(filePath) {
   }
 
   return {
-    permission: "approve",
+    permission: "allow",
   };
 }
 

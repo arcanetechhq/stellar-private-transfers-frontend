@@ -8,7 +8,8 @@ import { runConfidentialTransferMutation } from "../lib/run-confidential-transfe
 
 export interface SubmitConfidentialTransferPayload {
   senderPrivateAddress: string;
-  recipientPrivateAddressStpl1: string;
+  senderPrivKeyScalarHex: string;
+  recipientStellarAddress: string;
   assetId: string;
   tokenContractRaw: string;
   amountDisplay: number;
@@ -27,19 +28,21 @@ export const submitConfidentialTransferThunk = createAsyncThunk<
       return rejectWithValue("Wallet not connected");
     }
     const senderTrim = payload.senderPrivateAddress.trim();
+    const senderPrivKeyScalarHex =
+      payload.senderPrivKeyScalarHex.trim() ||
+      selectScalarByPrivateAddress(senderTrim)(state)?.trim() ||
+      "";
+    if (!senderPrivKeyScalarHex) {
+      return rejectWithValue(
+        "PrivateAddress key scalar is missing; open private address settings first",
+      );
+    }
     const finalizedCoinsForSenderAndAsset = selectCoinItems(state).filter(
       (item) =>
         item.privateAddress === senderTrim &&
         item.status === "finalized" &&
         item.assetId === payload.assetId,
     );
-    const senderPrivKeyScalarHex =
-      selectScalarByPrivateAddress(senderTrim)(state);
-    if (!senderPrivKeyScalarHex?.trim()) {
-      return rejectWithValue(
-        "PrivateAddress key scalar is missing; open private address settings first",
-      );
-    }
     const { sorobanRpcUrl, networkPassphrase } =
       getDefaultStellarNetworkConfig();
     try {
@@ -50,7 +53,8 @@ export const submitConfidentialTransferThunk = createAsyncThunk<
         sorobanRpcUrl,
         senderPrivKeyScalarHex,
         senderPrivateAddress: senderTrim,
-        recipientPrivateAddressStpl1: payload.recipientPrivateAddressStpl1.trim(),
+        recipientStellarAddress: payload.recipientStellarAddress.trim(),
+        recipientPrivateAddressStpl1: "",
         assetId: payload.assetId,
         tokenContractRaw: payload.tokenContractRaw,
         amountDisplay: payload.amountDisplay,

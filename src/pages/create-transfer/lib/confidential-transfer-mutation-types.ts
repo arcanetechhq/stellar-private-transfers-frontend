@@ -1,3 +1,4 @@
+import type { OnboardingPayload } from "contract";
 import type { AppDispatch } from "@/store";
 import type { CoinWithMetadata } from "@/entities/coin";
 
@@ -8,7 +9,9 @@ export interface RunConfidentialTransferInput {
   sorobanRpcUrl: string;
   senderPrivKeyScalarHex: string;
   senderPrivateAddress: string;
+  recipientStellarAddress: string;
   recipientPrivateAddressStpl1: string;
+  onboarding?: OnboardingPayload;
   assetId: string;
   tokenContractRaw: string;
   amountDisplay: number;

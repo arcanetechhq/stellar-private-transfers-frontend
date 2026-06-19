@@ -99,6 +99,7 @@ export interface UsePollAssetDeliveriesParameters {
   recipientScalarHex: string;
   assetId: string;
   poolContract: string;
+  pollingEnabled?: boolean;
 }
 
 export function usePollAssetDeliveries({
@@ -106,6 +107,7 @@ export function usePollAssetDeliveries({
   recipientScalarHex,
   assetId,
   poolContract,
+  pollingEnabled = true,
 }: UsePollAssetDeliveriesParameters): void {
   const dispatch = useAppDispatch();
   const publicKey = useAppSelector(selectWalletPublicKey);
@@ -116,6 +118,7 @@ export function usePollAssetDeliveries({
   const isSeenTagsBloomReady = bloomBitsBase64 !== undefined;
 
   const canPollIncomingDeliveries =
+    pollingEnabled &&
     Boolean(privateAddress) &&
     Boolean(recipientScalarHex) &&
     Boolean(publicKey) &&

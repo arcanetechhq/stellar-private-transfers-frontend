@@ -22,6 +22,7 @@ export function CreateTransfer() {
                 recipient={transfer.recipient}
                 onRecipientChange={transfer.setRecipient}
                 recipientErrorKey={transfer.recipientErrorKey}
+                recipientRegistryStatus={transfer.recipientRegistryStatus}
                 onOpenTokenPicker={() => transfer.setShowTokenPicker(true)}
                 onOpenContactPicker={() => transfer.setShowContactPicker(true)}
                 onPercentage={transfer.handlePercentage}
@@ -35,6 +36,7 @@ export function CreateTransfer() {
                 canSubmit={transfer.canSubmit}
                 isSubmitting={transfer.isSubmitting}
                 submitError={transfer.submitError}
+                recipientRegistryStatus={transfer.recipientRegistryStatus}
               />
             </div>
           </form>
@@ -52,7 +54,7 @@ export function CreateTransfer() {
           selectedAddress={transfer.recipient}
           onSelect={transfer.setRecipient}
           onClose={() => transfer.setShowContactPicker(false)}
-          excludePrivateAddress={transfer.senderPrivateAddress}
+          excludeStellarAddress={transfer.publicKey ?? undefined}
         />
       </div>
     </React.Fragment>

@@ -11,8 +11,9 @@ import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-netwo
 
 export function useWithdrawalPrivateAssets(assetIdFromUrl: string | null) {
   const withdrawalSender = useWithdrawalSender();
-  const aggregates = useAppSelector(
+  const aggregates = useAppSelector((state) =>
     selectFinalizedAggregatesForPrivateAddress(
+      state,
       withdrawalSender.senderPrivateAddress || undefined,
     ),
   );

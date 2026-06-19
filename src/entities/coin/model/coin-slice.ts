@@ -1,4 +1,4 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSelector, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { AggregatedPrivateAssetRow, CoinWithMetadata } from "./coin";
 import { normalizeCommitmentHex } from "../lib/persist-coin";
 import {
@@ -93,13 +93,19 @@ export const selectPrivateAddressesWithCoins = (
   return [...unique];
 };
 
-export const selectFinalizedAggregatesForPrivateAddress =
-  (privateAddress: string | undefined) =>
-  (state: CoinRootState): AggregatedPrivateAssetRow[] => {
+const EMPTY_FINALIZED_AGGREGATES: AggregatedPrivateAssetRow[] = [];
+
+export const selectFinalizedAggregatesForPrivateAddress = createSelector(
+  [
+    selectCoinItems,
+    (_state: CoinRootState, privateAddress: string | undefined) =>
+      privateAddress?.trim(),
+  ],
+  (items, privateAddress): AggregatedPrivateAssetRow[] => {
     if (!privateAddress) {
-      return [];
+      return EMPTY_FINALIZED_AGGREGATES;
     }
-    const finalized = state.coin.items.filter(
+    const finalized = items.filter(
       (item) =>
         item.privateAddress === privateAddress && item.status === "finalized",
     );
@@ -119,4 +125,5 @@ export const selectFinalizedAggregatesForPrivateAddress =
     return [...byAsset.values()].toSorted((left, right) =>
       left.assetId.localeCompare(right.assetId),
     );
-  };
+  },
+);

@@ -1,46 +1,14 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useAppDispatch, useAppSelector } from "@/store";
-import { type AssetDto, useGetAssetsQuery } from "@/entities/asset";
-import {
-  type AggregatedPrivateAssetRow,
-  selectFinalizedAggregatesForPrivateAddress,
-} from "@/entities/coin";
 import { selectWalletPublicKey } from "@/entities/wallet";
-import { buildPrivateTransferAssets } from "../lib/private-transfer-asset-list";
+import { useWalletPrivateAddress } from "@/features/register-private-address";
 import { QUICK_PERCENTAGE_OPTIONS } from "./create-transfer";
 import { useConfidentialTransferSubmitHandler } from "./use-confidential-transfer-submit-handler";
 import { useConfidentialTransfer } from "./use-confidential-transfer";
-import { useSelectedPrivateToken } from "./use-selected-private-token";
-import { useTransferAmountInputs } from "./use-transfer-amount-inputs";
 import { useTransferRecipientAndSubmitGates } from "./use-transfer-validation";
-import { useTransferSender } from "./use-transfer-sender";
-import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
-
-function withZeroAmountAssets(
-  aggregates: AggregatedPrivateAssetRow[],
-  assetCatalog: AssetDto[] | undefined,
-): AggregatedPrivateAssetRow[] {
-  const poolContract = getRequiredPrivacyPoolContractId();
-  const byAssetId = new Map(
-    aggregates.map((aggregate) => [aggregate.assetId, aggregate]),
-  );
-  if (assetCatalog) {
-    for (const asset of assetCatalog) {
-      if (byAssetId.has(asset.assetId)) {
-        continue;
-      }
-      byAssetId.set(asset.assetId, {
-        assetId: asset.assetId,
-        poolContract,
-        totalAmountDisplay: 0,
-      });
-    }
-  }
-  return [...byAssetId.values()].toSorted((left, right) =>
-    left.assetId.localeCompare(right.assetId),
-  );
-}
+import { useRecipientRegistryStatus } from "./use-recipient-registry-status";
+import { useTransferAssetModel } from "./use-transfer-asset-model";
 
 export function useCreateTransfer() {
   const dispatch = useAppDispatch();
@@ -50,47 +18,48 @@ export function useCreateTransfer() {
   const assetIdFromUrl = searchParameters.get("assetId");
   const publicKey = useAppSelector(selectWalletPublicKey);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const transferSender = useTransferSender();
-  const aggregates = useAppSelector(
-    selectFinalizedAggregatesForPrivateAddress(
-      transferSender.senderPrivateAddress || undefined,
-    ),
-  );
-  const { data: assetCatalog } = useGetAssetsQuery();
-  const aggregatesWithZeroAssets = useMemo(() => {
-    return withZeroAmountAssets(aggregates, assetCatalog);
-  }, [aggregates, assetCatalog]);
-  const privateTransferAssets = useMemo(
-    () => buildPrivateTransferAssets(aggregatesWithZeroAssets, assetCatalog),
-    [aggregatesWithZeroAssets, assetCatalog],
-  );
-  const tokenUi = useSelectedPrivateToken(
-    privateTransferAssets,
+  const [isPreparingWallet, setIsPreparingWallet] = useState(false);
+  const {
+    privateAddressStpl1: senderPrivateAddress,
+    defaultNonce: senderNonce,
+    actionsEnabled,
+    ensureWalletPrivateAddress,
+    ensureWalletScalar,
+  } = useWalletPrivateAddress();
+  const { assets, tokenUi, amountInputs, selectedAsset } = useTransferAssetModel(
+    senderPrivateAddress,
     assetIdFromUrl,
   );
-  const selectedAsset = tokenUi.selectedToken;
-  const amountInputs = useTransferAmountInputs(selectedAsset);
+  const recipientRegistryStatus = useRecipientRegistryStatus({
+    recipient: amountInputs.recipient,
+    walletPublicKey: publicKey,
+  });
   const validation = useTransferRecipientAndSubmitGates({
     publicKey,
-    senderPrivateAddress: transferSender.senderPrivateAddress,
+    senderPrivateAddress,
     recipient: amountInputs.recipient,
     selectedAsset,
     amount: amountInputs.amount,
-    isSubmitting,
+    isSubmitting: isSubmitting || isPreparingWallet,
+    actionsEnabled,
+    recipientRegistryStatus,
   });
   const { submitError, handleSubmit } = useConfidentialTransferSubmitHandler({
     dispatch,
     canSubmit: validation.canSubmit,
     setIsSubmitting,
+    setIsPreparingWallet,
     selectedAsset,
     submit,
     navigate,
-    senderPrivateAddress: transferSender.senderPrivateAddress,
+    ensureWalletPrivateAddress,
+    ensureWalletScalar,
     recipientTrim: validation.recipientTrim,
     numericAmount: validation.numericAmount,
   });
+  const isActionPending = isSubmitting || isPreparingWallet;
   return {
-    assets: privateTransferAssets,
+    assets,
     showTokenPicker: tokenUi.showTokenPicker,
     setShowTokenPicker: tokenUi.setShowTokenPicker,
     showContactPicker: tokenUi.showContactPicker,
@@ -107,12 +76,14 @@ export function useCreateTransfer() {
     totalAmount: validation.totalAmount,
     handleSubmit,
     canSubmit: validation.canSubmit,
-    isSubmitting,
+    isSubmitting: isActionPending,
     submitError,
-    senderNonce: transferSender.effectiveSenderNonce,
-    senderPrivateAddress: transferSender.senderPrivateAddress,
+    recipientRegistryStatus,
+    senderNonce,
+    senderPrivateAddress,
     recipientValid: validation.recipientValid,
     recipientDiffersFromSender: validation.recipientDiffersFromSender,
     recipientErrorKey: validation.recipientErrorKey,
+    publicKey,
   };
 }

@@ -28,10 +28,7 @@ export { existingSpentCoinMatchesIncomingDelivery } from "./lib/ledger-commitmen
 export { findCommitmentLeafIndex } from "./lib/find-commitment-leaf-index";
 
 export {
-  NUMBER_OF_CONFIDENTIAL_TRANSFER_INPUTS,
-  NUMBER_OF_CONFIDENTIAL_WITHDRAW_INPUTS,
-  NUMBER_OF_DEPOSITS,
-  pickCoinsForTransfer,
-  pickFinalizedCoinsForConfidentialSpend,
-  pickSingleCoinForPrivateWithdraw,
-} from "./lib/confidential-finalized-coin-pick";
+  CONFIDENTIAL_SPEND_INPUT_LIMIT,
+  CONFIDENTIAL_SPEND_OUTPUT_LIMIT,
+  pickPrivateSpendCoins,
+} from "./lib/private-spend-coin-selection";

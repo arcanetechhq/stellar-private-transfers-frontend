@@ -1,3 +1,4 @@
+import type { OnboardingPayload } from "contract";
 import { sealAndEncryptTransaction, type ITransaction } from "@auditable/stellar-audit";
 import type { CoinWithMetadata } from "@/entities/coin";
 import {
@@ -28,6 +29,7 @@ export async function sealEncryptAndSubmitSingleCoinConfidentialTransfer(
     input: RunConfidentialTransferInput;
     poolContract: string;
     tokenContract: string;
+    onboarding?: OnboardingPayload;
   },
 ): Promise<string> {
   const {
@@ -84,6 +86,7 @@ export async function sealEncryptAndSubmitSingleCoinConfidentialTransfer(
     proofHex: prepared.proof_hex,
     publicHex: prepared.public_hex,
     encoded,
+    onboarding: parameters.onboarding,
     networkPassphrase: input.networkPassphrase,
     sorobanRpcUrl: input.sorobanRpcUrl,
   });

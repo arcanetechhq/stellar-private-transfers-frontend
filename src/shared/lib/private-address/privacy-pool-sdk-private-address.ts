@@ -1,7 +1,9 @@
 import { PrivacyPoolSDK } from "@auditable/privacy-pool-zk-sdk";
 import * as privacyPoolSdkExports from "@auditable/privacy-pool-zk-sdk";
 
-type PrivateAddressDecoder = (value: string) => unknown;
+type DecodedPrivateAddress = { x: string; y: string };
+type PrivateAddressDecoder = (value: string) => DecodedPrivateAddress;
+type PrivateAddressEncoder = (decoded: DecodedPrivateAddress) => string;
 type PrivateAddressPublicKeyReader = (value: string) => unknown;
 type PrivateAddressMessageBuilder = (publicKey: string, nonce: string) => string;
 type PrivateAddressGenerator = (signature: string) => string | Promise<string>;
@@ -45,10 +47,28 @@ export function buildPrivateAddressSignMessage(
   )(publicKey, nonce);
 }
 
-export function decodePrivateAddress(value: string): unknown {
+export function decodePrivateAddress(value: string): DecodedPrivateAddress {
   return sdkExport<PrivateAddressDecoder>(
     privateAddressSdkExportName("decode", "Address"),
   )(value);
+}
+
+export function encodePrivateAddress(decoded: DecodedPrivateAddress): string {
+  return sdkExport<PrivateAddressEncoder>(
+    privateAddressSdkExportName("encode", "Address"),
+  )(decoded);
+}
+
+export function encodePrivateAddressFromHexCoordinates(
+  publicKeyXHex: string,
+  publicKeyYHex: string,
+): string {
+  return encodePrivateAddress(
+    Object.fromEntries([
+      ["x", publicKeyXHex],
+      ["y", publicKeyYHex],
+    ]) as DecodedPrivateAddress,
+  );
 }
 
 export function recipientPublicKeysDecimalFromPrivateAddress(

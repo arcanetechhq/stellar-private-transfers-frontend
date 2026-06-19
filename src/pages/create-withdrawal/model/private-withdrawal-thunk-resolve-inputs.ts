@@ -1,6 +1,6 @@
 import type { RootState } from "@/store";
 import {
-  pickCoinsForTransfer,
+  pickPrivateSpendCoins,
   selectCoinItems,
   type CoinWithMetadata,
 } from "@/entities/coin";
@@ -43,9 +43,11 @@ function pickCoinsForPrivateWithdraw(parameters: {
   }
   let pickedCoins: CoinWithMetadata[];
   try {
-    pickedCoins = pickCoinsForTransfer({
+    pickedCoins = pickPrivateSpendCoins({
       finalizedCoins: parameters.finalizedCoins,
-      transferStroops: withdrawStroops,
+      spendStroops: withdrawStroops,
+      insufficientBalanceMessage:
+        "Insufficient private balance for this withdrawal",
     });
   } catch (error: unknown) {
     const message =

@@ -3,6 +3,7 @@ import React from "react";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import type { AssetWithTrustline } from "@/entities/asset";
+import type { RecipientRegistryStatus } from "../model/use-recipient-registry-status";
 import { AssetField } from "./asset-field";
 import { AmountField } from "./amount-field";
 
@@ -63,7 +64,7 @@ function RecipientField(properties: RecipientFieldProperties) {
   );
 }
 
-function PrivacyNotice() {
+function PrivateTransferNotice() {
   const { t: translate } = useTranslation("transfer");
   return (
     <div className="rounded-lg border border-[var(--info-border)] bg-[var(--info-bg)] p-4">
@@ -82,6 +83,36 @@ function PrivacyNotice() {
   );
 }
 
+function OnboardingRecipientNotice() {
+  const { t: translate } = useTranslation("transfer");
+  return (
+    <div className="rounded-lg border border-[var(--warning-border)] bg-[var(--warning-bg)] p-4">
+      <div className="flex gap-3">
+        <Info className="mt-0.5 h-5 w-5 shrink-0 text-[var(--warning)]" />
+        <div>
+          <p className="mb-1 text-sm leading-5 font-semibold text-[var(--warning-foreground)]">
+            {translate("onboardingRecipientNotice")}
+          </p>
+          <p className="text-[13px] leading-[18px] text-[var(--warning-foreground)]">
+            {translate("onboardingRecipientDescription")}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TransferPrivacyNotice({
+  recipientRegistryStatus,
+}: {
+  recipientRegistryStatus: RecipientRegistryStatus;
+}) {
+  if (recipientRegistryStatus === "unregistered") {
+    return <OnboardingRecipientNotice />;
+  }
+  return <PrivateTransferNotice />;
+}
+
 export interface TransferFormProperties {
   selectedToken: AssetWithTrustline | undefined;
   amount: string;
@@ -89,6 +120,7 @@ export interface TransferFormProperties {
   recipient: string;
   onRecipientChange: (value: string) => void;
   recipientErrorKey: "invalidRecipient" | "sameAsSender" | undefined;
+  recipientRegistryStatus: RecipientRegistryStatus;
   onOpenTokenPicker: () => void;
   onOpenContactPicker: () => void;
   onPercentage: (percentage: number) => void;
@@ -100,7 +132,7 @@ function recipientErrorMessageFromKey(
   translate: TFunction<"transfer", undefined>,
 ): string | undefined {
   if (recipientErrorKey === "invalidRecipient") {
-    return translate("invalidRecipientPrivateAddress");
+    return translate("invalidRecipientStellarAddress");
   }
   if (recipientErrorKey === "sameAsSender") {
     return translate("recipientSameAsSender");
@@ -116,6 +148,7 @@ export function TransferForm(properties: TransferFormProperties) {
     recipient,
     onRecipientChange,
     recipientErrorKey,
+    recipientRegistryStatus,
     onOpenTokenPicker,
     onOpenContactPicker,
     onPercentage,
@@ -147,7 +180,9 @@ export function TransferForm(properties: TransferFormProperties) {
             onOpenContactPicker={onOpenContactPicker}
             errorMessage={recipientErrorMessage}
           />
-          <PrivacyNotice />
+          <TransferPrivacyNotice
+            recipientRegistryStatus={recipientRegistryStatus}
+          />
         </div>
       </div>
     </div>

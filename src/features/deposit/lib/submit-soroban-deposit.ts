@@ -1,10 +1,9 @@
 import { Buffer } from "buffer";
-import { Client as PrivacyPoolContractClient } from "contract";
-import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
 import type { CoinData } from "@auditable/privacy-pool-zk-sdk";
 import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
 import { runTtlPreflight } from "@/shared/lib/privacy-pool/ttl-preflight";
 import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
+import { createPoolContractClient } from "@/shared/stellar/create-pool-contract-client";
 
 function hexToBuffer(hex: string): Buffer {
   const clean = hex.startsWith("0x") ? hex.slice(2) : hex;
@@ -38,18 +37,12 @@ export async function submitSorobanDeposit(
   input: SubmitSorobanDepositInput,
 ): Promise<string> {
   const { passphrase, rpcUrl } = resolveSorobanNetwork(input);
-  const contractClient = (await PrivacyPoolContractClient.from({
+  const contractClient = createPoolContractClient({
     contractId: input.contractId,
+    walletPublicKey: input.walletPublicKey,
     networkPassphrase: passphrase,
-    rpcUrl,
-    allowHttp: true,
-    publicKey: input.walletPublicKey,
-    signTransaction: (xdrInput, options) =>
-      StellarWalletsKit.signTransaction(xdrInput, {
-        networkPassphrase: options?.networkPassphrase ?? passphrase,
-        address: options?.address ?? input.walletPublicKey,
-      }),
-  })) as InstanceType<typeof PrivacyPoolContractClient>;
+    sorobanRpcUrl: rpcUrl,
+  });
 
   const merkleTx = await contractClient.get_merkle_root();
   const merkleRootBuffer = merkleTx.result;

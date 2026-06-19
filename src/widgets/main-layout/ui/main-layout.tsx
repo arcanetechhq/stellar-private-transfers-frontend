@@ -1,9 +1,5 @@
 import React from "react";
-import { Outlet, useLocation } from "react-router";
-import { FileText, HelpCircle, History, Home, Info, Users } from "lucide-react";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { i18n } from "@/shared/config/i18n-instance";
+import { Outlet } from "react-router";
 import { MainLayoutHeader } from "./main-layout-header";
 import { MainLayoutSidebar } from "./main-layout-sidebar";
 import { NotificationsModal } from "./notifications-modal";
@@ -12,89 +8,44 @@ import {
   PollAllAssetDeliveries,
 } from "@/features/poll-coin-deliveries";
 import { PollPendingDeposits } from "@/features/poll-deposit";
+import { useMainLayoutModel } from "../lib/use-main-layout-model";
 
 export function MainLayout() {
-  const { t: translate } = useTranslation(["navigation", "common"]);
-  const location = useLocation();
-  const mainReference = useRef<HTMLElement>(null);
-
-  useLayoutEffect(() => {
-    mainReference.current?.scrollTo(0, 0);
-  }, [location.pathname, location.search, location.key]);
-
-  const navigation = useMemo(
-    () => [
-      { name: translate("navigation:home"), icon: Home, href: "/" },
-      {
-        name: translate("navigation:history"),
-        icon: History,
-        href: "/history",
-      },
-      {
-        name: translate("navigation:contacts"),
-        icon: Users,
-        href: "/contacts",
-      },
-    ],
-    [translate],
-  );
-
-  const bottomNavigation = useMemo(
-    () => [
-      { name: translate("navigation:about"), icon: Info, href: "/about" },
-      { name: translate("navigation:help"), icon: HelpCircle, href: "/help" },
-      {
-        name: translate("navigation:privacyPolicy"),
-        icon: FileText,
-        href: "/privacy-policy",
-      },
-    ],
-    [translate],
-  );
-
-  const [languageOpen, setLanguageOpen] = useState(false);
-  const [faucetOpen, setFaucetOpen] = useState(false);
-  const [walletOpen, setWalletOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState(i18n.language ?? "en");
-
-  const handleLanguageChange = (code: string) => {
-    i18n.changeLanguage(code);
-    setCurrentLanguage(code);
-    setLanguageOpen(false);
-  };
+  const model = useMainLayoutModel();
 
   return (
     <div className="flex h-screen" style={{ backgroundColor: "#F4F4F2" }}>
       <MainLayoutSidebar
-        navigation={navigation}
-        bottomNavigation={bottomNavigation}
-        pathname={location.pathname}
-        translate={translate}
+        navigation={model.navigation}
+        bottomNavigation={model.bottomNavigation}
+        pathname={model.location.pathname}
+        translate={model.translate}
       />
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <MainLayoutHeader
-          translate={translate}
-          languageOpen={languageOpen}
-          setLanguageOpen={setLanguageOpen}
-          faucetOpen={faucetOpen}
-          setFaucetOpen={setFaucetOpen}
-          walletOpen={walletOpen}
-          setWalletOpen={setWalletOpen}
-          onOpenNotifications={() => setNotificationsOpen(true)}
-          currentLanguage={currentLanguage}
-          onSelectLanguage={handleLanguageChange}
+          translate={model.translate}
+          languageOpen={model.languageOpen}
+          setLanguageOpen={model.setLanguageOpen}
+          faucetOpen={model.faucetOpen}
+          setFaucetOpen={model.setFaucetOpen}
+          walletOpen={model.walletOpen}
+          setWalletOpen={model.setWalletOpen}
+          onOpenNotifications={() => model.setNotificationsOpen(true)}
+          currentLanguage={model.currentLanguage}
+          onSelectLanguage={model.handleLanguageChange}
         />
 
-        <main ref={mainReference} className="flex-1 overflow-auto">
-          <Outlet key={`${location.pathname}:${location.key}`} />
+        <main ref={model.mainReference} className="flex-1 overflow-auto">
+          <Outlet
+            key={`${model.location.pathname}:${model.location.key}`}
+          />
         </main>
       </div>
 
       <NotificationsModal
-        isOpen={notificationsOpen}
-        onClose={() => setNotificationsOpen(false)}
+        isOpen={model.notificationsOpen}
+        onClose={() => model.setNotificationsOpen(false)}
       />
 
       <EnsureMissingPrivateAddressScalars />

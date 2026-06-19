@@ -1,7 +1,7 @@
 import { Buffer } from "buffer";
-import { Client as PrivacyPoolContractClient } from "contract";
-import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
+import type { OnboardingPayload } from "contract";
 import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
+import { createPoolContractClient } from "@/shared/stellar/create-pool-contract-client";
 import { runTtlPreflight } from "./ttl-preflight";
 
 function hexToBuffer(hex: string): Buffer {
@@ -15,6 +15,7 @@ export interface SubmitSorobanConfidentialTransferInput {
   proofHex: string;
   publicHex: string;
   encoded: Uint8Array;
+  onboarding?: OnboardingPayload;
   networkPassphrase?: string;
   sorobanRpcUrl?: string;
 }
@@ -34,24 +35,19 @@ export async function submitSorobanConfidentialTransfer(
   input: SubmitSorobanConfidentialTransferInput,
 ): Promise<string> {
   const { passphrase, rpcUrl } = resolveNetwork(input);
-  const contractClient = (await PrivacyPoolContractClient.from({
+  const contractClient = createPoolContractClient({
     contractId: input.contractId,
+    walletPublicKey: input.walletPublicKey,
     networkPassphrase: passphrase,
-    rpcUrl,
-    allowHttp: true,
-    publicKey: input.walletPublicKey,
-    signTransaction: (xdrInput, options) =>
-      StellarWalletsKit.signTransaction(xdrInput, {
-        networkPassphrase: options?.networkPassphrase ?? passphrase,
-        address: options?.address ?? input.walletPublicKey,
-      }),
-  })) as InstanceType<typeof PrivacyPoolContractClient>;
+    sorobanRpcUrl: rpcUrl,
+  });
 
-  const assembledTransaction = await contractClient.transact({
+  const assembledTransaction = await contractClient.transact_with_onboarding({
     from: input.walletPublicKey,
     proof_bytes: hexToBuffer(input.proofHex),
     pub_signals_bytes: hexToBuffer(input.publicHex),
     encoded: Buffer.from(input.encoded),
+    onboarding: input.onboarding,
   });
 
   await runTtlPreflight(assembledTransaction);

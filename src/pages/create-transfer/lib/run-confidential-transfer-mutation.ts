@@ -1,13 +1,20 @@
 import { fetchAndMergeMerkleState } from "@/shared/lib/privacy-pool/fetch-contract-merkle";
 import { displayAmountToStroops } from "@/shared/lib/stellar/stroops";
-import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
+import {
+  getRequiredPrivacyPoolContractId,
+  getRequiredPrivateAddressRegistryContractId,
+} from "@/shared/stellar/stellar-network-environment";
 import { resolveTokenContractId } from "@/shared/stellar/resolve-token-contract-id";
-import { privateAddressesEqual } from "./confidential-transfer-audit-helpers";
+import {
+  generateTemporaryRecipientPrivateAddress,
+  type TemporaryRecipientKeyMaterial,
+} from "@/shared/lib/registry/build-onboarding-payload";
+import { lookupRecipientPrivateAddress } from "@/shared/lib/registry/registry-lookup";
 import type {
   RunConfidentialTransferInput,
   RunConfidentialTransferResult,
 } from "./confidential-transfer-mutation-types";
-import { pickCoinsForTransfer } from "@/entities/coin";
+import { pickPrivateSpendCoins } from "@/entities/coin";
 import { runDualCoinConfidentialBranch } from "./run-dual-coin-confidential-branch";
 import { runSingleCoinConfidentialBranch } from "./run-single-coin-confidential-branch";
 
@@ -16,20 +23,47 @@ export type {
   RunConfidentialTransferResult,
 } from "./confidential-transfer-mutation-types";
 
+export type RecipientTransferTarget = {
+  recipientPrivateAddressStpl1: string;
+  temporaryKeyMaterial?: TemporaryRecipientKeyMaterial;
+};
+
+async function resolveRecipientTransferTarget(parameters: {
+  recipientStellarAddress: string;
+  walletPublicKey: string;
+  networkPassphrase: string;
+  sorobanRpcUrl: string;
+}): Promise<RecipientTransferTarget> {
+  const registryContractId = getRequiredPrivateAddressRegistryContractId();
+  const lookup = await lookupRecipientPrivateAddress({
+    registryContractId,
+    recipientStellarAddress: parameters.recipientStellarAddress,
+    walletPublicKey: parameters.walletPublicKey,
+    networkPassphrase: parameters.networkPassphrase,
+    sorobanRpcUrl: parameters.sorobanRpcUrl,
+  });
+  if (lookup.status === "registered") {
+    return { recipientPrivateAddressStpl1: lookup.privateAddressStpl1 };
+  }
+  const temporaryKeyMaterial = await generateTemporaryRecipientPrivateAddress();
+  return {
+    recipientPrivateAddressStpl1: temporaryKeyMaterial.temporaryPrivateAddressStpl1,
+    temporaryKeyMaterial,
+  };
+}
+
 export async function runConfidentialTransferMutation(
   input: RunConfidentialTransferInput,
 ): Promise<RunConfidentialTransferResult> {
   const poolContract = getRequiredPrivacyPoolContractId();
   const tokenContract = resolveTokenContractId(input.tokenContractRaw);
-  const recipientTrim = input.recipientPrivateAddressStpl1.trim();
+  const recipientStellarAddress = input.recipientStellarAddress.trim();
   const senderTrim = input.senderPrivateAddress.trim();
-  if (privateAddressesEqual(recipientTrim, senderTrim)) {
-    throw new Error("Recipient must differ from sender private address");
-  }
   const transferStroops = displayAmountToStroops(input.amountDisplay);
-  const picked = pickCoinsForTransfer({
+  const picked = pickPrivateSpendCoins({
     finalizedCoins: input.finalizedCoinsForSenderAndAsset,
-    transferStroops,
+    spendStroops: transferStroops,
+    insufficientBalanceMessage: "Insufficient private balance for this transfer",
   });
 
   const { commitments } = await fetchAndMergeMerkleState({
@@ -40,8 +74,20 @@ export async function runConfidentialTransferMutation(
   });
   const state = { commitments };
 
+  const recipientTarget = await resolveRecipientTransferTarget({
+    recipientStellarAddress,
+    walletPublicKey: input.walletPublicKey,
+    networkPassphrase: input.networkPassphrase,
+    sorobanRpcUrl: input.sorobanRpcUrl,
+  });
+  const recipientTrim = recipientTarget.recipientPrivateAddressStpl1;
+
   const branchParameters = {
-    input,
+    input: {
+      ...input,
+      recipientStellarAddress,
+      recipientPrivateAddressStpl1: recipientTrim,
+    },
     poolContract,
     transferStroops,
     commitments,
@@ -51,6 +97,7 @@ export async function runConfidentialTransferMutation(
     senderTrim,
     tokenContract,
     picked,
+    recipientTarget,
   };
 
   if (picked.length === 1) {

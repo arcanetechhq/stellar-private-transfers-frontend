@@ -12,6 +12,7 @@ export type MainLayoutNavItem = {
   name: string;
   icon: LucideIcon;
   href: string;
+  badgeCount?: number;
 };
 
 type MainLayoutSidebarProperties = {
@@ -55,7 +56,15 @@ function NavLinkRow({
         className="h-4 w-4"
         style={{ color: isActive ? "#1B1D22" : "#9A9DA3" }}
       />
-      {item.name}
+      <span className="flex-1">{item.name}</span>
+      {item.badgeCount && item.badgeCount > 0 ? (
+        <span
+          className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
+          style={{ backgroundColor: "#111827", color: "#FFFFFF" }}
+        >
+          {item.badgeCount}
+        </span>
+      ) : undefined}
     </Link>
   );
 }

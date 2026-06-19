@@ -1,10 +1,11 @@
 {
   "name": "contract",
   "version": "0.0.1",
-  "description": "Generated TypeScript bindings for contract Stellar contract",
+  "description": "Generated TypeScript bindings for privacy pool Stellar contract",
   "type": "module",
+  "exports": "./dist/index.js",
+  "typings": "dist/index.d.ts",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc"
   },

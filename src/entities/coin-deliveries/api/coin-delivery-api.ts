@@ -1,7 +1,11 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
+const environmentRecord = (
+  import.meta as ImportMeta & { env: Record<string, string | undefined> }
+).env;
+
 export interface PostCoinDeliveryBody {
-  recipientPrivateAddress: string;
+  recipientStealthAddress: string;
   assetId: string;
   ciphertextBase64: string;
   ephemeralKey: string;
@@ -47,14 +51,25 @@ export interface FetchIncomingParameters {
 export const coinDeliveryApi = createApi({
   reducerPath: "coinDeliveryApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_BASE_URL as string,
+    baseUrl: environmentRecord.VITE_API_BASE_URL,
   }),
   endpoints: (builder) => ({
-    getIncomingDeliveries: builder.query<IncomingListResponse, FetchIncomingParameters>({
-      query: ({ privateAddress, assetId, bloomM, bloomK, bloomBitsBase64, page, limit }) => ({
+    getIncomingDeliveries: builder.query<
+      IncomingListResponse,
+      FetchIncomingParameters
+    >({
+      query: ({
+        privateAddress,
+        assetId,
+        bloomM,
+        bloomK,
+        bloomBitsBase64,
+        page,
+        limit,
+      }) => ({
         url: "/coin-deliveries/incoming",
         params: {
-          privateAddress,
+          stealthAddress: privateAddress,
           assetId,
           bloomM,
           bloomK,
@@ -64,7 +79,10 @@ export const coinDeliveryApi = createApi({
         },
       }),
     }),
-    postCoinDelivery: builder.mutation<PostCoinDeliveryResponse, PostCoinDeliveryBody>({
+    postCoinDelivery: builder.mutation<
+      PostCoinDeliveryResponse,
+      PostCoinDeliveryBody
+    >({
       query: (body) => ({
         url: "/coin-deliveries",
         method: "POST",

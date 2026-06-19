@@ -34,6 +34,7 @@ import {
   resetSeenTags,
   saveSeenTags,
 } from "@/entities/coin-deliveries";
+import { pendingClaimsApi } from "@/entities/pending-claims";
 import {
   coinReducer,
   hydrateCoinState,
@@ -55,11 +56,13 @@ export const store = configureStore({
     assetUiOperations: assetUiOperationsReducer,
     [assetApi.reducerPath]: assetApi.reducer,
     [coinDeliveryApi.reducerPath]: coinDeliveryApi.reducer,
+    [pendingClaimsApi.reducerPath]: pendingClaimsApi.reducer,
   },
   middleware: (getDefaultMiddleware) => [
     ...getDefaultMiddleware(),
     assetApi.middleware,
     coinDeliveryApi.middleware,
+    pendingClaimsApi.middleware,
   ],
   preloadedState: loadedContact ? { contact: loadedContact } : undefined,
 });

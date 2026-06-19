@@ -9,6 +9,7 @@ import { TransferSuccess } from "@/pages/transfer-success";
 import { TransactionDetails } from "@/pages/transaction-details";
 import { TransactionHistory } from "@/pages/transaction-history";
 import { Contacts } from "@/pages/contacts";
+import { PendingClaimsPage } from "@/pages/pending-claims";
 import { Help } from "@/pages/help";
 import { About } from "@/pages/about";
 import { PrivacyPolicy } from "@/pages/privacy-policy";
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
       { path: "transaction/:id", Component: TransactionDetails },
       { path: "history", Component: TransactionHistory },
       { path: "contacts", Component: Contacts },
+      { path: "pending-claims", Component: PendingClaimsPage },
       { path: "help", Component: Help },
       { path: "about", Component: About },
       { path: "privacy-policy", Component: PrivacyPolicy },

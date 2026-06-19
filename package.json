@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
-    "prebuild": "cd generated/contract && npm install && npm run build",
+    "prebuild": "cd generated/contract && npm install && npm run build && cd ../registry && npm install && npm run build",
     "dev": "vite",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
@@ -78,7 +78,8 @@
     "sonner": "2.0.3",
     "tailwind-merge": "3.2.0",
     "tw-animate-css": "1.3.8",
-    "vaul": "1.1.2"
+    "vaul": "1.1.2",
+    "registry-contract": "file:generated/registry"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

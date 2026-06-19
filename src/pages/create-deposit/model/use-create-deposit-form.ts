@@ -6,11 +6,7 @@ import {
   useAssetsWithTrustlines,
   type AssetWithTrustline,
 } from "@/entities/asset";
-import {
-  selectDefaultNonce,
-  selectScalarByNonce,
-  selectPrivateAddressByNonce,
-} from "@/entities/private-address";
+import { useWalletPrivateAddress } from "@/features/register-private-address";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import { NETWORK_FEE } from "./create-deposit";
 import { resolveSelectedDepositAsset } from "./resolve-selected-deposit-asset";
@@ -28,6 +24,8 @@ export function useCreateDepositForm({
   const [searchParameters] = useSearchParams();
   const assetIdFromUrl = searchParameters.get("assetId");
   const publicKey = useAppSelector(selectWalletPublicKey);
+  const { privateAddressStpl1, defaultNonce, actionsEnabled } =
+    useWalletPrivateAddress();
   const { assets } = useAssetsWithTrustlines(publicKey);
 
   const [showTokenPicker, setShowTokenPicker] = useState(false);
@@ -35,15 +33,8 @@ export function useCreateDepositForm({
     AssetWithTrustline | undefined
   >();
   const [amount, setAmount] = useState("");
-  const selectedPrivateAddressNonce = useAppSelector(selectDefaultNonce);
-  const selectedPrivateAddress = useAppSelector(
-    (state) =>
-      selectPrivateAddressByNonce(selectedPrivateAddressNonce)(state)?.privateAddress ?? "",
-  );
-
-  const recipientScalar = useAppSelector(
-    selectScalarByNonce(selectedPrivateAddressNonce ?? ""),
-  );
+  const selectedPrivateAddressNonce = defaultNonce;
+  const selectedPrivateAddress = privateAddressStpl1;
 
   const selectedAsset = resolveSelectedDepositAsset({
     selectedToken,
@@ -78,10 +69,10 @@ export function useCreateDepositForm({
       return false;
     }
   })();
-  const hasPrivateAddressScalar = Boolean(recipientScalar?.trim());
-  const hasPrivateAddress = Boolean(selectedPrivateAddress.trim());
+  const hasPrivateAddressScalar = true;
+  const hasPrivateAddress = true;
 
-  const canSubmit = computeDepositCanSubmit({
+  const canSubmit = actionsEnabled && computeDepositCanSubmit({
     selectedAsset,
     amount,
     numericAmount,

@@ -30,3 +30,15 @@ export function getRequiredPrivacyPoolContractId(): string {
   }
   return normalizeSorobanContractId(raw);
 }
+
+export function getRequiredPrivateAddressRegistryContractId(): string {
+  const raw = (
+    import.meta.env.VITE_PRIVATE_ADDRESS_REGISTRY_CONTRACT as string | undefined
+  )?.trim();
+  if (!raw) {
+    throw new Error(
+      "Missing VITE_PRIVATE_ADDRESS_REGISTRY_CONTRACT environment variable",
+    );
+  }
+  return normalizeSorobanContractId(raw);
+}

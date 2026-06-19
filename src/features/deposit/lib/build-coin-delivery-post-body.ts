@@ -49,7 +49,7 @@ export async function buildCoinDeliveryPostBody(
   );
   const shared = sdk.sharedSecretFromDepositorPreimage({
     randomNonceScalar: depositScalarHex,
-    recipientPrivateAddress,
+    recipientStealthAddress: recipientPrivateAddress,
   });
 
   const payload: CoinDeliveryPayloadV1 = {
@@ -71,7 +71,7 @@ export async function buildCoinDeliveryPostBody(
   const ephemeralKey = encodeDecodedEphemeralKey(point);
 
   return {
-    recipientPrivateAddress: input.recipientPrivateAddressStpl1.trim(),
+    recipientStealthAddress: input.recipientPrivateAddressStpl1.trim(),
     assetId: input.assetId,
     ciphertextBase64: uint8ToBase64(cipherBytes),
     ephemeralKey,

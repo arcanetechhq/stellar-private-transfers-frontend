@@ -75,9 +75,23 @@ Extra material (`references/`, `templates/`) sits inside each skill folder.
 - When asked to fix lint or build issues without changing tooling, prefer edits in application code over changes to `eslint.config.ts` or other ESLint config.
 - For new or expanded UI strings, add English entries under `src/shared/config/locales/`; add other languages only when the user explicitly asks.
 - When implementing an attached Cursor plan, do not edit the plan file; follow existing todos without recreating them.
+- In user-facing UI, show Stellar `G...` public addresses instead of private/`stpl1` addresses; private addresses stay internal for registry registration and ZK flows only.
+- In client code, use private-address naming; do not retain `stealth` terminology or compatibility aliases.
+- Global wallet registry/private-address state belongs in `WalletPrivateAddressProvider` (`app.tsx`); fetch registry status on connect/page load, not on wallet dropdown open.
+- Home Send/Deposit/Withdraw stay disabled until registry status is `active`; show Register account CTA while `checking` or `unregistered`.
+- Transaction flows must reuse wallet private address and scalar from the provider (`ensureWalletPrivateAddress` / `ensureWalletScalar`), not regenerate or re-sign unnecessarily.
 
 ## Learned Workspace Facts
 
 - Local Node version is pinned in **`.nvmrc`** at the repo root; use it when switching versions for commands in this project.
 - **`index.html`** uses the product title **Arcane private payments** (not generic Stellar wording).
 - For privacy-pool prove transaction inputs, `tokenAddress` should come from the asset API field `clientContract` (not from a token symbol/code field).
+- Contacts store `stellarAddress` (validated Stellar G-address); transfers resolve recipients via on-chain registry lookup.
+- Soroban bindings: pool client in `generated/contract`, registry client in `generated/registry` (`registry-contract` package alias).
+- Required contract env vars: `VITE_POOL_CONTRACT`, `VITE_PRIVATE_ADDRESS_REGISTRY_CONTRACT`.
+- Pending claims UI uses `entities/pending-claims` RTK Query against backend `/api/pending-claims`.
+- `WalletPrivateAddressProvider` centralizes registry status, wallet `stpl1`/scalar, and `actionsEnabled`; consumers include overview actions, transaction flows, `RegistryStatusBadge`, and coin-delivery polling (incoming poll skips until `active`).
+- Unregistered-recipient transfers use temporary recipient scalar + pool `transact_with_onboarding`; submit passes `senderPrivKeyScalarHex` from `ensureWalletScalar()` (not `selectScalarByPrivateAddress` alone); UI warns via recipient registry lookup.
+- Registry `get_private_address` simulate result may be void/null, `{ tag: "None" }`, `{ tag: "Some", values: [record] }`, or a direct `PrivateAddressRecord` struct — parse all forms.
+- `@stellar/stellar-sdk` contract bindings: SDK `Option<T>` serializes as `T | undefined` (not `{ tag: "None" }`); contract UDT void unions use `{ tag: "None" }` without a `values` field.
+- Parameterized Redux selectors (e.g. aggregates by private address) should use RTK `createSelector` with `(state, param)` signature, not factory functions returning new selectors per call.

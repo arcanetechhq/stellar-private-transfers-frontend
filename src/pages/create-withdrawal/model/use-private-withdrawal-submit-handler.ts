@@ -10,6 +10,7 @@ import type { AppDispatch } from "@/store";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
+import { assertWithdrawalDestinationCanReceiveAsset } from "../lib/withdrawal-destination-trustline";
 
 type PrivateWithdrawalSubmit = (payload: {
   senderPrivateAddress: string;
@@ -27,6 +28,7 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
   submit: PrivateWithdrawalSubmit;
   navigate: NavigateFunction;
   senderPrivateAddress: string;
+  ensureSenderScalar: () => Promise<string>;
   destinationTrim: string;
   numericAmount: number;
 }) {
@@ -41,6 +43,11 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
     parameters.setIsSubmitting(true);
     setSubmitError(undefined);
     try {
+      await assertWithdrawalDestinationCanReceiveAsset({
+        asset: parameters.selectedAsset,
+        destinationAddress: parameters.destinationTrim,
+      });
+      await parameters.ensureSenderScalar();
       const result = await parameters.submit({
         senderPrivateAddress: parameters.senderPrivateAddress,
         assetId: parameters.selectedAsset.assetId,

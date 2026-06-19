@@ -20,16 +20,7 @@ export function ManagePrivateAddressesWidget({
 
   if (variant === "compact") {
     return (
-      <ManagePrivateAddressesCompact
-        translate={model.translate}
-        byNonce={model.byNonce}
-        defaultNonce={model.defaultNonce}
-        nonces={model.nonces}
-        create={model.create}
-        status={model.status}
-        errorKind={model.errorKind}
-        reset={model.reset}
-      />
+      <ManagePrivateAddressesCompact />
     );
   }
 

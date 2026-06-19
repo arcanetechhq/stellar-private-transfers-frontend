@@ -12,8 +12,8 @@ export function AddContactModal(properties: AddContactModalProperties) {
     translate,
     name,
     setName,
-    privateAddress,
-    setPrivateAddress,
+    stellarAddress,
+    setStellarAddress,
     error,
     handleAdd,
   } = useAddContactForm(onClose);
@@ -45,9 +45,9 @@ export function AddContactModal(properties: AddContactModalProperties) {
         </div>
         <ContactTextField label={translate("name")} value={name} onChange={setName} />
         <ContactTextField
-          label={translate("privateAddress")}
-          value={privateAddress}
-          onChange={setPrivateAddress}
+          label={translate("stellarAddress")}
+          value={stellarAddress}
+          onChange={setStellarAddress}
         />
         {error ? (
           <p className="mb-3 text-sm text-red-600">{error}</p>

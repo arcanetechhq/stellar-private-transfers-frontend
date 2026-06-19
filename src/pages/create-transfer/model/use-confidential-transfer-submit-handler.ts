@@ -1,4 +1,3 @@
-import { isRejectedWithValue } from "@reduxjs/toolkit";
 import {
   useState,
   type Dispatch,
@@ -8,12 +7,15 @@ import {
 import type { NavigateFunction } from "react-router";
 import type { AppDispatch } from "@/store";
 import type { AssetWithTrustline } from "@/entities/asset";
-import { addTransaction, buildUserTransaction } from "@/entities/transaction";
-import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
+import {
+  readConfidentialTransferSubmitError,
+  runConfidentialTransferSubmitFlow,
+} from "./confidential-transfer-submit-flow";
 
 type ConfidentialTransferSubmit = (payload: {
   senderPrivateAddress: string;
-  recipientPrivateAddressStpl1: string;
+  senderPrivKeyScalarHex: string;
+  recipientStellarAddress: string;
   assetId: string;
   tokenContractRaw: string;
   amountDisplay: number;
@@ -23,10 +25,12 @@ export function useConfidentialTransferSubmitHandler(parameters: {
   dispatch: AppDispatch;
   canSubmit: boolean;
   setIsSubmitting: Dispatch<SetStateAction<boolean>>;
+  setIsPreparingWallet: Dispatch<SetStateAction<boolean>>;
   selectedAsset: AssetWithTrustline | undefined;
   submit: ConfidentialTransferSubmit;
   navigate: NavigateFunction;
-  senderPrivateAddress: string;
+  ensureWalletPrivateAddress: () => Promise<string>;
+  ensureWalletScalar: () => Promise<string>;
   recipientTrim: string;
   numericAmount: number;
 }) {
@@ -34,53 +38,34 @@ export function useConfidentialTransferSubmitHandler(parameters: {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!parameters.canSubmit) {
+    if (!parameters.selectedAsset) {
       return;
     }
-    const poolContract = getRequiredPrivacyPoolContractId();
-    parameters.setIsSubmitting(true);
+    if (!parameters.canSubmit) {
+      setSubmitError("Complete all fields before sending");
+      return;
+    }
+    parameters.setIsPreparingWallet(true);
     setSubmitError(undefined);
     try {
-      const result = await parameters.submit({
-        senderPrivateAddress: parameters.senderPrivateAddress,
-        recipientPrivateAddressStpl1: parameters.recipientTrim,
-        assetId: parameters.selectedAsset.assetId,
-        tokenContractRaw: parameters.selectedAsset.clientContract ?? "",
-        amountDisplay: parameters.numericAmount,
-      });
-      parameters.dispatch(
-        addTransaction(
-          buildUserTransaction({
-            txId: result.txId,
-            type: "sent",
-            assetId: parameters.selectedAsset.assetId,
-            amount: parameters.numericAmount,
-            counterparty: parameters.recipientTrim,
-            senderPrivateAddress: parameters.senderPrivateAddress.trim(),
-          }),
-        ),
-      );
-      parameters.navigate(`/transfer-success/${encodeURIComponent(result.txId)}`, {
-        state: {
-          txId: result.txId,
-          amount: parameters.numericAmount,
-          assetId: parameters.selectedAsset.assetId,
-          poolContract,
-          coinDeliveryWarning: result.coinDeliveryWarning,
+      await runConfidentialTransferSubmitFlow({
+        dispatch: parameters.dispatch,
+        navigate: parameters.navigate,
+        ensureWalletPrivateAddress: parameters.ensureWalletPrivateAddress,
+        ensureWalletScalar: parameters.ensureWalletScalar,
+        submit: parameters.submit,
+        selectedAsset: parameters.selectedAsset,
+        recipientTrim: parameters.recipientTrim,
+        numericAmount: parameters.numericAmount,
+        onWalletReady: () => {
+          parameters.setIsPreparingWallet(false);
+          parameters.setIsSubmitting(true);
         },
       });
     } catch (error: unknown) {
-      if (isRejectedWithValue(error)) {
-        const payload = error.payload;
-        setSubmitError(
-          typeof payload === "string" ? payload : "Transfer failed",
-        );
-      } else if (error instanceof Error) {
-        setSubmitError(error.message);
-      } else {
-        setSubmitError("Transfer failed");
-      }
+      setSubmitError(readConfidentialTransferSubmitError(error));
     } finally {
+      parameters.setIsPreparingWallet(false);
       parameters.setIsSubmitting(false);
     }
   };

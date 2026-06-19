@@ -1,8 +1,10 @@
 import { Send } from "lucide-react";
 import React from "react";
+import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
-import { shortenPrivateAddressForDisplay } from "@/shared/lib/private-address/shorten-private-address-for-display";
+import { shortenStellarAddress } from "@/shared/lib/shorten-stellar-address";
 import type { AssetWithTrustline } from "@/entities/asset";
+import type { RecipientRegistryStatus } from "../model/use-recipient-registry-status";
 import { NETWORK_FEE } from "../model/create-transfer";
 
 interface SummaryDetailsProperties {
@@ -19,7 +21,7 @@ function SummaryDetails({
   const { t: translate } = useTranslation("transfer");
   const ticker = selectedToken?.assetId.toUpperCase() ?? "—";
   const displayRecipient = recipient
-    ? shortenPrivateAddressForDisplay(recipient.trim())
+    ? shortenStellarAddress(recipient.trim())
     : "—";
 
   return (
@@ -65,6 +67,17 @@ interface SummaryFooterProperties {
   totalAmount: number;
   canSubmit: boolean;
   isSubmitting: boolean;
+  recipientRegistryStatus: RecipientRegistryStatus;
+}
+
+function transferTypeLabel(
+  recipientRegistryStatus: RecipientRegistryStatus,
+  translate: TFunction<"transfer", undefined>,
+): string {
+  if (recipientRegistryStatus === "unregistered") {
+    return translate("onboardingTransfer");
+  }
+  return translate("privateTransfer");
 }
 
 function SummaryFooter({
@@ -72,6 +85,7 @@ function SummaryFooter({
   totalAmount,
   canSubmit,
   isSubmitting,
+  recipientRegistryStatus,
 }: SummaryFooterProperties) {
   const { t: translate } = useTranslation("transfer");
   const ticker = selectedToken?.assetId.toUpperCase() ?? "—";
@@ -96,7 +110,7 @@ function SummaryFooter({
             {translate("type")}
           </p>
           <p className="text-[13px] leading-[18px] font-semibold text-[var(--foreground-primary)]">
-            {translate("privateTransfer")}
+            {transferTypeLabel(recipientRegistryStatus, translate)}
           </p>
         </div>
       </div>
@@ -120,6 +134,7 @@ export interface TransferSummaryProperties {
   canSubmit: boolean;
   isSubmitting: boolean;
   submitError: string | undefined;
+  recipientRegistryStatus: RecipientRegistryStatus;
 }
 
 export function TransferSummary({
@@ -130,6 +145,7 @@ export function TransferSummary({
   canSubmit,
   isSubmitting,
   submitError,
+  recipientRegistryStatus,
 }: TransferSummaryProperties) {
   const { t: translate } = useTranslation("transfer");
   return (
@@ -156,6 +172,7 @@ export function TransferSummary({
           totalAmount={totalAmount}
           canSubmit={canSubmit}
           isSubmitting={isSubmitting}
+          recipientRegistryStatus={recipientRegistryStatus}
         />
       </div>
     </div>

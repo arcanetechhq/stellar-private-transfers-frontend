@@ -32,6 +32,14 @@ export async function buildRecipientAndOptionalChangeDeposits(parameters: {
         precommitementHex: string;
       }
     | undefined;
+  if (parameters.changeStroops <= ZERO_STROOPS) {
+    const paddingSlot = await privacyPoolService.buildAlignedDepositSlot({
+      privateAddressStpl1: parameters.recipientPrivateAddressStpl1.trim(),
+      amountStroops: ZERO_STROOPS,
+      tokenAddress: parameters.tokenAddress,
+    });
+    return { recipientSlot, deposits: [recipientSlot.deposit, paddingSlot.deposit] };
+  }
   if (parameters.changeStroops > ZERO_STROOPS) {
     const changeSlot = await privacyPoolService.buildAlignedDepositSlot({
       privateAddressStpl1: parameters.selfPrivateAddressStpl1ForChange!.trim(),

@@ -1,10 +1,9 @@
-import { type FormEvent, useCallback } from "react";
+import { type FormEvent, useCallback, useState } from "react";
 import { useNavigate } from "react-router";
-import { useAppDispatch, useAppSelector } from "@/store";
-import { useCreatePrivateAddress } from "@/features/create-private-address";
+import { useAppDispatch } from "@/store";
+import { useWalletPrivateAddress } from "@/features/register-private-address";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";
-import { selectWalletPublicKey } from "@/entities/wallet";
 import { useDepositTransaction } from "@/features/deposit";
 import { useCreateDepositForm } from "./use-create-deposit-form";
 
@@ -69,58 +68,52 @@ async function submitDepositSuccessFlow({
 export function useCreateDeposit() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const publicKey = useAppSelector(selectWalletPublicKey);
-  const { create: createPrivateAddress, status: createPrivateAddressStatus } =
-    useCreatePrivateAddress(publicKey);
+  const { ensureWalletPrivateAddress, ensureWalletScalar } =
+    useWalletPrivateAddress();
   const {
     mutateAsync: submitDeposit,
     isPending: isSubmitting,
     error: submitError,
   } = useDepositTransaction();
   const form = useCreateDepositForm({ isSubmitting });
-  const shouldGeneratePrivateAddress =
-    !form.destinationPrivateAddressPreview.trim();
-  const isGeneratingPrivateAddress = createPrivateAddressStatus === "pending";
-  const isActionPending = isSubmitting || isGeneratingPrivateAddress;
-  const canSubmitAction = shouldGeneratePrivateAddress
-    ? Boolean(publicKey?.trim()) && !isActionPending
-    : form.canSubmit;
+  const [isPreparingWallet, setIsPreparingWallet] = useState(false);
+  const isActionPending = isSubmitting || isPreparingWallet;
 
   const handleSubmit = useCallback(async (event: FormEvent) => {
     event.preventDefault();
-    if (shouldGeneratePrivateAddress) {
-      if (form.selectedPrivateAddressNonce?.trim()) {
-        await createPrivateAddress(form.selectedPrivateAddressNonce);
+    if (!form.selectedAsset || isActionPending) {
+      return;
+    }
+    setIsPreparingWallet(true);
+    try {
+      const privateAddress = await ensureWalletPrivateAddress();
+      await ensureWalletScalar();
+      if (!form.canSubmit) {
         return;
       }
-      await createPrivateAddress();
-      return;
-    }
-    if (!form.canSubmit || !form.selectedAsset) {
-      return;
-    }
-    try {
       await submitDepositSuccessFlow({
         submitDeposit,
         dispatch,
         navigate,
         selectedAsset: form.selectedAsset,
         numericAmount: form.numericAmount,
-        destinationPrivateAddressPreview: form.destinationPrivateAddressPreview,
+        destinationPrivateAddressPreview: privateAddress,
       });
     } catch {
       return;
+    } finally {
+      setIsPreparingWallet(false);
     }
   }, [
-    createPrivateAddress,
     dispatch,
+    ensureWalletPrivateAddress,
+    ensureWalletScalar,
     form.canSubmit,
     form.destinationPrivateAddressPreview,
     form.numericAmount,
     form.selectedAsset,
-    form.selectedPrivateAddressNonce,
+    isActionPending,
     navigate,
-    shouldGeneratePrivateAddress,
     submitDeposit,
   ]);
 
@@ -138,11 +131,11 @@ export function useCreateDeposit() {
     networkFee: form.networkFee,
     receivedAmount: form.receivedAmount,
     handleSubmit,
-    canSubmit: canSubmitAction,
+    canSubmit: form.canSubmit && !isActionPending,
     selectedPrivateAddressNonce: form.selectedPrivateAddressNonce,
     destinationPrivateAddressPreview: form.destinationPrivateAddressPreview,
     isSubmitting: isActionPending,
-    shouldGeneratePrivateAddress,
+    shouldGeneratePrivateAddress: false,
     submitErrorMessage: submitError?.message,
   };
 }

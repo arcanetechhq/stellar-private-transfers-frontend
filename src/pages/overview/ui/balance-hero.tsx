@@ -1,7 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { Send, Download, ArrowUpFromLine } from "lucide-react";
+import { Loader2, Send, Download, ArrowUpFromLine, UserPlus } from "lucide-react";
+import {
+  RegistryRegistrationModal,
+  useWalletPrivateAddress,
+} from "@/features/register-private-address";
 
 const CARD_STYLE: React.CSSProperties = {
   border: "1px solid #E7EAF0",
@@ -44,7 +48,9 @@ const PRIMARY_BUTTON_STYLE: React.CSSProperties = {
   color: "#FFFFFF",
   borderRadius: "12px",
   height: "44px",
-  width: "145px",
+  minWidth: "145px",
+  paddingLeft: "20px",
+  paddingRight: "20px",
 };
 
 const SECONDARY_BUTTON_STYLE: React.CSSProperties = {
@@ -57,6 +63,11 @@ const SECONDARY_BUTTON_STYLE: React.CSSProperties = {
   borderRadius: "12px",
   height: "44px",
   width: "145px",
+};
+
+const DISABLED_PRIMARY_BUTTON_STYLE: React.CSSProperties = {
+  cursor: "not-allowed",
+  opacity: 0.45,
 };
 
 type ActionButtonVariant = "primary" | "secondary";
@@ -94,6 +105,7 @@ function ActionButton(properties: ActionButtonProperties) {
   return (
     <Link to={to}>
       <button
+        type="button"
         className="flex items-center justify-center gap-2 transition-all"
         style={style}
         onMouseEnter={handleMouseEnter}
@@ -106,6 +118,58 @@ function ActionButton(properties: ActionButtonProperties) {
   );
 }
 
+interface RegisterAccountButtonProperties {
+  label: string;
+  disabled: boolean;
+  isLoading: boolean;
+  onClick: () => void;
+}
+
+function RegisterAccountButton({
+  label,
+  disabled,
+  isLoading,
+  onClick,
+}: RegisterAccountButtonProperties) {
+  const style = {
+    ...PRIMARY_BUTTON_STYLE,
+    ...(disabled ? DISABLED_PRIMARY_BUTTON_STYLE : undefined),
+  };
+
+  function handleMouseEnter(event: React.MouseEvent<HTMLButtonElement>) {
+    if (disabled) {
+      return;
+    }
+    event.currentTarget.style.backgroundColor = "#1F2937";
+  }
+
+  function handleMouseLeave(event: React.MouseEvent<HTMLButtonElement>) {
+    if (disabled) {
+      return;
+    }
+    event.currentTarget.style.backgroundColor = "#111827";
+  }
+
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      className="inline-flex items-center justify-center gap-2 transition-all"
+      style={style}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={onClick}
+    >
+      {isLoading ? (
+        <Loader2 className="h-4 w-4 animate-spin" />
+      ) : (
+        <UserPlus className="h-4 w-4" />
+      )}
+      {label}
+    </button>
+  );
+}
+
 interface BalanceHeroProperties {
   balance: string;
   assetCount: number;
@@ -113,13 +177,24 @@ interface BalanceHeroProperties {
 
 export function BalanceHero(properties: BalanceHeroProperties) {
   const { balance, assetCount } = properties;
-  const { t: translate } = useTranslation("overview");
+  const { t: translateOverview } = useTranslation("overview");
+  const {
+    actionsEnabled,
+    isRegistryLoading,
+    registryStatus,
+    refreshRegistryStatus,
+  } = useWalletPrivateAddress();
+  const [registrationModalOpen, setRegistrationModalOpen] = useState(false);
+  const isRegistryChecking =
+    isRegistryLoading || registryStatus === "checking";
+  const canOpenRegistration =
+    !actionsEnabled && !isRegistryChecking;
 
   return (
     <div className="rounded-xl bg-white" style={CARD_STYLE}>
       <div>
         <p className="mb-2" style={LABEL_STYLE}>
-          {translate("privateBalance")}
+          {translateOverview("privateBalance")}
         </p>
         <div className="mb-1 flex items-baseline gap-3">
           <p className="font-semibold" style={BALANCE_AMOUNT_STYLE}>
@@ -127,29 +202,47 @@ export function BalanceHero(properties: BalanceHeroProperties) {
           </p>
         </div>
         <p style={SUBTITLE_STYLE}>
-          {translate("assetsInWallet", { count: assetCount })}
+          {translateOverview("assetsInWallet", { count: assetCount })}
         </p>
       </div>
-      <div className="flex gap-3">
-        <ActionButton
-          to="/create-transfer"
-          label={translate("privateSend")}
-          icon={Send}
-          variant="primary"
-        />
-        <ActionButton
-          to="/deposit"
-          label={translate("deposit")}
-          icon={Download}
-          variant="secondary"
-        />
-        <ActionButton
-          to="/withdraw"
-          label={translate("withdraw")}
-          icon={ArrowUpFromLine}
-          variant="secondary"
-        />
-      </div>
+      {actionsEnabled ? (
+        <div className="flex gap-3">
+          <ActionButton
+            to="/create-transfer"
+            label={translateOverview("privateSend")}
+            icon={Send}
+            variant="primary"
+          />
+          <ActionButton
+            to="/deposit"
+            label={translateOverview("deposit")}
+            icon={Download}
+            variant="secondary"
+          />
+          <ActionButton
+            to="/withdraw"
+            label={translateOverview("withdraw")}
+            icon={ArrowUpFromLine}
+            variant="secondary"
+          />
+        </div>
+      ) : (
+        <React.Fragment>
+          <RegisterAccountButton
+            label={translateOverview("registerAccount")}
+            disabled={!canOpenRegistration}
+            isLoading={isRegistryChecking}
+            onClick={() => setRegistrationModalOpen(true)}
+          />
+          <RegistryRegistrationModal
+            open={registrationModalOpen && canOpenRegistration}
+            onRegistered={() => {
+              setRegistrationModalOpen(false);
+              void refreshRegistryStatus();
+            }}
+          />
+        </React.Fragment>
+      )}
     </div>
   );
 }

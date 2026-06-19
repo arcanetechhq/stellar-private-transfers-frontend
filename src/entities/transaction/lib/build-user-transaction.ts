@@ -1,6 +1,10 @@
 import type { Transaction } from "../model/transaction";
 
-export type UserTransactionFlowType = "deposit" | "sent" | "withdrawal";
+export type UserTransactionFlowType =
+  | "deposit"
+  | "received"
+  | "sent"
+  | "withdrawal";
 
 export interface BuildUserTransactionInput {
   txId: string;

@@ -18,5 +18,14 @@
   "newAddressNamePlaceholder": "Name for this address",
   "create": "Create",
   "newAddressNameHint": "This name is signed with your wallet to derive a unique address.",
-  "generateDefaultAddress": "Generate default address"
+  "generateDefaultAddress": "Generate default address",
+  "registryStatusTitle": "Account status",
+  "registryStatusActive": "Registered",
+  "registryStatusUnregistered": "Unregistered",
+  "registryStatusUnknown": "Checking…",
+  "registryStatusLookupFailed": "Lookup failed",
+  "registrationRequiredTitle": "Register your private address",
+  "registrationRequiredDescription": "Register your wallet in the private-address registry to receive private transfers by Stellar address.",
+  "registerPrivateAddress": "Register private address",
+  "registering": "Registering…"
 }

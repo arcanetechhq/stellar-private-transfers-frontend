@@ -101,6 +101,7 @@ export function useCreateWithdrawal() {
     submit,
     navigate,
     senderPrivateAddress: withdrawalSender.senderPrivateAddress,
+    ensureSenderScalar: withdrawalSender.ensureSenderScalar,
     destinationTrim,
     numericAmount: Number.isNaN(numericAmount) ? 0 : numericAmount,
   });

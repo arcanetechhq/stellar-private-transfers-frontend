@@ -26,8 +26,9 @@ export function PrivateAssetTable({
   const selectedPrivateAddress = useAppSelector(
     selectPrivateAddressByNonce(defaultNonce ?? ""),
   );
-  const aggregates = useAppSelector(
+  const aggregates = useAppSelector((state) =>
     selectFinalizedAggregatesForPrivateAddress(
+      state,
       selectedPrivateAddress?.privateAddress ?? undefined,
     ),
   );

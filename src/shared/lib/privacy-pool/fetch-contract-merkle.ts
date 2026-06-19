@@ -1,7 +1,6 @@
 import { Buffer } from "buffer";
-import { Client as PrivacyPoolContractClient } from "contract";
-import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
 import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
+import { createPoolContractClient } from "@/shared/stellar/create-pool-contract-client";
 import {
   commitmentsBuffersToDecimal,
   getCachedMerkleState,
@@ -18,26 +17,13 @@ export interface FetchContractMerkleResult {
   merkleRootHex: string;
 }
 
-async function createPoolClient(parameters: {
+function createPoolClient(parameters: {
   contractId: string;
   walletPublicKey: string;
   networkPassphrase: string;
   sorobanRpcUrl: string;
-}): Promise<InstanceType<typeof PrivacyPoolContractClient>> {
-  const { contractId, walletPublicKey, networkPassphrase, sorobanRpcUrl } =
-    parameters;
-  return (await PrivacyPoolContractClient.from({
-    contractId,
-    networkPassphrase,
-    rpcUrl: sorobanRpcUrl,
-    allowHttp: true,
-    publicKey: walletPublicKey,
-    signTransaction: (xdrInput, options) =>
-      StellarWalletsKit.signTransaction(xdrInput, {
-        networkPassphrase: options?.networkPassphrase ?? networkPassphrase,
-        address: options?.address ?? walletPublicKey,
-      }),
-  })) as InstanceType<typeof PrivacyPoolContractClient>;
+}) {
+  return createPoolContractClient(parameters);
 }
 
 function normalizeCommitmentBuffers(rawBuffers: Buffer[]): Buffer[] {

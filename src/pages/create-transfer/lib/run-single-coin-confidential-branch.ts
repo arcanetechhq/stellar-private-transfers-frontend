@@ -1,3 +1,4 @@
+import type { OnboardingPayload } from "contract";
 import { addCoin, markCoinSpent, type CoinWithMetadata } from "@/entities/coin";
 import { buildCoinDeliveryPostBody } from "@/features/deposit";
 import { prepareConfidentialTransferProof } from "@/shared/lib/privacy-pool/privacy-pool-confidential-proofs";
@@ -5,7 +6,9 @@ import { readLeafEphemeralHex } from "@/shared/lib/privacy-pool/fetch-contract-m
 import { stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops";
 import { findCommitmentLeafIndex } from "@/entities/coin";
 import { postCoinDeliveryBestEffort } from "@/entities/coin-deliveries";
+import { buildOnboardingPayload } from "@/shared/lib/registry/build-onboarding-payload";
 import type { RunConfidentialTransferInput } from "./confidential-transfer-mutation-types";
+import type { RecipientTransferTarget } from "./run-confidential-transfer-mutation";
 import { sealEncryptAndSubmitSingleCoinConfidentialTransfer } from "./single-coin-confidential-audit-submit";
 
 type PreparedSingleProof = Awaited<
@@ -23,6 +26,7 @@ interface SingleCoinBranchParameters {
   recipientTrim: string;
   senderTrim: string;
   picked: CoinWithMetadata[];
+  recipientTarget: RecipientTransferTarget;
 }
 
 async function submitSingleCoinTransfer(
@@ -70,6 +74,14 @@ async function submitSingleCoinTransfer(
     tokenAddress: tokenContract,
   });
   const noteStroops = BigInt(only.coin.value);
+  let onboarding: OnboardingPayload | undefined;
+  if (parameters.recipientTarget.temporaryKeyMaterial) {
+    onboarding = buildOnboardingPayload({
+      ownerStellarAddress: input.recipientStellarAddress,
+      temporaryKey: parameters.recipientTarget.temporaryKeyMaterial,
+      recipientNotes: [prepared.recipientCoin.coin],
+    });
+  }
   const txId = await sealEncryptAndSubmitSingleCoinConfidentialTransfer({
     prepared,
     only,
@@ -80,6 +92,7 @@ async function submitSingleCoinTransfer(
     input,
     poolContract,
     tokenContract,
+    onboarding,
   });
   return {
     txId,
@@ -128,20 +141,25 @@ async function finalizeSingleCoinDeliveries(
     );
   }
   const warnings: string[] = [];
-  const warning = await postCoinDeliveryBestEffort(input.dispatch, () =>
-    buildCoinDeliveryPostBody({
-      recipientPrivateAddressStpl1: recipientTrim,
-      commitmentHex: recipientCoin.commitment_hex,
-      coin: recipientCoin.coin,
-      depositScalarHex: recipientCoin.depositScalarHex,
-      precommitementHex: recipientCoin.precommitementHex,
-      assetId: input.assetId,
-      amountDisplay: input.amountDisplay,
-      txId,
-    }),
+  const suppressDeliveryWarnings = Boolean(
+    parameters.recipientTarget.temporaryKeyMaterial,
   );
-  if (warning) {
-    warnings.push(warning);
+  if (!parameters.recipientTarget.temporaryKeyMaterial) {
+    const warning = await postCoinDeliveryBestEffort(input.dispatch, () =>
+      buildCoinDeliveryPostBody({
+        recipientPrivateAddressStpl1: recipientTrim,
+        commitmentHex: recipientCoin.commitment_hex,
+        coin: recipientCoin.coin,
+        depositScalarHex: recipientCoin.depositScalarHex,
+        precommitementHex: recipientCoin.precommitementHex,
+        assetId: input.assetId,
+        amountDisplay: input.amountDisplay,
+        txId,
+      }),
+    );
+    if (warning) {
+      warnings.push(warning);
+    }
   }
   if (changeCoin) {
     const changeWarning = await postCoinDeliveryBestEffort(input.dispatch, () =>
@@ -156,7 +174,7 @@ async function finalizeSingleCoinDeliveries(
         txId,
       }),
     );
-    if (changeWarning) {
+    if (changeWarning && !suppressDeliveryWarnings) {
       warnings.push(changeWarning);
     }
   }

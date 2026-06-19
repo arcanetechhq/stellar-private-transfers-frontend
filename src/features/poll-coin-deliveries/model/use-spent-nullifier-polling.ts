@@ -1,16 +1,18 @@
 import { useEffect, useRef } from "react";
 import { Buffer } from "buffer";
-import { Client as PrivacyPoolContractClient } from "contract";
-import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
 import { useAppDispatch, useAppSelector, type AppDispatch } from "@/store";
 import { markCoinSpent, selectCoinItems, type CoinWithMetadata } from "@/entities/coin";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
 import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
+import {
+  createPoolContractClient,
+  type PoolContractClient,
+} from "@/shared/stellar/create-pool-contract-client";
 
 const POLL_INTERVAL_MS = 3000;
 
-type PrivacyPoolClient = InstanceType<typeof PrivacyPoolContractClient>;
+type PrivacyPoolClient = PoolContractClient;
 
 function hexToBuffer(hex: string): Buffer {
   const clean = hex.startsWith("0x") ? hex.slice(2) : hex;
@@ -41,18 +43,12 @@ async function getOrCreatePoolClient(parameters: {
   if (cached) {
     return cached;
   }
-  const client = (await PrivacyPoolContractClient.from({
+  const client = createPoolContractClient({
     contractId: parameters.poolContract,
+    walletPublicKey: parameters.walletPublicKey,
     networkPassphrase: parameters.networkPassphrase,
-    rpcUrl: parameters.sorobanRpcUrl,
-    allowHttp: true,
-    publicKey: parameters.walletPublicKey,
-    signTransaction: (xdrInput, options) =>
-      StellarWalletsKit.signTransaction(xdrInput, {
-        networkPassphrase: options?.networkPassphrase ?? parameters.networkPassphrase,
-        address: options?.address ?? parameters.walletPublicKey,
-      }),
-  })) as PrivacyPoolClient;
+    sorobanRpcUrl: parameters.sorobanRpcUrl,
+  });
   parameters.clientsByPool.set(parameters.poolContract, client);
   return client;
 }
