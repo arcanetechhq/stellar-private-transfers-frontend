@@ -42,3 +42,21 @@ export function getRequiredPrivateAddressRegistryContractId(): string {
   }
   return normalizeSorobanContractId(raw);
 }
+
+export function getRequiredKytPassageRegistryContractId(): string {
+  const raw = (
+    import.meta.env.VITE_KYT_PASSAGE_REGISTRY_CONTRACT as string | undefined
+  )?.trim();
+  if (!raw) {
+    throw new Error("Missing VITE_KYT_PASSAGE_REGISTRY_CONTRACT environment variable");
+  }
+  return normalizeSorobanContractId(raw);
+}
+
+export function getRequiredApiBaseUrl(): string {
+  const raw = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
+  if (!raw) {
+    throw new Error("Missing VITE_API_BASE_URL environment variable");
+  }
+  return raw.replace(/\/$/, "");
+}

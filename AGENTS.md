@@ -80,6 +80,7 @@ Extra material (`references/`, `templates/`) sits inside each skill folder.
 - Global wallet registry/private-address state belongs in `WalletPrivateAddressProvider` (`app.tsx`); fetch registry status on connect/page load, not on wallet dropdown open.
 - Home Send/Deposit/Withdraw stay disabled until registry status is `active`; show Register account CTA while `checking` or `unregistered`.
 - Transaction flows must reuse wallet private address and scalar from the provider (`ensureWalletPrivateAddress` / `ensureWalletScalar`), not regenerate or re-sign unnecessarily.
+- Do not use `VITE_NOTE_AUDIT_PUBLIC_KEY_X` / `VITE_NOTE_AUDIT_PUBLIC_KEY_Y`; use single `VITE_STELLAR_AUDIT_PUBLIC_KEY` for ZK audit public key.
 
 ## Learned Workspace Facts
 
@@ -89,9 +90,9 @@ Extra material (`references/`, `templates/`) sits inside each skill folder.
 - Contacts store `stellarAddress` (validated Stellar G-address); transfers resolve recipients via on-chain registry lookup.
 - Soroban bindings: pool client in `generated/contract`, registry client in `generated/registry` (`registry-contract` package alias).
 - Required contract env vars: `VITE_POOL_CONTRACT`, `VITE_PRIVATE_ADDRESS_REGISTRY_CONTRACT`.
+- ZK audit env: `VITE_APPLICATION_ID` and `VITE_STELLAR_AUDIT_PUBLIC_KEY` (128-char lowercase `X`+`Y` hex from audit-backend app create); resolved in `build-transaction-audit-parameters.ts` via `@auditable/privacy-pool-zk-sdk` `resolveTransactionAuditParams`.
+- Local `@auditable/privacy-pool-zk-sdk`: `cd soroban-privacy-pools/client-sdk && npm run build && npm link`, then `cd stellar-payment-client-v2 && npm link @auditable/privacy-pool-zk-sdk` (re-run link after `npm install` in the client).
+- Never generate ptau or Groth16 zkey in automation; use artifacts from `soroban-privacy-pools` (`client-sdk/assets`, user-maintained).
 - Pending claims UI uses `entities/pending-claims` RTK Query against backend `/api/pending-claims`.
-- `WalletPrivateAddressProvider` centralizes registry status, wallet `stpl1`/scalar, and `actionsEnabled`; consumers include overview actions, transaction flows, `RegistryStatusBadge`, and coin-delivery polling (incoming poll skips until `active`).
-- Unregistered-recipient transfers use temporary recipient scalar + pool `transact_with_onboarding`; submit passes `senderPrivKeyScalarHex` from `ensureWalletScalar()` (not `selectScalarByPrivateAddress` alone); UI warns via recipient registry lookup.
-- Registry `get_private_address` simulate result may be void/null, `{ tag: "None" }`, `{ tag: "Some", values: [record] }`, or a direct `PrivateAddressRecord` struct — parse all forms.
-- `@stellar/stellar-sdk` contract bindings: SDK `Option<T>` serializes as `T | undefined` (not `{ tag: "None" }`); contract UDT void unions use `{ tag: "None" }` without a `values` field.
-- Parameterized Redux selectors (e.g. aggregates by private address) should use RTK `createSelector` with `(state, param)` signature, not factory functions returning new selectors per call.
+- `WalletPrivateAddressProvider` centralizes registry status, wallet `stpl1`/scalar, and `actionsEnabled`; unregistered-recipient transfers use temporary recipient scalar + pool `transact(..., onboarding)` with `senderPrivKeyScalarHex` from `ensureWalletScalar()`.
+- Registry/SDK serialization: `get_private_address` simulate may return void/null, `{ tag: "None" }`, `{ tag: "Some", values: [record] }`, or a direct record; SDK `Option<T>` is `T | undefined`, contract UDT void unions use `{ tag: "None" }` without `values`.

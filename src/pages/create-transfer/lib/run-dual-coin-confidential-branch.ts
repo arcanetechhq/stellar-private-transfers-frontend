@@ -99,22 +99,11 @@ async function submitDualCoinTransfer(
       changeStroopsDual > ZERO_STROOPS ? senderTrim : undefined,
     tokenAddress: tokenContract,
   });
-  const noteA = BigInt(first.coin.value);
-  const noteB = BigInt(second.coin.value);
   const onboarding = buildDualOnboardingPayload(parameters, preparedDual);
   const txId = await sealEncryptAndSubmitDualCoinConfidentialTransfer({
     preparedDual,
-    first,
-    second,
-    noteA,
-    noteB,
-    transferStroops,
-    changeStroopsDual,
-    recipientTrim,
-    senderTrim,
     input,
     poolContract,
-    tokenContract,
     onboarding,
   });
   return {

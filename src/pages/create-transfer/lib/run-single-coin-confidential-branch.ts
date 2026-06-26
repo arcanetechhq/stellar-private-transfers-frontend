@@ -73,7 +73,6 @@ async function submitSingleCoinTransfer(
       transferStroops < BigInt(only.coin.value) ? senderTrim : undefined,
     tokenAddress: tokenContract,
   });
-  const noteStroops = BigInt(only.coin.value);
   let onboarding: OnboardingPayload | undefined;
   if (parameters.recipientTarget.temporaryKeyMaterial) {
     onboarding = buildOnboardingPayload({
@@ -85,13 +84,8 @@ async function submitSingleCoinTransfer(
   const txId = await sealEncryptAndSubmitSingleCoinConfidentialTransfer({
     prepared,
     only,
-    noteStroops,
-    transferStroops,
-    recipientTrim,
-    senderTrim,
     input,
     poolContract,
-    tokenContract,
     onboarding,
   });
   return {

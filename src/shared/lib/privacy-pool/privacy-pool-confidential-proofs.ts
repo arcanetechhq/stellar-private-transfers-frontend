@@ -9,6 +9,11 @@ import {
   senderWithdrawFrAndScalar,
   withdrawWitnessForCoin,
 } from "./privacy-pool-confidential-proof-helpers";
+import {
+  buildPoolTransactionAuditParameters,
+  resolvePoolApplicationId,
+} from "./build-transaction-audit-parameters";
+import type { KytApplicationIdHints } from "./privacy-pool-proof-types";
 
 type GeneratedOutputCoin = {
   commitment_hex: string;
@@ -33,6 +38,7 @@ type PrepareConfidentialTransferProofParameters = {
 type PrepareConfidentialTransferProofResult = {
   proof_hex: string;
   public_hex: string;
+  applicationIdsPlaintext: KytApplicationIdHints;
   recipientCoin: GeneratedOutputCoin;
   changeCoin?: GeneratedOutputCoin;
 };
@@ -81,14 +87,24 @@ export async function prepareConfidentialTransferProof(
     },
     parameters.tokenAddress,
   );
+  const applicationId = parameters.coin.application_id ?? resolvePoolApplicationId();
+  const audit = buildPoolTransactionAuditParameters(applicationId);
   const proof = await sdk.proveTransaction(
     publicInput as unknown as Parameters<typeof sdk.proveTransaction>[0],
     buildZeroPublicLegs(),
     [withdrawObject, "dummy"],
     deposits,
+    audit,
   );
+  const applicationIdsPlaintext: KytApplicationIdHints = [
+    applicationId,
+    "0",
+    applicationId,
+    changeCoin ? applicationId : "0",
+  ];
   return {
     ...proof,
+    applicationIdsPlaintext,
     recipientCoin: {
       commitment_hex: recipientSlot.commitment_hex,
       coin: recipientSlot.coin,

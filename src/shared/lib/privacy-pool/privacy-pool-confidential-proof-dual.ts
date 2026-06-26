@@ -9,6 +9,11 @@ import {
   requireChangeRecipientWhenPartial,
   senderWithdrawFrAndScalar,
 } from "./privacy-pool-confidential-proof-helpers";
+import {
+  buildPoolTransactionAuditParameters,
+  resolvePoolApplicationId,
+} from "./build-transaction-audit-parameters";
+import type { KytApplicationIdHints } from "./privacy-pool-proof-types";
 
 type GeneratedOutputCoin = {
   commitment_hex: string;
@@ -34,6 +39,7 @@ type PrepareConfidentialTransferProofDualParameters = {
 type PrepareConfidentialTransferProofDualResult = {
   proof_hex: string;
   public_hex: string;
+  applicationIdsPlaintext: KytApplicationIdHints;
   recipientCoin: GeneratedOutputCoin;
   changeCoin?: GeneratedOutputCoin;
 };
@@ -82,14 +88,27 @@ export async function prepareConfidentialTransferProofDual(
     },
     parameters.tokenAddress,
   );
+  const applicationId =
+    parameters.coinA.application_id
+    ?? parameters.coinB.application_id
+    ?? resolvePoolApplicationId();
+  const audit = buildPoolTransactionAuditParameters(applicationId);
   const proof = await sdk.proveTransaction(
     publicInput as unknown as Parameters<typeof sdk.proveTransaction>[0],
     buildZeroPublicLegs(),
     [legA.withdrawObject, legB.withdrawObject],
     deposits,
+    audit,
   );
+  const applicationIdsPlaintext: KytApplicationIdHints = [
+    parameters.coinA.application_id ?? applicationId,
+    parameters.coinB.application_id ?? applicationId,
+    applicationId,
+    changeCoin ? applicationId : "0",
+  ];
   return {
     ...proof,
+    applicationIdsPlaintext,
     recipientCoin: {
       commitment_hex: recipientSlot.commitment_hex,
       coin: recipientSlot.coin,

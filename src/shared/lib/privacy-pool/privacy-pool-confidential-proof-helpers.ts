@@ -6,6 +6,7 @@ import type { CoinData, PrivacyPoolSDK, StateFile } from "@auditable/privacy-poo
 import { StrKey } from "@stellar/stellar-sdk";
 import { Buffer } from "buffer";
 import { privKeyScalarDecimalFromRecipientScalarHex } from "./priv-key-scalar-decimal-from-recipient-scalar-hex";
+import { resolvePoolApplicationId } from "./build-transaction-audit-parameters";
 
 export const MIN_CONFIDENTIAL_TRANSFER_STROOPS = 1n;
 export const ZERO_STROOPS = 0n;
@@ -36,9 +37,11 @@ export function withdrawWitnessForCoin(parameters: {
 }) {
   const { sdk, coin, state, xHex, yHex } = parameters;
   const witness = sdk.buildWithdrawMerkleWitness(coin, state);
+  const applicationId = coin.application_id ?? resolvePoolApplicationId();
   const withdrawObject = withdrawObjectFromMerkleWitness(
     witness,
     leafEphemeralCoords(xHex, yHex),
+    applicationId,
   );
   return { witness, withdrawObject };
 }

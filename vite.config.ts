@@ -21,7 +21,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ["buffer", "@auditable/stellar-audit", "contract", "registry-contract"],
+    include: ["buffer", "contract", "registry-contract"],
     esbuildOptions: {
       alias: {
         fs: path.resolve(__dirname, "./src/shims/node-fs.ts"),

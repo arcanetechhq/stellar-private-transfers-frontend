@@ -1,18 +1,9 @@
-import {
-  sealAndEncryptTransaction,
-  type ITransaction,
-} from "@auditable/stellar-audit";
 import type { AssetDto } from "@/entities/asset";
 import { addCoin, type CoinData } from "@/entities/coin";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";
 import type { PendingClaimItem } from "@/entities/pending-claims";
 import type { AppDispatch } from "@/store";
 import { coinDeliveryApi } from "@/entities/coin-deliveries";
-import {
-  buildAuditDepositLeg,
-  buildAuditWithdrawLeg,
-} from "@/shared/lib/audit/build-audit-transaction-leg";
-import { resolveAuditPrecommitementHex } from "@/shared/lib/audit/resolve-audit-precommitement-hex";
 import { prepareConfidentialTransferProof } from "@/shared/lib/privacy-pool/privacy-pool-confidential-proofs";
 import {
   fetchAndMergeMerkleState,
@@ -23,8 +14,6 @@ import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-netwo
 import { resolveTokenContractId } from "@/shared/stellar/resolve-token-contract-id";
 import {
   buildCoinDeliveryPostBody,
-  getAuditPublicKey,
-  toAuditNumber,
 } from "@/features/deposit";
 import {
   base64RecoveryScalar,
@@ -36,8 +25,6 @@ import {
   waitForClaimTransactionSuccess,
 } from "./pending-claim-confirmation";
 
-const FIELD_HEX_LENGTH = 64;
-const ZERO_PRECOMMITMENT_HEX = "0".repeat(FIELD_HEX_LENGTH);
 const MISSING_INDEX = -1;
 
 type PendingClaimRunParameters = {
@@ -111,29 +98,12 @@ async function submitClaimTransaction(parameters: {
   prepared: Awaited<ReturnType<typeof prepareConfidentialTransferProof>>;
 }): Promise<string> {
   const permanentPrivateAddress = parameters.run.permanentPrivateAddress.trim();
-  const auditTx = {
-    withdraw1: buildAuditWithdrawLeg({
-      value: toAuditNumber(BigInt(parameters.coin.value), "Claim amount"),
-      precommitementHex: ZERO_PRECOMMITMENT_HEX,
-      nullifierDecimal: parameters.coin.nullifier,
-      tokenAddress: parameters.tokenContract,
-    }),
-    deposit1: buildAuditDepositLeg(permanentPrivateAddress, {
-      value: toAuditNumber(BigInt(parameters.coin.value), "Claim amount"),
-      precommitementHex: resolveAuditPrecommitementHex(
-        parameters.prepared.recipientCoin.precommitementHex,
-        "deposit1",
-      ),
-      nullifierDecimal: parameters.prepared.recipientCoin.coin.nullifier,
-      tokenAddress: parameters.tokenContract,
-    }),
-  } as unknown as ITransaction;
   return submitSorobanConfidentialTransfer({
     contractId: parameters.poolContract,
     walletPublicKey: parameters.run.walletPublicKey,
     proofHex: parameters.prepared.proof_hex,
     publicHex: parameters.prepared.public_hex,
-    encoded: await sealAndEncryptTransaction(auditTx, getAuditPublicKey()),
+    applicationIdsPlaintext: parameters.prepared.applicationIdsPlaintext,
     onboarding: buildClaimOnboardingPayload({
       claim: parameters.run.claim,
       privateAddressStpl1: permanentPrivateAddress,

@@ -1,7 +1,3 @@
-import {
-  sealAndEncryptTransaction,
-  type ITransaction,
-} from "@auditable/stellar-audit";
 import type { PostCoinDeliveryBody } from "@/entities/coin-deliveries";
 import type { AppDispatch } from "@/store";
 import { addCoin } from "@/entities/coin";
@@ -10,13 +6,9 @@ import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-servi
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import {
   buildCoinDeliveryPostBody,
-  getAuditPublicKey,
   submitSorobanDeposit,
-  toAuditNumber,
 } from "@/features/deposit";
 import { resolveTokenContractId } from "@/shared/stellar/resolve-token-contract-id";
-import { buildAuditDepositLeg } from "@/shared/lib/audit/build-audit-transaction-leg";
-import { resolveAuditPrecommitementHex } from "@/shared/lib/audit/resolve-audit-precommitement-hex";
 
 const STROOPS_PER_UNIT = 10_000_000;
 
@@ -67,20 +59,6 @@ export async function runDepositMutation(
       tokenAddress: tokenContract,
     });
 
-  const auditPublicKey = getAuditPublicKey();
-  const auditTx = {
-    deposit1: buildAuditDepositLeg(privateAddress, {
-      value: toAuditNumber(BigInt(coin.value), "Deposit amount"),
-      precommitementHex: resolveAuditPrecommitementHex(
-        precommitementHex,
-        "deposit1",
-      ),
-      nullifierDecimal: coin.nullifier,
-      tokenAddress: tokenContract,
-    }),
-  } as unknown as ITransaction;
-  const encoded = await sealAndEncryptTransaction(auditTx, auditPublicKey);
-
   const txId = await submitSorobanDeposit({
     contractId: poolContract,
     walletPublicKey: input.walletPublicKey,
@@ -88,7 +66,6 @@ export async function runDepositMutation(
     coin,
     depositScalarHex,
     tokenAddress: tokenContract,
-    encoded,
     networkPassphrase: input.networkPassphrase,
     sorobanRpcUrl: input.sorobanRpcUrl,
   });

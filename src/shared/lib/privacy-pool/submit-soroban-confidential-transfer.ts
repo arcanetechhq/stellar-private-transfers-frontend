@@ -1,21 +1,20 @@
-import { Buffer } from "buffer";
 import type { OnboardingPayload } from "contract";
 import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
 import { createPoolContractClient } from "@/shared/stellar/create-pool-contract-client";
 import { runTtlPreflight } from "./ttl-preflight";
-
-function hexToBuffer(hex: string): Buffer {
-  const clean = hex.startsWith("0x") ? hex.slice(2) : hex;
-  return Buffer.from(clean, "hex");
-}
+import {
+  approvalSignatureToBytes,
+  requestKytPassageForPoolInteraction,
+} from "./kyt-passage-inspect";
+import type { KytApplicationIdHints } from "./privacy-pool-proof-types";
 
 export interface SubmitSorobanConfidentialTransferInput {
   contractId: string;
   walletPublicKey: string;
   proofHex: string;
   publicHex: string;
-  encoded: Uint8Array;
   onboarding?: OnboardingPayload;
+  applicationIdsPlaintext?: KytApplicationIdHints;
   networkPassphrase?: string;
   sorobanRpcUrl?: string;
 }
@@ -41,15 +40,27 @@ export async function submitSorobanConfidentialTransfer(
     networkPassphrase: passphrase,
     sorobanRpcUrl: rpcUrl,
   });
-
-  const assembledTransaction = await contractClient.transact_with_onboarding({
-    from: input.walletPublicKey,
-    proof_bytes: hexToBuffer(input.proofHex),
-    pub_signals_bytes: hexToBuffer(input.publicHex),
-    encoded: Buffer.from(input.encoded),
+  const approval = await requestKytPassageForPoolInteraction({
+    owner: input.walletPublicKey,
+    poolContract: input.contractId,
+    proofHex: input.proofHex,
+    publicHex: input.publicHex,
     onboarding: input.onboarding,
+    applicationIdsPlaintext: input.applicationIdsPlaintext,
+    networkPassphrase: passphrase,
+    sorobanRpcUrl: rpcUrl,
   });
-
+  // NOTE: Keep KYT authorization in pool.transact so indexers can read one tx context.
+  const assembledTransaction = await contractClient.transact({
+    from: input.walletPublicKey,
+    proof_bytes: Buffer.from(input.proofHex.replace(/^0x/i, ""), "hex"),
+    pub_signals_bytes: Buffer.from(input.publicHex.replace(/^0x/i, ""), "hex"),
+    onboarding: input.onboarding,
+    kyt_authorization: {
+      expiration_ledger: approval.expiresAtLedger,
+      signature: approvalSignatureToBytes(approval.signature),
+    },
+  });
   await runTtlPreflight(assembledTransaction);
   const sentTransaction = await assembledTransaction.signAndSend();
   const transactionHash = sentTransaction.sendTransactionResponse?.hash ?? "";

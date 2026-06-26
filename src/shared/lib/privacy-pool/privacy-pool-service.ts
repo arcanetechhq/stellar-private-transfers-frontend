@@ -5,32 +5,24 @@ import {
   scalarHexToFrDecimal,
 } from "@auditable/privacy-pool-zk-sdk";
 import type { CoinData, DepositObject, StateFile } from "@auditable/privacy-pool-zk-sdk";
-import wasmSdkUrl from "@auditable/privacy-pool-zk-sdk/sdk.wasm?url";
-import wasmWitnessCalculatorUrl from "@auditable/privacy-pool-zk-sdk/witness.wasm?url";
-import zkeyFileUrl from "@auditable/privacy-pool-zk-sdk/main.zkey?url";
 import { merkleRootBufferToFrDecimal } from "./merkle-fr";
 import { decodePrivateAddress, privateAddressSdk, recipientPublicKeysDecimalFromPrivateAddress } from "@/shared/lib/private-address/privacy-pool-sdk-private-address";
 import { proveWithdrawTransact, proveWithdrawTransactDual } from "./privacy-pool-withdraw-transact-proof";
 import { Buffer } from "buffer";
 import { buildPublicDepositLegs, tokenAddressToAssetLeg, withTokenAddressPublicInputs } from "./prove-transaction-input";
+import {
+  buildPoolTransactionAuditParameters,
+  resolvePoolApplicationId,
+} from "./build-transaction-audit-parameters";
+import { initializePrivacyPoolSdk } from "./privacy-pool-sdk-init";
+import type {
+  AlignedDepositSlot,
+  KytApplicationIdHints,
+  ProofResult,
+  ProofWithChange,
+} from "./privacy-pool-proof-types";
 
 const SAMPLE_SCALAR_ATTEMPTS = 10;
-type AlignedDepositSlot = {
-  deposit: DepositObject;
-  commitment_hex: string;
-  coin: CoinData;
-  depositScalarHex: string;
-  precommitementHex: string;
-};
-type ProofResult = { proof_hex: string; public_hex: string };
-type ProofWithChange = ProofResult & {
-  changeCoin?: {
-    commitment_hex: string;
-    coin: CoinData;
-    depositScalarHex: string;
-    precommitementHex: string;
-  };
-};
 
 export class PrivacyPoolService {
   private sdk: PrivacyPoolSDK | undefined = undefined;
@@ -44,16 +36,7 @@ export class PrivacyPoolService {
       return this.initPromise;
     }
     this.initPromise = (async () => {
-      const wasmBinary = await fetch(wasmSdkUrl).then((response) =>
-        response.arrayBuffer(),
-      );
-      const circuitWasm = await fetch(wasmWitnessCalculatorUrl).then(
-        (response) => response.arrayBuffer(),
-      );
-      const zkey = await fetch(zkeyFileUrl).then((response) =>
-        response.arrayBuffer(),
-      );
-      this.sdk = await PrivacyPoolSDK.init({ wasmBinary, circuitWasm, zkey });
+      this.sdk = await initializePrivacyPoolSdk();
     })();
     return this.initPromise;
   }
@@ -117,6 +100,7 @@ export class PrivacyPoolService {
     const scalarHex = this.sampleValidDepositScalarHex();
     const shared = sdk.ecdhSharedKey(scalarHex, privateAddressPoint.x, privateAddressPoint.y);
     const [assetHi, assetLo] = tokenAddressToAssetLeg(parameters.tokenAddress);
+    const applicationId = resolvePoolApplicationId();
     const generated = sdk.generateCoinForDepositWithSharedHex(
       scalarHex,
       shared.x,
@@ -124,6 +108,7 @@ export class PrivacyPoolService {
       parameters.amountStroops,
       assetHi,
       assetLo,
+      applicationId,
     );
     const recipientPublicKeys =
       recipientPublicKeysDecimalFromPrivateAddress(parameters.privateAddressStpl1);
@@ -132,6 +117,7 @@ export class PrivacyPoolService {
       nullifier: generated.coin.nullifier,
       ephemeralKeyScalar: scalarHexToFrDecimal(scalarHex),
       asset: [generated.coin.asset_hi, generated.coin.asset_lo],
+      applicationId,
       recipientPublicKeys,
     };
     return {
@@ -165,11 +151,14 @@ export class PrivacyPoolService {
     const recipientPublicKeys = recipientPublicKeysDecimalFromPrivateAddress(
       parameters.privateAddressStpl1,
     );
+    const applicationId = resolvePoolApplicationId();
+    const audit = buildPoolTransactionAuditParameters(applicationId);
     const deposit = {
       value: parameters.coin.value,
       nullifier: parameters.coin.nullifier,
       ephemeralKeyScalar: scalarHexToFrDecimal(parameters.depositScalarHex),
       asset: [parameters.coin.asset_hi, parameters.coin.asset_lo] as [string, string],
+      applicationId,
       recipientPublicKeys,
     };
     const publicInput = withTokenAddressPublicInputs(
@@ -181,12 +170,20 @@ export class PrivacyPoolService {
       },
       parameters.tokenAddress,
     );
-    return sdk.proveTransaction(
+    const proof = await sdk.proveTransaction(
       publicInput as unknown as Parameters<typeof sdk.proveTransaction>[0],
       buildPublicDepositLegs(parameters.tokenAddress, parameters.coin.value),
       ["dummy", "dummy"],
       [deposit, "dummy"],
+      audit,
     );
+    const applicationIdsPlaintext: KytApplicationIdHints = [
+      "0",
+      "0",
+      applicationId,
+      "0",
+    ];
+    return { ...proof, applicationIdsPlaintext };
   }
 
   async calculateNullifierHash(nullifier: string): Promise<string> {

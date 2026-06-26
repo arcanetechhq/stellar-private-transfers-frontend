@@ -2,77 +2,26 @@ import {
   ed25519PubkeyPayloadHexToWithdrawFrDecimals,
   withdrawObjectFromMerkleWitness,
 } from "@auditable/privacy-pool-zk-sdk";
-import type {
-  CoinData,
-  DepositObject,
-  DepositSlot,
-  PrivacyPoolSDK,
-  StateFile,
-} from "@auditable/privacy-pool-zk-sdk";
+import type { CoinData, PrivacyPoolSDK, StateFile } from "@auditable/privacy-pool-zk-sdk";
 import { buildPublicWithdrawLegs } from "./prove-transaction-input";
 import {
-  dualWithdrawLegsWithSharedRoot,
   leafEphemeralCoords,
   MIN_CONFIDENTIAL_TRANSFER_STROOPS,
-  requireChangeRecipientWhenPartial,
-  ZERO_STROOPS,
 } from "./privacy-pool-confidential-proof-helpers";
 import { ed25519PublicKeyHexFromStellarAccount } from "@/shared/lib/stellar/ed25519-public-key-hex-from-account";
 import { privKeyScalarDecimalFromRecipientScalarHex } from "./priv-key-scalar-decimal-from-recipient-scalar-hex";
 import { withTokenAddressPublicInputs } from "./prove-transaction-input";
-
-export type AlignedDepositSlotBuilder = (
-  parameters: {
-    privateAddressStpl1: string;
-    amountStroops: bigint;
-    tokenAddress: string;
-  },
-) => Promise<{
-  deposit: DepositObject;
-  commitment_hex: string;
-  coin: CoinData;
-  depositScalarHex: string;
-  precommitementHex: string;
-}>;
-
-async function resolveWithdrawChangeDeposits(parameters: {
-  changeStroops: bigint;
-  changePrivateAddressStpl1: string | undefined;
-  buildAlignedDepositSlot: AlignedDepositSlotBuilder;
-  tokenAddress: string;
-}): Promise<{
-  deposits: [DepositSlot, DepositSlot];
-  changeCoin?: {
-    commitment_hex: string;
-    coin: CoinData;
-    depositScalarHex: string;
-    precommitementHex: string;
-  };
-}> {
-  if (parameters.changeStroops <= ZERO_STROOPS) {
-    return { deposits: ["dummy", "dummy"] };
-  }
-  const stpl1 = parameters.changePrivateAddressStpl1?.trim() ?? "";
-  if (!stpl1) {
-    throw new Error(
-      "Private address is required to return the unused balance to the pool (partial withdraw)",
-    );
-  }
-  const slot = await parameters.buildAlignedDepositSlot({
-    privateAddressStpl1: stpl1,
-    amountStroops: parameters.changeStroops,
-    tokenAddress: parameters.tokenAddress,
-  });
-  return {
-    deposits: [slot.deposit, "dummy"],
-    changeCoin: {
-      commitment_hex: slot.commitment_hex,
-      coin: slot.coin,
-      depositScalarHex: slot.depositScalarHex,
-      precommitementHex: slot.precommitementHex,
-    },
-  };
-}
+import {
+  buildPoolTransactionAuditParameters,
+  resolvePoolApplicationId,
+} from "./build-transaction-audit-parameters";
+import {
+  prepareDualWithdrawProofInputs,
+  resolveWithdrawChangeDeposits,
+  type AlignedDepositSlotBuilder,
+  type WithdrawChangeCoin,
+} from "./privacy-pool-withdraw-proof-helpers";
+import type { KytApplicationIdHints } from "./privacy-pool-proof-types";
 
 export async function proveWithdrawTransact(parameters: {
   sdk: PrivacyPoolSDK;
@@ -89,12 +38,8 @@ export async function proveWithdrawTransact(parameters: {
 }): Promise<{
   proof_hex: string;
   public_hex: string;
-  changeCoin?: {
-    commitment_hex: string;
-    coin: CoinData;
-    depositScalarHex: string;
-    precommitementHex: string;
-  };
+  applicationIdsPlaintext: KytApplicationIdHints;
+  changeCoin?: WithdrawChangeCoin;
 }> {
   const noteStroops = BigInt(parameters.coin.value);
   if (parameters.withdrawAmountStroops < MIN_CONFIDENTIAL_TRANSFER_STROOPS) {
@@ -103,15 +48,17 @@ export async function proveWithdrawTransact(parameters: {
   if (parameters.withdrawAmountStroops > noteStroops) {
     throw new Error("Withdraw amount exceeds note value");
   }
-  const witness = parameters.sdk.buildWithdrawMerkleWitness(
-    parameters.coin,
-    parameters.state,
-  );
+  const witness = parameters.sdk.buildWithdrawMerkleWitness(parameters.coin, parameters.state);
   const ephemeralCoords = leafEphemeralCoords(
     parameters.depositorEphemeralXHex,
     parameters.depositorEphemeralYHex,
   );
-  const primaryWithdraw = withdrawObjectFromMerkleWitness(witness, ephemeralCoords);
+  const applicationId = parameters.coin.application_id ?? resolvePoolApplicationId();
+  const primaryWithdraw = withdrawObjectFromMerkleWitness(
+    witness,
+    ephemeralCoords,
+    applicationId,
+  );
   const pkHex = ed25519PublicKeyHexFromStellarAccount(
     parameters.destinationStellarAddress,
   );
@@ -135,6 +82,7 @@ export async function proveWithdrawTransact(parameters: {
     },
     parameters.tokenAddress,
   );
+  const audit = buildPoolTransactionAuditParameters(applicationId);
   const proof = await parameters.sdk.proveTransaction(
     publicInput as unknown as Parameters<typeof parameters.sdk.proveTransaction>[0],
     buildPublicWithdrawLegs(
@@ -143,8 +91,15 @@ export async function proveWithdrawTransact(parameters: {
     ),
     [primaryWithdraw, "dummy"],
     deposits,
+    audit,
   );
-  return { ...proof, changeCoin };
+  const applicationIdsPlaintext: KytApplicationIdHints = [
+    applicationId,
+    "0",
+    changeCoin ? applicationId : "0",
+    "0",
+  ];
+  return { ...proof, applicationIdsPlaintext, changeCoin };
 }
 
 export async function proveWithdrawTransactDual(parameters: {
@@ -163,65 +118,35 @@ export async function proveWithdrawTransactDual(parameters: {
 }): Promise<{
   proof_hex: string;
   public_hex: string;
-  changeCoin?: {
-    commitment_hex: string;
-    coin: CoinData;
-    depositScalarHex: string;
-    precommitementHex: string;
-  };
+  applicationIdsPlaintext: KytApplicationIdHints;
+  changeCoin?: WithdrawChangeCoin;
 }> {
-  const noteA = BigInt(parameters.coinA.value);
-  const noteB = BigInt(parameters.coinB.value);
-  const totalNotes = noteA + noteB;
-  if (parameters.withdrawAmountStroops < MIN_CONFIDENTIAL_TRANSFER_STROOPS) {
-    throw new Error("Withdraw amount must be positive");
-  }
-  if (parameters.withdrawAmountStroops > totalNotes) {
-    throw new Error("Withdraw amount exceeds combined note value");
-  }
-  const changeStroops = totalNotes - parameters.withdrawAmountStroops;
-  requireChangeRecipientWhenPartial(
-    changeStroops,
-    parameters.changePrivateAddressStpl1,
-  );
-  const { legA, legB } = dualWithdrawLegsWithSharedRoot({
-    sdk: parameters.sdk,
-    coinA: parameters.coinA,
-    coinB: parameters.coinB,
-    state: parameters.state,
-    ephemeralA: parameters.ephemeralA,
-    ephemeralB: parameters.ephemeralB,
-  });
-  const pkHex = ed25519PublicKeyHexFromStellarAccount(
-    parameters.destinationStellarAddress,
-  );
-  const { hi, lo } = ed25519PubkeyPayloadHexToWithdrawFrDecimals(pkHex);
-  const privKeyScalar = privKeyScalarDecimalFromRecipientScalarHex(
-    parameters.privKeyScalarHex,
-  );
-  const { deposits, changeCoin } = await resolveWithdrawChangeDeposits({
-    changeStroops,
-    changePrivateAddressStpl1: parameters.changePrivateAddressStpl1,
-    buildAlignedDepositSlot: parameters.buildAlignedDepositSlot,
-    tokenAddress: parameters.tokenAddress,
-  });
-  const publicInput = withTokenAddressPublicInputs(
-    {
-      stateRoot: legA.witness.stateRoot,
-      withdrawAddressHi: hi,
-      withdrawAddressLo: lo,
-      privKeyScalar,
-    },
-    parameters.tokenAddress,
-  );
+  const {
+    publicInput,
+    audit,
+    withdrawLegs,
+    deposits,
+    changeCoin,
+  } = await prepareDualWithdrawProofInputs(parameters);
   const proof = await parameters.sdk.proveTransaction(
     publicInput as unknown as Parameters<typeof parameters.sdk.proveTransaction>[0],
     buildPublicWithdrawLegs(
       parameters.tokenAddress,
       parameters.withdrawAmountStroops.toString(),
     ),
-    [legA.withdrawObject, legB.withdrawObject],
+    withdrawLegs,
     deposits,
+    audit,
   );
-  return { ...proof, changeCoin };
+  const applicationIdA = parameters.coinA.application_id ?? audit.applicationId;
+  const applicationIdB = parameters.coinB.application_id ?? audit.applicationId;
+  const applicationIdsPlaintext: KytApplicationIdHints = [
+    applicationIdA,
+    applicationIdB,
+    changeCoin ? audit.applicationId : "0",
+    "0",
+  ];
+  return { ...proof, applicationIdsPlaintext, changeCoin };
 }
+
+export { type AlignedDepositSlotBuilder } from "./privacy-pool-withdraw-proof-helpers";
