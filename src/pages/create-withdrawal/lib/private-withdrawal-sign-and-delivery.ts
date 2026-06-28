@@ -1,7 +1,7 @@
 import type { AppDispatch } from "@/store";
 import type { CoinWithMetadata } from "@/entities/coin";
 import { postCoinDeliveryBestEffort } from "@/entities/coin-deliveries";
-import { buildCoinDeliveryPostBody } from "@/features/deposit";
+import { buildCoinDeliveryPostBody } from "@/entities/coin-deliveries";
 import { stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops";
 
 export async function postPrivateWithdrawChangeDeliveryIfNeeded(parameters: {

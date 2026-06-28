@@ -1,4 +1,3 @@
-export { faucetApi, useMintAssetMutation } from "./api/faucet-api";
 export { useFaucetForNative, useFaucetForAsset } from "./lib/use-faucet";
 export type { FaucetStatus } from "./lib/use-faucet";
 export { FaucetButton } from "./ui/faucet-button";

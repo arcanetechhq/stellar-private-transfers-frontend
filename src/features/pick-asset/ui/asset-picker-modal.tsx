@@ -1,25 +1,9 @@
 import React, { useState } from "react";
 import { Search, X, Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { formatBalance } from "@/shared/lib/format-balance";
 import { TokenIcon } from "@/shared/ui/token-icon";
 import type { AssetWithTrustline } from "@/entities/asset";
-
-function formatBalance(raw: string | undefined): string {
-  if (raw === undefined) return "—";
-  const value = Number.parseFloat(raw);
-  if (Number.isNaN(value)) return raw;
-  if (value === 0) return "0";
-  if (value < 1) {
-    return value.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 8,
-    });
-  }
-  return value.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
 
 interface AssetListItemProperties {
   asset: AssetWithTrustline;

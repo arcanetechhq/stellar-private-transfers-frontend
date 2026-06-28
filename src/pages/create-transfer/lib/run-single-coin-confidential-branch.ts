@@ -1,15 +1,13 @@
 import type { OnboardingPayload } from "contract";
-import { addCoin, markCoinSpent, type CoinWithMetadata } from "@/entities/coin";
-import { buildCoinDeliveryPostBody } from "@/features/deposit";
+import type { CoinWithMetadata } from "@/entities/coin";
 import { prepareConfidentialTransferProof } from "@/shared/lib/privacy-pool/privacy-pool-confidential-proofs";
 import { readLeafEphemeralHex } from "@/shared/lib/privacy-pool/fetch-contract-merkle";
-import { stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops";
 import { findCommitmentLeafIndex } from "@/entities/coin";
-import { postCoinDeliveryBestEffort } from "@/entities/coin-deliveries";
 import { buildOnboardingPayload } from "@/shared/lib/registry/build-onboarding-payload";
 import type { RunConfidentialTransferInput } from "./confidential-transfer-mutation-types";
 import type { RecipientTransferTarget } from "./run-confidential-transfer-mutation";
 import { sealEncryptAndSubmitSingleCoinConfidentialTransfer } from "./single-coin-confidential-audit-submit";
+import { finalizeConfidentialTransferDeliveries } from "./finalize-confidential-transfer-deliveries";
 
 type PreparedSingleProof = Awaited<
   ReturnType<typeof prepareConfidentialTransferProof>
@@ -104,75 +102,12 @@ interface FinalizeSingleParameters extends SingleCoinBranchParameters {
 async function finalizeSingleCoinDeliveries(
   parameters: FinalizeSingleParameters,
 ): Promise<string | undefined> {
-  const {
-    input,
-    poolContract,
-    recipientTrim,
-    senderTrim,
-    txId,
-    recipientCoin,
-    changeCoin,
-    picked,
-  } = parameters;
-  for (const coinRow of picked) {
-    input.dispatch(markCoinSpent(coinRow.coin.commitment));
-  }
-  if (changeCoin) {
-    const changeDisplay = stroopsToDisplayAmount(BigInt(changeCoin.coin.value));
-    input.dispatch(
-      addCoin({
-        commitmentHex: changeCoin.commitment_hex,
-        coin: changeCoin.coin,
-        depositScalarHex: changeCoin.depositScalarHex,
-        precommitementHex: changeCoin.precommitementHex,
-        privateAddress: senderTrim,
-        assetId: input.assetId,
-        poolContract,
-        amountDisplay: changeDisplay,
-        status: "pending",
-        txId,
-      }),
-    );
-  }
-  const warnings: string[] = [];
-  const suppressDeliveryWarnings = Boolean(
-    parameters.recipientTarget.temporaryKeyMaterial,
-  );
-  if (!parameters.recipientTarget.temporaryKeyMaterial) {
-    const warning = await postCoinDeliveryBestEffort(input.dispatch, () =>
-      buildCoinDeliveryPostBody({
-        recipientPrivateAddressStpl1: recipientTrim,
-        commitmentHex: recipientCoin.commitment_hex,
-        coin: recipientCoin.coin,
-        depositScalarHex: recipientCoin.depositScalarHex,
-        precommitementHex: recipientCoin.precommitementHex,
-        assetId: input.assetId,
-        amountDisplay: input.amountDisplay,
-        txId,
-      }),
-    );
-    if (warning) {
-      warnings.push(warning);
-    }
-  }
-  if (changeCoin) {
-    const changeWarning = await postCoinDeliveryBestEffort(input.dispatch, () =>
-      buildCoinDeliveryPostBody({
-        recipientPrivateAddressStpl1: senderTrim,
-        commitmentHex: changeCoin.commitment_hex,
-        coin: changeCoin.coin,
-        depositScalarHex: changeCoin.depositScalarHex,
-        precommitementHex: changeCoin.precommitementHex,
-        assetId: input.assetId,
-        amountDisplay: stroopsToDisplayAmount(BigInt(changeCoin.coin.value)),
-        txId,
-      }),
-    );
-    if (changeWarning && !suppressDeliveryWarnings) {
-      warnings.push(changeWarning);
-    }
-  }
-  return warnings.length > 0 ? warnings.join("; ") : undefined;
+  return finalizeConfidentialTransferDeliveries({
+    ...parameters,
+    suppressRecipientDelivery: Boolean(
+      parameters.recipientTarget.temporaryKeyMaterial,
+    ),
+  });
 }
 
 export async function runSingleCoinConfidentialBranch(

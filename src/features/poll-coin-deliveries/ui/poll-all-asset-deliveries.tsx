@@ -3,12 +3,13 @@ import { useAppSelector } from "@/store";
 import { useGetAssetsQuery } from "@/entities/asset";
 import { selectPrivateAddressState } from "@/entities/private-address";
 import { selectWalletPublicKey } from "@/entities/wallet";
-import { useWalletPrivateAddress } from "@/features/register-private-address";
-import {
-  usePollAssetDeliveries,
-  useSpentNullifierPolling,
-} from "@/features/poll-coin-deliveries";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
+import { usePollAssetDeliveries } from "../polling/use-poll-asset-deliveries";
+import { useSpentNullifierPolling } from "../polling/use-spent-nullifier-polling";
+
+type PollAllAssetDeliveriesProperties = {
+  actionsEnabled: boolean;
+};
 
 interface AssetPollerProperties {
   privateAddress: string;
@@ -35,9 +36,10 @@ function AssetPoller({
   return <></>;
 }
 
-export function PollAllAssetDeliveries() {
+export function PollAllAssetDeliveries({
+  actionsEnabled,
+}: PollAllAssetDeliveriesProperties) {
   useSpentNullifierPolling();
-  const { actionsEnabled } = useWalletPrivateAddress();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const { byNonce, scalarByNonce } = useAppSelector(selectPrivateAddressState);
   const { data: assets } = useGetAssetsQuery();

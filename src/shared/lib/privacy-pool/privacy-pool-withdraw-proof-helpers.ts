@@ -45,6 +45,60 @@ export type WithdrawChangeCoin = {
   precommitementHex: string;
 };
 
+export type DualWithdrawProofParameters = {
+  sdk: PrivacyPoolSDK;
+  buildAlignedDepositSlot: AlignedDepositSlotBuilder;
+  coinA: CoinData;
+  coinB: CoinData;
+  state: StateFile;
+  destinationStellarAddress: string;
+  privKeyScalarHex: string;
+  ephemeralA: { xHex: string; yHex: string };
+  ephemeralB: { xHex: string; yHex: string };
+  withdrawAmountStroops: bigint;
+  changePrivateAddressStpl1: string | undefined;
+  tokenAddress: string;
+};
+
+function destinationWithdrawFrAndScalar(parameters: {
+  destinationStellarAddress: string;
+  privKeyScalarHex: string;
+}): {
+  hi: string;
+  lo: string;
+  privKeyScalar: string;
+} {
+  const pkHex = ed25519PublicKeyHexFromStellarAccount(
+    parameters.destinationStellarAddress,
+  );
+  const { hi, lo } = ed25519PubkeyPayloadHexToWithdrawFrDecimals(pkHex);
+  const privKeyScalar = privKeyScalarDecimalFromRecipientScalarHex(
+    parameters.privKeyScalarHex,
+  );
+  return { hi, lo, privKeyScalar };
+}
+
+export function buildWithdrawPublicInput(parameters: {
+  stateRoot: string;
+  destinationStellarAddress: string;
+  privKeyScalarHex: string;
+  tokenAddress: string;
+}): ReturnType<typeof withTokenAddressPublicInputs> {
+  const { hi, lo, privKeyScalar } = destinationWithdrawFrAndScalar({
+    destinationStellarAddress: parameters.destinationStellarAddress,
+    privKeyScalarHex: parameters.privKeyScalarHex,
+  });
+  return withTokenAddressPublicInputs(
+    {
+      stateRoot: parameters.stateRoot,
+      withdrawAddressHi: hi,
+      withdrawAddressLo: lo,
+      privKeyScalar,
+    },
+    parameters.tokenAddress,
+  );
+}
+
 export async function resolveWithdrawChangeDeposits(parameters: {
   changeStroops: bigint;
   changePrivateAddressStpl1: string | undefined;
@@ -79,20 +133,9 @@ export async function resolveWithdrawChangeDeposits(parameters: {
   };
 }
 
-export async function prepareDualWithdrawProofInputs(parameters: {
-  sdk: PrivacyPoolSDK;
-  buildAlignedDepositSlot: AlignedDepositSlotBuilder;
-  coinA: CoinData;
-  coinB: CoinData;
-  state: StateFile;
-  destinationStellarAddress: string;
-  privKeyScalarHex: string;
-  ephemeralA: { xHex: string; yHex: string };
-  ephemeralB: { xHex: string; yHex: string };
-  withdrawAmountStroops: bigint;
-  changePrivateAddressStpl1: string | undefined;
-  tokenAddress: string;
-}): Promise<{
+export async function prepareDualWithdrawProofInputs(
+  parameters: DualWithdrawProofParameters,
+): Promise<{
   publicInput: ReturnType<typeof withTokenAddressPublicInputs>;
   audit: TransactionAuditParams;
   withdrawLegs: [WithdrawObject, WithdrawObject];
@@ -119,28 +162,18 @@ export async function prepareDualWithdrawProofInputs(parameters: {
     ephemeralA: parameters.ephemeralA,
     ephemeralB: parameters.ephemeralB,
   });
-  const pkHex = ed25519PublicKeyHexFromStellarAccount(
-    parameters.destinationStellarAddress,
-  );
-  const { hi, lo } = ed25519PubkeyPayloadHexToWithdrawFrDecimals(pkHex);
-  const privKeyScalar = privKeyScalarDecimalFromRecipientScalarHex(
-    parameters.privKeyScalarHex,
-  );
   const { deposits, changeCoin } = await resolveWithdrawChangeDeposits({
     changeStroops,
     changePrivateAddressStpl1: parameters.changePrivateAddressStpl1,
     buildAlignedDepositSlot: parameters.buildAlignedDepositSlot,
     tokenAddress: parameters.tokenAddress,
   });
-  const publicInput = withTokenAddressPublicInputs(
-    {
-      stateRoot: legA.witness.stateRoot,
-      withdrawAddressHi: hi,
-      withdrawAddressLo: lo,
-      privKeyScalar,
-    },
-    parameters.tokenAddress,
-  );
+  const publicInput = buildWithdrawPublicInput({
+    stateRoot: legA.witness.stateRoot,
+    destinationStellarAddress: parameters.destinationStellarAddress,
+    privKeyScalarHex: parameters.privKeyScalarHex,
+    tokenAddress: parameters.tokenAddress,
+  });
   const applicationId =
     parameters.coinA.application_id
     ?? parameters.coinB.application_id

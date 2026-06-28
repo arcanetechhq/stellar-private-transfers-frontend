@@ -1,8 +1,8 @@
 import React from "react";
 import { Info } from "lucide-react";
-import { ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { TokenIcon } from "@/shared/ui/token-icon";
+import { AmountInputPanel } from "@/shared/ui/amount-input-panel";
+import { AssetSelectButton } from "@/shared/ui/asset-select-button";
 import { FormErrorAlert } from "@/shared/ui/form-error-alert";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { QUICK_PERCENTAGE_OPTIONS } from "../model/create-deposit";
@@ -12,71 +12,17 @@ interface AssetSelectorProperties {
   onOpen: () => void;
 }
 
-function formatBalance(raw: string | undefined): string {
-  if (raw === undefined) return "—";
-  const value = Number.parseFloat(raw);
-  if (Number.isNaN(value)) return raw;
-  if (value === 0) return "0";
-  if (value < 1) {
-    return value.toLocaleString("en-US", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 8,
-    });
-  }
-  return value.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
-
 function AssetSelector({ selectedToken, onOpen }: AssetSelectorProperties) {
   const { t: translate } = useTranslation("deposit");
-  const selectedTokenBalance = React.useMemo(
-    () => formatBalance(selectedToken?.balance),
-    [selectedToken?.balance],
-  );
 
   return (
-    <div>
-      <label className="mb-2 block text-[14px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
-        {translate("asset")}
-      </label>
-      <button
-        type="button"
-        onClick={onOpen}
-        className="flex w-full items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-4 py-3 transition-colors hover:bg-[var(--surface-hover)]"
-      >
-        {selectedToken ? (
-          <div className="flex items-center gap-3">
-            <TokenIcon
-              ticker={selectedToken.assetId.toUpperCase()}
-              logoUrl={selectedToken.logoUrl}
-              size={40}
-            />
-            <div className="text-left">
-              <p className="text-[14px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
-                {selectedToken.assetId.toUpperCase()}
-              </p>
-              <p className="text-[13px] leading-[18px] text-[var(--foreground-secondary)]">
-                {selectedToken.name}
-              </p>
-            </div>
-          </div>
-        ) : (
-          <p className="text-[15px] text-[var(--foreground-tertiary)]">
-            {translate("asset")}
-          </p>
-        )}
-        <div className="flex items-center gap-3">
-          {selectedToken ? (
-            <p className="text-right text-[14px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
-              {selectedTokenBalance}
-            </p>
-          ) : undefined}
-          <ChevronDown className="h-4 w-4 text-[var(--foreground-secondary)]" />
-        </div>
-      </button>
-    </div>
+    <AssetSelectButton
+      asset={selectedToken}
+      label={translate("asset")}
+      placeholder={translate("asset")}
+      onOpen={onOpen}
+      tickerClassName="text-[14px] leading-[20px] font-semibold text-[var(--foreground-primary)]"
+    />
   );
 }
 
@@ -96,52 +42,21 @@ function AmountInput({
   onPercentage,
 }: AmountInputProperties) {
   const { t: translate } = useTranslation("deposit");
-  const maxAvailableBalance = React.useMemo(
-    () => formatBalance(availableBalance),
-    [availableBalance],
-  );
 
   return (
-    <div>
-      <label className="mb-2 block text-[14px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
-        {translate("amount")}
-      </label>
-      <div className="relative">
-        <input
-          type="text"
-          value={amount}
-          onChange={(event) => onAmountChange(event.target.value)}
-          placeholder="0.00"
-          className="w-full rounded-lg border border-[var(--border)] px-4 py-4 pr-28 text-[20px] font-semibold text-[var(--foreground-primary)] focus:ring-2 focus:ring-[var(--ring)] focus:outline-none"
-        />
-        <div className="absolute top-1/2 right-4 flex -translate-y-1/2 flex-col items-end">
-          {maxAvailableBalance === "—" ? undefined : (
-            <p className="mb-1 text-[12px] leading-[16px] text-[var(--foreground-secondary)]">
-              {translate("availableForMax", { amount: maxAvailableBalance })}
-            </p>
-          )}
-          <button
-            type="button"
-            onClick={onMaxAmount}
-            className="rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-3 py-1.5 text-[13px] font-semibold text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
-          >
-            {translate("max")}
-          </button>
-        </div>
-      </div>
-      <div className="mt-3 flex gap-2">
-        {QUICK_PERCENTAGE_OPTIONS.map((percentage) => (
-          <button
-            key={percentage}
-            type="button"
-            onClick={() => onPercentage(percentage)}
-            className="rounded-lg border border-[var(--border)] bg-[var(--secondary)] px-4 py-2 text-[13px] font-medium text-[var(--foreground-secondary)] transition-colors hover:bg-[var(--surface-hover)]"
-          >
-            {percentage}%
-          </button>
-        ))}
-      </div>
-    </div>
+    <AmountInputPanel
+      label={translate("amount")}
+      amount={amount}
+      availableBalance={availableBalance}
+      availableLabel={(balance) => translate("availableForMax", { amount: balance })}
+      maxLabel={translate("max")}
+      onAmountChange={onAmountChange}
+      onMaxAmount={onMaxAmount}
+      placeholder="0.00"
+      inputClassName="w-full rounded-lg border border-[var(--border)] px-4 py-4 pr-28 text-[20px] font-semibold text-[var(--foreground-primary)] focus:ring-2 focus:ring-[var(--ring)] focus:outline-none"
+      quickPercentages={QUICK_PERCENTAGE_OPTIONS}
+      onPercentage={onPercentage}
+    />
   );
 }
 

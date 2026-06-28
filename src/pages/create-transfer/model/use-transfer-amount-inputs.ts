@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { AssetWithTrustline } from "@/entities/asset";
-import { isNumericDecimalInput } from "../lib/numeric-input";
+import { isNumericDecimalInput } from "@/shared/lib/numeric-decimal-input";
 import { PERCENTAGE_DIVISOR } from "./create-transfer";
 
 export function useTransferAmountInputs(

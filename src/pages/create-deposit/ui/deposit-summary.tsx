@@ -3,6 +3,7 @@ import { Download, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { shortenPrivateAddressForDisplay } from "@/shared/lib/private-address/shorten-private-address-for-display";
+import { SummaryRows } from "@/shared/ui/summary-rows";
 
 interface SummaryLineItemsProperties {
   selectedToken: AssetWithTrustline | undefined;
@@ -19,32 +20,13 @@ function SummaryLineItems({
   const ticker = selectedToken?.assetId.toUpperCase() ?? "—";
 
   return (
-    <div className="mb-6 space-y-3">
-      <div className="flex justify-between">
-        <span className="text-sm leading-5 text-[var(--foreground-secondary)]">
-          {translate("asset")}
-        </span>
-        <span className="text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
-          {ticker}
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-sm leading-5 text-[var(--foreground-secondary)]">
-          {translate("amount")}
-        </span>
-        <span className="text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
-          {amount || "0.00"}
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-sm leading-5 text-[var(--foreground-secondary)]">
-          {translate("networkFee")}
-        </span>
-        <span className="text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
-          ${networkFee.toFixed(2)}
-        </span>
-      </div>
-    </div>
+    <SummaryRows
+      rows={[
+        { label: translate("asset"), value: ticker },
+        { label: translate("amount"), value: amount || "0.00" },
+        { label: translate("networkFee"), value: `$${networkFee.toFixed(2)}` },
+      ]}
+    />
   );
 }
 

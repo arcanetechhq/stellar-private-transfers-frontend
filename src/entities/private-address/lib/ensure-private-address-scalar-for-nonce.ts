@@ -1,5 +1,5 @@
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
-import type { Dispatch, UnknownAction } from "redux";
+import type { Dispatch, UnknownAction } from "@reduxjs/toolkit";
 import { readPrivateAddressRecordFromStorage } from "./persist-private-address";
 import { setPrivateAddressRecordAndScalar } from "../model/private-address";
 import type { PrivateAddressNonceEntry } from "../model/types";

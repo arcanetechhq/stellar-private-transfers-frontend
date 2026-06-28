@@ -4,6 +4,7 @@ import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { shortenStellarAddress } from "@/shared/lib/shorten-stellar-address";
 import type { AssetWithTrustline } from "@/entities/asset";
+import { SummaryRows } from "@/shared/ui/summary-rows";
 import type { RecipientRegistryStatus } from "../model/use-recipient-registry-status";
 import { NETWORK_FEE } from "../model/create-transfer";
 
@@ -25,40 +26,21 @@ function SummaryDetails({
     : "—";
 
   return (
-    <div className="mb-6 space-y-3">
-      <div className="flex justify-between">
-        <span className="text-sm leading-5 text-[var(--foreground-secondary)]">
-          {translate("asset")}
-        </span>
-        <span className="text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
-          {ticker}
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-sm leading-5 text-[var(--foreground-secondary)]">
-          {translate("amount")}
-        </span>
-        <span className="text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
-          {amount || translate("amountPlaceholder")}
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-sm leading-5 text-[var(--foreground-secondary)]">
-          {translate("recipient")}
-        </span>
-        <span className="font-mono text-[13px] leading-[18px] text-[var(--foreground-primary)]">
-          {displayRecipient}
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-sm leading-5 text-[var(--foreground-secondary)]">
-          {translate("networkFee")}
-        </span>
-        <span className="text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
-          {NETWORK_FEE} {ticker}
-        </span>
-      </div>
-    </div>
+    <SummaryRows
+      rows={[
+        { label: translate("asset"), value: ticker },
+        {
+          label: translate("amount"),
+          value: amount || translate("amountPlaceholder"),
+        },
+        {
+          label: translate("recipient"),
+          value: displayRecipient,
+          valueClassName: "font-mono text-[13px] leading-[18px] font-normal",
+        },
+        { label: translate("networkFee"), value: `${NETWORK_FEE} ${ticker}` },
+      ]}
+    />
   );
 }
 

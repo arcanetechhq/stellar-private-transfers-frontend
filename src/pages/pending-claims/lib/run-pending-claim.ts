@@ -3,7 +3,10 @@ import { addCoin, type CoinData } from "@/entities/coin";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";
 import type { PendingClaimItem } from "@/entities/pending-claims";
 import type { AppDispatch } from "@/store";
-import { coinDeliveryApi } from "@/entities/coin-deliveries";
+import {
+  buildCoinDeliveryPostBody,
+  coinDeliveryApi,
+} from "@/entities/coin-deliveries";
 import { prepareConfidentialTransferProof } from "@/shared/lib/privacy-pool/privacy-pool-confidential-proofs";
 import {
   fetchAndMergeMerkleState,
@@ -12,9 +15,6 @@ import {
 import { submitSorobanConfidentialTransfer } from "@/shared/lib/privacy-pool/submit-soroban-confidential-transfer";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import { resolveTokenContractId } from "@/shared/stellar/resolve-token-contract-id";
-import {
-  buildCoinDeliveryPostBody,
-} from "@/features/deposit";
 import {
   base64RecoveryScalar,
   buildClaimOnboardingPayload,

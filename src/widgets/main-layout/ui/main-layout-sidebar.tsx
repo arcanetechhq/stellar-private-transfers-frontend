@@ -1,19 +1,12 @@
 import React from "react";
 import { Link } from "react-router";
-import type { LucideIcon } from "lucide-react";
 import Arcn from "@/shared/assets/logo-arcn";
 import {
   LOGO_HEIGHT_PX,
   LOGO_WIDTH_PX,
   SIDEBAR_WIDTH_PX,
 } from "./main-layout-constants";
-
-export type MainLayoutNavItem = {
-  name: string;
-  icon: LucideIcon;
-  href: string;
-  badgeCount?: number;
-};
+import type { MainLayoutNavItem } from "../lib/main-layout-navigation";
 
 type MainLayoutSidebarProperties = {
   navigation: MainLayoutNavItem[];

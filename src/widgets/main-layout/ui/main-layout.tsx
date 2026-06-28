@@ -8,10 +8,12 @@ import {
   PollAllAssetDeliveries,
 } from "@/features/poll-coin-deliveries";
 import { PollPendingDeposits } from "@/features/poll-deposit";
+import { useWalletPrivateAddress } from "@/features/register-private-address";
 import { useMainLayoutModel } from "../lib/use-main-layout-model";
 
 export function MainLayout() {
   const model = useMainLayoutModel();
+  const { actionsEnabled } = useWalletPrivateAddress();
 
   return (
     <div className="flex h-screen" style={{ backgroundColor: "#F4F4F2" }}>
@@ -49,7 +51,7 @@ export function MainLayout() {
       />
 
       <EnsureMissingPrivateAddressScalars />
-      <PollAllAssetDeliveries />
+      <PollAllAssetDeliveries actionsEnabled={actionsEnabled} />
       <PollPendingDeposits />
     </div>
   );

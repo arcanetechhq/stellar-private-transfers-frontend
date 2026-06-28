@@ -29,3 +29,9 @@ export {
 } from "./lib/persist-seen-tags";
 
 export { postCoinDeliveryBestEffort } from "./lib/post-coin-delivery-best-effort";
+
+export {
+  buildCoinDeliveryPostBody,
+  type BuildCoinDeliveryPostBodyInput,
+} from "./lib/build-coin-delivery-post-body";
+

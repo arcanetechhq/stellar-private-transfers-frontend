@@ -1,12 +1,9 @@
 import type { CoinData, StateFile } from "@auditable/privacy-pool-zk-sdk";
 import { privacyPoolService } from "./privacy-pool-service";
-import { buildRecipientAndOptionalChangeDeposits } from "./build-recipient-change-deposits";
-import { withTokenAddressPublicInputs } from "./prove-transaction-input";
 import { buildZeroPublicLegs } from "./prove-transaction-input";
 import {
   MIN_CONFIDENTIAL_TRANSFER_STROOPS,
   requireChangeRecipientWhenPartial,
-  senderWithdrawFrAndScalar,
   withdrawWitnessForCoin,
 } from "./privacy-pool-confidential-proof-helpers";
 import {
@@ -14,13 +11,11 @@ import {
   resolvePoolApplicationId,
 } from "./build-transaction-audit-parameters";
 import type { KytApplicationIdHints } from "./privacy-pool-proof-types";
-
-type GeneratedOutputCoin = {
-  commitment_hex: string;
-  coin: CoinData;
-  depositScalarHex: string;
-  precommitementHex: string;
-};
+import {
+  buildSenderTransferDepositsAndPublicInput,
+  generatedOutputCoinFromSlot,
+  type GeneratedOutputCoin,
+} from "./confidential-transfer-proof-shared";
 
 type PrepareConfidentialTransferProofParameters = {
   coin: CoinData;
@@ -66,27 +61,17 @@ export async function prepareConfidentialTransferProof(
     xHex: parameters.depositorEphemeralXHex,
     yHex: parameters.depositorEphemeralYHex,
   });
-  const { hi, lo, privKeyScalar } = senderWithdrawFrAndScalar({
-    senderGAddress: parameters.senderGAddress,
-    senderPrivKeyScalarHex: parameters.senderPrivKeyScalarHex,
-  });
-  const { recipientSlot, deposits, changeCoin } =
-    await buildRecipientAndOptionalChangeDeposits({
+  const { recipientSlot, deposits, changeCoin, publicInput } =
+    await buildSenderTransferDepositsAndPublicInput({
+      senderGAddress: parameters.senderGAddress,
+      senderPrivKeyScalarHex: parameters.senderPrivKeyScalarHex,
       recipientPrivateAddressStpl1: parameters.recipientPrivateAddressStpl1,
       transferStroops: parameters.transferStroops,
       changeStroops,
       selfPrivateAddressStpl1ForChange: parameters.selfPrivateAddressStpl1ForChange,
       tokenAddress: parameters.tokenAddress,
-    });
-  const publicInput = withTokenAddressPublicInputs(
-    {
       stateRoot: witness.stateRoot,
-      withdrawAddressHi: hi,
-      withdrawAddressLo: lo,
-      privKeyScalar,
-    },
-    parameters.tokenAddress,
-  );
+    });
   const applicationId = parameters.coin.application_id ?? resolvePoolApplicationId();
   const audit = buildPoolTransactionAuditParameters(applicationId);
   const proof = await sdk.proveTransaction(
@@ -105,12 +90,7 @@ export async function prepareConfidentialTransferProof(
   return {
     ...proof,
     applicationIdsPlaintext,
-    recipientCoin: {
-      commitment_hex: recipientSlot.commitment_hex,
-      coin: recipientSlot.coin,
-      depositScalarHex: recipientSlot.depositScalarHex,
-      precommitementHex: recipientSlot.precommitementHex,
-    },
+    recipientCoin: generatedOutputCoinFromSlot(recipientSlot),
     changeCoin,
   };
 }

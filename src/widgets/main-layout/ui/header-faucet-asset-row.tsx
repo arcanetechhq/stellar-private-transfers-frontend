@@ -5,12 +5,12 @@ import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/store";
 import type { AssetWithTrustline } from "@/entities/asset";
 import {
+  addAssetTrustlineThunk,
   faucetClaimAmountLabel,
   isAssetFaucetClaimable,
   selectIsClaimLoadingForAsset,
   selectTrustlinePendingAssetId,
 } from "@/entities/asset";
-import { addAssetTrustlineThunk } from "@/features/add-asset-trustline";
 import {
   claimIssuedAssetThunk,
   claimNativeFaucetThunk,
@@ -106,7 +106,7 @@ function HeaderFaucetRowClaim({
       variant="default"
       size="sm"
       disabled={isClaimLoading || !walletPublicKey}
-      className="min-w-[7.5rem] max-w-[11rem] shrink-0 truncate"
+      className="max-w-[11rem] min-w-[7.5rem] shrink-0 truncate"
       onClick={() => {
         if (!walletPublicKey) {
           return;

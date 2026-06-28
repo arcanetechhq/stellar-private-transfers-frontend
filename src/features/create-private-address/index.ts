@@ -1,9 +1,9 @@
-export { createPrivateAddressFromWalletSignature } from "./lib/create-private-address-flow";
+export { createPrivateAddressFromWalletSignature } from "@/entities/private-address";
 export {
   errorToMessage,
   isSignMessageUnsupportedError,
-} from "./lib/sign-message-errors";
-export { runWalletCreatePrivateAddressFlow } from "./lib/run-wallet-create-private-address";
+} from "@/shared/lib/wallet/sign-message-errors";
+export { runWalletCreatePrivateAddressFlow } from "@/entities/private-address";
 export type { EnsureScalarResult } from "@/entities/private-address";
 export { ensurePrivateAddressScalarForNonce } from "@/entities/private-address";
 export { useCreatePrivateAddress } from "./api/use-create-private-address";

@@ -1,24 +1,20 @@
-import {
-  ed25519PubkeyPayloadHexToWithdrawFrDecimals,
-  withdrawObjectFromMerkleWitness,
-} from "@auditable/privacy-pool-zk-sdk";
+import { withdrawObjectFromMerkleWitness } from "@auditable/privacy-pool-zk-sdk";
 import type { CoinData, PrivacyPoolSDK, StateFile } from "@auditable/privacy-pool-zk-sdk";
 import { buildPublicWithdrawLegs } from "./prove-transaction-input";
 import {
   leafEphemeralCoords,
   MIN_CONFIDENTIAL_TRANSFER_STROOPS,
 } from "./privacy-pool-confidential-proof-helpers";
-import { ed25519PublicKeyHexFromStellarAccount } from "@/shared/lib/stellar/ed25519-public-key-hex-from-account";
-import { privKeyScalarDecimalFromRecipientScalarHex } from "./priv-key-scalar-decimal-from-recipient-scalar-hex";
-import { withTokenAddressPublicInputs } from "./prove-transaction-input";
 import {
   buildPoolTransactionAuditParameters,
   resolvePoolApplicationId,
 } from "./build-transaction-audit-parameters";
 import {
+  buildWithdrawPublicInput,
   prepareDualWithdrawProofInputs,
   resolveWithdrawChangeDeposits,
   type AlignedDepositSlotBuilder,
+  type DualWithdrawProofParameters,
   type WithdrawChangeCoin,
 } from "./privacy-pool-withdraw-proof-helpers";
 import type { KytApplicationIdHints } from "./privacy-pool-proof-types";
@@ -59,13 +55,6 @@ export async function proveWithdrawTransact(parameters: {
     ephemeralCoords,
     applicationId,
   );
-  const pkHex = ed25519PublicKeyHexFromStellarAccount(
-    parameters.destinationStellarAddress,
-  );
-  const { hi, lo } = ed25519PubkeyPayloadHexToWithdrawFrDecimals(pkHex);
-  const privKeyScalar = privKeyScalarDecimalFromRecipientScalarHex(
-    parameters.privKeyScalarHex,
-  );
   const changeStroops = noteStroops - parameters.withdrawAmountStroops;
   const { deposits, changeCoin } = await resolveWithdrawChangeDeposits({
     changeStroops,
@@ -73,15 +62,12 @@ export async function proveWithdrawTransact(parameters: {
     buildAlignedDepositSlot: parameters.buildAlignedDepositSlot,
     tokenAddress: parameters.tokenAddress,
   });
-  const publicInput = withTokenAddressPublicInputs(
-    {
-      stateRoot: witness.stateRoot,
-      withdrawAddressHi: hi,
-      withdrawAddressLo: lo,
-      privKeyScalar,
-    },
-    parameters.tokenAddress,
-  );
+  const publicInput = buildWithdrawPublicInput({
+    stateRoot: witness.stateRoot,
+    destinationStellarAddress: parameters.destinationStellarAddress,
+    privKeyScalarHex: parameters.privKeyScalarHex,
+    tokenAddress: parameters.tokenAddress,
+  });
   const audit = buildPoolTransactionAuditParameters(applicationId);
   const proof = await parameters.sdk.proveTransaction(
     publicInput as unknown as Parameters<typeof parameters.sdk.proveTransaction>[0],
@@ -102,20 +88,9 @@ export async function proveWithdrawTransact(parameters: {
   return { ...proof, applicationIdsPlaintext, changeCoin };
 }
 
-export async function proveWithdrawTransactDual(parameters: {
-  sdk: PrivacyPoolSDK;
-  buildAlignedDepositSlot: AlignedDepositSlotBuilder;
-  coinA: CoinData;
-  coinB: CoinData;
-  state: StateFile;
-  destinationStellarAddress: string;
-  privKeyScalarHex: string;
-  ephemeralA: { xHex: string; yHex: string };
-  ephemeralB: { xHex: string; yHex: string };
-  withdrawAmountStroops: bigint;
-  changePrivateAddressStpl1: string | undefined;
-  tokenAddress: string;
-}): Promise<{
+export async function proveWithdrawTransactDual(
+  parameters: DualWithdrawProofParameters,
+): Promise<{
   proof_hex: string;
   public_hex: string;
   applicationIdsPlaintext: KytApplicationIdHints;

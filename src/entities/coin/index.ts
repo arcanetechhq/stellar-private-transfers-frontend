@@ -32,3 +32,6 @@ export {
   CONFIDENTIAL_SPEND_OUTPUT_LIMIT,
   pickPrivateSpendCoins,
 } from "./lib/private-spend-coin-selection";
+
+export { withZeroAmountPrivateAssetRows } from "./lib/private-asset-aggregates";
+

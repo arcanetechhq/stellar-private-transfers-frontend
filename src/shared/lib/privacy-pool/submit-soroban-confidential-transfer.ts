@@ -1,12 +1,9 @@
 import type { OnboardingPayload } from "contract";
 import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
 import { createPoolContractClient } from "@/shared/stellar/create-pool-contract-client";
-import { runTtlPreflight } from "./ttl-preflight";
-import {
-  approvalSignatureToBytes,
-  requestKytPassageForPoolInteraction,
-} from "./kyt-passage-inspect";
+import { requestKytPassageForPoolInteraction } from "./kyt-passage-inspect";
 import type { KytApplicationIdHints } from "./privacy-pool-proof-types";
+import { submitPoolTransact } from "./submit-pool-transact";
 
 export interface SubmitSorobanConfidentialTransferInput {
   contractId: string;
@@ -50,22 +47,12 @@ export async function submitSorobanConfidentialTransfer(
     networkPassphrase: passphrase,
     sorobanRpcUrl: rpcUrl,
   });
-  // NOTE: Keep KYT authorization in pool.transact so indexers can read one tx context.
-  const assembledTransaction = await contractClient.transact({
-    from: input.walletPublicKey,
-    proof_bytes: Buffer.from(input.proofHex.replace(/^0x/i, ""), "hex"),
-    pub_signals_bytes: Buffer.from(input.publicHex.replace(/^0x/i, ""), "hex"),
+  return submitPoolTransact({
+    contractClient,
     onboarding: input.onboarding,
-    kyt_authorization: {
-      expiration_ledger: approval.expiresAtLedger,
-      signature: approvalSignatureToBytes(approval.signature),
-    },
+    from: input.walletPublicKey,
+    proofHex: input.proofHex,
+    publicHex: input.publicHex,
+    approval,
   });
-  await runTtlPreflight(assembledTransaction);
-  const sentTransaction = await assembledTransaction.signAndSend();
-  const transactionHash = sentTransaction.sendTransactionResponse?.hash ?? "";
-  if (!transactionHash) {
-    throw new Error("Transaction failed");
-  }
-  return transactionHash;
 }

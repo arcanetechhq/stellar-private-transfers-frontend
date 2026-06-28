@@ -1,39 +1,14 @@
-import { useEffect, useState } from "react";
+import { useNormalizedNonceState } from "@/shared/hooks/use-normalized-nonce-state";
 
 export function usePrivateAssetPrivateAddressNonce(
   defaultNonce: string | undefined,
   nonces: string[],
 ) {
-  const [viewingNonce, setViewingNonce] = useState<string | undefined>();
-
-  useEffect(() => {
-    if (defaultNonce && !viewingNonce) {
-      setViewingNonce(defaultNonce);
-    }
-  }, [defaultNonce, viewingNonce]);
-
-  useEffect(() => {
-    if (!viewingNonce && nonces.length > 0) {
-      setViewingNonce(defaultNonce ?? nonces[0]);
-    }
-  }, [nonces, defaultNonce, viewingNonce]);
-
-  const effectiveNonce =
-    viewingNonce ?? defaultNonce ?? nonces[0] ?? undefined;
-  const normalizedNonce =
-    effectiveNonce && nonces.includes(effectiveNonce)
-      ? effectiveNonce
-      : nonces[0];
-
-  useEffect(() => {
-    if (
-      nonces.length > 0 &&
-      effectiveNonce &&
-      !nonces.includes(effectiveNonce)
-    ) {
-      setViewingNonce(nonces[0]);
-    }
-  }, [nonces, effectiveNonce]);
+  const {
+    nonce: viewingNonce,
+    setNonce: setViewingNonce,
+    normalizedNonce,
+  } = useNormalizedNonceState(defaultNonce, nonces);
 
   return { viewingNonce, setViewingNonce, normalizedNonce };
 }

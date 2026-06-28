@@ -8,7 +8,7 @@ import {
 } from "@/shared/ui/select";
 import { cn } from "@/shared/lib/cn";
 import type { PrivateAddressState } from "@/entities/private-address";
-import { PrivateAddressOptionRows } from "@/features/pick-private-address";
+import { shortenPrivateAddressForDisplay } from "@/shared/lib/private-address/shorten-private-address-for-display";
 
 export const privateAddressSelectTriggerClassName = cn(
   "h-auto min-h-10 w-full min-w-0 items-start gap-2 border-border-input bg-input-background px-3 py-2 text-foreground shadow-sm",
@@ -30,6 +30,29 @@ export const privateAddressSelectItemClassName = cn(
 
 export const privateAddressSelectLabelClassName =
   "mb-1 block text-[12px] font-medium uppercase leading-[16px] tracking-[0.06em] text-[var(--muted-foreground)]";
+
+interface PrivateAddressOptionRowsProperties {
+  addressLabel: string;
+  privateAddress: string;
+  className?: string;
+}
+
+function PrivateAddressOptionRows({
+  addressLabel,
+  privateAddress,
+  className,
+}: PrivateAddressOptionRowsProperties) {
+  return (
+    <div className={cn("flex flex-col gap-1 text-left", className)}>
+      <span className="leading-tight font-medium text-[var(--foreground-primary)]">
+        {addressLabel}
+      </span>
+      <span className="font-mono text-xs leading-tight text-[var(--muted-foreground)]">
+        {shortenPrivateAddressForDisplay(privateAddress)}
+      </span>
+    </div>
+  );
+}
 
 export interface PrivateAddressSelectProperties {
   label: string;

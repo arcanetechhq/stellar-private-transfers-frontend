@@ -46,12 +46,7 @@ export function withTokenAddressPublicInputs(
 }
 
 export function tokenAddressToAssetLeg(tokenAddress: string): [string, string] {
-  const normalized = resolveTokenContractId(tokenAddress);
-  const payload = StrKey.decodeContract(normalized);
-  const hi = bytes16ToDecimal(payload.subarray(0, CONTRACT_ADDRESS_HALF_BYTES));
-  const lo = bytes16ToDecimal(
-    payload.subarray(CONTRACT_ADDRESS_HALF_BYTES, CONTRACT_ADDRESS_BYTES),
-  );
+  const { hi, lo } = tokenAddressFrParts(tokenAddress);
   return [hi, lo];
 }
 

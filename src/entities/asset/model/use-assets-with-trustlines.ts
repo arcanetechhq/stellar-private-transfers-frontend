@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useAppSelector } from "@/store";
+import { useAppSelector } from "@/store/hooks";
 import {
   fetchAccountBalances,
   type StellarBalance,

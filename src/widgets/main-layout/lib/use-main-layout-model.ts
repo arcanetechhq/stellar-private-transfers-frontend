@@ -6,7 +6,7 @@ import { i18n } from "@/shared/config/i18n-instance";
 import { useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { usePendingClaimsCountQuery } from "@/entities/pending-claims";
-import type { MainLayoutNavItem } from "../ui/main-layout-sidebar";
+import type { MainLayoutNavItem } from "./main-layout-navigation";
 
 export function useMainLayoutModel() {
   const { t: translate } = useTranslation(["navigation", "common"]);

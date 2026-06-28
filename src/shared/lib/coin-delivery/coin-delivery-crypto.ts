@@ -1,5 +1,5 @@
-const HEX_RADIX = 16;
-const HEX_PAIR_WIDTH = 2;
+import { hexToBytes } from "@/shared/lib/hex-bytes";
+
 const HEX_32_LENGTH = 64;
 const GCM_IV_LENGTH = 12;
 const GCM_AUTH_TAG_LENGTH = 16;
@@ -11,17 +11,6 @@ function normalizeHex32(xHex: string): string {
     throw new Error("sharedSecret.x must be 32-byte hex (64 chars)");
   }
   return stripped.toLowerCase();
-}
-
-function hexToBytes(hex: string): Uint8Array {
-  const out = new Uint8Array(hex.length / HEX_PAIR_WIDTH);
-  for (let index = 0; index < out.length; index++) {
-    out[index] = Number.parseInt(
-      hex.slice(index * HEX_PAIR_WIDTH, index * HEX_PAIR_WIDTH + HEX_PAIR_WIDTH),
-      HEX_RADIX,
-    );
-  }
-  return out;
 }
 
 async function sha256(data: Uint8Array): Promise<Uint8Array> {

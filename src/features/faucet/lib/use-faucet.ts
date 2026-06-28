@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useMintAssetMutation } from "@/features/faucet";
+import { useMintAssetMutation } from "@/entities/asset";
 
 const FRIENDBOT_URL = "https://friendbot.stellar.org";
 

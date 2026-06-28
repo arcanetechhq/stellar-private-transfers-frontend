@@ -3,34 +3,16 @@ import { Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AddContactModal } from "@/features/add-contact";
 import { ContactList } from "@/features/view-contact-list";
+import { PageHeading } from "@/shared/ui/page-heading";
 
 function ContactsHeader({ onAddClick }: { onAddClick: () => void }) {
   const { t: translate } = useTranslation("contacts");
 
   return (
-    <div className="mb-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1
-            className="mb-1 font-semibold"
-            style={{
-              fontSize: "32px",
-              lineHeight: "40px",
-              color: "#121826",
-            }}
-          >
-            {translate("title")}
-          </h1>
-          <p
-            style={{
-              fontSize: "16px",
-              lineHeight: "24px",
-              color: "#667085",
-            }}
-          >
-            {translate("subtitle")}
-          </p>
-        </div>
+    <PageHeading
+      title={translate("title")}
+      subtitle={translate("subtitle")}
+      action={
         <button
           type="button"
           className="flex items-center gap-2 rounded-lg px-4 py-2.5 transition-colors"
@@ -52,8 +34,8 @@ function ContactsHeader({ onAddClick }: { onAddClick: () => void }) {
           <Plus className="h-4 w-4" />
           {translate("addContact")}
         </button>
-      </div>
-    </div>
+      }
+    />
   );
 }
 

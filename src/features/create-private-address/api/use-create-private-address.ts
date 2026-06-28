@@ -1,7 +1,10 @@
 import { useCallback, useState } from "react";
 import { store, useAppDispatch, type AppDispatch } from "@/store";
-import { readPrivateAddressRecordFromStorage, setPrivateAddressRecord } from "@/entities/private-address";
-import { runWalletCreatePrivateAddressFlow } from "@/features/create-private-address";
+import {
+  readPrivateAddressRecordFromStorage,
+  runWalletCreatePrivateAddressFlow,
+  setPrivateAddressRecord,
+} from "@/entities/private-address";
 import { DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE } from "@/shared/lib/private-address/privacy-pool-sdk-private-address";
 
 export type CreatePrivateAddressStatus = "idle" | "pending" | "success" | "error";
@@ -64,6 +67,7 @@ export function useCreatePrivateAddress(publicKey: string | undefined) {
       }
       await runWalletCreatePrivateAddressFlow({
         dispatch,
+        getState: store.getState,
         publicKey,
         trimmedNonce,
         setStatus,

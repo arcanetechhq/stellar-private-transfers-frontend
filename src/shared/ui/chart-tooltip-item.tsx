@@ -5,7 +5,7 @@ import * as RechartsPrimitive from "recharts";
 
 import { cn } from "@/shared/lib/cn";
 
-import { type ChartConfig, getPayloadConfigFromPayload } from "./chart";
+import { type ChartConfig, getPayloadConfigFromPayload } from "./chart-context";
 
 type TooltipPayload = NonNullable<
   React.ComponentProps<typeof RechartsPrimitive.Tooltip>["payload"]
@@ -89,12 +89,12 @@ function TooltipPayloadDefaultContent({
       >
         <div className="grid gap-1.5">
           {nestLabel ? tooltipLabel : undefined}
-          <span className="text-muted-foreground">
+          <span className="text-[var(--muted-foreground)]">
             {itemConfig?.label || item.name}
           </span>
         </div>
         {item.value && (
-          <span className="text-foreground font-mono font-medium tabular-nums">
+          <span className="font-mono font-medium text-[var(--foreground)] tabular-nums">
             {item.value.toLocaleString()}
           </span>
         )}

@@ -5,7 +5,7 @@ import * as RechartsPrimitive from "recharts";
 
 import { cn } from "@/shared/lib/cn";
 
-import { getPayloadConfigFromPayload, useChart } from "./chart";
+import { getPayloadConfigFromPayload, useChart } from "./chart-context";
 
 export function ChartLegendContent({
   className,
