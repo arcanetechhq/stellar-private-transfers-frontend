@@ -11,6 +11,7 @@ import { MerkleTreeSyncProvider } from "./providers/merkle-tree-sync-provider";
 import { StoreProvider } from "./providers/store-provider";
 import { WalletPrivateAddressProvider } from "@/features/register-private-address";
 import { ConnectWalletGuard } from "@/widgets/connect-wallet-guard";
+import { Toaster } from "@/shared/ui/sonner";
 import { router } from "./routes";
 
 function AppShell() {
@@ -29,6 +30,7 @@ function AppShell() {
         <RouterProvider router={router} unstable_useTransitions={false} />
       </div>
       <ConnectWalletGuard />
+      <Toaster richColors closeButton position="top-right" />
     </>
   );
 }

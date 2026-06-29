@@ -34,7 +34,7 @@ if (typeof window !== "undefined") {
 export const networks = {
   testnet: {
     networkPassphrase: "Test SDF Network ; September 2015",
-    contractId: "CBAMENVHQA2GK7O3N5DW4L7GPUZPT3AZWJKZMNN26MOPFH7IRMGSMKFN",
+    contractId: "CCO5QRTS5HFVPR356FFC4NI62IMBQNDGMOAXR4K5UVTV3YMRWDZGKXGC",
   }
 } as const
 
@@ -145,6 +145,18 @@ export interface Client {
   get_private_address: ({owner}: {owner: string}, options?: MethodOptions) => Promise<AssembledTransaction<Option<PrivateAddressRecord>>>
 
   /**
+   * Construct and simulate a get_owner_by_public_key transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   * Resolve the Stellar G-address owner from a registered private-address public key.
+   */
+  get_owner_by_public_key: ({public_key_x, public_key_y}: {public_key_x: Buffer, public_key_y: Buffer}, options?: MethodOptions) => Promise<AssembledTransaction<Option<string>>>
+
+  /**
+   * Construct and simulate a seed_private_address transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   * Admin-only migration helper: seed forward and reverse indexes without owner auth.
+   */
+  seed_private_address: ({admin, registration, updated_at_ledger}: {admin: string, registration: PrivateAddressRegistration, updated_at_ledger: u32}, options?: MethodOptions) => Promise<AssembledTransaction<null>>
+
+  /**
    * Construct and simulate a register_pending_notes transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    * Trusted pool registers onboarding pending notes.
    */
@@ -192,6 +204,8 @@ export class Client extends ContractClient {
         "AAAAAAAAADVPd25lciByZWdpc3RlcnMgYSBwZXJtYW5lbnQgcHJpdmF0ZSBhZGRyZXNzIGRpcmVjdGx5LgAAAAAAABhyZWdpc3Rlcl9wcml2YXRlX2FkZHJlc3MAAAADAAAAAAAAAAVvd25lcgAAAAAAABMAAAAAAAAADHB1YmxpY19rZXlfeAAAA+4AAAAgAAAAAAAAAAxwdWJsaWNfa2V5X3kAAAPuAAAAIAAAAAA=",
         "AAAAAAAAAExUcnVzdGVkIHBvb2wgZm9yd2FyZHMgcmVnaXN0cmF0aW9uIGFmdGVyIG93bmVyIGF1dGggaW4gdGhlIHNhbWUgdHJhbnNhY3Rpb24uAAAAGXJlZ2lzdGVyX2FkZHJlc3NfdmlhX3Bvb2wAAAAAAAABAAAAAAAAAAxyZWdpc3RyYXRpb24AAAfQAAAAGlByaXZhdGVBZGRyZXNzUmVnaXN0cmF0aW9uAAAAAAAA",
         "AAAAAAAAAAAAAAATZ2V0X3ByaXZhdGVfYWRkcmVzcwAAAAABAAAAAAAAAAVvd25lcgAAAAAAABMAAAABAAAD6AAAB9AAAAAUUHJpdmF0ZUFkZHJlc3NSZWNvcmQ=",
+        "AAAAAAAAAFFSZXNvbHZlIHRoZSBTdGVsbGFyIEctYWRkcmVzcyBvd25lciBmcm9tIGEgcmVnaXN0ZXJlZCBwcml2YXRlLWFkZHJlc3MgcHVibGljIGtleS4AAAAAAAAXZ2V0X293bmVyX2J5X3B1YmxpY19rZXkAAAAAAgAAAAAAAAAMcHVibGljX2tleV94AAAD7gAAACAAAAAAAAAADHB1YmxpY19rZXlfeQAAA+4AAAAgAAAAAQAAA+gAAAAT",
+        "AAAAAAAAAFFBZG1pbi1vbmx5IG1pZ3JhdGlvbiBoZWxwZXI6IHNlZWQgZm9yd2FyZCBhbmQgcmV2ZXJzZSBpbmRleGVzIHdpdGhvdXQgb3duZXIgYXV0aC4AAAAAAAAUc2VlZF9wcml2YXRlX2FkZHJlc3MAAAADAAAAAAAAAAVhZG1pbgAAAAAAABMAAAAAAAAADHJlZ2lzdHJhdGlvbgAAB9AAAAAaUHJpdmF0ZUFkZHJlc3NSZWdpc3RyYXRpb24AAAAAAAAAAAARdXBkYXRlZF9hdF9sZWRnZXIAAAAAAAAEAAAAAA==",
         "AAAAAAAAADBUcnVzdGVkIHBvb2wgcmVnaXN0ZXJzIG9uYm9hcmRpbmcgcGVuZGluZyBub3Rlcy4AAAAWcmVnaXN0ZXJfcGVuZGluZ19ub3RlcwAAAAAAAgAAAAAAAAAGc2VuZGVyAAAAAAATAAAAAAAAAAdwYXlsb2FkAAAAB9AAAAART25ib2FyZGluZ1BheWxvYWQAAAAAAAAA",
         "AAAAAAAAAAAAAAAaYXV0aF9hZGRyZXNzX2Zvcl9udWxsaWZpZXIAAAAAAAEAAAAAAAAADm51bGxpZmllcl9oYXNoAAAAAAPuAAAAIAAAAAEAAAPoAAAAEw==",
         "AAAAAAAAAAAAAAAcZ2V0X3BlbmRpbmdfbnVsbGlmaWVyX3JlY29yZAAAAAEAAAAAAAAADm51bGxpZmllcl9oYXNoAAAAAAPuAAAAIAAAAAEAAAPoAAAH0AAAABZQZW5kaW5nTnVsbGlmaWVyUmVjb3JkAAA=",
@@ -214,6 +228,8 @@ export class Client extends ContractClient {
         register_private_address: this.txFromJSON<null>,
         register_address_via_pool: this.txFromJSON<null>,
         get_private_address: this.txFromJSON<Option<PrivateAddressRecord>>,
+        get_owner_by_public_key: this.txFromJSON<Option<string>>,
+        seed_private_address: this.txFromJSON<null>,
         register_pending_notes: this.txFromJSON<null>,
         auth_address_for_nullifier: this.txFromJSON<Option<string>>,
         get_pending_nullifier_record: this.txFromJSON<Option<PendingNullifierRecord>>,

@@ -21,6 +21,7 @@ import enAccess from "./locales/en/access.json";
 import enPrivateAddress from "./locales/en/private-address.json";
 import enPendingClaims from "./locales/en/pending-claims.json";
 import enAssets from "./locales/en/assets.json";
+import enKyt from "./locales/en/kyt.json";
 
 const NAMESPACES = [
   "common",
@@ -44,6 +45,7 @@ const NAMESPACES = [
   "privateAddress",
   "pendingClaims",
   "assets",
+  "kyt",
 ] as const;
 
 i18n.use(initReactI18next).init({
@@ -75,6 +77,7 @@ i18n.use(initReactI18next).init({
       privateAddress: enPrivateAddress,
       pendingClaims: enPendingClaims,
       assets: enAssets,
+      kyt: enKyt,
     },
   },
 });

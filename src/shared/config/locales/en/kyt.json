@@ -1,0 +1,12 @@
+{
+  "inspectRejectedTitle": "Compliance check failed",
+  "reasonDefault": "This transaction did not pass compliance screening.",
+  "reason_predicate_non_compliant": "Address {{address}} did not pass compliance screening.",
+  "reason_private_address_owner_unresolved": "Could not verify the owner for private address {{address}}.",
+  "reason_predicate_unconfigured": "Compliance screening is not configured on the server.",
+  "reason_predicate_error": "Compliance screening failed for address {{address}}.",
+  "reason_audit_validation_unconfigured": "Audit validation is not configured.",
+  "reason_audit_decrypt_failed": "Audit data could not be decrypted for compliance review.",
+  "reason_audit_tag_mismatch": "Audit tag validation failed.",
+  "reason_application_id_hint_mismatch": "Application id hints did not match the audit payload."
+}

@@ -3,12 +3,19 @@ import type { InspectKytPassageApproved } from "@auditable/privacy-pool-zk-sdk";
 import { Buffer } from "buffer";
 import { Operation, TransactionBuilder, rpc, xdr } from "@stellar/stellar-sdk";
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
+import { toast } from "sonner";
 import {
   getRequiredApiBaseUrl,
   getRequiredKytPassageRegistryContractId,
 } from "@/shared/stellar/stellar-network-environment";
 import { resolvePoolApplicationId } from "./build-transaction-audit-parameters";
 import type { KytApplicationIdHints } from "./privacy-pool-proof-types";
+import {
+  formatKytRejectionMessage,
+  formatKytRejectionTitle,
+  KytInspectError,
+  parseKytReasonCode,
+} from "./kyt-inspect-error";
 
 const KYT_REGISTER_FEE_STROOPS = "1000000";
 const KYT_REGISTER_TIMEOUT_SECONDS = 300;
@@ -123,6 +130,19 @@ async function parseInspectResponse(response: Response): Promise<KytInspectRespo
   return body;
 }
 
+function throwKytInspectRejected(body: Exclude<KytInspectResponse, InspectKytPassageApproved>): never {
+  const reasonCode = body.reasonCode ?? body.status;
+  const parsed = parseKytReasonCode(reasonCode);
+  const message = formatKytRejectionMessage(reasonCode);
+  toast.error(formatKytRejectionTitle(), { description: message });
+  throw new KytInspectError({
+    message,
+    reasonCode,
+    decisionId: body.decisionId,
+    detailAddress: parsed.address,
+  });
+}
+
 function passageIdToScValue(passageId: string): xdr.ScVal {
   return xdr.ScVal.scvBytes(Buffer.from(passageId.replace(/^0x/, ""), "hex"));
 }
@@ -233,7 +253,7 @@ export async function requestKytPassageForPoolInteraction(
   });
   const body = await parseInspectResponse(response);
   if (body.status !== "approved") {
-    throw new Error(`KYT inspect rejected: ${body.reasonCode ?? body.status}`);
+    throwKytInspectRejected(body);
   }
   return body;
 }
