@@ -1,0 +1,868 @@
+@keyframes stellar-wallet-panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes sheet-backdrop-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.sheet-backdrop--modal {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal-backdrop);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.sheet-backdrop--modal[data-state='open'] {
+  animation: sheet-backdrop-fade-in 160ms ease;
+}
+
+.sheet-backdrop--modal[data-state='closed'] {
+  animation: sheet-backdrop-fade-in 160ms ease reverse;
+}
+
+.action-sheet--wallet.stellar-wallet-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  width: min(520px, calc(100vw - 32px));
+  max-width: min(520px, calc(100vw - 32px));
+  max-height: min(720px, calc(100dvh - 32px));
+  transform: translate(-50%, -50%);
+  border-color: var(--border-subtle);
+  border-radius: var(--radius-4);
+  background: var(--surface);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+  overflow: hidden;
+}
+
+.action-sheet--wallet.stellar-wallet-modal[data-state='open'] {
+  animation: export-modal-in 180ms ease forwards;
+}
+
+@keyframes export-modal-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 8px)) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.stellar-wallet-modal__header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: var(--space-5);
+}
+
+.stellar-wallet-modal__header > span {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.stellar-wallet-modal__title {
+  margin: 0;
+  color: var(--text);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 34px;
+}
+
+.stellar-wallet-modal__description {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.stellar-wallet-modal__close {
+  display: inline-grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.stellar-wallet-modal__close:hover {
+  border-color: var(--border);
+  background: var(--surface-high);
+  color: var(--text);
+}
+
+.stellar-wallet-modal__body {
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.stellar-wallet-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.stellar-wallet-option {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  min-height: 78px;
+  align-items: center;
+  gap: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-4);
+  background: var(--surface-low);
+  color: var(--text);
+  cursor: pointer;
+  padding: var(--space-3);
+  text-align: left;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.stellar-wallet-option:hover:not(:disabled) {
+  border-color: var(--border);
+  background: var(--surface-high);
+}
+
+.stellar-wallet-option:disabled {
+  cursor: default;
+  opacity: 0.72;
+}
+
+.stellar-wallet-option[data-connecting='true'] {
+  border-color: var(--border);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.stellar-wallet-option__icon {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-3);
+  background: var(--surface-high);
+  color: var(--text-soft);
+}
+
+.stellar-wallet-option__copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.stellar-wallet-option__name-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stellar-wallet-option__icon-image {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-2);
+  object-fit: cover;
+}
+
+.stellar-wallet-install-badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  background: var(--surface-high);
+  color: var(--text-muted);
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.stellar-wallet-picker {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.stellar-wallet-picker__back {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: var(--space-2);
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  transition: color 180ms ease;
+}
+
+.stellar-wallet-picker__back:hover {
+  color: var(--text);
+}
+
+.stellar-wallet-picker__loading {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+}
+
+.stellar-wallet-option__name {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stellar-wallet-option__description {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stellar-wallet-option__badge {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--surface-high);
+  color: var(--text-muted);
+  padding: 0 var(--space-3);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.stellar-wallet-connected-card {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-4);
+  background: var(--surface-low);
+  padding: var(--space-3);
+}
+
+.stellar-wallet-connected-card__icon {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-4);
+  background: var(--surface-high);
+  color: var(--text-muted);
+}
+
+.stellar-wallet-connected-card__copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.stellar-wallet-connected-card__address {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stellar-wallet-connected-card__provider {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 18px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stellar-wallet-connected-card__status {
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--success-bg);
+  color: var(--success-foreground);
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.stellar-wallet-connected-card__status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.stellar-private-address-card {
+  display: grid;
+  gap: var(--space-3);
+  min-width: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-4);
+  background: var(--surface-low);
+  padding: var(--space-4);
+}
+
+.stellar-private-address-card__header {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.stellar-private-address-card__copy {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.stellar-private-address-card__title {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.stellar-private-address-card__description {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.stellar-private-address-card__status {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  border-radius: var(--radius-pill);
+  background: var(--success-bg);
+  color: var(--success-foreground);
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  white-space: nowrap;
+}
+
+.stellar-private-address-card__status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.stellar-private-address-card__address {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 38px;
+  align-items: center;
+  gap: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-3);
+  background: var(--surface);
+  padding: var(--space-3);
+}
+
+.stellar-private-address-card__address > span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.stellar-private-address-card__address-label {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.stellar-private-address-card__address-value {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stellar-private-address-card__address button {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-3);
+  background: var(--surface-high);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.stellar-private-address-card__address button:hover {
+  border-color: var(--border);
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.stellar-private-address-card__empty {
+  display: grid;
+  gap: 2px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-3);
+  background: var(--surface);
+  padding: var(--space-3);
+}
+
+.stellar-private-address-card__empty-title {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 20px;
+}
+
+.stellar-private-address-card__empty-description {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.stellar-private-address-card__status--warning {
+  background: var(--warning-bg);
+  color: var(--warning-foreground);
+}
+
+.stellar-private-address-card__error {
+  margin: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.stellar-private-address-card__action-button {
+  display: inline-flex;
+  width: 100%;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-5);
+  border: 0;
+  border-radius: var(--radius-4);
+  background: var(--button-primary-background);
+  color: var(--button-primary-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 400;
+  letter-spacing: -0.14px;
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.stellar-private-address-card__action-button:hover {
+  background: var(--button-primary-hover-background);
+}
+
+.stellar-private-address-card__action-button:disabled {
+  cursor: default;
+  opacity: 0.68;
+}
+
+.stellar-private-address-card__action-button:disabled:hover {
+  background: var(--button-primary-background);
+}
+
+.stellar-private-address-card__action-button:active {
+  transform: scale(0.99);
+}
+
+.stellar-private-address-card__action-button:disabled:active {
+  transform: none;
+}
+
+.stellar-private-address-card__action-button .activity-loader {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stellar-private-address-card__generate-button {
+  width: 100%;
+}
+
+.stellar-private-address-card__generate-button .activity-loader {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stellar-wallet-modal__footer {
+  display: grid;
+  flex: 0 0 auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  border-top: 1px solid var(--border-subtle);
+  padding: var(--space-5);
+}
+
+.stellar-wallet-modal__footer-button {
+  appearance: none;
+  display: inline-flex;
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-4);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 300ms ease,
+    border-color 300ms ease,
+    box-shadow 300ms ease,
+    color 300ms ease,
+    transform 100ms ease;
+}
+
+.stellar-wallet-modal__footer-button--secondary {
+  background: var(--surface-high);
+  color: var(--text-soft);
+  border-color: var(--control-border-soft);
+}
+
+.stellar-wallet-modal__footer-button--secondary:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+}
+
+:root[data-theme='light'] .stellar-wallet-modal__footer-button--secondary:hover {
+  background: rgba(37, 111, 173, 0.045);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+.stellar-wallet-modal__footer-button:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.stellar-wallet-modal__footer-button--disconnect {
+  border-color: color-mix(in srgb, var(--danger) 26%, var(--control-border-soft));
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.stellar-wallet-modal__footer-button--disconnect:hover {
+  border-color: color-mix(in srgb, var(--danger) 44%, var(--control-border-soft));
+  background: color-mix(in srgb, var(--danger) 16%, transparent);
+  color: var(--danger);
+}
+
+@media (max-width: 560px) {
+  .action-sheet--wallet.stellar-wallet-modal {
+    width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+  }
+
+  .stellar-wallet-modal__header,
+  .stellar-wallet-modal__body,
+  .stellar-wallet-modal__footer {
+    padding: var(--space-4);
+  }
+
+  .stellar-wallet-modal__footer {
+    grid-template-columns: 1fr;
+  }
+}
+
+.account-menu__popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: var(--z-header-popover);
+  display: grid;
+  width: min(320px, calc(100vw - 32px));
+  gap: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-4);
+  background: var(--dropdown-background);
+  box-shadow: var(--shadow-popover);
+  color: var(--text);
+  padding: var(--space-5);
+  animation: stellar-wallet-panel-in 160ms ease;
+}
+
+.account-menu__identity {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-4);
+  background: var(--surface);
+  padding: 10px;
+}
+
+.account-menu__identity-icon {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-3);
+  background: var(--surface-high);
+  color: var(--text-soft);
+}
+
+.account-menu__identity-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.account-menu__identity-copy small,
+.account-menu__identity-copy span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-menu__identity-copy small {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.account-menu__identity-copy span {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.account-menu__identity--empty .account-menu__identity-copy span {
+  color: var(--text-muted);
+}
+
+.account-menu__copy,
+.account-menu__set-id {
+  display: inline-flex;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-3);
+  background: var(--surface-high);
+  color: var(--text-soft);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: none;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.account-menu__copy {
+  width: 34px;
+  padding: 0;
+}
+
+.account-menu__set-id {
+  padding: 0 12px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 18px;
+  white-space: nowrap;
+}
+
+.account-menu__copy:hover,
+.account-menu__set-id:hover {
+  border-color: var(--border);
+  background: var(--control-overlay-hover);
+  color: var(--text);
+}
+
+.account-menu__theme-switch {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-4);
+  background: transparent;
+  padding: 2px;
+}
+
+.account-menu__theme-switch button {
+  display: inline-flex;
+  min-width: 0;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-3);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  padding: 0 var(--space-2);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.account-menu__theme-switch button:hover,
+.account-menu__theme-switch button[data-active='true'] {
+  border-color: var(--border);
+  background: var(--surface-high);
+  color: var(--text);
+}
+
+.account-menu__item {
+  display: inline-flex;
+  width: 100%;
+  min-height: 42px;
+  align-items: center;
+  gap: var(--space-4);
+  border: 0;
+  border-radius: var(--radius-4);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 16px;
+  line-height: 22px;
+  padding: 0 var(--space-3);
+  text-align: left;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.account-menu__item:hover {
+  background: var(--control-overlay-hover);
+  color: var(--text);
+}
+
+.account-menu__wallet {
+  min-height: 54px;
+}
+
+.account-menu__item-copy > span {
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 20px;
+}
+
+.account-menu__item-copy > small {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+}
+
+.account-menu__item-copy {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.account-menu__item-copy > span,
+.account-menu__item-copy > small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

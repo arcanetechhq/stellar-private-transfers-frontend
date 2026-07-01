@@ -52,6 +52,15 @@ async function submitPreparedConfidentialTransfer(parameters: {
   });
 }
 
+export type ConfidentialTransferSuccess = {
+  txId: string;
+  amount: number;
+  assetId: string;
+  recipient: string;
+  poolContract: string;
+  coinDeliveryWarning?: string;
+};
+
 function recordSuccessfulTransfer(parameters: {
   dispatch: AppDispatch;
   navigate: NavigateFunction;
@@ -61,6 +70,7 @@ function recordSuccessfulTransfer(parameters: {
   senderPrivateAddress: string;
   txId: string;
   coinDeliveryWarning?: string;
+  onSuccess?: (result: ConfidentialTransferSuccess) => void;
 }): void {
   const poolContract = getRequiredPrivacyPoolContractId();
   parameters.dispatch(
@@ -75,15 +85,28 @@ function recordSuccessfulTransfer(parameters: {
       }),
     ),
   );
+  const successResult: ConfidentialTransferSuccess = {
+    txId: parameters.txId,
+    amount: parameters.numericAmount,
+    assetId: parameters.selectedAsset.assetId,
+    recipient: parameters.recipientTrim,
+    poolContract,
+    coinDeliveryWarning: parameters.coinDeliveryWarning,
+  };
+  if (parameters.onSuccess) {
+    parameters.onSuccess(successResult);
+    return;
+  }
   parameters.navigate(
     `/transfer-success/${encodeURIComponent(parameters.txId)}`,
     {
       state: {
-        txId: parameters.txId,
-        amount: parameters.numericAmount,
-        assetId: parameters.selectedAsset.assetId,
-        poolContract,
-        coinDeliveryWarning: parameters.coinDeliveryWarning,
+        txId: successResult.txId,
+        amount: successResult.amount,
+        assetId: successResult.assetId,
+        poolContract: successResult.poolContract,
+        coinDeliveryWarning: successResult.coinDeliveryWarning,
+        flow: "transfer",
       },
     },
   );
@@ -99,6 +122,7 @@ export async function runConfidentialTransferSubmitFlow(parameters: {
   recipientTrim: string;
   numericAmount: number;
   onWalletReady: () => void;
+  onSuccess?: (result: ConfidentialTransferSuccess) => void;
 }): Promise<void> {
   const preparedWallet = await prepareWalletTransferKeys(parameters);
   parameters.onWalletReady();
@@ -119,5 +143,6 @@ export async function runConfidentialTransferSubmitFlow(parameters: {
     senderPrivateAddress: preparedWallet.senderPrivateAddress,
     txId: submitted.txId,
     coinDeliveryWarning: submitted.coinDeliveryWarning,
+    onSuccess: parameters.onSuccess,
   });
 }

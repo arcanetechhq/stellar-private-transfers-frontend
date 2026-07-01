@@ -1,6 +1,10 @@
-import React from "react";
-import { MainLayoutHeaderWallet } from "./main-layout-header-wallet";
 import { HeaderFaucetMenu } from "./header-faucet-menu";
+import { HeaderNotificationsMenu } from "./header-notifications-menu";
+import { HeaderReferralButton } from "./header-referral-button";
+import { MainLayoutHeaderWallet } from "./main-layout-header-wallet";
+import { MainLayoutPageTitle } from "./main-layout-page-title";
+import type { MainLayoutPageHeaderConfig } from "../lib/resolve-main-layout-page-header";
+import { HIDDEN_FEATURES } from "@/shared/config/hidden-features";
 
 export const LANGUAGES = [
   { code: "en", name: "English", flag: "🇺🇸" },
@@ -12,47 +16,85 @@ export const LANGUAGES = [
 
 type MainLayoutHeaderProperties = {
   translate: (key: string) => string;
+  pageHeader: MainLayoutPageHeaderConfig;
   languageOpen: boolean;
   setLanguageOpen: (open: boolean) => void;
   faucetOpen: boolean;
   setFaucetOpen: (open: boolean) => void;
+  notificationsOpen: boolean;
+  setNotificationsOpen: (open: boolean) => void;
   walletOpen: boolean;
   setWalletOpen: (open: boolean) => void;
 };
 
 export function MainLayoutHeader({
   translate,
+  pageHeader,
   setLanguageOpen,
   faucetOpen,
   setFaucetOpen,
+  notificationsOpen,
+  setNotificationsOpen,
   walletOpen,
-  setWalletOpen,
+  setWalletOpen: setWalletOpenState,
 }: MainLayoutHeaderProperties) {
+  const closeSiblingMenus = (
+    except: "faucet" | "notifications" | "wallet" | null,
+  ) => {
+    if (except !== "faucet") {
+      setFaucetOpen(false);
+    }
+    if (except !== "notifications") {
+      setNotificationsOpen(false);
+    }
+    if (except !== "wallet") {
+      setWalletOpenState(false);
+    }
+    if (except !== null) {
+      setLanguageOpen(false);
+    }
+  };
+
   return (
-    <React.Fragment>
-      <header className="border-b border-gray-200 bg-white px-6 py-4">
-        <div className="flex min-h-[50px] items-center justify-between">
-          <div className="flex flex-1 items-center gap-4"></div>
+    <header className="page-header">
+      <MainLayoutPageTitle pageHeader={pageHeader} />
 
-          <div className="flex items-center gap-4">
-            <HeaderFaucetMenu
-              isOpen={faucetOpen}
-              onOpenChange={(open) => {
-                setFaucetOpen(open);
-                if (open) {
-                  setLanguageOpen(false);
-                }
-              }}
-            />
+      <div className="top-bar">
+        <div className="top-bar__actions">
+          {!HIDDEN_FEATURES.overviewReferralButton ? <HeaderReferralButton /> : null}
 
-            <MainLayoutHeaderWallet
-              translate={translate}
-              walletOpen={walletOpen}
-              setWalletOpen={setWalletOpen}
-            />
-          </div>
+          <HeaderFaucetMenu
+            isOpen={faucetOpen}
+            onOpenChange={(open) => {
+              if (open) {
+                closeSiblingMenus("faucet");
+              }
+              setFaucetOpen(open);
+            }}
+          />
+
+          <HeaderNotificationsMenu
+            isOpen={notificationsOpen}
+            onOpenChange={(open) => {
+              if (open) {
+                closeSiblingMenus("notifications");
+              }
+              setNotificationsOpen(open);
+            }}
+          />
+
+          <MainLayoutHeaderWallet
+            translate={translate}
+            walletOpen={walletOpen}
+            setWalletOpen={(open) => {
+              if (open) {
+                closeSiblingMenus("wallet");
+              }
+              setWalletOpenState(open);
+            }}
+          />
         </div>
-      </header>
-    </React.Fragment>
+      </div>
+    </header>
   );
 }

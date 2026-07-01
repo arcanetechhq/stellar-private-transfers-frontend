@@ -27,5 +27,10 @@
   "registrationRequiredTitle": "Register your private address",
   "registrationRequiredDescription": "Register your wallet in the private-address registry to receive private transfers by Stellar address.",
   "registerPrivateAddress": "Register private address",
-  "registering": "Registering…"
+  "registering": "Registering…",
+  "modalReadyHint": "Use this private address to receive funds privately.",
+  "modalGenerateHint": "Generate a private Stellar address after connecting your wallet.",
+  "addressLabel": "Address",
+  "modalEmptyTitle": "No private address yet",
+  "modalEmptyDescription": "Create one before receiving private transfers."
 }

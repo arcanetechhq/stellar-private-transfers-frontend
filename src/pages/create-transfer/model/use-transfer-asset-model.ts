@@ -12,6 +12,7 @@ import { useTransferAmountInputs } from "./use-transfer-amount-inputs";
 export function useTransferAssetModel(
   senderPrivateAddress: string,
   assetIdFromUrl: string | null,
+  recipientFromUrl = "",
 ) {
   const aggregates = useAppSelector((state) =>
     selectFinalizedAggregatesForPrivateAddress(
@@ -31,7 +32,10 @@ export function useTransferAssetModel(
     privateTransferAssets,
     assetIdFromUrl,
   );
-  const amountInputs = useTransferAmountInputs(tokenUi.selectedToken);
+  const amountInputs = useTransferAmountInputs(
+    tokenUi.selectedToken,
+    recipientFromUrl,
+  );
   return {
     assets: privateTransferAssets,
     tokenUi,

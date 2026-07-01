@@ -1,4 +1,4 @@
-import React, { type ReactNode, useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 import { Provider } from "react-redux";
 import { store, useAppDispatch } from "@/store";
 import { syncWalletAddressFromKit } from "@/features/stellar-wallet-connect";

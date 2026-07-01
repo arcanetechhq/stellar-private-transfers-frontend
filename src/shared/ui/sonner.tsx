@@ -1,21 +1,26 @@
-import React, { type CSSProperties } from "react";
-import { Toaster as Sonner, type ToasterProps } from "sonner";
+"use client";
 
-function Toaster({ ...properties }: ToasterProps) {
+import React from "react";
+import { useTheme } from "next-themes";
+import { Toaster as Sonner, ToasterProps } from "sonner";
+
+const Toaster = ({ ...properties }: ToasterProps) => {
+  const { theme = "system" } = useTheme();
+
   return (
     <Sonner
-      theme="light"
+      theme={theme as ToasterProps["theme"]}
       className="toaster group"
       style={
         {
           "--normal-bg": "var(--popover)",
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
-        } as CSSProperties
+        } as React.CSSProperties
       }
       {...properties}
     />
   );
-}
+};
 
 export { Toaster };

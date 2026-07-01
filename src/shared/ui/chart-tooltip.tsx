@@ -9,7 +9,7 @@ import {
   type ChartConfig,
   getPayloadConfigFromPayload,
   useChart,
-} from "./chart-context";
+} from "./chart";
 import {
   type IndicatorStyle,
   type TooltipPayload,

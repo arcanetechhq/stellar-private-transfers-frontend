@@ -1,0 +1,157 @@
+{
+  "title": "Transactions",
+  "searchPlaceholder": "Search",
+  "viewAll": "View all",
+  "exportData": "Export data",
+  "exported": "Exported",
+  "refresh": "Refresh transactions",
+  "filter": "Filter transactions",
+  "filters": "Filters",
+  "clearFilters": "Clear filters",
+  "clearFilterCount": "Clear {{count}} {{count, plural, one {filter} other {filters}}}",
+  "noTransactionsFound": "No transactions found",
+  "noTransactionsHint": "Adjust search, period, or filters to see more activity.",
+  "emptyState": {
+    "loadingTitle": "Loading transactions",
+    "loadingHint": "Fetching your recent activity.",
+    "emptyTitle": "No transactions yet",
+    "emptyHint": "Your transfers and deposits will appear here.",
+    "connectWalletHint": "Connect your wallet to see your transaction list."
+  },
+  "statusSummary": "{{count}} transactions · {{pending}} pending",
+  "stats": {
+    "inflow": "Inflow",
+    "outflow": "Outflow",
+    "pending": "Pending",
+    "pendingMeta": "{{count}} transactions"
+  },
+  "periods": {
+    "last30Days": "Last 30 days",
+    "last3Months": "Last 3 months",
+    "thisYear": "This year"
+  },
+  "filterGroups": {
+    "type": "Type",
+    "asset": "Asset",
+    "status": "Status"
+  },
+  "filterOptions": {
+    "all": "All",
+    "incoming": "Incoming",
+    "outgoing": "Outgoing",
+    "completed": "Completed",
+    "pending": "Pending"
+  },
+  "tableHeaders": {
+    "date": "Date",
+    "fromTo": "From/To",
+    "amount": "Amount"
+  },
+  "pagination": {
+    "navLabel": "Transaction list pagination",
+    "previous": "Previous page",
+    "next": "Next page"
+  },
+  "exportModal": {
+    "title": "Export transactions",
+    "close": "Close export",
+    "transactionType": "Transaction type",
+    "fileFormat": "File format",
+    "period": "PERIOD",
+    "export": "Export",
+    "periods": {
+      "all": "All",
+      "week": "Week",
+      "month": "Month",
+      "year": "Year",
+      "custom": "Custom"
+    },
+    "types": {
+      "all": "All",
+      "inflow": "Inflow",
+      "outflow": "Outflow"
+    },
+    "formats": {
+      "csv": "CSV",
+      "xlsx": "XLSX"
+    },
+    "scope": {
+      "selected": "{{count}} selected {{count, plural, one {transaction} other {transactions}}}",
+      "all": "All transactions",
+      "inflow": "Inflow only",
+      "outflow": "Outflow only"
+    }
+  },
+  "transactionLabels": {
+    "deposit": "Deposit",
+    "sent": "Sent",
+    "received": "Received",
+    "withdrawal": "Withdrawal",
+    "merge": "Merge"
+  },
+  "statusLabels": {
+    "completed": "Completed",
+    "pending": "Pending",
+    "processing": "Processing",
+    "created": "Created",
+    "failed": "Failed"
+  },
+  "details": {
+    "close": "Close transaction details",
+    "directionIncoming": "Incoming",
+    "directionOutgoing": "Outgoing",
+    "paymentRail": "{{asset}} on Stellar",
+    "networkLabel": "Stellar",
+    "feeFree": "FREE",
+    "tabs": {
+      "details": "Details",
+      "timeline": "Timeline",
+      "attachments": "Attachments"
+    },
+    "sections": {
+      "transaction": "Transaction",
+      "payment": "Payment",
+      "counterparty": "Counterparty"
+    },
+    "fields": {
+      "direction": "Direction",
+      "status": "Status",
+      "reference": "Reference",
+      "asset": "Asset",
+      "network": "Network",
+      "amount": "Amount",
+      "fee": "Fee",
+      "sender": "Sender",
+      "recipient": "Recipient",
+      "from": "From",
+      "to": "To",
+      "privateAccount": "Private account",
+      "transactionHash": "Transaction hash"
+    },
+    "timeline": {
+      "receivedTitle": "Transfer received",
+      "sentTitle": "Transfer sent",
+      "processingText": "Private transfer accepted for processing.",
+      "networkTitle": "Stellar processing",
+      "networkText": "Network confirmed the transaction route.",
+      "networkTime": "1 min later",
+      "pendingTitle": "Pending settlement",
+      "balanceTitle": "Private balance updated",
+      "pendingText": "Waiting for network finality.",
+      "balanceText": "The transfer is reflected in the private balance.",
+      "waiting": "Waiting",
+      "balanceTime": "2 min later",
+      "inProgressTitle": "In progress",
+      "completedTitle": "Completed",
+      "inProgressText": "Transaction is still being monitored.",
+      "completedText": "Transaction posted to account ledger."
+    },
+    "attachments": {
+      "proofTitle": "{{reference}} proof",
+      "proofMeta": "Stellar transaction",
+      "empty": "No receipts attached",
+      "pendingEmpty": "Receipts available after settlement",
+      "upload": "Upload receipt"
+    }
+  }
+}

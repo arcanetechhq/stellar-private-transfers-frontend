@@ -1,5 +1,6 @@
-import React from "react";
+import { useEffect, useRef } from "react";
 import { Networks } from "@stellar/stellar-sdk";
+import { ArrowDown, ArrowDownToLine } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppSelector } from "@/store";
 import { useAssetsWithTrustlines } from "@/entities/asset";
@@ -21,6 +22,33 @@ export function HeaderFaucetMenu({
   const { t: translate } = useTranslation("assets");
   const publicKey = useAppSelector(selectWalletPublicKey);
   const { assets } = useAssetsWithTrustlines(publicKey);
+  const menuReference = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      return undefined;
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!menuReference.current?.contains(event.target as Node)) {
+        onOpenChange(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onOpenChange(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onOpenChange]);
 
   if (!isTestnet) {
     return;
@@ -29,52 +57,44 @@ export function HeaderFaucetMenu({
   const sortedAssets = assets.toSorted((left, right) => left.id - right.id);
 
   return (
-    <div className="relative">
+    <div className="faucet-menu" ref={menuReference}>
       <button
         type="button"
-        className="flex min-h-[48px] items-center gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2 transition-colors hover:bg-gray-50"
+        className="topbar-action faucet-menu__trigger"
+        aria-haspopup="menu"
         aria-expanded={isOpen}
+        data-open={isOpen}
         onClick={() => {
           onOpenChange(!isOpen);
         }}
       >
-        <span className="hidden text-[13px] leading-[18px] font-semibold text-gray-900 sm:inline">
-          {translate("faucet.headerLabel")}
-        </span>
+        <ArrowDown size={18} strokeWidth={1.5} />
+        <span>{translate("faucet.headerLabel")}</span>
       </button>
 
       {isOpen ? (
-        <React.Fragment>
-          <div
-            className="fixed inset-0 z-10"
-            aria-hidden
-            onClick={() => {
-              onOpenChange(false);
-            }}
-          />
-          <div className="absolute top-full right-0 z-20 mt-2 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-dropdown)]">
-            <div className="border-b border-[var(--border-soft)] px-3 py-2.5 text-sm font-medium text-[var(--foreground-primary)]">
-              {translate("faucet.menuTitle")}
-            </div>
-            <div className="max-h-80 overflow-y-auto px-3 pb-2">
-              {sortedAssets.length === 0 ? (
-                <p className="py-4 text-center text-sm text-[var(--foreground-secondary)]">
-                  {translate("noAssetsFound")}
-                </p>
-              ) : (
-                sortedAssets.map((asset) => (
-                  <HeaderFaucetAssetRow
-                    key={asset.id}
-                    asset={asset}
-                    walletPublicKey={publicKey ?? undefined}
-                    showFaucet
-                  />
-                ))
-              )}
-            </div>
+        <div
+          className="faucet-menu__popover"
+          role="menu"
+          aria-label={translate("faucet.menuTitle")}
+        >
+          <h2 className="faucet-menu__title">{translate("faucet.menuTitle")}</h2>
+          <div className="faucet-menu__list">
+            {sortedAssets.length === 0 ? (
+              <p className="faucet-menu__empty">{translate("noAssetsFound")}</p>
+            ) : (
+              sortedAssets.map((asset) => (
+                <HeaderFaucetAssetRow
+                  key={asset.id}
+                  asset={asset}
+                  walletPublicKey={publicKey ?? undefined}
+                  showFaucet
+                />
+              ))
+            )}
           </div>
-        </React.Fragment>
-      ) : undefined}
+        </div>
+      ) : null}
     </div>
   );
 }

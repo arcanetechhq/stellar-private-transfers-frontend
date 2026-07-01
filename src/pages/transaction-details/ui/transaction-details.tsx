@@ -1,4 +1,3 @@
-import React from "react";
 import { useParams } from "react-router";
 import { DetailHeader } from "./detail-header";
 import { DetailInfo } from "./detail-info";

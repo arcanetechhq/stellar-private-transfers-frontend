@@ -12,5 +12,122 @@
   "appVersion": "App Version",
   "version": "1.0.0",
   "network": "Network",
-  "ethereumMainnet": "Ethereum Mainnet"
+  "ethereumMainnet": "Ethereum Mainnet",
+  "backToApp": "Back to app",
+  "nav": {
+    "personal": "Personal",
+    "workspace": "Workspace",
+    "general": "General",
+    "notifications": "Notifications",
+    "apiKeys": "API Keys",
+    "referralProgram": "Referral Program"
+  },
+  "appearance": {
+    "title": "Appearance",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "systemValue": "System ({{theme}})"
+  },
+  "identity": {
+    "title": "Identity",
+    "nickname": "Nickname",
+    "nicknameHint": "Used as your in-app identifier.",
+    "nicknamePlaceholder": "arcane",
+    "save": "Save"
+  },
+  "moreOptions": {
+    "title": "More options",
+    "about": "About",
+    "helpSupport": "Help & Support",
+    "privacyPolicy": "Privacy policy",
+    "termsOfService": "Terms of Service"
+  },
+  "notifications": {
+    "push": {
+      "title": "Push notifications",
+      "text": "Receive time-sensitive alerts on devices where Arcane is installed."
+    },
+    "importantUpdates": "Important Updates",
+    "generalUpdates": "General Updates",
+    "email": "Email",
+    "pushLabel": "Push",
+    "cashFlow": {
+      "title": "Cash flow",
+      "text": "Large incoming or outgoing payments, transfer failures, and money movement that needs your attention."
+    },
+    "suspiciousActivity": {
+      "title": "Suspicious activity",
+      "text": "Security-sensitive sign-ins, device changes, blocked attempts, and unusual account activity."
+    },
+    "tasks": {
+      "title": "Tasks and approvals",
+      "text": "Approvals, missing documents, reminders, and tasks assigned to you or your workspace."
+    },
+    "spending": {
+      "title": "Your spending",
+      "text": "Tracks expenses, reimbursements, card limits, and transactions."
+    },
+    "balances": {
+      "title": "Account balances",
+      "text": "Alerts you when low-balance thresholds are reached."
+    },
+    "accounting": {
+      "title": "Accounting",
+      "text": "Notifies you when transactions don't sync."
+    },
+    "billPay": {
+      "title": "Bill pay",
+      "text": "Tracks the status of a bill."
+    },
+    "invoicing": {
+      "title": "Invoicing",
+      "text": "Tracks when customer invoices are paid."
+    },
+    "collaboration": {
+      "title": "Collaboration",
+      "text": "Tracks transaction comments and replies."
+    }
+  },
+  "apiKeys": {
+    "title": "API Keys",
+    "description": "Manage API access for your account. Use API keys to automate payouts via scripts or AI agents.",
+    "securityNote": "Support will never ask you to share your API keys.",
+    "create": "Create API Key",
+    "columns": {
+      "name": "Name",
+      "created": "Created",
+      "lastUsed": "Last used",
+      "access": "Access"
+    },
+    "resources": {
+      "title": "Developer resources",
+      "documentation": "Documentation",
+      "documentationHint": "API reference and payout examples.",
+      "latestVersion": "Latest API version",
+      "versionValue": "2026-03-01"
+    }
+  },
+  "referral": {
+    "title": "Referral Program",
+    "description": "Invite businesses to Arcane and earn rewards when they activate their account.",
+    "metrics": {
+      "availableReward": "Available reward",
+      "invitedUsers": "Invited users",
+      "paidRewards": "Paid rewards"
+    },
+    "inviteLink": {
+      "title": "Invite link",
+      "codeTitle": "Invite code",
+      "linkTitle": "Invite link"
+    },
+    "emptyValue": "—",
+    "invitedUsers": "Invited Users",
+    "copy": "Copy",
+    "columns": {
+      "name": "Name",
+      "status": "Status",
+      "reward": "Reward"
+    }
+  }
 }

@@ -8,16 +8,6 @@ export function ConfirmationsHeader() {
     <div className="mb-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1
-            className="font-semibold"
-            style={{
-              fontSize: "24px",
-              lineHeight: "32px",
-              color: "#1B1D22",
-            }}
-          >
-            {translate("pageTitle")}
-          </h1>
           <p
             className="mt-1"
             style={{

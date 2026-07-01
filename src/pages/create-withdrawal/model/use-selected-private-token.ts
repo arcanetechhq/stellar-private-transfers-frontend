@@ -5,7 +5,6 @@ export function useSelectedPrivateToken(
   privateAssets: AssetWithTrustline[],
   assetIdFromUrl: string | null,
 ) {
-  const [showTokenPicker, setShowTokenPicker] = useState(false);
   const [userSelectedAssetId, setUserSelectedAssetId] = useState<
     string | undefined
   >();
@@ -36,12 +35,9 @@ export function useSelectedPrivateToken(
 
   const handleTokenSelect = (asset: AssetWithTrustline) => {
     setUserSelectedAssetId(asset.assetId);
-    setShowTokenPicker(false);
   };
 
   return {
-    showTokenPicker,
-    setShowTokenPicker,
     selectedToken,
     handleTokenSelect,
   };

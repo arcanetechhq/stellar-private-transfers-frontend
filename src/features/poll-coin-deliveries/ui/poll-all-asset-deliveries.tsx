@@ -1,15 +1,14 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { useAppSelector } from "@/store";
 import { useGetAssetsQuery } from "@/entities/asset";
 import { selectPrivateAddressState } from "@/entities/private-address";
 import { selectWalletPublicKey } from "@/entities/wallet";
+import { useWalletPrivateAddress } from "@/features/register-private-address";
+import {
+  usePollAssetDeliveries,
+  useSpentNullifierPolling,
+} from "../model";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
-import { usePollAssetDeliveries } from "../polling/use-poll-asset-deliveries";
-import { useSpentNullifierPolling } from "../polling/use-spent-nullifier-polling";
-
-type PollAllAssetDeliveriesProperties = {
-  actionsEnabled: boolean;
-};
 
 interface AssetPollerProperties {
   privateAddress: string;
@@ -36,10 +35,9 @@ function AssetPoller({
   return <></>;
 }
 
-export function PollAllAssetDeliveries({
-  actionsEnabled,
-}: PollAllAssetDeliveriesProperties) {
+export function PollAllAssetDeliveries() {
   useSpentNullifierPolling();
+  const { actionsEnabled } = useWalletPrivateAddress();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const { byNonce, scalarByNonce } = useAppSelector(selectPrivateAddressState);
   const { data: assets } = useGetAssetsQuery();

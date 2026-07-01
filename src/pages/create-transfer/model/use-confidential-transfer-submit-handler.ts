@@ -1,13 +1,13 @@
 import {
   useState,
   type Dispatch,
-  type FormEvent,
   type SetStateAction,
 } from "react";
 import type { NavigateFunction } from "react-router";
 import type { AppDispatch } from "@/store";
 import type { AssetWithTrustline } from "@/entities/asset";
 import {
+  type ConfidentialTransferSuccess,
   readConfidentialTransferSubmitError,
   runConfidentialTransferSubmitFlow,
 } from "./confidential-transfer-submit-flow";
@@ -33,11 +33,11 @@ export function useConfidentialTransferSubmitHandler(parameters: {
   ensureWalletScalar: () => Promise<string>;
   recipientTrim: string;
   numericAmount: number;
+  onSuccess?: (result: ConfidentialTransferSuccess) => void;
 }) {
   const [submitError, setSubmitError] = useState<string | undefined>();
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
+  const handleConfirmSend = async () => {
     if (!parameters.selectedAsset) {
       return;
     }
@@ -61,8 +61,10 @@ export function useConfidentialTransferSubmitHandler(parameters: {
           parameters.setIsPreparingWallet(false);
           parameters.setIsSubmitting(true);
         },
+        onSuccess: parameters.onSuccess,
       });
     } catch (error: unknown) {
+      console.error("Private transfer failed:", error);
       setSubmitError(readConfidentialTransferSubmitError(error));
     } finally {
       parameters.setIsPreparingWallet(false);
@@ -70,5 +72,5 @@ export function useConfidentialTransferSubmitHandler(parameters: {
     }
   };
 
-  return { submitError, handleSubmit };
+  return { submitError, setSubmitError, handleConfirmSend };
 }

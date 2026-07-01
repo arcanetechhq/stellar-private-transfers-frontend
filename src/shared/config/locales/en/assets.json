@@ -9,14 +9,26 @@
     "title": "Private assets",
     "noCoins": "No finalized private coins for this address yet.",
     "noPrivateAddresses": "Create a private address on the Contacts page to receive private assets.",
-    "selectAddress": "Private address"
+    "selectAddress": "Private address",
+    "assetsCount": "{{count}} assets",
+    "networkStellar": "Stellar",
+    "sendAsset": "Send {{asset}}"
   },
   "faucet": {
     "mint": "Mint",
     "hint": "Get test tokens",
     "headerLabel": "Faucet",
     "menuTitle": "Faucet claim",
-    "claimWithAmount": "Claim {{amount}} {{symbol}}"
+    "claimWithAmount": "Claim {{amount}} {{symbol}}",
+    "claimLabel": "Claim",
+    "claimPendingLabel": "Claiming",
+    "addPendingLabel": "Adding",
+    "successLabel": "Claimed",
+    "statusPreparing": "Preparing claim...",
+    "statusReady": "{{amount}} {{symbol}} ready to claim",
+    "statusClaiming": "Claiming test funds...",
+    "statusClaimed": "{{amount}} {{symbol}} claimed",
+    "statusAvailable": "{{amount}} {{symbol}} available"
   },
   "noAssetsFound": "No assets found",
   "tableHeaders": {

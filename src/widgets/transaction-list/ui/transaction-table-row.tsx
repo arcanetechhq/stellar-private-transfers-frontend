@@ -14,6 +14,7 @@ import {
   getAmountToneClass,
   getAmountPrefix,
 } from "../lib/transaction-display";
+import { buildTransactionsPathWithSelection } from "../lib/transactions-selection-path";
 import { TransactionTypeIcon } from "./transaction-type-icon";
 
 interface TransactionTableRowProperties {
@@ -56,7 +57,7 @@ export function TransactionTableRow(properties: TransactionTableRowProperties) {
     counterpartyTrimmed === ""
       ? "—"
       : formatSenderCounterpartyForDisplay(counterpartyTrimmed);
-  const detailsPath = `/transaction/${transaction.id}`;
+  const detailsPath = buildTransactionsPathWithSelection(transaction.id);
 
   const handleRowClick = () => {
     navigate(detailsPath);

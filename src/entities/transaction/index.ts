@@ -27,3 +27,7 @@ export {
   saveTransactionState,
 } from "./lib/persist-transaction";
 export { sortTransactionsByDateDesc } from "./lib/sort-transactions-desc";
+export {
+  aggregateTransactionFlow,
+  type TransactionFlowTotals,
+} from "./lib/aggregate-transaction-flow";

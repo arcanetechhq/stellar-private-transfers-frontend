@@ -1,15 +1,26 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
-import { FileText, HelpCircle, History, Home, Inbox, Info, Users } from "lucide-react";
+import {
+  ArrowLeftRight,
+  Bolt,
+  Home,
+  LogIn,
+  MessagesSquare,
+  UserCircleIcon,
+} from "lucide-react";
+import { disconnectStellarWallet } from "@/features/stellar-wallet-connect";
 import { i18n } from "@/shared/config/i18n-instance";
-import { useAppSelector } from "@/store";
+import { HIDDEN_FEATURES } from "@/shared/config/hidden-features";
+import { useAppDispatch, useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { usePendingClaimsCountQuery } from "@/entities/pending-claims";
-import type { MainLayoutNavItem } from "./main-layout-navigation";
+import type { MainLayoutNavItem } from "../ui/main-layout-sidebar";
+import { resolveMainLayoutPageHeader } from "./resolve-main-layout-page-header";
 
 export function useMainLayoutModel() {
   const { t: translate } = useTranslation(["navigation", "common"]);
+  const dispatch = useAppDispatch();
   const location = useLocation();
   const mainReference = useRef<HTMLElement>(null);
   const publicKey = useAppSelector(selectWalletPublicKey);
@@ -19,45 +30,67 @@ export function useMainLayoutModel() {
   );
   const pendingClaimsBadgeCount = pendingClaimsCountData?.count ?? 0;
 
+  const pageHeader = useMemo(
+    () => resolveMainLayoutPageHeader(location.pathname),
+    [location.pathname],
+  );
+
   useLayoutEffect(() => {
     mainReference.current?.scrollTo(0, 0);
-  }, [location.pathname, location.search, location.key]);
+  }, [location.pathname, location.key]);
 
   const navigation = useMemo(
     (): MainLayoutNavItem[] => [
       { name: translate("navigation:home"), icon: Home, href: "/" },
       {
-        name: translate("navigation:history"),
-        icon: History,
-        href: "/history",
+        name: translate("navigation:transactions"),
+        icon: ArrowLeftRight,
+        href: "/transactions",
       },
       {
         name: translate("navigation:contacts"),
-        icon: Users,
+        icon: UserCircleIcon,
         href: "/contacts",
       },
-      {
-        name: translate("navigation:pendingClaims"),
-        icon: Inbox,
-        href: "/pending-claims",
-        badgeCount: pendingClaimsBadgeCount,
-      },
+      // {
+      //   name: translate("navigation:pendingClaims"),
+      //   icon: Inbox,
+      //   href: "/pending-claims",
+      //   badgeCount: pendingClaimsBadgeCount,
+      // },
     ],
     [translate, pendingClaimsBadgeCount],
   );
 
-  const bottomNavigation = useMemo(
-    (): MainLayoutNavItem[] => [
-      { name: translate("navigation:about"), icon: Info, href: "/about" },
-      { name: translate("navigation:help"), icon: HelpCircle, href: "/help" },
-      {
-        name: translate("navigation:privacyPolicy"),
-        icon: FileText,
-        href: "/privacy-policy",
-      },
-    ],
-    [translate],
-  );
+  const bottomNavigation = useMemo((): MainLayoutNavItem[] => {
+    const items: MainLayoutNavItem[] = [];
+
+    if (!HIDDEN_FEATURES.contactSupportSection) {
+      items.push({
+        name: translate("navigation:contactSupport"),
+        icon: MessagesSquare,
+        href: "/help",
+      });
+    }
+
+    items.push({
+      name: translate("navigation:settings"),
+      icon: Bolt,
+      href: "/settings",
+    });
+
+    if (publicKey) {
+      items.push({
+        name: translate("navigation:logOut"),
+        icon: LogIn,
+        onClick: () => {
+          void dispatch(disconnectStellarWallet());
+        },
+      });
+    }
+
+    return items;
+  }, [dispatch, publicKey, translate]);
 
   const [languageOpen, setLanguageOpen] = useState(false);
   const [faucetOpen, setFaucetOpen] = useState(false);
@@ -75,6 +108,7 @@ export function useMainLayoutModel() {
     translate,
     location,
     mainReference,
+    pageHeader,
     navigation,
     bottomNavigation,
     languageOpen,

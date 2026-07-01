@@ -1,3 +1,6 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+@import '../shared/styles/layout.css';
+@import '../shared/styles/ui-card.css';
+@import '../shared/styles/select-menu.css';

@@ -1,8 +1,6 @@
-import React from "react";
-import { Link } from "react-router";
-import { Send, ArrowUpFromLine } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
-import { TokenIcon } from "@/shared/ui/token-icon";
 import type { AggregatedPrivateAssetRow } from "@/entities/coin";
 
 const SMALL_BALANCE_THRESHOLD = 1;
@@ -31,6 +29,43 @@ function formatUsdAmount(value: number): string {
   });
 }
 
+function AssetRowIcon({
+  ticker,
+  logoUrl,
+}: {
+  ticker: string;
+  logoUrl?: string | null;
+}) {
+  const [failed, setFailed] = useState(false);
+  const assetKey = ticker.toLowerCase();
+
+  if (!logoUrl || failed) {
+    return (
+      <span className="asset-balance-row__icon" data-asset={assetKey}>
+        <span
+          aria-hidden="true"
+          className="text-[13px] font-semibold text-[var(--text-muted)]"
+        >
+          {ticker.slice(0, 1)}
+        </span>
+      </span>
+    );
+  }
+
+  return (
+    <span className="asset-balance-row__icon" data-asset={assetKey}>
+      <img
+        src={logoUrl}
+        alt=""
+        aria-hidden="true"
+        onError={() => {
+          setFailed(true);
+        }}
+      />
+    </span>
+  );
+}
+
 type PrivateAssetRowProperties = {
   row: AggregatedPrivateAssetRow;
   assetName: string;
@@ -44,69 +79,41 @@ export function PrivateAssetRow({
   logoUrl,
   usdAmount,
 }: PrivateAssetRowProperties) {
+  const navigate = useNavigate();
   const { t: translate } = useTranslation("assets");
   const ticker = row.assetId.toUpperCase();
 
+  function handleSend() {
+    navigate(
+      `/create-transfer?assetId=${encodeURIComponent(row.assetId)}`,
+    );
+  }
+
   return (
-    <div className="px-6 py-4 transition-colors hover:bg-[var(--surface-hover)]">
-      <div className="grid grid-cols-12 items-center gap-4">
-        <div className="col-span-4 flex items-center gap-4">
-          <TokenIcon ticker={ticker} logoUrl={logoUrl} size={44} />
-          <div>
-            <p className="mb-0.5 text-[15px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
-              {ticker}
-            </p>
-            <p className="text-[13px] leading-[18px] text-[var(--foreground-secondary)]">
-              {assetName}
-            </p>
-          </div>
-        </div>
-
-        <div className="col-span-3">
-          <p className="text-[15px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
-            {formatAggregatedBalance(row.totalAmountDisplay)}
-          </p>
-          <p className="text-[13px] leading-[18px] text-[var(--foreground-secondary)]">
-            {ticker}
-          </p>
-        </div>
-
-        <div className="col-span-2 text-right">
-          <p className="text-[15px] leading-[20px] font-semibold text-[var(--foreground-primary)]">
-            ${formatUsdAmount(usdAmount)}
-          </p>
-        </div>
-
-        <div className="col-span-3 flex items-center justify-end gap-2">
-          <Link
-            to={`/create-transfer?assetId=${encodeURIComponent(row.assetId)}`}
-            className="block w-24"
-          >
-            <button
-              type="button"
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-[10px] border border-[var(--border)] bg-[var(--secondary)] px-3 py-2 text-[13px] leading-[18px] font-semibold text-[var(--foreground)] transition-colors hover:border-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)]"
-            >
-              <Send className="h-3.5 w-3.5" />
-              {translate("trustline.send")}
-            </button>
-          </Link>
-          <Link
-            to={`/withdraw?assetId=${encodeURIComponent(row.assetId)}`}
-            className="block w-24"
-          >
-            <button
-              type="button"
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-[10px] border border-[var(--border)] bg-[var(--secondary)] px-3 py-2 text-[13px] leading-[18px] font-semibold text-[var(--foreground)] transition-colors hover:border-[var(--primary)] hover:bg-[var(--primary)] hover:text-[var(--primary-foreground)]"
-            >
-              <ArrowUpFromLine
-                className="h-3.5 w-3.5 shrink-0"
-                strokeWidth={2.25}
-              />
-              {translate("trustline.withdraw")}
-            </button>
-          </Link>
-        </div>
-      </div>
-    </div>
+    <button
+      type="button"
+      className="asset-balance-row"
+      aria-label={translate("privateAssets.sendAsset", { asset: ticker })}
+      onClick={handleSend}
+    >
+      <AssetRowIcon ticker={ticker} logoUrl={logoUrl} />
+      <span className="asset-balance-row__identity">
+        <span className="asset-balance-row__title">
+          <span className="asset-balance-row__code">{ticker}</span>
+          <span className="asset-balance-row__badge">
+            {translate("privateAssets.networkStellar")}
+          </span>
+        </span>
+        <span className="asset-balance-row__name">{assetName}</span>
+      </span>
+      <span className="asset-balance-row__amount">
+        <span className="asset-balance-row__balance">
+          {formatAggregatedBalance(row.totalAmountDisplay)} {ticker}
+        </span>
+        <span className="asset-balance-row__fiat">
+          ${formatUsdAmount(usdAmount)}
+        </span>
+      </span>
+    </button>
   );
 }

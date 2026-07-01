@@ -2,7 +2,6 @@ import { isRejectedWithValue } from "@reduxjs/toolkit";
 import {
   useState,
   type Dispatch,
-  type FormEvent,
   type SetStateAction,
 } from "react";
 import type { NavigateFunction } from "react-router";
@@ -11,6 +10,7 @@ import type { AssetWithTrustline } from "@/entities/asset";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import { assertWithdrawalDestinationCanReceiveAsset } from "../lib/withdrawal-destination-trustline";
+import type { PrivateWithdrawalSuccess } from "./private-withdrawal-success";
 
 type PrivateWithdrawalSubmit = (payload: {
   senderPrivateAddress: string;
@@ -31,12 +31,12 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
   ensureSenderScalar: () => Promise<string>;
   destinationTrim: string;
   numericAmount: number;
+  onSuccess?: (result: PrivateWithdrawalSuccess) => void;
 }) {
   const [submitError, setSubmitError] = useState<string | undefined>();
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!parameters.canSubmit) {
+  async function performWithdrawal() {
+    if (!parameters.canSubmit || !parameters.selectedAsset) {
       return;
     }
     const poolContract = getRequiredPrivacyPoolContractId();
@@ -67,16 +67,30 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
           }),
         ),
       );
+      const successResult: PrivateWithdrawalSuccess = {
+        txId: result.txId,
+        amount: parameters.numericAmount,
+        assetId: parameters.selectedAsset.assetId,
+        destination: parameters.destinationTrim,
+        poolContract,
+        coinDeliveryWarning: result.coinDeliveryWarning,
+      };
+      if (parameters.onSuccess) {
+        parameters.onSuccess(successResult);
+        return;
+      }
       parameters.navigate(`/transfer-success/${encodeURIComponent(result.txId)}`, {
         state: {
-          txId: result.txId,
-          amount: parameters.numericAmount,
-          assetId: parameters.selectedAsset.assetId,
-          poolContract,
-          coinDeliveryWarning: result.coinDeliveryWarning,
+          txId: successResult.txId,
+          amount: successResult.amount,
+          assetId: successResult.assetId,
+          poolContract: successResult.poolContract,
+          coinDeliveryWarning: successResult.coinDeliveryWarning,
+          flow: "withdrawal",
         },
       });
     } catch (error: unknown) {
+      console.error("Withdrawal failed:", error);
       if (isRejectedWithValue(error)) {
         const payload = error.payload;
         setSubmitError(
@@ -90,7 +104,11 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
     } finally {
       parameters.setIsSubmitting(false);
     }
-  };
+  }
 
-  return { submitError, handleSubmit };
+  async function handleConfirmWithdraw() {
+    await performWithdrawal();
+  }
+
+  return { submitError, setSubmitError, handleConfirmWithdraw };
 }

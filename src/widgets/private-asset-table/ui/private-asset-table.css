@@ -1,0 +1,218 @@
+.asset-balances-panel.ui-card {
+  display: grid;
+  gap: var(--space-5);
+  min-width: 0;
+  padding: var(--space-6);
+}
+
+.asset-balances-panel__header {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.asset-balances-panel__title-group {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.asset-balances-panel__icon-frame {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-4);
+  background: var(--surface-high);
+  color: var(--text-muted);
+}
+
+.asset-balances-panel__icon-frame svg {
+  width: 17px;
+  height: 17px;
+  stroke-width: 1.5;
+}
+
+.asset-balances-panel__title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.asset-balances-panel__meta {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.asset-balances-panel__count {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.asset-balances-panel__list {
+  display: grid;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-3);
+}
+
+.asset-balance-row {
+  width: 100%;
+  display: grid;
+  min-width: 0;
+  min-height: 84px;
+  grid-template-columns: 48px minmax(0, 1fr) minmax(112px, auto);
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 0;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  appearance: none;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.asset-balance-row:hover {
+  background: var(--surface-high);
+}
+
+.asset-balance-row:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
+.asset-balance-row + .asset-balance-row {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.asset-balance-row__icon {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  background: var(--surface-control);
+}
+
+.asset-balance-row__icon[data-asset='xlm'] {
+  background: #fff;
+}
+
+.asset-balance-row__icon[data-asset='usdc'],
+.asset-balance-row__icon[data-asset='usdt'] {
+  border-color: transparent;
+  background: transparent;
+}
+
+.asset-balance-row__icon img {
+  display: block;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.asset-balance-row__icon[data-asset='usdc'] img,
+.asset-balance-row__icon[data-asset='usdt'] img {
+  width: 42px;
+  height: 42px;
+}
+
+.asset-balance-row__identity,
+.asset-balance-row__amount {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.asset-balance-row__title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.asset-balance-row__code,
+.asset-balance-row__name,
+.asset-balance-row__balance,
+.asset-balance-row__fiat {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.asset-balance-row__code {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.asset-balance-row__badge {
+  display: inline-flex;
+  height: 24px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  padding: 0 var(--space-2);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  background: var(--surface-high);
+  color: var(--text-muted);
+}
+
+.asset-balance-row__name {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text-muted);
+}
+
+.asset-balance-row__amount {
+  justify-items: end;
+  text-align: right;
+}
+
+.asset-balance-row__balance {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.asset-balance-row__fiat {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text-faint);
+}
+
+.asset-balances-panel__empty {
+  padding: var(--space-12) var(--space-6);
+  text-align: center;
+}
+
+.asset-balances-panel__empty-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 22px;
+  color: var(--text-muted);
+}

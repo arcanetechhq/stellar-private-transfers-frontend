@@ -3,6 +3,7 @@ import type { AssetWithTrustline } from "@/entities/asset";
 import { isValidStellarPublicAddress } from "@/shared/lib/stellar/is-valid-stellar-public-address";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import type { RecipientRegistryStatus } from "./use-recipient-registry-status";
+import { parseTransferBalance } from "../lib/format-transfer-balance";
 import { NETWORK_FEE } from "./create-transfer";
 
 function recipientFieldErrorKey(parameters: {
@@ -104,7 +105,7 @@ export function useTransferRecipientAndSubmitGates(parameters: {
   recipientRegistryStatus: RecipientRegistryStatus;
 }) {
   const numericBalance = parameters.selectedAsset
-    ? Number.parseFloat(parameters.selectedAsset.balance ?? "0")
+    ? parseTransferBalance(parameters.selectedAsset.balance)
     : 0;
   const recipientTrim = parameters.recipient.trim();
   const recipientValid = isValidStellarPublicAddress(recipientTrim);

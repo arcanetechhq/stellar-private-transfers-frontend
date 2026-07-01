@@ -1,19 +1,16 @@
-import React, { useMemo, type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
+import "./private-asset-table.css";
+import { Wallet } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppSelector } from "@/store";
 import { getAssetUsdPrice, useGetAssetsQuery } from "@/entities/asset";
-import {
-  selectFinalizedAggregatesForPrivateAddress,
-  withZeroAmountPrivateAssetRows,
-} from "@/entities/coin";
+import { selectFinalizedAggregatesForPrivateAddress } from "@/entities/coin";
 import {
   selectDefaultNonce,
   selectPrivateAddressByNonce,
 } from "@/entities/private-address";
-import {
-  PrivateAssetTableBody,
-  PRIVATE_ASSET_TITLE_CLASS,
-} from "./private-asset-table-body";
+import { PrivateAssetTableBody } from "./private-asset-table-body";
+import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 
 type PrivateAssetTableProperties = {
   postAddressPicker?: ReactNode;
@@ -37,7 +34,25 @@ export function PrivateAssetTable({
   const { data: assetCatalog } = useGetAssetsQuery();
 
   const aggregatesWithZeroAssets = useMemo(() => {
-    return withZeroAmountPrivateAssetRows(aggregates, assetCatalog);
+    const poolContract = getRequiredPrivacyPoolContractId();
+    const byAssetId = new Map(
+      aggregates.map((aggregate) => [aggregate.assetId, aggregate]),
+    );
+    if (assetCatalog) {
+      for (const asset of assetCatalog) {
+        if (byAssetId.has(asset.assetId)) {
+          continue;
+        }
+        byAssetId.set(asset.assetId, {
+          assetId: asset.assetId,
+          poolContract,
+          totalAmountDisplay: 0,
+        });
+      }
+    }
+    return [...byAssetId.values()].toSorted((left, right) =>
+      left.assetId.localeCompare(right.assetId),
+    );
   }, [aggregates, assetCatalog]);
 
   const assetMetaById = useMemo(() => {
@@ -63,16 +78,23 @@ export function PrivateAssetTable({
   }, [assetCatalog]);
 
   return (
-    <div className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--card)]">
-      <div className="flex flex-col gap-4 border-b border-[var(--border)] px-6 py-5 sm:flex-row sm:items-end sm:justify-between">
-        <h2 className={PRIVATE_ASSET_TITLE_CLASS}>
-          {translateOverview("privateAssetsTitle")}
-        </h2>
-        <div className="flex min-w-sm flex-row flex-nowrap items-start justify-end gap-3">
-          <div className="max-w-xs min-w-0 flex-3 shrink" />
-          {postAddressPicker ? (
-            <div className="flex-2 shrink-0">{postAddressPicker}</div>
-          ) : undefined}
+    <section className="asset-balances-panel ui-card">
+      <div className="asset-balances-panel__header">
+        <div className="asset-balances-panel__title-group">
+          <span className="asset-balances-panel__icon-frame" aria-hidden="true">
+            <Wallet />
+          </span>
+          <h2 className="asset-balances-panel__title">
+            {translateOverview("privateAssetsTitle")}
+          </h2>
+        </div>
+        <div className="asset-balances-panel__meta">
+          {postAddressPicker}
+          <p className="asset-balances-panel__count">
+            {translateAssets("privateAssets.assetsCount", {
+              count: aggregatesWithZeroAssets.length,
+            })}
+          </p>
         </div>
       </div>
       <PrivateAssetTableBody
@@ -82,6 +104,6 @@ export function PrivateAssetTable({
         assetMetaById={assetMetaById}
         assetUsdPriceById={assetUsdPriceById}
       />
-    </div>
+    </section>
   );
 }

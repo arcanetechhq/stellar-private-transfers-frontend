@@ -1,0 +1,262 @@
+.balance-card.ui-card {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: 120px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+  align-items: center;
+  gap: var(--space-6);
+  overflow: hidden;
+  padding: var(--space-6);
+}
+
+.balance-card__summary {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.balance-card__label {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text-muted);
+}
+
+.balance-card__amount-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.balance-card__visibility-actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: -4px;
+}
+
+.balance-card__icon-button {
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  border: 0;
+  border-radius: var(--radius-2);
+  background: transparent;
+  box-shadow: none;
+  color: var(--text);
+  opacity: 1;
+  cursor: pointer;
+  transition: opacity 200ms ease;
+}
+
+.balance-card__icon-button svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.5;
+}
+
+.balance-card__icon-button:hover {
+  background: transparent;
+  box-shadow: none;
+  color: var(--text);
+  opacity: 0.7;
+}
+
+.balance-card__icon-button:active {
+  transform: none;
+}
+
+.balance-card__icon-button[data-active='true'] {
+  background: transparent;
+  color: var(--text);
+}
+
+.balance-card__refresh-button svg {
+  transform-origin: center;
+}
+
+.balance-card__refresh-button[data-active='true'] {
+  opacity: 1;
+}
+
+.balance-card__refresh-button[data-active='true'] svg {
+  animation: balance-refresh-spin 650ms cubic-bezier(0.32, 0.72, 0.2, 1);
+}
+
+@keyframes balance-refresh-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .balance-card__refresh-button[data-active='true'] svg {
+    animation: none;
+  }
+}
+
+.balance-card__amount {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 44px;
+  letter-spacing: 0;
+  color: var(--text);
+}
+
+.balance-card__amount-cents {
+  color: var(--text-faint);
+}
+
+.balance-card__subtitle {
+  margin: 0;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text-faint);
+}
+
+.balance-card__actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(130px, 1fr));
+  width: min(407px, 100%);
+  justify-self: end;
+  gap: var(--space-2);
+  transform: translate(4px, 2px);
+}
+
+.balance-card__actions[data-count='1'] {
+  grid-template-columns: minmax(0, 1fr);
+  width: min(145px, 100%);
+}
+
+.balance-card__action-button {
+  display: inline-flex;
+  min-width: 0;
+  height: 32px;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-4);
+  padding: 0 var(--space-4);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 300ms ease,
+    border-color 300ms ease,
+    box-shadow 300ms ease,
+    color 300ms ease,
+    opacity 300ms ease,
+    transform 100ms ease;
+}
+
+.balance-card__action-button svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  stroke-width: 1.5;
+}
+
+.balance-card__action-button:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.balance-card__action-button[data-variant='primary'] {
+  background: var(--button-primary-background);
+  color: var(--button-primary-text);
+}
+
+.balance-card__action-button[data-variant='primary']:hover:not(:disabled) {
+  background: var(--button-primary-hover-background);
+}
+
+.balance-card__action-button[data-variant='outline'] {
+  overflow: hidden;
+  border-color: transparent;
+  background:
+    linear-gradient(
+        color-mix(in srgb, var(--surface) 86%, transparent),
+        color-mix(in srgb, var(--surface) 86%, transparent)
+      )
+      padding-box,
+    linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.5) 0%,
+        rgba(255, 255, 255, 0) 50%,
+        rgba(255, 255, 255, 0.25) 100%
+      )
+      border-box;
+  color: var(--text);
+}
+
+.balance-card__action-button[data-variant='outline']:hover {
+  background:
+    linear-gradient(var(--surface-hover), var(--surface-hover)) padding-box,
+    linear-gradient(
+        265deg,
+        rgba(255, 255, 255, 0.5) 0%,
+        rgba(255, 255, 255, 0) 50%,
+        rgba(255, 255, 255, 0.25) 100%
+      )
+      border-box;
+}
+
+:root[data-theme='light'] .balance-card__action-button[data-variant='outline'] {
+  background:
+    linear-gradient(var(--surface-low), var(--surface-low)) padding-box,
+    linear-gradient(
+        135deg,
+        rgba(14, 17, 23, 0.22) 0%,
+        rgba(14, 17, 23, 0.08) 48%,
+        rgba(14, 17, 23, 0.16) 100%
+      )
+      border-box;
+  box-shadow: 0 1px 0 rgba(14, 17, 23, 0.02);
+}
+
+:root[data-theme='light'] .balance-card__action-button[data-variant='outline']:hover {
+  background:
+    linear-gradient(var(--surface-high), var(--surface-high)) padding-box,
+    linear-gradient(
+        265deg,
+        rgba(14, 17, 23, 0.26) 0%,
+        rgba(14, 17, 23, 0.1) 48%,
+        rgba(14, 17, 23, 0.18) 100%
+      )
+      border-box;
+}
+
+.balance-card__action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (max-width: 960px) {
+  .balance-card.ui-card {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .balance-card__actions {
+    justify-self: stretch;
+    width: 100%;
+    transform: none;
+  }
+}

@@ -2,15 +2,15 @@ import { useState } from "react";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { isNumericDecimalInput } from "@/shared/lib/numeric-decimal-input";
 import { PERCENTAGE_DIVISOR } from "./create-transfer";
+import { parseTransferBalance } from "../lib/format-transfer-balance";
 
 export function useTransferAmountInputs(
   selectedAsset: AssetWithTrustline | undefined,
+  initialRecipient = "",
 ) {
   const [amount, setAmount] = useState("");
-  const [recipient, setRecipient] = useState("");
-  const numericBalance = selectedAsset
-    ? Number.parseFloat(selectedAsset.balance ?? "0")
-    : 0;
+  const [recipient, setRecipient] = useState(initialRecipient);
+  const numericBalance = parseTransferBalance(selectedAsset?.balance);
   const handlePercentage = (percentage: number) => {
     const value = (numericBalance * percentage) / PERCENTAGE_DIVISOR;
     setAmount(value.toString());

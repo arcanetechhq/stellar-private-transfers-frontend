@@ -61,6 +61,7 @@ async function submitDepositSuccessFlow({
       assetId: result.assetId,
       poolContract: result.poolContract,
       txId: result.txId,
+      flow: "deposit",
     },
   });
 }
@@ -99,8 +100,8 @@ export function useCreateDeposit() {
         numericAmount: form.numericAmount,
         destinationPrivateAddressPreview: privateAddress,
       });
-    } catch {
-      return;
+    } catch (error: unknown) {
+      console.error("Deposit failed:", error);
     } finally {
       setIsPreparingWallet(false);
     }

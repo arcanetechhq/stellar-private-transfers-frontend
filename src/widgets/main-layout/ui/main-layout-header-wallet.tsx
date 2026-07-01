@@ -1,15 +1,14 @@
-import React from "react";
+import { useEffect, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import {
-  connectStellarWallet,
   disconnectStellarWallet,
+  useStellarWalletModal,
 } from "@/features/stellar-wallet-connect";
 import { shortenStellarAddress } from "@/shared/lib/shorten-stellar-address";
-import {
-  MainLayoutWalletMenu,
-  MainLayoutWalletTrigger,
-} from "./main-layout-wallet-menu";
+import { Wallet } from "lucide-react";
+import { ConnectedWalletPanel } from "./connected-wallet-panel";
+import { MainLayoutWalletTrigger } from "./main-layout-wallet-menu";
 
 type MainLayoutHeaderWalletProperties = {
   translate: (key: string) => string;
@@ -25,36 +24,69 @@ export function MainLayoutHeaderWallet({
   const dispatch = useAppDispatch();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const isConnected = Boolean(publicKey);
+  const { openConnected, openPicker } = useStellarWalletModal();
+  const accountMenuReference = useRef<HTMLDivElement>(null);
 
-  const shortAddress = publicKey ? shortenStellarAddress(publicKey) : "";
+  const shortAddress = publicKey ? shortenStellarAddress(publicKey, 4, 3) : "";
 
-  const handleChangeWallet = async () => {
-    setWalletOpen(false);
-    await dispatch(connectStellarWallet());
-  };
+  useEffect(() => {
+    if (!walletOpen) {
+      return undefined;
+    }
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!accountMenuReference.current?.contains(event.target as Node)) {
+        setWalletOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setWalletOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [walletOpen, setWalletOpen]);
 
   const handleDisconnect = async () => {
     setWalletOpen(false);
     await dispatch(disconnectStellarWallet());
   };
 
+  const handleManageWallet = () => {
+    setWalletOpen(false);
+    openConnected();
+  };
+
+  const handleChangeWallet = () => {
+    setWalletOpen(false);
+    openPicker(true);
+  };
+
   const handleConnect = () => {
-    void dispatch(connectStellarWallet());
+    openPicker();
   };
 
   if (isConnected && publicKey) {
     return (
-      <div className="relative">
+      <div className="account-menu" ref={accountMenuReference}>
         <MainLayoutWalletTrigger
           shortAddress={shortAddress}
           isOpen={walletOpen}
           onToggle={() => setWalletOpen(!walletOpen)}
         />
-        <MainLayoutWalletMenu
+        <ConnectedWalletPanel
           isOpen={walletOpen}
-          onClose={() => setWalletOpen(false)}
           publicKey={publicKey}
-          translate={translate}
+          onClose={() => setWalletOpen(false)}
+          onManageWallet={handleManageWallet}
           onChangeWallet={handleChangeWallet}
           onDisconnect={handleDisconnect}
         />
@@ -65,10 +97,13 @@ export function MainLayoutHeaderWallet({
   return (
     <button
       type="button"
-      className="min-h-[48px] rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50"
+      className="topbar-action user-menu user-menu--connect"
       onClick={handleConnect}
     >
-      {translate("common:connectWallet")}
+      <span className="user-menu__wallet-icon" aria-hidden="true">
+        <Wallet size={18} strokeWidth={1.6} />
+      </span>
+      <span className="user-menu__name">{translate("common:connectWallet")}</span>
     </button>
   );
 }

@@ -5,7 +5,9 @@ import {
   clearWallet,
   setPublicKey,
   setWalletKitLoaded,
+  setWalletProviderName,
 } from "@/entities/wallet";
+import { readWalletProviderNameFromKit } from "../lib/read-wallet-provider-name";
 
 export const syncWalletAddressFromKit = createAsyncThunk(
   "wallet/syncWalletAddressFromKit",
@@ -13,6 +15,10 @@ export const syncWalletAddressFromKit = createAsyncThunk(
     try {
       const { address } = await StellarWalletsKitSdk.getAddress();
       dispatch(setPublicKey(address));
+      const providerName = readWalletProviderNameFromKit();
+      if (providerName) {
+        dispatch(setWalletProviderName(providerName));
+      }
     } catch {
       await Promise.resolve();
     } finally {
@@ -24,11 +30,38 @@ export const syncWalletAddressFromKit = createAsyncThunk(
 export const connectStellarWallet = createAsyncThunk(
   "wallet/connectStellarWallet",
   async (_argument: undefined, { dispatch }) => {
-    const { address } = await StellarWalletsKit.authModal();
-    if (!address) {
+    try {
+      const { address } = await StellarWalletsKit.authModal();
+      if (!address) {
+        return;
+      }
+      dispatch(setPublicKey(address));
+      const providerName = readWalletProviderNameFromKit();
+      if (providerName) {
+        dispatch(setWalletProviderName(providerName));
+      }
+      return address;
+    } catch {
       return;
     }
-    dispatch(setPublicKey(address));
+  },
+);
+
+export const connectStellarWalletModule = createAsyncThunk(
+  "wallet/connectStellarWalletModule",
+  async (moduleId: string, { dispatch }) => {
+    try {
+      StellarWalletsKitSdk.setWallet(moduleId);
+      const { address } = await StellarWalletsKitSdk.fetchAddress();
+      dispatch(setPublicKey(address));
+      const providerName = readWalletProviderNameFromKit();
+      if (providerName) {
+        dispatch(setWalletProviderName(providerName));
+      }
+      return address;
+    } catch {
+      return;
+    }
   },
 );
 

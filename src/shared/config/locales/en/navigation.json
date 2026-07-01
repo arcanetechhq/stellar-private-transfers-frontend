@@ -1,10 +1,17 @@
 {
-  "home": "Home",
-  "history": "History",
+  "home": "Overview",
+  "history": "Transactions",
   "contacts": "Contacts",
   "pendingClaims": "Pending claims",
   "about": "About",
   "help": "Help & Support",
   "privacyPolicy": "Privacy Policy",
-  "appVersion": "v1.0.0"
+  "appVersion": "v1.0.0",
+  "transactions": "Transactions",
+  "contactSupport": "Contact support",
+  "settings": "Settings",
+  "logOut": "Log out",
+  "appName": "Arcane",
+  "expandSidebar": "Expand sidebar",
+  "collapseSidebar": "Collapse sidebar"
 }

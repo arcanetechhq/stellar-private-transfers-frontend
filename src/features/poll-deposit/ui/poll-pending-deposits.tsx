@@ -66,4 +66,5 @@ function usePollPendingDeposits(): void {
 
 export function PollPendingDeposits() {
   usePollPendingDeposits();
+  return null;
 }

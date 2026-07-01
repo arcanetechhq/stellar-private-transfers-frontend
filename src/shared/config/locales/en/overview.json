@@ -1,12 +1,12 @@
 {
-  "privateAssetsTitle": "Assets on Balance",
+  "privateAssetsTitle": "Assets",
   "viewAllAssets": "View All Assets",
   "recentTransactions": "Recent Transactions",
   "noRecentTransactions": "No transactions yet",
   "viewAll": "View All",
   "privateBalance": "Private Balance",
   "assetsInWallet": "{{count}} assets in your wallet",
-  "privateSend": "Private Send",
+  "privateSend": "Send",
   "deposit": "Deposit",
   "withdraw": "Withdraw",
   "registerAccount": "Register account",
@@ -18,5 +18,19 @@
     "sent": "Sent",
     "received": "Received",
     "withdrawal": "Withdrawal"
+  },
+  "totalBalance": "Total Balance",
+  "showBalance": "Show balance",
+  "hideBalance": "Hide balance",
+  "refreshBalance": "Refresh balance",
+  "monthlyNet": {
+    "title": "Monthly NET",
+    "inflow": "Inflow",
+    "outflow": "Outflow",
+    "periods": {
+      "thisMonth": "This month",
+      "lastMonth": "Last month",
+      "thisQuarter": "This quarter"
+    }
   }
 }

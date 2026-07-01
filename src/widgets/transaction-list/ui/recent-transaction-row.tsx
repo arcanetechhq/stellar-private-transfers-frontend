@@ -10,6 +10,7 @@ import {
   getAmountToneClass,
   getAmountPrefix,
 } from "../lib/transaction-display";
+import { buildTransactionsPathWithSelection } from "../lib/transactions-selection-path";
 import { TransactionTypeIcon } from "./transaction-type-icon";
 
 interface RecentTransactionRowProperties {
@@ -29,7 +30,7 @@ export function RecentTransactionRow(
 
   return (
     <Link
-      to={`/transaction/${transaction.id}`}
+      to={buildTransactionsPathWithSelection(transaction.id)}
       className={cn(
         "flex h-[68px] items-center bg-[var(--card)] px-5 transition-colors hover:bg-[var(--surface-hover)]",
       )}

@@ -1,0 +1,171 @@
+.monthly-net-insights.ui-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 272px;
+  min-width: 0;
+  overflow: hidden;
+  padding: var(--space-6);
+}
+
+.monthly-net-insights__header {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.monthly-net-insights__title-group {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.monthly-net-insights__icon-frame {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-4);
+  background: var(--surface-high);
+  color: var(--text-muted);
+}
+
+.monthly-net-insights__icon-frame svg {
+  width: 17px;
+  height: 17px;
+  stroke-width: 1.5;
+}
+
+.monthly-net-insights__title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.money-figure {
+  display: inline-flex;
+  align-items: baseline;
+  color: var(--text);
+  font-weight: 500;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.money-figure[data-tone="positive"] {
+  color: var(--positive);
+}
+
+.money-figure[data-tone="danger"] {
+  color: var(--danger);
+}
+
+.money-figure[data-tone="muted"] {
+  color: var(--text-muted);
+}
+
+.money-figure[data-size="hero"] {
+  font-size: 28px;
+  line-height: 36px;
+}
+
+.money-figure[data-size="md"] {
+  font-size: 18px;
+  line-height: 26px;
+}
+
+.money-figure__cents {
+  color: var(--text-faint);
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.monthly-net-insights__net-row {
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  gap: var(--space-3);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-4);
+  background:
+    linear-gradient(90deg, var(--positive-soft), transparent 72%),
+    var(--surface-low);
+  padding: var(--space-4);
+}
+
+.monthly-net-insights__net-row[data-tone="danger"] {
+  background:
+    linear-gradient(90deg, rgba(255, 77, 59, 0.12), transparent 72%),
+    var(--surface-low);
+}
+
+.monthly-net-insights__net-indicator {
+  width: 4px;
+  flex: 0 0 4px;
+  align-self: stretch;
+  min-height: 42px;
+  margin: 4px 0;
+  border-radius: var(--radius-2);
+  background: var(--positive);
+}
+
+.monthly-net-insights__net-row[data-tone="danger"]
+  .monthly-net-insights__net-indicator {
+  background: var(--danger);
+}
+
+.monthly-net-insights__breakdown {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.monthly-net-insights__breakdown-item {
+  display: grid;
+  min-width: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-4);
+  background: var(--surface-low);
+  padding: var(--space-3);
+}
+
+.monthly-net-insights__breakdown-item[data-tone="positive"] {
+  box-shadow: inset 3px 0 0 var(--positive);
+}
+
+.monthly-net-insights__breakdown-item[data-tone="muted"] {
+  box-shadow: inset 3px 0 0 var(--border-strong);
+}
+
+.monthly-net-insights__breakdown-content {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-1);
+}
+
+.monthly-net-insights__breakdown-label {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text-muted);
+}
+
+.overview-right-rail {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+@media (max-width: 1179px) {
+  .overview-right-rail {
+    display: none;
+  }
+}

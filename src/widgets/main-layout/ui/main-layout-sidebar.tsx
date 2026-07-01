@@ -1,64 +1,152 @@
-import React from "react";
 import { Link } from "react-router";
-import Arcn from "@/shared/assets/logo-arcn";
-import {
-  LOGO_HEIGHT_PX,
-  LOGO_WIDTH_PX,
-  SIDEBAR_WIDTH_PX,
-} from "./main-layout-constants";
-import type { MainLayoutNavItem } from "../lib/main-layout-navigation";
+import type { LucideIcon } from "lucide-react";
+import { PanelLeft } from "lucide-react";
+import Arcn, { type ArcnVariant } from "@/shared/assets/logo-arcn";
+
+export type MainLayoutNavItem = {
+  name: string;
+  icon: LucideIcon;
+  href?: string;
+  onClick?: () => void;
+  badgeCount?: number;
+};
 
 type MainLayoutSidebarProperties = {
   navigation: MainLayoutNavItem[];
   bottomNavigation: MainLayoutNavItem[];
   pathname: string;
   translate: (key: string) => string;
+  collapsed: boolean;
+  isNarrowViewport: boolean;
+  onToggleCollapsed: () => void;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
 };
 
-function NavLinkRow({
+function SidebarBadge({ value }: { value?: number }) {
+  if (!value || value <= 0) {
+    return undefined;
+  }
+
+  return <span className="sidebar-link__badge">{value}</span>;
+}
+
+function isSidebarItemActive(pathname: string, item: MainLayoutNavItem) {
+  if (!item.href) {
+    return false;
+  }
+
+  if (item.href === "/settings") {
+    return pathname === "/settings" || pathname.startsWith("/settings/");
+  }
+
+  return pathname === item.href;
+}
+
+function SidebarLink({
   item,
   isActive,
+  collapsed,
 }: {
   item: MainLayoutNavItem;
   isActive: boolean;
+  collapsed: boolean;
 }) {
   const Icon = item.icon;
+  const title = collapsed ? item.name : undefined;
+  const content = (
+    <>
+      <span className="sidebar-link__icon">
+        <Icon size={20} strokeWidth={1.5} />
+      </span>
+      <span>{item.name}</span>
+      <SidebarBadge value={item.badgeCount} />
+    </>
+  );
+
+  if (item.onClick) {
+    return (
+      <button
+        type="button"
+        className="sidebar-link"
+        data-active={isActive}
+        onClick={item.onClick}
+        title={title}
+      >
+        {content}
+      </button>
+    );
+  }
+
   return (
     <Link
-      to={item.href}
-      className="flex items-center gap-3 px-3 transition-colors"
-      style={{
-        height: "40px",
-        borderRadius: "10px",
-        backgroundColor: isActive ? "#FFFFFF" : "transparent",
-        color: isActive ? "#1B1D22" : "#5E6168",
-        fontSize: "14px",
-        lineHeight: "20px",
-        fontWeight: 500,
-        boxShadow: isActive ? "0 1px 2px rgba(16, 24, 40, 0.03)" : "none",
-      }}
-      onMouseEnter={(event) => {
-        if (!isActive) event.currentTarget.style.backgroundColor = "#F6F6F4";
-      }}
-      onMouseLeave={(event) => {
-        if (!isActive)
-          event.currentTarget.style.backgroundColor = "transparent";
-      }}
+      to={item.href ?? "/"}
+      className="sidebar-link"
+      data-active={isActive}
+      aria-current={isActive ? "page" : undefined}
+      title={title}
     >
-      <Icon
-        className="h-4 w-4"
-        style={{ color: isActive ? "#1B1D22" : "#9A9DA3" }}
-      />
-      <span className="flex-1">{item.name}</span>
-      {item.badgeCount && item.badgeCount > 0 ? (
-        <span
-          className="rounded-full px-2 py-0.5 text-[11px] font-semibold"
-          style={{ backgroundColor: "#111827", color: "#FFFFFF" }}
-        >
-          {item.badgeCount}
-        </span>
-      ) : undefined}
+      {content}
     </Link>
+  );
+}
+
+function SidebarHeaderSection({
+  collapsed,
+  isNarrowViewport,
+  translate,
+  onToggleCollapsed,
+}: {
+  collapsed: boolean;
+  isNarrowViewport: boolean;
+  translate: (key: string) => string;
+  onToggleCollapsed: () => void;
+}) {
+  const showLogo = !collapsed || isNarrowViewport;
+  const logoVariant: ArcnVariant = collapsed && isNarrowViewport ? "mark" : "full";
+
+  return (
+    <div className="sidebar__account">
+      {showLogo ? (
+        <Link
+          to="/"
+          className={
+            logoVariant === "mark"
+              ? "sidebar__brand sidebar__brand--mark"
+              : "sidebar__brand"
+          }
+          aria-label={translate("navigation:home")}
+        >
+          <div
+            className={
+              logoVariant === "mark"
+                ? "sidebar__brand-logo sidebar__brand-logo--mark"
+                : "sidebar__brand-logo"
+            }
+          >
+            <Arcn variant={logoVariant} />
+          </div>
+        </Link>
+      ) : undefined}
+      <button
+        type="button"
+        className="sidebar__panel-control"
+        aria-label={
+          collapsed
+            ? translate("navigation:expandSidebar")
+            : translate("navigation:collapseSidebar")
+        }
+        aria-pressed={collapsed}
+        onClick={onToggleCollapsed}
+        title={
+          collapsed
+            ? translate("navigation:expandSidebar")
+            : translate("navigation:collapseSidebar")
+        }
+      >
+        <PanelLeft size={20} strokeWidth={1.5} />
+      </button>
+    </div>
   );
 }
 
@@ -67,56 +155,53 @@ export function MainLayoutSidebar({
   bottomNavigation,
   pathname,
   translate,
+  collapsed,
+  isNarrowViewport,
+  onToggleCollapsed,
+  onMouseEnter,
+  onMouseLeave,
 }: MainLayoutSidebarProperties) {
   return (
-    <aside
-      className="flex flex-col"
-      style={{
-        width: `${SIDEBAR_WIDTH_PX}px`,
-        backgroundColor: "#F1F1EF",
-        borderRight: "1px solid #E5E4DF",
-      }}
-    >
-      <div
-        className="border-b px-4"
-        style={{
-          paddingTop: "24px",
-          paddingBottom: "24px",
-          borderColor: "#E5E4DF",
-        }}
+    <div className="sidebar-slot">
+      <aside
+        className="sidebar"
+        data-collapsed={collapsed}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
-        <div
-          style={{ width: `${LOGO_WIDTH_PX}px`, height: `${LOGO_HEIGHT_PX}px` }}
-        >
-          <Arcn />
-        </div>
-      </div>
+        <SidebarHeaderSection
+          collapsed={collapsed}
+          isNarrowViewport={isNarrowViewport}
+          translate={translate}
+          onToggleCollapsed={onToggleCollapsed}
+        />
 
-      <nav className="flex-1 space-y-1 p-4">
-        {navigation.map((item) => (
-          <NavLinkRow
-            key={item.href}
-            item={item}
-            isActive={pathname === item.href}
-          />
-        ))}
-      </nav>
+        <div className="sidebar__nav">
+          <div className="sidebar__nav-main">
+            <nav className="sidebar__section">
+              {navigation.map((item) => (
+                <SidebarLink
+                  key={item.href ?? item.name}
+                  item={item}
+                  isActive={isSidebarItemActive(pathname, item)}
+                  collapsed={collapsed}
+                />
+              ))}
+            </nav>
+          </div>
 
-      <div className="space-y-1 p-4" style={{ borderTop: "1px solid #E5E4DF" }}>
-        {bottomNavigation.map((item) => (
-          <NavLinkRow
-            key={item.href}
-            item={item}
-            isActive={pathname === item.href}
-          />
-        ))}
-        <div
-          className="mt-3 px-3"
-          style={{ fontSize: "11px", lineHeight: "16px", color: "#9A9DA3" }}
-        >
-          {translate("navigation:appVersion")}
+          <nav className="sidebar__section sidebar__footer">
+            {bottomNavigation.map((item) => (
+              <SidebarLink
+                key={item.href ?? item.name}
+                item={item}
+                isActive={isSidebarItemActive(pathname, item)}
+                collapsed={collapsed}
+              />
+            ))}
+          </nav>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </div>
   );
 }

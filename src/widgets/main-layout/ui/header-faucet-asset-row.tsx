@@ -1,142 +1,98 @@
-import React from "react";
-import { Loader2 } from "lucide-react";
+import { Check } from "lucide-react";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/store";
 import type { AssetWithTrustline } from "@/entities/asset";
 import {
-  addAssetTrustlineThunk,
   faucetClaimAmountLabel,
   isAssetFaucetClaimable,
   selectIsClaimLoadingForAsset,
   selectTrustlinePendingAssetId,
 } from "@/entities/asset";
+import { addAssetTrustlineThunk } from "@/features/add-asset-trustline";
 import {
   claimIssuedAssetThunk,
   claimNativeFaucetThunk,
 } from "@/features/faucet";
-import { Button } from "@/shared/ui/button";
-import { TokenIcon } from "@/shared/ui/token-icon";
 
-function HeaderFaucetRowTrustlineLoading() {
-  return (
-    <Button
-      type="button"
-      variant="outline"
-      size="sm"
-      disabled
-      className="min-w-[7.5rem] shrink-0"
-    >
-      <Loader2 className="size-3.5 animate-spin" />
-    </Button>
-  );
-}
+type FaucetRowState = "idle" | "adding" | "ready" | "claiming" | "success";
 
-interface HeaderFaucetRowMissingTrustlineProperties {
+interface ResolveFaucetRowStateInput {
   asset: AssetWithTrustline;
-  symbol: string;
-  walletPublicKey: string | undefined;
+  canClaim: boolean;
   isSubmittingTrustline: boolean;
-  translate: TFunction<"assets">;
-}
-
-function HeaderFaucetRowMissingTrustline({
-  asset,
-  symbol,
-  walletPublicKey,
-  isSubmittingTrustline,
-  translate,
-}: HeaderFaucetRowMissingTrustlineProperties) {
-  const dispatch = useAppDispatch();
-  const issuerAddress = asset.issuerAddress ?? undefined;
-
-  return (
-    <Button
-      type="button"
-      variant="default"
-      size="sm"
-      disabled={isSubmittingTrustline || !walletPublicKey || !issuerAddress}
-      className="min-w-[7.5rem] shrink-0"
-      onClick={() => {
-        if (!walletPublicKey || !issuerAddress) {
-          return;
-        }
-        void dispatch(
-          addAssetTrustlineThunk({
-            assetId: asset.assetId,
-            assetCode: symbol,
-            issuerAddress,
-            publicKey: walletPublicKey,
-          }),
-        );
-      }}
-    >
-      {isSubmittingTrustline ? (
-        <Loader2 className="size-3.5 animate-spin" />
-      ) : (
-        translate("trustline.add")
-      )}
-    </Button>
-  );
-}
-
-interface HeaderFaucetRowClaimProperties {
-  asset: AssetWithTrustline;
-  symbol: string;
-  claimAmount: string;
-  walletPublicKey: string | undefined;
   isClaimLoading: boolean;
-  translate: TFunction<"assets">;
 }
 
-function HeaderFaucetRowClaim({
+function resolveFaucetRowState({
   asset,
-  symbol,
-  claimAmount,
-  walletPublicKey,
+  canClaim,
+  isSubmittingTrustline,
   isClaimLoading,
-  translate,
-}: HeaderFaucetRowClaimProperties) {
-  const dispatch = useAppDispatch();
-  const isNative = asset.trustlineStatus === "native";
+}: ResolveFaucetRowStateInput): FaucetRowState {
+  if (asset.trustlineStatus === "loading" || isSubmittingTrustline) {
+    return "adding";
+  }
+  if (isClaimLoading) {
+    return "claiming";
+  }
+  const addRequired = asset.trustlineStatus !== "native";
+  if (
+    canClaim &&
+    addRequired &&
+    asset.trustlineStatus === "exists"
+  ) {
+    return "ready";
+  }
+  return "idle";
+}
 
+function resolveActionLabel(
+  rowState: FaucetRowState,
+  canClaim: boolean,
+  addRequired: boolean,
+  translate: TFunction<"assets">,
+): string {
+  const isReady = rowState === "ready";
+  if (isReady || (!addRequired && rowState === "idle" && canClaim)) {
+    return translate("faucet.claimLabel");
+  }
+  return translate("trustline.add");
+}
+
+function resolveStatusLabel(
+  rowState: FaucetRowState,
+  symbol: string,
+  claimAmount: string,
+  translate: TFunction<"assets">,
+): string {
+  switch (rowState) {
+    case "adding": {
+      return translate("faucet.statusPreparing");
+    }
+    case "ready": {
+      return translate("faucet.statusReady", { amount: claimAmount, symbol });
+    }
+    case "claiming": {
+      return translate("faucet.statusClaiming");
+    }
+    case "success": {
+      return translate("faucet.statusClaimed", { amount: claimAmount, symbol });
+    }
+    default: {
+      return translate("faucet.statusAvailable", { amount: claimAmount, symbol });
+    }
+  }
+}
+
+function FaucetRowActionLoader({ label }: { label: string }) {
   return (
-    <Button
-      type="button"
-      variant="default"
-      size="sm"
-      disabled={isClaimLoading || !walletPublicKey}
-      className="max-w-[11rem] min-w-[7.5rem] shrink-0 truncate"
-      onClick={() => {
-        if (!walletPublicKey) {
-          return;
-        }
-        if (isNative) {
-          void dispatch(
-            claimNativeFaucetThunk({
-              publicKey: walletPublicKey,
-              assetId: asset.assetId,
-            }),
-          );
-        } else {
-          void dispatch(
-            claimIssuedAssetThunk({
-              publicKey: walletPublicKey,
-              assetId: asset.assetId,
-            }),
-          );
-        }
-      }}
-    >
-      {isClaimLoading ? (
-        <Loader2 className="size-3.5 shrink-0 animate-spin" />
-      ) : (
-        translate("faucet.claimWithAmount", {
-          amount: claimAmount,
-          symbol,
-        })
-      )}
-    </Button>
+    <>
+      <span className="activity-loader" aria-hidden="true">
+        <span className="activity-loader__spinner" />
+      </span>
+      <span>{label}</span>
+    </>
   );
 }
 
@@ -152,6 +108,7 @@ export function HeaderFaucetAssetRow({
   showFaucet,
 }: HeaderFaucetAssetRowProperties) {
   const { t: translate } = useTranslation("assets");
+  const dispatch = useAppDispatch();
   const pendingTrustlineAssetId = useAppSelector(selectTrustlinePendingAssetId);
   const isClaimLoading = useAppSelector((state) =>
     selectIsClaimLoadingForAsset(state, asset.assetId),
@@ -163,46 +120,118 @@ export function HeaderFaucetAssetRow({
     pendingTrustlineAssetId === asset.assetId;
   const canClaim = isAssetFaucetClaimable(showFaucet, asset);
   const claimAmount = faucetClaimAmountLabel(asset);
+  const addRequired = asset.trustlineStatus !== "native";
+  const rowState = resolveFaucetRowState({
+    asset,
+    canClaim,
+    isSubmittingTrustline,
+    isClaimLoading,
+  });
+  const isBusy = rowState === "adding" || rowState === "claiming";
+  const needsTrustline = asset.trustlineStatus === "missing";
+  const showAction = needsTrustline || canClaim;
 
-  let action: React.ReactNode;
-  if (asset.trustlineStatus === "loading") {
-    action = <HeaderFaucetRowTrustlineLoading />;
-  } else if (asset.trustlineStatus === "missing") {
-    action = (
-      <HeaderFaucetRowMissingTrustline
-        asset={asset}
-        symbol={symbol}
-        walletPublicKey={walletPublicKey}
-        isSubmittingTrustline={isSubmittingTrustline}
-        translate={translate}
-      />
+  const actionLabel = resolveActionLabel(
+    rowState,
+    canClaim,
+    addRequired,
+    translate,
+  );
+  const pendingLabel = isSubmittingTrustline
+    ? translate("faucet.addPendingLabel")
+    : translate("faucet.claimPendingLabel");
+  const statusLabel = resolveStatusLabel(
+    rowState,
+    symbol,
+    claimAmount,
+    translate,
+  );
+
+  const handleAction = () => {
+    if (isBusy || !walletPublicKey) {
+      return;
+    }
+
+    if (needsTrustline) {
+      const issuerAddress = asset.issuerAddress ?? undefined;
+      if (!issuerAddress) {
+        return;
+      }
+      void dispatch(
+        addAssetTrustlineThunk({
+          assetId: asset.assetId,
+          assetCode: symbol,
+          issuerAddress,
+          publicKey: walletPublicKey,
+        }),
+      );
+      return;
+    }
+
+    if (!canClaim) {
+      return;
+    }
+
+    if (asset.trustlineStatus === "native") {
+      void dispatch(
+        claimNativeFaucetThunk({
+          publicKey: walletPublicKey,
+          assetId: asset.assetId,
+        }),
+      );
+      return;
+    }
+
+    void dispatch(
+      claimIssuedAssetThunk({
+        publicKey: walletPublicKey,
+        assetId: asset.assetId,
+      }),
     );
-  } else if (canClaim) {
-    action = (
-      <HeaderFaucetRowClaim
-        asset={asset}
-        symbol={symbol}
-        claimAmount={claimAmount}
-        walletPublicKey={walletPublicKey}
-        isClaimLoading={isClaimLoading}
-        translate={translate}
-      />
-    );
-  } else {
-    action = (
-      <span className="text-foreground-tertiary min-w-[7.5rem] text-right text-xs">
-        —
-      </span>
-    );
-  }
+  };
 
   return (
-    <div className="border-border-soft flex items-center gap-3 border-b py-2 last:border-b-0">
-      <TokenIcon ticker={symbol} logoUrl={asset.logoUrl} size="sm" />
-      <span className="text-foreground-primary min-w-0 flex-1 truncate text-sm font-medium">
-        {symbol}
+    <div className="faucet-menu__row" data-state={rowState} role="none">
+      <span
+        className="faucet-menu__asset-icon"
+        data-token={symbol}
+        aria-hidden="true"
+      >
+        {asset.logoUrl ? (
+          <img src={asset.logoUrl} alt="" />
+        ) : (
+          <span>{symbol.slice(0, 1)}</span>
+        )}
       </span>
-      {action}
+      <span className="faucet-menu__asset-copy">
+        <strong>{symbol}</strong>
+        <small>{asset.name}</small>
+        <small className="faucet-menu__status" data-state={rowState}>
+          {statusLabel}
+        </small>
+      </span>
+      {showAction ? (
+        <button
+          type="button"
+          className="faucet-menu__action"
+          data-state={rowState}
+          data-testid={`faucet-claim-${symbol.toLowerCase()}`}
+          disabled={isBusy || !walletPublicKey}
+          role="menuitem"
+          onClick={handleAction}
+        >
+          {isBusy ? (
+            <FaucetRowActionLoader label={pendingLabel} />
+          ) : rowState === "success" ? (
+            <>
+              <Check size={16} strokeWidth={1.8} />
+              <span>{translate("faucet.successLabel")}</span>
+            </>
+          ) : (
+            actionLabel
+          )}
+        </button>
+      ) : null}
     </div>
   );
 }

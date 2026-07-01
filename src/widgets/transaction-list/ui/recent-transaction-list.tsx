@@ -1,4 +1,3 @@
-import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { cn } from "@/shared/lib/cn";
@@ -20,7 +19,7 @@ export function RecentTransactionList(
   return (
     <div
       className={cn(
-        "flex h-[260px] w-1/2 shrink-0 flex-col overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--card)]",
+        "flex h-[260px] w-full shrink-0 flex-col overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--card)]",
       )}
     >
       <div className="flex flex-shrink-0 items-center justify-between border-b border-[var(--border)] px-5 py-3">

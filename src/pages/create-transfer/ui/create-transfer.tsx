@@ -1,62 +1,81 @@
 import React from "react";
-import { AssetPickerModal } from "@/features/pick-asset";
-import { PickContactModal } from "@/features/pick-contact";
+import "@/shared/styles/transfer-flow.css";
+import { useTranslation } from "react-i18next";
+import { useAppSelector } from "@/store";
+import { selectContacts } from "@/entities/contact";
 import { useCreateTransfer } from "../model/use-create-transfer";
-import { PageHeader } from "./page-header";
-import { TransferForm } from "./transfer-form";
-import { TransferSummary } from "./transfer-summary";
+import { TransferReviewModal } from "./transfer-review-modal";
+import { TransferSendPanel } from "./transfer-send-panel";
+import { TransferSuccessModal } from "./transfer-success-modal";
 
-export function CreateTransfer() {
+function resolveRecipientLabel(
+  recipient: string,
+  contacts: { name: string; stellarAddress: string }[],
+  manualRecipientLabel: string,
+): string {
+  const recipientTrim = recipient.trim();
+  const contact = contacts.find(
+    (item) => item.stellarAddress.trim() === recipientTrim,
+  );
+  if (contact) {
+    return contact.name;
+  }
+  if (recipientTrim) {
+    return manualRecipientLabel;
+  }
+  return "—";
+}
+
+export function CreateTransfer(): React.JSX.Element {
   const transfer = useCreateTransfer();
+  const contacts = useAppSelector(selectContacts);
+  const { t: translate } = useTranslation("transfer");
+
   return (
-    <React.Fragment>
-      <div className="min-h-full bg-[var(--background)] p-8">
-        <div className="mx-auto max-w-7xl">
-          <PageHeader />
-          <form onSubmit={transfer.handleSubmit}>
-            <div className="grid grid-cols-3 gap-6">
-              <TransferForm
-                selectedToken={transfer.selectedToken}
-                amount={transfer.amount}
-                onAmountChange={transfer.handleAmountChange}
-                recipient={transfer.recipient}
-                onRecipientChange={transfer.setRecipient}
-                recipientErrorKey={transfer.recipientErrorKey}
-                recipientRegistryStatus={transfer.recipientRegistryStatus}
-                onOpenTokenPicker={() => transfer.setShowTokenPicker(true)}
-                onOpenContactPicker={() => transfer.setShowContactPicker(true)}
-                onPercentage={transfer.handlePercentage}
-                onMaxAmount={transfer.handleMaxAmount}
-              />
-              <TransferSummary
-                selectedToken={transfer.selectedToken}
-                amount={transfer.amount}
-                recipient={transfer.recipient}
-                totalAmount={transfer.totalAmount}
-                canSubmit={transfer.canSubmit}
-                isSubmitting={transfer.isSubmitting}
-                submitError={transfer.submitError}
-                recipientRegistryStatus={transfer.recipientRegistryStatus}
-              />
-            </div>
-          </form>
-        </div>
-        {transfer.showTokenPicker ? (
-          <AssetPickerModal
+    <div className="workspace__inner">
+      <div className="transfer-route">
+        <div className="transfer-flow">
+          <TransferSendPanel
             assets={transfer.assets}
-            selectedAssetId={transfer.selectedToken?.assetId}
-            onSelect={transfer.handleTokenSelect}
-            onClose={() => transfer.setShowTokenPicker(false)}
+            selectedToken={transfer.selectedToken}
+            amount={transfer.amount}
+            recipient={transfer.recipient}
+            recipientErrorKey={transfer.recipientErrorKey}
+            recipientRegistryStatus={transfer.recipientRegistryStatus}
+            totalAmount={transfer.totalAmount}
+            canContinue={transfer.canSubmit}
+            isSubmitting={transfer.isSubmitting}
+            excludeStellarAddress={transfer.publicKey ?? undefined}
+            onAmountChange={transfer.handleAmountChange}
+            onRecipientChange={transfer.setRecipient}
+            onTokenSelect={transfer.handleTokenSelect}
+            onMaxAmount={transfer.handleMaxAmount}
+            onContinue={transfer.handleOpenReview}
           />
-        ) : undefined}
-        <PickContactModal
-          open={transfer.showContactPicker}
-          selectedAddress={transfer.recipient}
-          onSelect={transfer.setRecipient}
-          onClose={() => transfer.setShowContactPicker(false)}
-          excludeStellarAddress={transfer.publicKey ?? undefined}
-        />
+        </div>
       </div>
-    </React.Fragment>
+
+      <TransferReviewModal
+        open={transfer.step === "review"}
+        selectedToken={transfer.selectedToken}
+        amount={transfer.amount}
+        recipient={transfer.recipient}
+        isSubmitting={transfer.isSubmitting}
+        submitError={transfer.submitError}
+        onClose={transfer.handleCloseReview}
+        onConfirm={transfer.handleConfirmSend}
+      />
+
+      <TransferSuccessModal
+        open={transfer.step === "success"}
+        result={transfer.successResult}
+        recipientLabel={resolveRecipientLabel(
+          transfer.recipient,
+          contacts,
+          translate("manualRecipient"),
+        )}
+        onDone={transfer.handleSuccessDone}
+      />
+    </div>
   );
 }

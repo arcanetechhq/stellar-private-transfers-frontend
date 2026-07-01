@@ -1,0 +1,27 @@
+.workspace__inner {
+  --workspace-top-space: var(--space-2);
+  --workspace-bottom-space: var(--space-6);
+  display: flex;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  min-height: calc(100% - var(--page-header-height));
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin: 0;
+  padding: var(--workspace-top-space) var(--space-6) var(--workspace-bottom-space);
+}
+
+.page-column {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.full-table-route {
+  position: relative;
+  width: 100%;
+}

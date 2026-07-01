@@ -1,9 +1,7 @@
 import { useCallback } from "react";
 import { useAppDispatch, useAppSelector } from "@/store";
-import {
-  addAssetTrustlineThunk,
-  selectTrustlinePendingAssetId,
-} from "@/entities/asset";
+import { selectTrustlinePendingAssetId } from "@/entities/asset";
+import { addAssetTrustlineThunk } from "./add-asset-trustline-thunk";
 
 interface TrustlineTarget {
   assetId: string;

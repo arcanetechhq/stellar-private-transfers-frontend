@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import { buildTransactionsPathWithSelection } from "@/widgets/transaction-list";
 import {
   MOCK_NOTIFICATIONS,
   type NotificationRecord,
@@ -109,7 +110,7 @@ export function NotificationsModal({
       return;
     }
 
-    navigate(`/transaction/${transactionId}`);
+    navigate(buildTransactionsPathWithSelection(transactionId));
     onClose();
   };
 

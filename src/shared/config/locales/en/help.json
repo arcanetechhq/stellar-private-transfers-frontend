@@ -1,5 +1,5 @@
 {
-  "title": "Help & Support",
+  "title": "Contact support",
   "subtitle": "Find answers to your questions or contact us",
   "documentation": "Documentation",
   "documentationDesc": "Guides for using private transfers",
@@ -16,5 +16,21 @@
   "q2": "What is data disclosure?",
   "a2": "Data disclosure allows you to selectively share transaction information with third parties while maintaining control over privacy.",
   "q3": "How long does a transfer take to process?",
-  "a3": "Transfers are typically processed within a few minutes, depending on network congestion."
+  "a3": "Transfers are typically processed within a few minutes, depending on network congestion.",
+  "chatTitle": "ARC Support",
+  "chatSubtitle": "Usually replies within a few minutes.",
+  "startConversation": "Start a conversation",
+  "startConversationHint": "Send a message and our team will get back to you soon.",
+  "messagePlaceholder": "Type your message",
+  "sendMessage": "Send message",
+  "otherWaysTitle": "Other ways to reach us",
+  "otherWaysSubtitle": "Prefer email, Telegram, or a quick call? Pick what works best.",
+  "bookCall": "Book a call",
+  "bookCallHint": "Schedule on Calendly",
+  "telegram": "Telegram",
+  "telegramHint": "@pasha_arc",
+  "email": "Email",
+  "emailHint": "support@arcn.io",
+  "linkedin": "LinkedIn",
+  "linkedinHint": "Pavel Mitsevich (CMO)"
 }

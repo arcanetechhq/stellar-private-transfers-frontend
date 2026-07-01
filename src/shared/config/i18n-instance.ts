@@ -16,11 +16,12 @@ import enConfirmations from "./locales/en/confirmations.json";
 import enDisclosure from "./locales/en/disclosure.json";
 import enAbout from "./locales/en/about.json";
 import enPrivacyPolicy from "./locales/en/privacyPolicy.json";
-import enDataExport from "./locales/en/dataExport.json";
 import enAccess from "./locales/en/access.json";
 import enPrivateAddress from "./locales/en/private-address.json";
 import enPendingClaims from "./locales/en/pending-claims.json";
 import enAssets from "./locales/en/assets.json";
+import enTransactions from "./locales/en/transactions.json";
+import enDataExport from "./locales/en/dataExport.json";
 import enKyt from "./locales/en/kyt.json";
 
 const NAMESPACES = [
@@ -40,11 +41,12 @@ const NAMESPACES = [
   "disclosure",
   "about",
   "privacyPolicy",
-  "dataExport",
   "access",
   "privateAddress",
   "pendingClaims",
   "assets",
+  "transactions",
+  "dataExport",
   "kyt",
 ] as const;
 
@@ -72,11 +74,12 @@ i18n.use(initReactI18next).init({
       disclosure: enDisclosure,
       about: enAbout,
       privacyPolicy: enPrivacyPolicy,
-      dataExport: enDataExport,
       access: enAccess,
       privateAddress: enPrivateAddress,
       pendingClaims: enPendingClaims,
       assets: enAssets,
+      transactions: enTransactions,
+      dataExport: enDataExport,
       kyt: enKyt,
     },
   },

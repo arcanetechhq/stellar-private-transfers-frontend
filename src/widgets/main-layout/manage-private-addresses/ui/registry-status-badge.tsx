@@ -1,10 +1,9 @@
-import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  RegistryRegistrationModal,
   useWalletPrivateAddress,
   type WalletRegistryStatus,
 } from "@/features/register-private-address";
+import { useStellarWalletModal } from "@/features/stellar-wallet-connect";
 
 function registryStatusLabel(
   status: WalletRegistryStatus,
@@ -34,37 +33,27 @@ function registryStatusToneClass(status: WalletRegistryStatus): string {
 
 export function RegistryStatusBadge() {
   const { t: translate } = useTranslation("privateAddress");
-  const { registryStatus, isRegistryLoading, refreshRegistryStatus } =
-    useWalletPrivateAddress();
-  const [modalOpen, setModalOpen] = useState(false);
+  const { registryStatus, isRegistryLoading } = useWalletPrivateAddress();
+  const { openConnected } = useStellarWalletModal();
 
   return (
-    <React.Fragment>
-      <div className="flex items-center justify-between gap-3 border-b border-gray-200 px-4 py-3">
-        <p className="text-xs font-medium text-gray-500">
-          {translate("registryStatusTitle")}
-        </p>
-        <button
-          type="button"
-          className={`inline-flex shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold ${registryStatusToneClass(registryStatus)}`}
-          onClick={() => {
-            if (registryStatus === "unregistered") {
-              setModalOpen(true);
-            }
-          }}
-        >
-          {isRegistryLoading || registryStatus === "checking"
-            ? translate("registryStatusUnknown")
-            : registryStatusLabel(registryStatus, translate)}
-        </button>
-      </div>
-      <RegistryRegistrationModal
-        open={modalOpen && registryStatus === "unregistered"}
-        onRegistered={() => {
-          setModalOpen(false);
-          void refreshRegistryStatus();
+    <div className="flex items-center justify-between gap-3 border-b border-gray-200 px-4 py-3">
+      <p className="text-xs font-medium text-gray-500">
+        {translate("registryStatusTitle")}
+      </p>
+      <button
+        type="button"
+        className={`inline-flex shrink-0 rounded-full border px-2.5 py-1 text-xs font-semibold ${registryStatusToneClass(registryStatus)}`}
+        onClick={() => {
+          if (registryStatus === "unregistered") {
+            openConnected();
+          }
         }}
-      />
-    </React.Fragment>
+      >
+        {isRegistryLoading || registryStatus === "checking"
+          ? translate("registryStatusUnknown")
+          : registryStatusLabel(registryStatus, translate)}
+      </button>
+    </div>
   );
 }
