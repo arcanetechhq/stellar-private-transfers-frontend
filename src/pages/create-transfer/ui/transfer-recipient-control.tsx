@@ -4,8 +4,8 @@ import { useTranslation } from "react-i18next";
 import { useAppSelector } from "@/store";
 import { type Contact, selectContacts } from "@/entities/contact";
 import { useDismissOnOutsideClick } from "@/shared/hooks";
-import { getContactInitials } from "@/features/view-contact-list";
 import { shortenStellarAddress } from "@/shared/lib/shorten-stellar-address";
+import { contactInitials } from "../lib/contact-initials";
 
 interface TransferRecipientControlProperties {
   recipient: string;
@@ -22,7 +22,7 @@ function RecipientAvatar({
   return (
     <span className="send-recipient-avatar" aria-hidden="true">
       {contact ? (
-        getContactInitials(contact.name)
+        contactInitials(contact.name)
       ) : (
         <Send size={20} strokeWidth={1.7} />
       )}

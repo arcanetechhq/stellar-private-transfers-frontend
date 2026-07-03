@@ -7,7 +7,6 @@ import {
   ChevronRight,
   Eye,
   FileText,
-  Headphones,
   Info,
   ReceiptText,
 } from "lucide-react";
@@ -140,15 +139,6 @@ export function SettingsGeneral() {
             </span>
             <ChevronRight size={18} strokeWidth={1.5} />
           </Link>
-          {!HIDDEN_FEATURES.settingsHelpSupportLink ? (
-            <Link className="settings-option-row" to="/help">
-              <SettingsIconFrame icon={Headphones} />
-              <span className="settings-list-row__title">
-                {translate("moreOptions.helpSupport")}
-              </span>
-              <ChevronRight size={18} strokeWidth={1.5} />
-            </Link>
-          ) : null}
           <Link className="settings-option-row" to="/privacy-policy">
             <SettingsIconFrame icon={FileText} />
             <span className="settings-list-row__title">
@@ -156,16 +146,18 @@ export function SettingsGeneral() {
             </span>
             <ChevronRight size={18} strokeWidth={1.5} />
           </Link>
-          <div
-            className="settings-option-row settings-option-row--disabled"
-            aria-disabled="true"
-          >
-            <SettingsIconFrame icon={ReceiptText} />
-            <span className="settings-list-row__title">
-              {translate("moreOptions.termsOfService")}
-            </span>
-            <ChevronRight size={18} strokeWidth={1.5} />
-          </div>
+          {!HIDDEN_FEATURES.termsOfService ? (
+            <div
+              className="settings-option-row settings-option-row--disabled"
+              aria-disabled="true"
+            >
+              <SettingsIconFrame icon={ReceiptText} />
+              <span className="settings-list-row__title">
+                {translate("moreOptions.termsOfService")}
+              </span>
+              <ChevronRight size={18} strokeWidth={1.5} />
+            </div>
+          ) : null}
         </div>
       </SettingsSection>
     </SettingsRouteFrame>

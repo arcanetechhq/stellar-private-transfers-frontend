@@ -10,24 +10,8 @@ export function PolicyListItem({
   children,
 }: PolicyListItemProperties) {
   return (
-    <li
-      style={{
-        fontSize: "15px",
-        lineHeight: "24px",
-        color: "#667085",
-        paddingLeft: "20px",
-        position: "relative",
-      }}
-    >
-      <span
-        style={{
-          position: "absolute",
-          left: "0",
-          color: "#111827",
-        }}
-      >
-        {marker}
-      </span>
+    <li className="info-page__list-item">
+      <span className="info-page__list-marker">{marker}</span>
       {children}
     </li>
   );

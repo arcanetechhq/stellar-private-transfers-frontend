@@ -224,8 +224,8 @@
 
 .contacts-records .records-table th:nth-child(4),
 .contacts-records .records-table td:nth-child(4) {
-  width: 165px;
-  min-width: 165px;
+  width: 240px;
+  min-width: 240px;
   padding-left: 0;
   padding-right: 16px;
 }
@@ -283,6 +283,47 @@
   background: var(--contact-send-hover-background);
   border-color: var(--border);
   box-shadow: none;
+}
+
+.contact-row-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.contact-row-action-button {
+  display: inline-grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid var(--control-border-soft);
+  border-radius: var(--radius-4);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease;
+}
+
+.contact-row-action-button svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.8;
+}
+
+.contact-row-action-button:hover {
+  background: var(--surface-high);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+.contact-row-action-button--danger:hover {
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 28%, var(--border));
+  color: var(--danger);
 }
 
 .contact-type {
@@ -595,8 +636,8 @@
 @media (max-width: 960px) {
   .contacts-records .records-table th:nth-child(4),
   .contacts-records .records-table td:nth-child(4) {
-    width: 145px;
-    min-width: 145px;
+    width: 220px;
+    min-width: 220px;
     padding-right: 12px;
   }
 

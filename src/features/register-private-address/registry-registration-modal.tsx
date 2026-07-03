@@ -1,20 +1,51 @@
-import React from "react";
-import { Loader2 } from "lucide-react";
+import "./registry-registration-modal.css";
+import { Loader2, X } from "lucide-react";
+import { useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { useRegisterWalletPrivateAddress } from "./use-register-wallet-private-address";
 
 type RegistryRegistrationModalProperties = {
   open: boolean;
+  onClose: () => void;
   onRegistered: () => void;
 };
 
 export function RegistryRegistrationModal({
   open,
+  onClose,
   onRegistered,
 }: RegistryRegistrationModalProperties) {
-  const { t: translate } = useTranslation("privateAddress");
-  const { register, status, errorMessage } = useRegisterWalletPrivateAddress();
+  const { t: translate } = useTranslation(["privateAddress", "common"]);
+  const { register, reset, status, hasError } = useRegisterWalletPrivateAddress();
   const isBusy = status === "creating" || status === "registering";
+
+  const handleClose = useCallback(() => {
+    if (isBusy) {
+      return;
+    }
+    reset();
+    onClose();
+  }, [isBusy, onClose, reset]);
+
+  useEffect(() => {
+    if (!open) {
+      reset();
+      return undefined;
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && !isBusy) {
+        handleClose();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open, isBusy, handleClose, reset]);
 
   if (!open) {
     return;
@@ -23,36 +54,64 @@ export function RegistryRegistrationModal({
   const handleRegister = async () => {
     const ok = await register();
     if (ok) {
+      reset();
       onRegistered();
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[var(--overlay-backdrop)]">
-      <div className="m-4 w-full max-w-md rounded-2xl bg-[var(--surface-card)] p-6 shadow-[var(--shadow-modal)]">
-        <h3 className="mb-2 text-lg font-semibold text-[var(--foreground-primary)]">
-          {translate("registrationRequiredTitle")}
-        </h3>
-        <p className="mb-4 text-sm text-[var(--foreground-secondary)]">
-          {translate("registrationRequiredDescription")}
-        </p>
-        {errorMessage ? (
-          <p className="mb-3 text-sm text-[var(--error)]" role="alert">
-            {errorMessage}
+  return createPortal(
+    <div
+      className="registry-registration-modal__backdrop"
+      onClick={handleClose}
+      role="presentation"
+    >
+      <div
+        className="registry-registration-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="registry-registration-modal-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="registry-registration-modal__header">
+          <h3
+            id="registry-registration-modal-title"
+            className="registry-registration-modal__title"
+          >
+            {translate("privateAddress:registrationRequiredTitle")}
+          </h3>
+          <button
+            type="button"
+            className="registry-registration-modal__close"
+            aria-label={translate("common:a11y.close")}
+            disabled={isBusy}
+            onClick={handleClose}
+          >
+            <X size={18} strokeWidth={1.7} />
+          </button>
+        </div>
+        <div className="registry-registration-modal__body">
+          <p className="registry-registration-modal__description">
+            {translate("privateAddress:registrationRequiredDescription")}
           </p>
-        ) : undefined}
+          {hasError ? (
+            <p className="registry-registration-modal__error" role="alert">
+              {translate("privateAddress:registrationFailed")}
+            </p>
+          ) : null}
+        </div>
         <button
           type="button"
           disabled={isBusy}
           onClick={() => void handleRegister()}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--primary)] px-4 py-3 text-sm font-semibold text-[var(--primary-foreground)] disabled:opacity-50"
+          className="registry-registration-modal__submit"
         >
-          {isBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : undefined}
+          {isBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           {isBusy
-            ? translate("registering")
-            : translate("registerPrivateAddress")}
+            ? translate("privateAddress:registering")
+            : translate("privateAddress:registerPrivateAddress")}
         </button>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -6,15 +6,12 @@ import {
   Bolt,
   Home,
   LogIn,
-  MessagesSquare,
   UserCircleIcon,
 } from "lucide-react";
 import { disconnectStellarWallet } from "@/features/stellar-wallet-connect";
 import { i18n } from "@/shared/config/i18n-instance";
-import { HIDDEN_FEATURES } from "@/shared/config/hidden-features";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
-import { usePendingClaimsCountQuery } from "@/entities/pending-claims";
 import type { MainLayoutNavItem } from "../ui/main-layout-sidebar";
 import { resolveMainLayoutPageHeader } from "./resolve-main-layout-page-header";
 
@@ -24,11 +21,6 @@ export function useMainLayoutModel() {
   const location = useLocation();
   const mainReference = useRef<HTMLElement>(null);
   const publicKey = useAppSelector(selectWalletPublicKey);
-  const { data: pendingClaimsCountData } = usePendingClaimsCountQuery(
-    { ownerAddress: publicKey ?? "" },
-    { skip: !publicKey, pollingInterval: 30_000 },
-  );
-  const pendingClaimsBadgeCount = pendingClaimsCountData?.count ?? 0;
 
   const pageHeader = useMemo(
     () => resolveMainLayoutPageHeader(location.pathname),
@@ -37,7 +29,7 @@ export function useMainLayoutModel() {
 
   useLayoutEffect(() => {
     mainReference.current?.scrollTo(0, 0);
-  }, [location.pathname, location.key]);
+  }, [location.pathname, location.search, location.key]);
 
   const navigation = useMemo(
     (): MainLayoutNavItem[] => [
@@ -52,32 +44,18 @@ export function useMainLayoutModel() {
         icon: UserCircleIcon,
         href: "/contacts",
       },
-      // {
-      //   name: translate("navigation:pendingClaims"),
-      //   icon: Inbox,
-      //   href: "/pending-claims",
-      //   badgeCount: pendingClaimsBadgeCount,
-      // },
     ],
-    [translate, pendingClaimsBadgeCount],
+    [translate],
   );
 
   const bottomNavigation = useMemo((): MainLayoutNavItem[] => {
-    const items: MainLayoutNavItem[] = [];
-
-    if (!HIDDEN_FEATURES.contactSupportSection) {
-      items.push({
-        name: translate("navigation:contactSupport"),
-        icon: MessagesSquare,
-        href: "/help",
-      });
-    }
-
-    items.push({
-      name: translate("navigation:settings"),
-      icon: Bolt,
-      href: "/settings",
-    });
+    const items: MainLayoutNavItem[] = [
+      {
+        name: translate("navigation:settings"),
+        icon: Bolt,
+        href: "/settings",
+      },
+    ];
 
     if (publicKey) {
       items.push({

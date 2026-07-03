@@ -8,29 +8,9 @@ interface DetailRowProperties {
 
 function DetailRow({ label, value }: DetailRowProperties) {
   return (
-    <div
-      className="flex items-center justify-between border-b py-3"
-      style={{ borderColor: "#E7EAF0" }}
-    >
-      <span
-        style={{
-          fontSize: "15px",
-          lineHeight: "20px",
-          color: "#98A2B3",
-        }}
-      >
-        {label}
-      </span>
-      <span
-        style={{
-          fontSize: "15px",
-          lineHeight: "20px",
-          color: "#121826",
-          fontWeight: 600,
-        }}
-      >
-        {value}
-      </span>
+    <div className="info-page__divider flex items-center justify-between border-b py-3">
+      <span className="info-page__text-sm">{label}</span>
+      <span className="info-page__text font-semibold text-[var(--text)]">{value}</span>
     </div>
   );
 }
@@ -46,16 +26,7 @@ export function AboutDetails() {
 
   return (
     <div>
-      <h2
-        className="mb-4 font-semibold"
-        style={{
-          fontSize: "20px",
-          lineHeight: "28px",
-          color: "#121826",
-        }}
-      >
-        {translate("technicalDetails")}
-      </h2>
+      <h2 className="info-page__section-title mb-4">{translate("technicalDetails")}</h2>
       <div className="space-y-4">
         {technicalDetails.map((detail) => (
           <DetailRow

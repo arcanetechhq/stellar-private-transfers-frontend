@@ -71,32 +71,34 @@ export function AddContactScreen({ onSuccess }: AddContactScreenProperties) {
         </div>
 
         <div className="add-contact-form">
-          <div
-            className="add-contact-tabs"
-            role="tablist"
-            aria-label={translate("contactTypeTabsLabel")}
-          >
-            {contactTypeOptions.map((option) => {
-              const TypeIcon = option.icon;
-              return (
-                <button
-                  type="button"
-                  role="tab"
-                  aria-selected={type === option.value}
-                  className="add-contact-tab"
-                  data-active={type === option.value ? "true" : undefined}
-                  key={option.value}
-                  onClick={() => {
-                    setType(option.value);
-                    setRecipientValue("");
-                  }}
-                >
-                  <TypeIcon aria-hidden="true" />
-                  {translate(option.labelKey)}
-                </button>
-              );
-            })}
-          </div>
+          {!HIDDEN_FEATURES.addContactTypeTabs ? (
+            <div
+              className="add-contact-tabs"
+              role="tablist"
+              aria-label={translate("contactTypeTabsLabel")}
+            >
+              {contactTypeOptions.map((option) => {
+                const TypeIcon = option.icon;
+                return (
+                  <button
+                    type="button"
+                    role="tab"
+                    aria-selected={type === option.value}
+                    className="add-contact-tab"
+                    data-active={type === option.value ? "true" : undefined}
+                    key={option.value}
+                    onClick={() => {
+                      setType(option.value);
+                      setRecipientValue("");
+                    }}
+                  >
+                    <TypeIcon aria-hidden="true" />
+                    {translate(option.labelKey)}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
 
           <div className="add-contact-fields">
             <input

@@ -1,12 +1,9 @@
-export type DepositAddressMode = "address" | "privateAddress";
-
-export type DepositMode = DepositAddressMode | "wallet";
+export type DepositMode = "publicAddress" | "wallet";
 
 export const DEPOSIT_MODE_OPTIONS: ReadonlyArray<{
   id: DepositMode;
   labelKey: string;
 }> = [
-  { id: "address", labelKey: "modePublicAddress" },
-  { id: "privateAddress", labelKey: "modePrivateAddress" },
+  { id: "publicAddress", labelKey: "modePublicAddress" },
   { id: "wallet", labelKey: "modeFromWallet" },
 ];

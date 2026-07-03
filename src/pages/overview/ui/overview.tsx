@@ -21,6 +21,7 @@ function formatUsdBalance(value: number): string {
 
 export function Overview() {
   const privateCoinItems = useAppSelector(selectCoinItems);
+
   const transactions = useAppSelector(selectTransactions);
   const transactionsHydrated = useAppSelector(selectAreTransactionsHydrated);
   const sortedTransactions = sortTransactionsByDateDesc(transactions);
@@ -34,30 +35,37 @@ export function Overview() {
     privateAmountByAssetId.set(item.assetId, current + item.amountDisplay);
   }
 
+  let privateAssetCount = 0;
   let totalUsdBalance = 0;
   for (const [assetId, amount] of privateAmountByAssetId.entries()) {
     if (amount <= 0) {
       continue;
     }
+    privateAssetCount += 1;
     totalUsdBalance += amount * getAssetUsdPrice(assetId);
   }
 
   return (
-    <div className="w-full h-full min-h-full p-[24px] pt-[8px] bg-background">
-      <div className="w-full h-full flex flex-col gap-4">
-        <BalanceHero balance={formatUsdBalance(totalUsdBalance)} />
-        <div className="h-full grid grid-cols-1 min-[1180px]:grid-cols-[1fr_416px] gap-4">
-          <TransactionsPanel
-            transactions={sortedTransactions}
-            isHydrated={transactionsHydrated}
-            variant="overview"
+    <React.Fragment>
+      <div className="w-full h-full min-h-full p-[24px] pt-[8px] bg-background">
+        <div className="w-full h-full flex flex-col gap-4">
+          <BalanceHero
+            balance={formatUsdBalance(totalUsdBalance)}
+            assetCount={privateAssetCount}
           />
-          <div className="overview-right-rail">
-            <PrivateAssetTable />
-            <MonthlyNetInsights transactions={sortedTransactions} />
+          <div className="h-full grid grid-cols-1 min-[1180px]:grid-cols-[1fr_416px] gap-4">
+            <TransactionsPanel
+              transactions={sortedTransactions}
+              isHydrated={transactionsHydrated}
+              variant="overview"
+            />
+            <div className="overview-right-rail">
+              <PrivateAssetTable/>
+              {/* <MonthlyNetInsights transactions={sortedTransactions} /> */}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </React.Fragment>
   );
 }

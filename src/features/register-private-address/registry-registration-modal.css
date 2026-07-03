@@ -1,0 +1,120 @@
+.registry-registration-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal-backdrop);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: var(--overlay-backdrop);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.registry-registration-modal {
+  position: relative;
+  z-index: var(--z-modal);
+  display: grid;
+  width: min(400px, 100%);
+  max-height: min(560px, calc(100dvh - 32px));
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-4);
+  background: var(--surface-card);
+  box-shadow: var(--shadow-modal);
+  padding: var(--space-6);
+}
+
+.registry-registration-modal__header {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.registry-registration-modal__title {
+  min-width: 0;
+  flex: 1 1 auto;
+  margin: 0;
+  color: var(--foreground-primary);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 26px;
+}
+
+.registry-registration-modal__close {
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.registry-registration-modal__close:hover:not(:disabled) {
+  border-color: var(--border);
+  background: var(--surface-high);
+  color: var(--text);
+}
+
+.registry-registration-modal__close:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.registry-registration-modal__body {
+  display: grid;
+  min-width: 0;
+  gap: var(--space-3);
+  overflow: auto;
+}
+
+.registry-registration-modal__description {
+  margin: 0;
+  color: var(--foreground-secondary);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.registry-registration-modal__error {
+  margin: 0;
+  color: var(--error);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.registry-registration-modal__submit {
+  display: inline-flex;
+  width: 100%;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 0;
+  border-radius: var(--radius-3);
+  background: var(--primary);
+  color: var(--primary-foreground);
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 20px;
+  padding: 0 var(--space-4);
+  transition: opacity 180ms ease;
+}
+
+.registry-registration-modal__submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

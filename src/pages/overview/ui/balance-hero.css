@@ -132,6 +132,7 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(130px, 1fr));
   width: min(407px, 100%);
+  min-height: 32px;
   justify-self: end;
   gap: var(--space-2);
   transform: translate(4px, 2px);
@@ -139,23 +140,23 @@
 
 .balance-card__actions[data-count='1'] {
   grid-template-columns: minmax(0, 1fr);
-  width: min(145px, 100%);
+  width: min(220px, 100%);
 }
 
 .balance-card__action-button {
   display: inline-flex;
   min-width: 0;
-  height: 32px;
+  height: 100%;
   width: 100%;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
   border: 1px solid transparent;
   border-radius: var(--radius-4);
-  padding: 0 var(--space-4);
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 20px;
+  padding: 0 var(--space-5);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 22px;
   white-space: nowrap;
   cursor: pointer;
   transition:
@@ -171,7 +172,7 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
-  stroke-width: 1.5;
+  stroke-width: 1.6;
 }
 
 .balance-card__action-button:active {

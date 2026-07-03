@@ -40,12 +40,4 @@ export const DEPOSIT_NETWORK_OPTIONS: DepositNetworkOption[] = [
   },
 ];
 
-export const PRIVATE_DEPOSIT_ADDRESSES: Record<string, string> = {
-  base: "arc1baseprivate7kx4kjw6ybz3m7q5f3e2vj9w8n4p6r7t2",
-  stellar: "arc1stellarprivate4r9n2x6k8m5v3t1w4c9h6j2l8s5",
-};
-
-export const DEPOSIT_ADDRESS_GENERATION_DELAY_MS = 30_000;
-export const PRIVATE_DEPOSIT_ADDRESS_GENERATION_DELAY_MS = 1200;
-
 export const WALLET_DEPOSIT_NETWORK_ID = "stellar";

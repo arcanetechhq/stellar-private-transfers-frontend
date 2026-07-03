@@ -86,6 +86,7 @@ export function StellarWalletModal({
     >
       <WalletConnectPickerContent
         open={open}
+        isChangeWallet={isChangeWallet}
         onConnected={closeModal}
       />
     </StellarWalletModalShell>

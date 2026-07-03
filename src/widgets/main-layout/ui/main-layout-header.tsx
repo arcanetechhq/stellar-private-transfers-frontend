@@ -73,15 +73,17 @@ export function MainLayoutHeader({
             }}
           />
 
-          <HeaderNotificationsMenu
-            isOpen={notificationsOpen}
-            onOpenChange={(open) => {
-              if (open) {
-                closeSiblingMenus("notifications");
-              }
-              setNotificationsOpen(open);
-            }}
-          />
+          {!HIDDEN_FEATURES.settingsNotifications ? (
+            <HeaderNotificationsMenu
+              isOpen={notificationsOpen}
+              onOpenChange={(open) => {
+                if (open) {
+                  closeSiblingMenus("notifications");
+                }
+                setNotificationsOpen(open);
+              }}
+            />
+          ) : null}
 
           <MainLayoutHeaderWallet
             translate={translate}

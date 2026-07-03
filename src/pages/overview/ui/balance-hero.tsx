@@ -3,12 +3,17 @@ import "./balance-hero.css";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import {
+  Loader2,
   ArrowUpFromLine,
+  UserPlus,
   EyeOff,
   RefreshCw,
   ArrowDownIcon,
   ArrowUpRight,
 } from "lucide-react";
+import {
+  useWalletPrivateAddress,
+} from "@/features/register-private-address";
 
 type ActionButtonVariant = "primary" | "outline";
 
@@ -33,6 +38,37 @@ function ActionButton(properties: ActionButtonProperties) {
         <span>{label}</span>
       </button>
     </Link>
+  );
+}
+
+interface RegisterAccountButtonProperties {
+  label: string;
+  disabled: boolean;
+  isLoading: boolean;
+  onClick: () => void;
+}
+
+function RegisterAccountButton({
+  label,
+  disabled,
+  isLoading,
+  onClick,
+}: RegisterAccountButtonProperties) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      className="balance-card__action-button"
+      data-variant="primary"
+      onClick={onClick}
+    >
+      {isLoading ? (
+        <Loader2 className="animate-spin" />
+      ) : (
+        <UserPlus />
+      )}
+      <span>{label}</span>
+    </button>
   );
 }
 
@@ -98,14 +134,25 @@ function BalanceVisibilityActions({
 
 interface BalanceHeroProperties {
   balance: string;
+  assetCount: number;
 }
 
 const BALANCE_REFRESH_ANIMATION_MS = 700;
 
-export function BalanceHero({ balance }: BalanceHeroProperties) {
+export function BalanceHero(properties: BalanceHeroProperties) {
+  const { balance } = properties;
   const { t: translateOverview } = useTranslation("overview");
   const [hidden, setHidden] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const {
+    actionsEnabled,
+    isRegistryLoading,
+    registryStatus,
+    canOpenRegistryRegistration,
+    openRegistryRegistrationModal,
+  } = useWalletPrivateAddress();
+  const isRegistryChecking =
+    isRegistryLoading || registryStatus === "checking";
 
   function handleRefresh() {
     setRefreshing(true);
@@ -143,26 +190,37 @@ export function BalanceHero({ balance }: BalanceHeroProperties) {
           />
         </div>
       </div>
-      <div className="balance-card__actions" data-count="3">
-        <ActionButton
-          to="/deposit"
-          label={translateOverview("deposit")}
-          icon={ArrowDownIcon}
-          variant="primary"
-        />
-        <ActionButton
-          to="/create-transfer"
-          label={translateOverview("privateSend")}
-          icon={ArrowUpRight}
-          variant="outline"
-        />
-        <ActionButton
-          to="/withdraw"
-          label={translateOverview("withdraw")}
-          icon={ArrowUpFromLine}
-          variant="outline"
-        />
-      </div>
+      {actionsEnabled ? (
+        <div className="balance-card__actions" data-count="3">
+          <ActionButton
+            to="/deposit"
+            label={translateOverview("deposit")}
+            icon={ArrowDownIcon}
+            variant="primary"
+          />
+          <ActionButton
+            to="/create-transfer"
+            label={translateOverview("privateSend")}
+            icon={ArrowUpRight}
+            variant="outline"
+          />
+          <ActionButton
+            to="/withdraw"
+            label={translateOverview("withdraw")}
+            icon={ArrowUpFromLine}
+            variant="outline"
+          />
+        </div>
+      ) : (
+        <div className="balance-card__actions" data-count="1">
+          <RegisterAccountButton
+            label={translateOverview("registerAccount")}
+            disabled={!canOpenRegistryRegistration}
+            isLoading={isRegistryChecking}
+            onClick={openRegistryRegistrationModal}
+          />
+        </div>
+      )}
     </section>
   );
 }

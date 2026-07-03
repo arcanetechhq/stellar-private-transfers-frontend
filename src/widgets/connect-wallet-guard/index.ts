@@ -1,1 +1,1 @@
-export { ConnectWalletGuard } from "./ui/connect-wallet-guard";
+export { ConnectWalletScreen } from "./ui/connect-wallet-screen";

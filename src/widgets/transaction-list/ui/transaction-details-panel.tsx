@@ -1,15 +1,6 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import "./transaction-details-panel.css";
-import {
-  Calendar,
-  FileDown,
-  FileText,
-  Network,
-  ReceiptText,
-  RefreshCw,
-  WalletCards,
-  X,
-} from "lucide-react";
+import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAssetLookup } from "@/entities/asset";
 import type { Transaction } from "@/entities/transaction";
@@ -22,8 +13,6 @@ import {
 } from "../lib/transaction-display";
 import { useTransactionDetailsPanel } from "../model/use-transaction-details-panel";
 import { TransactionDetailRow } from "./transaction-detail-row";
-
-type DetailTab = "details" | "timeline" | "attachments";
 
 type TransactionDetailsPanelProperties = {
   transaction: Transaction;
@@ -118,8 +107,6 @@ export function TransactionDetailsPanel({
 }: TransactionDetailsPanelProperties) {
   const { t: translateDetails } = useTranslation("transactionDetails");
   const { t: translateTransactions } = useTranslation("transactions");
-  const [activeTab, setActiveTab] = useState<DetailTab>("details");
-  const [refreshing, setRefreshing] = useState(false);
   const { chainEntry } = useTransactionDetailsPanel(transaction.id);
   const assetMap = useAssetLookup();
   const asset = assetMap.get(transaction.assetId);
@@ -147,64 +134,6 @@ export function TransactionDetailsPanel({
     asset: transaction.assetId.toUpperCase(),
   });
 
-  const detailTabs = useMemo(
-    () => [
-      { value: "details" as const, label: translateTransactions("details.tabs.details") },
-      { value: "timeline" as const, label: translateTransactions("details.tabs.timeline") },
-      {
-        value: "attachments" as const,
-        label: translateTransactions("details.tabs.attachments"),
-      },
-    ],
-    [translateTransactions],
-  );
-
-  const timelineItems = useMemo(
-    () => [
-      {
-        icon: WalletCards,
-        title: isIncoming
-          ? translateTransactions("details.timeline.receivedTitle")
-          : translateTransactions("details.timeline.sentTitle"),
-        text: translateTransactions("details.timeline.processingText"),
-        time: timeLabel,
-      },
-      {
-        icon: Network,
-        title: translateTransactions("details.timeline.networkTitle"),
-        text: translateTransactions("details.timeline.networkText"),
-        time: translateTransactions("details.timeline.networkTime"),
-      },
-      {
-        icon: ReceiptText,
-        title: isPending
-          ? translateTransactions("details.timeline.pendingTitle")
-          : translateTransactions("details.timeline.balanceTitle"),
-        text: isPending
-          ? translateTransactions("details.timeline.pendingText")
-          : translateTransactions("details.timeline.balanceText"),
-        time: isPending
-          ? translateTransactions("details.timeline.waiting")
-          : translateTransactions("details.timeline.balanceTime"),
-      },
-      {
-        icon: Calendar,
-        title: isPending
-          ? translateTransactions("details.timeline.inProgressTitle")
-          : translateTransactions("details.timeline.completedTitle"),
-        text: isPending
-          ? translateTransactions("details.timeline.inProgressText")
-          : translateTransactions("details.timeline.completedText"),
-        time: dateLabel,
-      },
-    ],
-    [dateLabel, isIncoming, isPending, timeLabel, translateTransactions],
-  );
-
-  useEffect(() => {
-    setActiveTab("details");
-  }, [transaction.id]);
-
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -216,11 +145,6 @@ export function TransactionDetailsPanel({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onClose]);
-
-  function handleRefresh() {
-    setRefreshing(true);
-    window.setTimeout(() => setRefreshing(false), 650);
-  }
 
   return (
     <section className="transaction-details ui-card">
@@ -277,25 +201,8 @@ export function TransactionDetailsPanel({
       </div>
 
       <div className="transaction-details__tabs">
-        <div className="transaction-details__tabs-list" role="tablist">
-          {detailTabs.map((tab) => (
-            <button
-              type="button"
-              key={tab.value}
-              className="transaction-details__tab"
-              role="tab"
-              data-active={activeTab === tab.value}
-              aria-selected={activeTab === tab.value}
-              onClick={() => setActiveTab(tab.value)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {activeTab === "details" ? (
-          <div className="transaction-info-stack">
-            <DetailSection title={translateTransactions("details.sections.transaction")}>
+        <div className="transaction-info-stack">
+          <DetailSection title={translateTransactions("details.sections.transaction")}>
               <TransactionDetailRow
                 label={translateTransactions("tableHeaders.date")}
                 value={`${dateLabel}, ${timeLabel}`}
@@ -368,71 +275,7 @@ export function TransactionDetailsPanel({
                 {translateDetails("chainLoading")}
               </p>
             ) : null}
-          </div>
-        ) : null}
-
-        {activeTab === "timeline" ? (
-          <div className="transaction-timeline">
-            {timelineItems.map((item, index) => {
-              const Icon = item.icon;
-              const isLast = index === timelineItems.length - 1;
-
-              return (
-                <div className="transaction-timeline__item" key={item.title}>
-                  <div className="transaction-timeline__track">
-                    <span className="transaction-timeline__marker">
-                      <Icon aria-hidden="true" />
-                    </span>
-                    {isLast ? null : (
-                      <span className="transaction-timeline__line" aria-hidden="true" />
-                    )}
-                  </div>
-                  <div className="transaction-timeline__copy">
-                    <p className="transaction-timeline__title">{item.title}</p>
-                    <p className="transaction-timeline__text">{item.text}</p>
-                    <p className="transaction-timeline__time">{item.time}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : null}
-
-        {activeTab === "attachments" ? (
-          <div className="transaction-attachments">
-            {!isPending ? (
-              <div className="transaction-attachment">
-                <span className="transaction-attachment__icon" aria-hidden="true">
-                  <FileText />
-                </span>
-                <span className="transaction-attachment__copy">
-                  <span className="transaction-attachment__title">
-                    {translateTransactions("details.attachments.proofTitle", {
-                      reference: transaction.id.slice(0, 8),
-                    })}
-                  </span>
-                  <span className="transaction-attachment__meta">
-                    {translateTransactions("details.attachments.proofMeta")}
-                  </span>
-                </span>
-              </div>
-            ) : null}
-            <div className="transaction-upload">
-              <p className="transaction-upload__text">
-                {isPending
-                  ? translateTransactions("details.attachments.pendingEmpty")
-                  : translateTransactions("details.attachments.empty")}
-              </p>
-              <button
-                type="button"
-                className="transaction-details__action-button"
-                disabled
-              >
-                {translateTransactions("details.attachments.upload")}
-              </button>
-            </div>
-          </div>
-        ) : null}
+        </div>
       </div>
     </section>
   );

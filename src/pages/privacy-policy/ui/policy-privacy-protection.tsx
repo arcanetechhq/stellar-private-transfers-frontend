@@ -8,23 +8,8 @@ export function PolicyPrivacyProtection() {
   return (
     <div>
       <PolicySectionHeading title={translate("privacyProtection.title")} />
-      <p
-        className="mb-4"
-        style={{
-          fontSize: "15px",
-          lineHeight: "24px",
-          color: "#667085",
-        }}
-      >
-        {translate("privacyProtection.intro")}
-      </p>
-      <div
-        className="rounded-lg p-4"
-        style={{
-          backgroundColor: "#F9FAFB",
-          border: "1px solid #E7EAF0",
-        }}
-      >
+      <p className="info-page__text mb-4">{translate("privacyProtection.intro")}</p>
+      <div className="info-page__panel rounded-lg">
         <ul className="space-y-2">
           <PolicyListItem marker="✓">
             {translate("privacyProtection.item1")}

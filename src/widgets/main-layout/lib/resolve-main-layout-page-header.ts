@@ -1,8 +1,4 @@
-import {
-  getActiveSettingsItemId,
-  isSettingsRoute,
-  SETTINGS_NAV_GROUPS,
-} from "@/widgets/settings-layout";
+import { isSettingsRoute } from "@/widgets/settings-layout";
 
 export type MainLayoutPageHeaderConfig = {
   titleKey: string;
@@ -19,12 +15,6 @@ type RouteRule = {
 };
 
 const ROUTE_RULES: RouteRule[] = [
-  {
-    match: (pathname) => pathname === "/assets",
-    titleKey: "pageTitle",
-    titleNamespace: "allAssets",
-    backTo: "/",
-  },
   {
     match: (pathname) => pathname === "/create-transfer",
     titleKey: "pageTitle",
@@ -56,14 +46,14 @@ const ROUTE_RULES: RouteRule[] = [
     backTo: "/",
   },
   {
-    match: (pathname) => pathname === "/history",
-    titleKey: "title",
-    titleNamespace: "transactions",
-    backTo: "/",
-  },
-  {
     match: (pathname) => pathname === "/contacts/new",
     titleKey: "pageTitleAddContact",
+    titleNamespace: "contacts",
+    backTo: "/contacts",
+  },
+  {
+    match: (pathname) => /^\/contacts\/\d+\/edit$/.test(pathname),
+    titleKey: "pageTitleEditContact",
     titleNamespace: "contacts",
     backTo: "/contacts",
   },
@@ -74,60 +64,25 @@ const ROUTE_RULES: RouteRule[] = [
     backTo: "/",
   },
   {
-    match: (pathname) => pathname === "/pending-claims",
-    titleKey: "title",
-    titleNamespace: "pending-claims",
-    backTo: "/",
-  },
-  {
-    match: (pathname) => pathname === "/help",
-    titleKey: "title",
-    titleNamespace: "help",
-    backTo: "/",
-  },
-  {
     match: (pathname) => pathname === "/about",
     titleKey: "title",
     titleNamespace: "about",
-    backTo: "/",
+    backTo: "/settings",
   },
   {
     match: (pathname) => pathname === "/privacy-policy",
     titleKey: "title",
     titleNamespace: "privacyPolicy",
-    backTo: "/",
-  },
-  {
-    match: (pathname) => pathname === "/access",
-    titleKey: "title",
-    titleNamespace: "access",
-    backTo: "/",
-  },
-  {
-    match: (pathname) => pathname === "/confirmations",
-    titleKey: "pageTitle",
-    titleNamespace: "confirmations",
-    backTo: "/",
-  },
-  {
-    match: (pathname) => pathname === "/disclosure",
-    titleKey: "pageTitle",
-    titleNamespace: "disclosure",
-    backTo: "/",
+    backTo: "/settings",
   },
 ];
 
-function resolveSettingsPageHeader(pathname: string): MainLayoutPageHeaderConfig {
-  const activeItemId = getActiveSettingsItemId(pathname);
-  const activeItem = SETTINGS_NAV_GROUPS.flatMap((group) => group.items).find(
-    (item) => item.id === activeItemId,
-  );
-
+function resolveSettingsPageHeader(): MainLayoutPageHeaderConfig {
   return {
-    titleKey: activeItem?.labelKey ?? "nav.general",
-    titleNamespace: "settings",
-    showBack: false,
-    backTo: undefined,
+    titleKey: "settings",
+    titleNamespace: "navigation",
+    showBack: true,
+    backTo: "/",
   };
 }
 
@@ -135,7 +90,7 @@ export function resolveMainLayoutPageHeader(
   pathname: string,
 ): MainLayoutPageHeaderConfig {
   if (isSettingsRoute(pathname)) {
-    return resolveSettingsPageHeader(pathname);
+    return resolveSettingsPageHeader();
   }
 
   if (pathname === "/") {

@@ -24,7 +24,7 @@ export function MainLayoutHeaderWallet({
   const dispatch = useAppDispatch();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const isConnected = Boolean(publicKey);
-  const { openConnected, openPicker } = useStellarWalletModal();
+  const { openPicker } = useStellarWalletModal();
   const accountMenuReference = useRef<HTMLDivElement>(null);
 
   const shortAddress = publicKey ? shortenStellarAddress(publicKey, 4, 3) : "";
@@ -60,11 +60,6 @@ export function MainLayoutHeaderWallet({
     await dispatch(disconnectStellarWallet());
   };
 
-  const handleManageWallet = () => {
-    setWalletOpen(false);
-    openConnected();
-  };
-
   const handleChangeWallet = () => {
     setWalletOpen(false);
     openPicker(true);
@@ -86,7 +81,6 @@ export function MainLayoutHeaderWallet({
           isOpen={walletOpen}
           publicKey={publicKey}
           onClose={() => setWalletOpen(false)}
-          onManageWallet={handleManageWallet}
           onChangeWallet={handleChangeWallet}
           onDisconnect={handleDisconnect}
         />

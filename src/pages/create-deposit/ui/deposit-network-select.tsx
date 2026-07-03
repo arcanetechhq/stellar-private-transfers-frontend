@@ -25,10 +25,18 @@ export function DepositNetworkSelect({
   const menu = useDismissOnOutsideClick<HTMLDivElement>();
   const selectedNetwork =
     options.find((network) => network.id === selectedNetworkId) ?? options[0];
+  const hasSingleOption = options.length === 1;
 
   function handleSelect(networkId: string) {
     onSelect(networkId);
     menu.close();
+  }
+
+  function handleButtonClick() {
+    if (hasSingleOption) {
+      return;
+    }
+    menu.toggle();
   }
 
   return (
@@ -37,11 +45,12 @@ export function DepositNetworkSelect({
         type="button"
         className="deposit-network-select__button"
         data-open={menu.isOpen ? "true" : undefined}
-        aria-haspopup="menu"
-        aria-expanded={menu.isOpen}
+        data-single-option={hasSingleOption ? "true" : undefined}
+        aria-haspopup={hasSingleOption ? undefined : "menu"}
+        aria-expanded={hasSingleOption ? undefined : menu.isOpen}
         aria-label={translate("selectNetwork")}
         disabled={disabled}
-        onClick={menu.toggle}
+        onClick={handleButtonClick}
       >
         <span className="deposit-network-select__main">
           <DepositNetworkBadge network={selectedNetwork} />
@@ -51,11 +60,13 @@ export function DepositNetworkSelect({
             </span>
           </span>
         </span>
-        <span className="deposit-network-select__right">
-          <ChevronDown size={18} strokeWidth={1.6} />
-        </span>
+        {hasSingleOption ? null : (
+          <span className="deposit-network-select__right">
+            <ChevronDown size={18} strokeWidth={1.6} />
+          </span>
+        )}
       </button>
-      {menu.isOpen ? (
+      {menu.isOpen && !hasSingleOption ? (
         <span
           className="deposit-network-menu"
           role="menu"

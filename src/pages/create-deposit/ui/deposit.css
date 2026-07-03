@@ -34,7 +34,7 @@
 
 .deposit-mode-switch {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-1);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-4);
@@ -82,7 +82,7 @@
   gap: var(--space-3);
 }
 
-.deposit-select-row[data-mode="address"] {
+.deposit-select-row[data-mode="publicAddress"] {
   grid-template-columns: 1fr;
 }
 
@@ -170,6 +170,26 @@
 
 .deposit-network-select__button[data-open="true"] .deposit-network-select__right svg {
   transform: rotate(180deg);
+}
+
+.deposit-network-select__button[data-single-option="true"] {
+  grid-template-columns: 1fr;
+  cursor: default;
+}
+
+.deposit-network-select__button[data-single-option="true"]:hover,
+.deposit-network-select__button[data-single-option="true"][data-open="true"] {
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+:root[data-theme="dark"] .deposit-network-select__button[data-single-option="true"]:hover,
+:root[data-theme="dark"] .deposit-network-select__button[data-single-option="true"][data-open="true"] {
+  background: var(--surface-high);
+}
+
+.deposit-network-select__button[data-single-option="true"] .deposit-network-select__right {
+  display: none;
 }
 
 .deposit-network-menu {
@@ -567,9 +587,9 @@
 }
 
 .deposit-address-card {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   min-height: 80px;
-  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-4);
   border-radius: var(--radius-4);
@@ -578,7 +598,10 @@
 }
 
 .deposit-address-card__copy {
-  display: grid;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
   min-width: 0;
   gap: var(--space-1);
 }
@@ -639,9 +662,10 @@
 
 .deposit-address-card__actions {
   display: inline-flex;
+  width: 100%;
   min-width: 0;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: var(--space-2);
 }
 
@@ -668,6 +692,7 @@
 }
 
 .deposit-copy-button {
+  width: 100%;
   min-width: 128px;
 }
 

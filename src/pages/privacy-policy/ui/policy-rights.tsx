@@ -8,16 +8,7 @@ export function PolicyRights() {
   return (
     <div>
       <PolicySectionHeading title={translate("rights.title")} />
-      <p
-        className="mb-3"
-        style={{
-          fontSize: "15px",
-          lineHeight: "24px",
-          color: "#667085",
-        }}
-      >
-        {translate("rights.intro")}
-      </p>
+      <p className="info-page__text mb-3">{translate("rights.intro")}</p>
       <ul className="space-y-2">
         <PolicyListItem>{translate("rights.item1")}</PolicyListItem>
         <PolicyListItem>{translate("rights.item2")}</PolicyListItem>

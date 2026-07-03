@@ -41,6 +41,23 @@ function recipientErrorMessageFromKey(
   return undefined;
 }
 
+function PrivateTransferNotice() {
+  const { t: translate } = useTranslation("transfer");
+  return (
+    <div className="transfer-privacy-notice transfer-privacy-notice--info">
+      <Info className="transfer-privacy-notice__icon" aria-hidden="true" />
+      <div>
+        <p className="transfer-privacy-notice__title">
+          {translate("privateTransferNotice")}
+        </p>
+        <p className="transfer-privacy-notice__text">
+          {translate("privateTransferDescription")}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function OnboardingRecipientNotice() {
   const { t: translate } = useTranslation("transfer");
   return (
@@ -66,7 +83,7 @@ function TransferPrivacyNotice({
   if (recipientRegistryStatus === "unregistered") {
     return <OnboardingRecipientNotice />;
   }
-  return null;
+  // return <PrivateTransferNotice />;
 }
 
 export function TransferSendPanel({

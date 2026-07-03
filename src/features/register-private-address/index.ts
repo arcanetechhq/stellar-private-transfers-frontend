@@ -6,3 +6,9 @@ export type {
 export { WalletPrivateAddressProvider } from "./wallet-private-address-provider";
 export { useRegisterWalletPrivateAddress } from "./use-register-wallet-private-address";
 export { RegistryRegistrationModal } from "./registry-registration-modal";
+export {
+  isWalletRegistryChecking,
+  isWalletRegistryRegistered,
+  registryStatusLabel,
+  registryStatusTone,
+} from "./registry-status-display";

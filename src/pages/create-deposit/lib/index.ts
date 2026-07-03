@@ -8,7 +8,6 @@ export {
 } from "./deposit-mock-data";
 export {
   DEPOSIT_MODE_OPTIONS,
-  type DepositAddressMode,
   type DepositMode,
 } from "./deposit-mode";
 export {

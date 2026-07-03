@@ -1,86 +1,18 @@
-.app-frame[data-custom-sidebar='true'] {
-  --settings-sidebar-width: 240px;
-  grid-template-columns: var(--settings-sidebar-width) minmax(0, 1fr);
-}
-
-.settings-sidebar {
-  display: grid;
-  gap: var(--space-8);
-  width: var(--settings-sidebar-width, var(--sidebar-width));
-  min-height: 100vh;
-  align-content: start;
-  overflow: hidden;
-  border-right: 1px solid var(--border-subtle);
-  background: var(--sidebar);
-  padding: var(--space-5) var(--space-4);
-}
-
-.settings-nav-group {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.settings-nav-group__title {
-  color: var(--text-muted);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  line-height: 16px;
-  text-transform: uppercase;
-}
-
-.settings-nav-link {
-  display: flex;
-  min-height: 40px;
-  align-items: center;
-  gap: var(--space-3);
-  border: 0;
-  border-radius: var(--radius-4);
-  background: transparent;
-  color: var(--text-muted);
-  font: inherit;
-  padding: 0 var(--space-3);
-  text-align: left;
-  cursor: pointer;
-  text-decoration: none;
-  transition:
-    background-color 240ms ease,
-    color 240ms ease;
-}
-
-.settings-nav-link svg {
-  width: 18px;
-  height: 18px;
-  stroke-width: 1.5;
-}
-
-.settings-nav-link:hover,
-.settings-nav-link[data-active='true'] {
-  background: var(--surface-high);
-  color: var(--text);
-}
-
-.settings-nav-link[data-active='true'] {
-  font-weight: 500;
-}
-
-:root[data-theme='light'] .settings-nav-link:hover,
-:root[data-theme='light'] .settings-nav-link[data-active='true'] {
-  box-shadow: inset 0 0 0 1px var(--border-subtle);
-}
-
 .settings-route {
   position: relative;
   display: block;
-  min-height: 760px;
+  width: min(891px, 100%);
+  min-height: 0;
+}
+
+.workspace__inner:has(.settings-route) {
+  padding-left: 98px;
 }
 
 .settings-route__content {
   display: grid;
-  width: min(891px, calc(100% - 98px));
+  width: 100%;
   gap: 64px;
-  margin-top: 25px;
-  margin-left: 98px;
   min-width: 0;
 }
 
@@ -654,17 +586,9 @@ button.settings-chip:hover {
   color: var(--text);
 }
 
-@media (max-width: 1179px) {
-  .settings-route__content {
-    width: min(891px, calc(100% - var(--space-8)));
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
 @media (max-width: 960px) {
-  .settings-route__content {
-    width: calc(100% - var(--space-8));
+  .workspace__inner:has(.settings-route) {
+    padding-left: var(--space-6);
   }
 
   .settings-identity-card {

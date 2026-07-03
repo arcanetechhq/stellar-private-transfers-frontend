@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import "./settings.css";
 
 type SettingsRouteFrameProperties = {
   children: ReactNode;

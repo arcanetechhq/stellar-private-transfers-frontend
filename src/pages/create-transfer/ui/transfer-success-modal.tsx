@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 import type { ConfidentialTransferSuccess } from "../model/confidential-transfer-submit-flow";
 import { formatTransferAmount } from "../lib/format-transfer-amount";
 

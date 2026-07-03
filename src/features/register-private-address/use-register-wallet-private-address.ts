@@ -6,6 +6,7 @@ import {
   getDefaultStellarNetworkConfig,
   getRequiredPrivateAddressRegistryContractId,
 } from "@/shared/stellar/stellar-network-environment";
+import { logRegisterPrivateAddressError } from "./register-private-address-flow-error";
 import { useWalletPrivateAddress } from "./wallet-private-address-context";
 
 export type RegisterPrivateAddressFlowStatus =
@@ -20,14 +21,19 @@ export function useRegisterWalletPrivateAddress() {
   const { ensureWalletPrivateAddress, refreshRegistryStatus } =
     useWalletPrivateAddress();
   const [status, setStatus] = useState<RegisterPrivateAddressFlowStatus>("idle");
-  const [errorMessage, setErrorMessage] = useState<string | undefined>();
+  const [hasError, setHasError] = useState(false);
+
+  const reset = useCallback(() => {
+    setStatus("idle");
+    setHasError(false);
+  }, []);
 
   const register = useCallback(async (): Promise<boolean> => {
     const trimmedPublicKey = publicKey?.trim();
     if (!trimmedPublicKey) {
       return false;
     }
-    setErrorMessage(undefined);
+    setHasError(false);
     setStatus("creating");
     try {
       const privateAddress = await ensureWalletPrivateAddress();
@@ -45,17 +51,17 @@ export function useRegisterWalletPrivateAddress() {
       setStatus("success");
       return true;
     } catch (error: unknown) {
+      logRegisterPrivateAddressError(error);
       setStatus("error");
-      setErrorMessage(
-        error instanceof Error ? error.message : "Registration failed",
-      );
+      setHasError(true);
       return false;
     }
   }, [publicKey, ensureWalletPrivateAddress, refreshRegistryStatus]);
 
   return {
     register,
+    reset,
     status,
-    errorMessage,
+    hasError,
   };
 }

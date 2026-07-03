@@ -25,6 +25,10 @@
   --sidebar-width: var(--sidebar-collapsed-width);
 }
 
+.app-frame[data-no-sidebar='true'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .sidebar-slot {
   position: relative;
   min-height: 0;

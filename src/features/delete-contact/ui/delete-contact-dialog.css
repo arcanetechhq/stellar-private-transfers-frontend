@@ -1,0 +1,23 @@
+.delete-contact-dialog {
+  border-radius: var(--radius-4);
+  border-color: var(--border-subtle);
+  background: var(--surface);
+  box-shadow: var(--shadow-popover);
+}
+
+.delete-contact-dialog [data-slot="alert-dialog-title"] {
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.delete-contact-dialog [data-slot="alert-dialog-description"] {
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 22px;
+}
+
+.delete-contact-dialog [data-slot="alert-dialog-footer"] button {
+  min-width: 96px;
+}

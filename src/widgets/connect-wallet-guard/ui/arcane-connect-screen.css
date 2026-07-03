@@ -1,0 +1,144 @@
+.arcane-connect-screen {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  background: #eaf7ff;
+}
+
+.arcane-connect-shell {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.arcane-connect-copy {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(32px, 6vw, 80px);
+  gap: var(--space-6);
+}
+
+.arcane-connect-logo {
+  display: block;
+  width: min(148px, 42vw);
+  height: 36px;
+  flex-shrink: 0;
+  /* margin-bottom: clamp(32px, 5vw, 48px); */
+}
+
+.arcane-connect-heading {
+  display: flex;
+  flex-direction: column;
+  max-width: 350px;
+  gap: var(--space-4);
+}
+
+.arcane-connect-heading h1 {
+  /* max-width: 12ch; */
+  /* margin: 0 0 16px; */
+  color: #121826;
+  font-size: clamp(40px, 5vw, 56px);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+  text-transform: uppercase;
+}
+
+.arcane-connect-heading p {
+  /* margin: 0 0 clamp(28px, 4vw, 40px); */
+  max-width: 420px;
+  color: #667085;
+  font-size: 15px;
+  line-height: 24px;
+}
+
+.arcane-connect-primary {
+  display: inline-flex;
+  width: 100%;
+  max-width: 360px;
+  height: 48px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  border-radius: 14px;
+  background: #1e2024;
+  color: #ffffff;
+  padding: 0 20px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 22px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 180ms ease, opacity 180ms ease;
+}
+
+.arcane-connect-primary:hover:not(:disabled) {
+  background: #15171b;
+}
+
+.arcane-connect-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.arcane-connect-status {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  height: 48px;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 10px;
+  color: #475467;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.arcane-connect-visual {
+  position: relative;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.arcane-connect-webgl {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 960px) {
+  .arcane-connect-shell {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 38%) minmax(0, 1fr);
+  }
+
+  .arcane-connect-visual {
+    order: -1;
+  }
+
+  .arcane-connect-copy {
+    justify-content: flex-start;
+    overflow: auto;
+    padding-top: 24px;
+    padding-bottom: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arcane-connect-primary {
+    transition: none;
+  }
+}

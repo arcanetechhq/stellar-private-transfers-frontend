@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ISupportedWallet } from "@creit-tech/stellar-wallets-kit/types";
 import { useAppDispatch } from "@/store";
+import { useWalletPrivateAddress } from "@/features/register-private-address";
 import { connectStellarWalletModule } from "../model/stellar-wallet-thunks";
+import { useStellarWalletModal } from "../model/stellar-wallet-modal-context";
 import {
   buildSupportedWalletMap,
   fetchSupportedStellarWallets,
@@ -19,6 +21,7 @@ type WalletPickerView = "recommended" | "all-wallets";
 
 type WalletConnectPickerContentProperties = {
   open: boolean;
+  isChangeWallet: boolean;
   onConnected: () => void;
 };
 
@@ -28,10 +31,13 @@ function openWalletProductUrl(url: string) {
 
 export function WalletConnectPickerContent({
   open,
+  isChangeWallet,
   onConnected,
 }: WalletConnectPickerContentProperties) {
   const { t: translate } = useTranslation("common");
   const dispatch = useAppDispatch();
+  const { refreshRegistryStatus } = useWalletPrivateAddress();
+  const { setWalletChangeInProgress } = useStellarWalletModal();
   const [view, setView] = useState<WalletPickerView>("recommended");
   const [connectingId, setConnectingId] = useState<string | null>(null);
   const [supportedWallets, setSupportedWallets] = useState<ISupportedWallet[]>(
@@ -83,13 +89,23 @@ export function WalletConnectPickerContent({
 
     setConnectingId(moduleId);
 
+    if (isChangeWallet) {
+      setWalletChangeInProgress(true);
+    }
+
     try {
       const result = await dispatch(connectStellarWalletModule(moduleId));
       if (connectStellarWalletModule.fulfilled.match(result) && result.payload) {
+        if (isChangeWallet) {
+          await refreshRegistryStatus();
+        }
         onConnected();
       }
     } finally {
       setConnectingId(null);
+      if (isChangeWallet) {
+        setWalletChangeInProgress(false);
+      }
     }
   };
 

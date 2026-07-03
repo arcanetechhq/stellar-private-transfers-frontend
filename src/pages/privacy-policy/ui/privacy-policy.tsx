@@ -7,20 +7,15 @@ import { PolicyPrivacyProtection } from "./policy-privacy-protection";
 import { PolicySecurity } from "./policy-security";
 import { PolicyRights } from "./policy-rights";
 import { PolicyChanges } from "./policy-changes";
+import "@/shared/styles/info-page.css";
 
 export function PrivacyPolicy() {
   return (
-    <div
-      className="p-8"
-      style={{ backgroundColor: "#F6F7F9", minHeight: "100%" }}
-    >
-      <div className="mx-auto max-w-4xl">
+    <div className="info-page">
+      <div className="info-page__shell">
         <PolicyHeader />
-        <div
-          className="rounded-xl bg-white p-8"
-          style={{ border: "1px solid #E7EAF0" }}
-        >
-          <div className="space-y-8">
+        <div className="info-page__card">
+          <div className="info-page__stack">
             <PolicyIntroduction />
             <PolicyDataCollection />
             <PolicyDataUsage />

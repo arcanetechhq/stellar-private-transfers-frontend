@@ -1,10 +1,12 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { createSelector, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 export interface Contact {
   id: number;
   name: string;
   stellarAddress: string;
 }
+
+export type ContactAccountType = "userId" | "publicAddress" | "privateAddress";
 
 export const COPY_FEEDBACK_TIMEOUT_MS = 2000;
 
@@ -43,11 +45,37 @@ const contactSlice = createSlice({
         stellarAddress: action.payload.stellarAddress,
       });
     },
+    updateContact: (
+      state,
+      action: PayloadAction<{
+        id: number;
+        name: string;
+        stellarAddress: string;
+      }>,
+    ) => {
+      const contact = state.items.find((item) => item.id === action.payload.id);
+      if (!contact) {
+        return;
+      }
+      contact.name = action.payload.name;
+      contact.stellarAddress = action.payload.stellarAddress;
+    },
+    removeContact: (state, action: PayloadAction<number>) => {
+      state.items = state.items.filter((item) => item.id !== action.payload);
+    },
   },
 });
 
-export const { addContact } = contactSlice.actions;
+export const { addContact, updateContact, removeContact } = contactSlice.actions;
 export const contactReducer = contactSlice.reducer;
 
 export const selectContacts = (state: { contact: ContactState }) =>
   state.contact.items;
+
+export const selectContactById = createSelector(
+  [
+    selectContacts,
+    (_state: { contact: ContactState }, contactId: number) => contactId,
+  ],
+  (contacts, contactId) => contacts.find((contact) => contact.id === contactId),
+);

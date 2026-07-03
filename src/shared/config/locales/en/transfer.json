@@ -3,7 +3,7 @@
   "pageTitle": "Send money",
   "pageSubtitle": "Send a private cryptocurrency transfer",
   "recipientAddress": "Recipient Address",
-  "recipientPlaceholder": "Paste recipient address",
+  "recipientPlaceholder": "Enter recipient address",
   "selectFromContacts": "Select from Contacts",
   "privateTransferNotice": "Private Transfer",
   "privateTransferDescription": "This transaction will be private and confidential. The recipient's identity and transaction details remain hidden on-chain.",

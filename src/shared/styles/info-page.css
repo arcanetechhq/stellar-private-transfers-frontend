@@ -1,0 +1,132 @@
+.info-page {
+  width: min(891px, 100%);
+  min-height: 100%;
+  margin-inline: auto;
+  padding: var(--space-8);
+  background: var(--background);
+  color: var(--text);
+}
+
+.info-page__shell {
+  width: 100%;
+}
+
+.info-page__logo {
+  --fill-0: var(--text);
+}
+
+.info-page__header {
+  margin-bottom: var(--space-6);
+}
+
+.info-page__header-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.info-page__icon-wrap {
+  display: flex;
+  height: 48px;
+  width: 48px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-4);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-high);
+  color: var(--text-muted);
+}
+
+.info-page__title {
+  margin-bottom: var(--space-1);
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.info-page__subtitle {
+  font-size: 16px;
+  line-height: 24px;
+  color: var(--text-muted);
+}
+
+.info-page__card {
+  border-radius: 12px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface);
+  padding: var(--space-8);
+}
+
+.info-page__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.info-page__section-title {
+  margin-bottom: var(--space-3);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.info-page__text {
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--text-muted);
+}
+
+.info-page__text-sm {
+  font-size: 14px;
+  line-height: 22px;
+  color: var(--text-soft);
+}
+
+.info-page__subheading {
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.info-page__panel {
+  border-radius: var(--radius-4);
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-high);
+  padding: var(--space-4);
+}
+
+.info-page__list-item {
+  position: relative;
+  padding-left: 20px;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--text-muted);
+}
+
+.info-page__list-marker {
+  position: absolute;
+  left: 0;
+  color: var(--text);
+}
+
+.info-page__feature-item {
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--text-muted);
+}
+
+.info-page__feature-marker {
+  color: var(--success, #10b981);
+}
+
+.info-page__link {
+  color: var(--text);
+}
+
+.info-page__divider {
+  border-color: var(--border-subtle);
+}

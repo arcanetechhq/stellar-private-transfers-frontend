@@ -16,6 +16,10 @@ export type WalletPrivateAddressContextValue = {
   refreshRegistryStatus: () => Promise<void>;
   ensureWalletPrivateAddress: () => Promise<string>;
   ensureWalletScalar: () => Promise<string>;
+  registryRegistrationModalOpen: boolean;
+  canOpenRegistryRegistration: boolean;
+  openRegistryRegistrationModal: () => void;
+  closeRegistryRegistrationModal: () => void;
 };
 
 export const WalletPrivateAddressContext =

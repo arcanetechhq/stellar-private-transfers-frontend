@@ -5,5 +5,9 @@ export const HIDDEN_FEATURES = {
   contactSupportSection: true,
   settingsReferralProgram: true,
   settingsHelpSupportLink: true,
+  settingsNotifications: true,
+  settingsApiKeys: true,
+  termsOfService: true,
   userId: true,
+  addContactTypeTabs: true,
 } as const;

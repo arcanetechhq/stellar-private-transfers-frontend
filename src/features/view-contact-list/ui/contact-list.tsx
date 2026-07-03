@@ -5,6 +5,7 @@ import { useNavigate } from "react-router";
 import { useAppSelector } from "@/store";
 import { selectContacts, type Contact } from "@/entities/contact";
 import { getContactInitials } from "../lib/get-contact-initials";
+import { ContactRowActions } from "./contact-row-actions";
 import { ContactTypeBadge } from "./contact-type-badge";
 import { ContactsSearchField } from "./contacts-search-field";
 import { RecordsTableContent } from "./records-table-content";
@@ -85,16 +86,7 @@ export function ContactList({ onAddContact }: ContactListProperties) {
         title: "",
         align: "right" as const,
         render: (contact: Contact) => (
-          <button
-            type="button"
-            className="contact-send-button"
-            onClick={(event) => {
-              event.stopPropagation();
-              handleSendMoney(contact);
-            }}
-          >
-            {translate("sendMoney")}
-          </button>
+          <ContactRowActions contact={contact} onSendMoney={handleSendMoney} />
         ),
       },
     ],

@@ -5,31 +5,12 @@ export function AboutFooter() {
   const { t: translate } = useTranslation("about");
   return (
     <div>
-      <h2
-        className="mb-4 font-semibold"
-        style={{
-          fontSize: "20px",
-          lineHeight: "28px",
-          color: "#121826",
-        }}
-      >
-        {translate("contactSupport")}
-      </h2>
-      <p
-        style={{
-          fontSize: "15px",
-          lineHeight: "24px",
-          color: "#667085",
-        }}
-      >
+      <h2 className="info-page__section-title mb-4">{translate("contactSupport")}</h2>
+      <p className="info-page__text">
         {translate("contactDescription")}{" "}
         <a
           href="mailto:support@arcn.io"
-          style={{
-            color: "#111827",
-            fontWeight: 600,
-            textDecoration: "underline",
-          }}
+          className="info-page__link font-semibold underline"
         >
           support@arcn.io
         </a>
