@@ -8,7 +8,7 @@
   "privateAssets": {
     "title": "Private assets",
     "noCoins": "No finalized private coins for this address yet.",
-    "noPrivateAddresses": "Create a private address on the Contacts page to receive private assets.",
+    "noPrivateAddresses": "Make a deposit to add assets to your private balance.",
     "selectAddress": "Private address",
     "assetsCount": "{{count}} assets",
     "networkStellar": "Stellar",

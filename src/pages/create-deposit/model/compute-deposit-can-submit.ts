@@ -4,7 +4,7 @@ export interface DepositCanSubmitInput {
   selectedAsset: AssetWithTrustline | undefined;
   amount: string;
   numericAmount: number;
-  numericBalance: number;
+  spendableBalanceDisplay: number;
   hasPoolContract: boolean;
   hasPrivateAddress: boolean;
   hasPrivateAddressScalar: boolean;
@@ -24,7 +24,7 @@ export function computeDepositCanSubmit(input: DepositCanSubmitInput): boolean {
   if (input.numericAmount <= 0) {
     return false;
   }
-  if (input.numericAmount > input.numericBalance) {
+  if (input.numericAmount > input.spendableBalanceDisplay) {
     return false;
   }
   if (!input.hasPoolContract) {

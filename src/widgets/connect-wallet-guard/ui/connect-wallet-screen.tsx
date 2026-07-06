@@ -1,35 +1,85 @@
 import { useAppSelector } from "@/store";
 import { selectIsWalletConnected } from "@/entities/wallet";
 import {
-  isWalletRegistryChecking,
-  useWalletPrivateAddress,
-} from "@/features/register-private-address";
+  useWalletOnboarding,
+  type WalletOnboardingPhase,
+} from "@/features/wallet-onboarding";
 import { useStellarWalletModal } from "@/features/stellar-wallet-connect";
-import { ArcaneConnectScreen } from "./arcane-connect-screen";
+import {
+  ArcaneConnectScreen,
+  type ArcaneConnectScreenPhase,
+} from "./arcane-connect-screen";
 
 type ConnectWalletScreenProperties = {
   walletKitLoaded: boolean;
 };
 
+function resolveConnectScreenPhase(parameters: {
+  isWalletConnected: boolean;
+  walletKitLoaded: boolean;
+  isPickerOpen: boolean;
+  onboardingPhase: WalletOnboardingPhase;
+}): ArcaneConnectScreenPhase {
+  if (!parameters.isWalletConnected) {
+    if (!parameters.walletKitLoaded || parameters.isPickerOpen) {
+      return "connecting_wallet";
+    }
+    return "prompt";
+  }
+
+  if (parameters.onboardingPhase === "error") {
+    return "error";
+  }
+
+  if (parameters.onboardingPhase === "funding") {
+    return "funding";
+  }
+
+  if (parameters.onboardingPhase === "registering") {
+    return "registering";
+  }
+
+  if (
+    parameters.onboardingPhase === "checking" ||
+    parameters.onboardingPhase === "idle"
+  ) {
+    return "checking";
+  }
+
+  if (parameters.isPickerOpen) {
+    return "connecting_wallet";
+  }
+
+  return "checking";
+}
+
 export function ConnectWalletScreen({
   walletKitLoaded,
 }: ConnectWalletScreenProperties) {
   const isWalletConnected = useAppSelector(selectIsWalletConnected);
-  const { registryStatus, isRegistryLoading } = useWalletPrivateAddress();
-  const { openPicker, isOpen, mode } = useStellarWalletModal();
+  const { phase, errorMessage, retry } = useWalletOnboarding();
+  const { openPicker, isOpen, mode, isWalletConnectInProgress } =
+    useStellarWalletModal();
   const isPickerOpen = isOpen && mode === "picker";
-  const isAccountConnecting =
-    isWalletConnected &&
-    isWalletRegistryChecking(registryStatus, isRegistryLoading);
+  const screenPhase = resolveConnectScreenPhase({
+    isWalletConnected,
+    walletKitLoaded,
+    isPickerOpen: isPickerOpen || isWalletConnectInProgress,
+    onboardingPhase: phase,
+  });
 
   return (
     <ArcaneConnectScreen
-      phase={isAccountConnecting ? "connecting" : "prompt"}
+      phase={screenPhase}
       connectDisabled={!walletKitLoaded}
-      isConnectingWallet={!walletKitLoaded || isPickerOpen}
+      isConnectingWallet={
+        !walletKitLoaded || isPickerOpen || isWalletConnectInProgress
+      }
+      errorMessage={errorMessage}
       onConnectWallet={() => {
         openPicker();
       }}
+      onRetry={retry}
     />
   );
 }

@@ -185,6 +185,51 @@
   white-space: nowrap;
 }
 
+.send-flow-wallet-control {
+  cursor: default;
+}
+
+.send-flow-wallet-control__field {
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+}
+
+.send-flow-wallet-control__action {
+  display: inline-flex;
+  min-width: 92px;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-4);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  letter-spacing: -0.14px;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+
+.send-flow-wallet-control__action:hover {
+  background: var(--surface-hover);
+}
+
+.send-flow-wallet-control__action[data-connected="true"] {
+  border-color: var(--border);
+  background: var(--surface-control);
+  color: var(--text);
+}
+
+.send-flow-wallet-control__action[data-connected="true"]:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
 .send-recipient-control__error {
   margin: 0;
   color: var(--danger);
@@ -487,32 +532,31 @@
 
 .send-money-amount-row__meta span {
   color: var(--text-muted);
-  font-size: 13px;
-  line-height: 18px;
+  font-size: 14px;
+  line-height: 20px;
   font-weight: 500;
 }
 
 .send-money-amount-row__input {
   display: grid;
   min-width: 0;
-  height: 58px;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
-.send-money-amount-row__input input,
-.send-money-value {
+.send-money-amount-row__input input {
   width: 100%;
   min-width: 0;
   border: 0;
   outline: 0;
   background: transparent;
-  color: var(--text-faint);
+  color: var(--text);
   font: inherit;
-  font-size: 48px;
-  line-height: 56px;
+  font-size: 40px;
+  line-height: 48px;
   font-weight: 600;
+  letter-spacing: -0.5px;
 }
 
 .send-money-amount-row__input input::placeholder {
@@ -520,8 +564,37 @@
   opacity: 1;
 }
 
+.send-money-amount-code {
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+}
+
+.send-money-amount-row--output .send-money-amount-row__input {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.send-money-value {
+  width: 100%;
+  min-width: 0;
+  color: var(--text-faint);
+  font: inherit;
+  font-size: 40px;
+  line-height: 48px;
+  font-weight: 600;
+}
+
+.private-deposit-panel .send-money-amount-row__input input {
+  font-weight: 500;
+}
+
 .send-money-amount-row[data-invalid="true"] .send-money-amount-row__input input,
 .send-money-amount-row[data-invalid="true"] .send-money-value {
+  color: var(--danger);
+}
+
+.send-money-amount-panel[data-invalid="true"] .send-money-amount-row__input input {
   color: var(--danger);
 }
 
@@ -548,6 +621,11 @@
 .send-money-max:hover {
   background: var(--surface-control);
   color: var(--text-soft);
+}
+
+.send-money-max:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 
 .send-money-error {
@@ -577,6 +655,21 @@
 
 .send-money-summary-row__value {
   color: var(--text);
+  font-weight: 600;
+}
+
+.send-money-fee-pill {
+  display: inline-flex;
+  min-width: 46px;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-4);
+  background: var(--positive-soft);
+  color: var(--positive);
+  padding: 0 var(--space-3);
+  font-size: 13px;
+  line-height: 18px;
   font-weight: 600;
 }
 
@@ -644,9 +737,9 @@
   }
 
   .send-money-asset-select__right {
-    width: 100%;
-    justify-content: space-between;
-    padding-left: calc(40px + var(--space-3));
+    width: auto;
+    justify-content: flex-end;
+    padding-left: 0;
   }
 
   .send-money-asset-option {
@@ -657,7 +750,17 @@
     display: none;
   }
 
-  .send-money-amount-row__input input,
+  .send-money-amount-row__meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .send-money-amount-row__input input {
+    font-size: 32px;
+    line-height: 40px;
+  }
+
   .send-money-value {
     font-size: 36px;
     line-height: 44px;
@@ -671,6 +774,15 @@
   .send-recipient-control__actions {
     grid-column: 1 / -1;
     justify-content: flex-end;
+  }
+
+  .send-flow-wallet-control__field {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .send-flow-wallet-control__action {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 }
 

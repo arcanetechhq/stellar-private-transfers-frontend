@@ -133,59 +133,61 @@ export function PageTransactionsHeader({
             }
           />
         </div>
-        <div className="transactions-panel__actions">
-          {showFilterBar ? (
-            <span className="transactions-panel__filter" ref={filterReference}>
+        {(showFilterBar || !HIDDEN_FEATURES.transactionsRefreshButton || !HIDDEN_FEATURES.transactionsExportButton) && (
+          <div className="transactions-panel__actions">
+            {showFilterBar ? (
+              <span className="transactions-panel__filter" ref={filterReference}>
+                <button
+                  type="button"
+                  className="transactions-panel__icon-button"
+                  data-active={filterOpen}
+                  aria-label={filterLabel}
+                  onClick={() => setFilterOpen(!filterOpen)}
+                >
+                  <SlidersHorizontal />
+                </button>
+                {activeFilterCount > 0 ? (
+                  <span className="transactions-panel__filter-count">
+                    {activeFilterCount}
+                  </span>
+                ) : null}
+                <TransactionsFilterMenu
+                  open={filterOpen}
+                  typeFilter={typeFilter}
+                  assetFilter={assetFilter}
+                  statusFilter={statusFilter}
+                  assetOptions={assetOptions}
+                  labels={filterLabels}
+                  onTypeFilterChange={onTypeFilterChange}
+                  onAssetFilterChange={onAssetFilterChange}
+                  onStatusFilterChange={onStatusFilterChange}
+                  onClearFilters={onClearFilters}
+                />
+              </span>
+            ) : null}
+            {!HIDDEN_FEATURES.transactionsRefreshButton ? (
               <button
                 type="button"
-                className="transactions-panel__icon-button"
-                data-active={filterOpen}
-                aria-label={filterLabel}
-                onClick={() => setFilterOpen(!filterOpen)}
+                className="transactions-panel__icon-button transactions-refresh-button"
+                data-active={refreshing}
+                aria-label={refreshLabel}
+                onClick={onRefresh}
               >
-                <SlidersHorizontal />
+                <RefreshCw />
               </button>
-              {activeFilterCount > 0 ? (
-                <span className="transactions-panel__filter-count">
-                  {activeFilterCount}
-                </span>
-              ) : null}
-              <TransactionsFilterMenu
-                open={filterOpen}
-                typeFilter={typeFilter}
-                assetFilter={assetFilter}
-                statusFilter={statusFilter}
-                assetOptions={assetOptions}
-                labels={filterLabels}
-                onTypeFilterChange={onTypeFilterChange}
-                onAssetFilterChange={onAssetFilterChange}
-                onStatusFilterChange={onStatusFilterChange}
-                onClearFilters={onClearFilters}
-              />
-            </span>
-          ) : null}
-          {!HIDDEN_FEATURES.transactionsRefreshButton ? (
-            <button
-              type="button"
-              className="transactions-panel__icon-button transactions-refresh-button"
-              data-active={refreshing}
-              aria-label={refreshLabel}
-              onClick={onRefresh}
-            >
-              <RefreshCw />
-            </button>
-          ) : null}
-          {!HIDDEN_FEATURES.transactionsExportButton ? (
-            <button
-              type="button"
-              className="transactions-panel__export-button"
-              onClick={onExport}
-            >
-              <FileDown aria-hidden="true" size={20} />
-              <span>{exportLabel}</span>
-            </button>
-          ) : null}
-        </div>
+            ) : null}
+            {!HIDDEN_FEATURES.transactionsExportButton ? (
+              <button
+                type="button"
+                className="transactions-panel__export-button"
+                onClick={onExport}
+              >
+                <FileDown aria-hidden="true" size={20} />
+                <span>{exportLabel}</span>
+              </button>
+            ) : null}
+          </div>
+        )}
       </div>
     </>
   );

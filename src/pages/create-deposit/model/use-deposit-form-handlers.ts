@@ -1,10 +1,11 @@
 import { useCallback, type Dispatch, type SetStateAction } from "react";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { isNumericDecimalInput } from "@/shared/lib/numeric-decimal-input";
+import { formatDepositSpendableBalanceInput } from "../lib/compute-deposit-spendable-balance";
 import { PERCENTAGE_DIVISOR } from "./create-deposit";
 
 export interface UseDepositFormHandlersInput {
-  numericBalance: number;
+  spendableBalanceDisplay: number;
   selectedAsset: AssetWithTrustline | undefined;
   setAmount: Dispatch<SetStateAction<string>>;
   setSelectedToken: Dispatch<SetStateAction<AssetWithTrustline | undefined>>;
@@ -12,7 +13,7 @@ export interface UseDepositFormHandlersInput {
 }
 
 export function useDepositFormHandlers({
-  numericBalance,
+  spendableBalanceDisplay,
   selectedAsset,
   setAmount,
   setSelectedToken,
@@ -37,17 +38,24 @@ export function useDepositFormHandlers({
 
   const handlePercentage = useCallback(
     (percentage: number) => {
-      const value = (numericBalance * percentage) / PERCENTAGE_DIVISOR;
+      const value =
+        (spendableBalanceDisplay * percentage) / PERCENTAGE_DIVISOR;
       setAmount(value.toString());
     },
-    [numericBalance, setAmount],
+    [spendableBalanceDisplay, setAmount],
   );
 
   const handleMaxAmount = useCallback(() => {
-    if (selectedAsset?.balance) {
-      setAmount(selectedAsset.balance);
+    if (!selectedAsset?.balance) {
+      return;
     }
-  }, [selectedAsset?.balance, setAmount]);
+    setAmount(
+      formatDepositSpendableBalanceInput(
+        selectedAsset,
+        selectedAsset.balance,
+      ),
+    );
+  }, [selectedAsset, setAmount]);
 
   return {
     handleTokenSelect,

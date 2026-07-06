@@ -1,6 +1,13 @@
 import React from "react";
+import "@/shared/styles/transfer-flow.css";
 import { useTranslation } from "react-i18next";
+import type { AssetWithTrustline } from "@/entities/asset";
 import type { DepositMode } from "../lib/deposit-mode";
+import {
+  computeDepositSpendableBalanceDisplay,
+  isNativeXlmDepositAsset,
+  NATIVE_XLM_SAC_MINIMUM_BALANCE_XLM,
+} from "../lib/compute-deposit-spendable-balance";
 import {
   DEPOSIT_NETWORK_OPTIONS,
   WALLET_DEPOSIT_NETWORK_ID,
@@ -24,7 +31,7 @@ function resolveDepositTitleKey(mode: DepositMode): string {
 
 function buildWalletErrorMessage(
   amount: string,
-  selectedAsset: { balance?: string; assetId: string } | undefined,
+  selectedAsset: AssetWithTrustline | undefined,
   submitErrorMessage: string | undefined,
   translate: (key: string, options?: Record<string, string>) => string,
 ): string | undefined {
@@ -34,17 +41,38 @@ function buildWalletErrorMessage(
 
   const numericAmount = Number.parseFloat(amount);
   const numericBalance = Number.parseFloat(selectedAsset?.balance ?? "0");
+  const spendableBalance = computeDepositSpendableBalanceDisplay(
+    selectedAsset,
+    selectedAsset?.balance,
+  );
   const hasAmount = Number.isFinite(numericAmount) && numericAmount > 0;
+  const exceedsSpendableBalance =
+    hasAmount &&
+    Number.isFinite(spendableBalance) &&
+    numericAmount > spendableBalance;
+
+  if (
+    exceedsSpendableBalance &&
+    isNativeXlmDepositAsset(selectedAsset) &&
+    numericAmount <= numericBalance
+  ) {
+    return translate("nativeXlmReserveRequired", {
+      amount: NATIVE_XLM_SAC_MINIMUM_BALANCE_XLM.toString(),
+    });
+  }
+
   const exceedsBalance =
     hasAmount &&
     Number.isFinite(numericBalance) &&
     numericAmount > numericBalance;
 
-  if (!exceedsBalance) {
+  if (!exceedsBalance && !exceedsSpendableBalance) {
     return undefined;
   }
 
-  const shortfall = numericAmount - numericBalance;
+  const shortfall = exceedsSpendableBalance
+    ? numericAmount - spendableBalance
+    : numericAmount - numericBalance;
   const ticker = selectedAsset?.assetId.toUpperCase() ?? "";
   return translate("insufficientBalance", {
     amount: `${shortfall.toLocaleString("en-US", {
@@ -57,7 +85,7 @@ function buildWalletErrorMessage(
 export function CreateDeposit(): React.JSX.Element {
   const { t: translate } = useTranslation("deposit");
   const deposit = useCreateDeposit();
-  const [depositMode, setDepositMode] = React.useState<DepositMode>("publicAddress");
+  const [depositMode, setDepositMode] = React.useState<DepositMode>("wallet");
   const addressUi = useDepositAddressUi();
   const isWalletDepositMode = depositMode === "wallet";
   const stellarNetworkOptions = React.useMemo(
@@ -91,24 +119,24 @@ export function CreateDeposit(): React.JSX.Element {
             onModeChange={setDepositMode}
           />
 
-          <div
-            className="deposit-select-row"
-            data-mode={isWalletDepositMode ? "wallet" : "publicAddress"}
-          >
-            <DepositNetworkSelect
-              selectedNetworkId={WALLET_DEPOSIT_NETWORK_ID}
-              options={stellarNetworkOptions}
-              onSelect={() => undefined}
-            />
+          {/* <DepositNetworkSelect
+            selectedNetworkId={WALLET_DEPOSIT_NETWORK_ID}
+            options={stellarNetworkOptions}
+            onSelect={() => undefined}
+          /> */}
 
-            {isWalletDepositMode ? (
+          {isWalletDepositMode && (
+            <div
+              className="deposit-select-row"
+              data-mode={isWalletDepositMode ? "wallet" : "publicAddress"}
+            >
               <DepositAssetSelect
                 assets={deposit.assets}
                 selectedAsset={deposit.selectedToken}
                 onSelect={deposit.handleTokenSelect}
               />
-            ) : null}
-          </div>
+            </div>
+          )}
 
           <div className="deposit-flow__body">
             {isWalletDepositMode ? (
@@ -120,7 +148,6 @@ export function CreateDeposit(): React.JSX.Element {
                 errorMessage={walletErrorMessage}
                 onAmountChange={deposit.handleAmountChange}
                 onMaxAmount={deposit.handleMaxAmount}
-                onPercentage={deposit.handlePercentage}
               />
             ) : (
               <DepositAddressPanel

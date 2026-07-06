@@ -9,6 +9,7 @@ import {
 import { useWalletPrivateAddress } from "@/features/register-private-address";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import { NETWORK_FEE } from "./create-deposit";
+import { computeDepositSpendableBalanceDisplay } from "../lib/compute-deposit-spendable-balance";
 import { resolveSelectedDepositAsset } from "./resolve-selected-deposit-asset";
 import { computeDepositCanSubmit } from "./compute-deposit-can-submit";
 import { computeReceivedAmount } from "./compute-received-amount";
@@ -42,9 +43,10 @@ export function useCreateDepositForm({
     assetIdFromUrl,
   });
 
-  const numericBalance = selectedAsset
-    ? Number.parseFloat(selectedAsset.balance ?? "0")
-    : 0;
+  const spendableBalanceDisplay = computeDepositSpendableBalanceDisplay(
+    selectedAsset,
+    selectedAsset?.balance,
+  );
 
   const {
     handleTokenSelect,
@@ -52,7 +54,7 @@ export function useCreateDepositForm({
     handlePercentage,
     handleMaxAmount,
   } = useDepositFormHandlers({
-    numericBalance,
+    spendableBalanceDisplay,
     selectedAsset,
     setAmount,
     setSelectedToken,
@@ -76,7 +78,7 @@ export function useCreateDepositForm({
     selectedAsset,
     amount,
     numericAmount,
-    numericBalance,
+    spendableBalanceDisplay,
     hasPoolContract,
     hasPrivateAddress,
     hasPrivateAddressScalar,

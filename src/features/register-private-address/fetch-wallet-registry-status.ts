@@ -7,8 +7,13 @@ import {
   getDefaultStellarNetworkConfig,
   getRequiredPrivateAddressRegistryContractId,
 } from "@/shared/stellar/stellar-network-environment";
+import { DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE } from "@/shared/lib/private-address/privacy-pool-sdk-private-address";
 import { syncRegisteredWalletPrivateAddress } from "./ensure-wallet-private-address";
 import type { WalletRegistryStatus } from "./wallet-private-address-context";
+
+function resolveDefaultNonce(nonce: string | undefined): string {
+  return (nonce ?? DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE).trim();
+}
 
 async function hydrateDefaultScalar(parameters: {
   dispatch: AppDispatch;
@@ -37,9 +42,10 @@ export async function fetchWalletRegistryStatus(parameters: {
   dispatch: AppDispatch;
   getState: Store<RootState>["getState"];
   publicKey: string;
-  defaultNonce: string;
+  defaultNonce?: string;
 }): Promise<WalletRegistryStatus> {
   const trimmedPublicKey = parameters.publicKey.trim();
+  const defaultNonce = resolveDefaultNonce(parameters.defaultNonce);
   const { networkPassphrase, sorobanRpcUrl } = getDefaultStellarNetworkConfig();
   const lookup = await lookupWalletRegistryStatus({
     registryContractId: getRequiredPrivateAddressRegistryContractId(),
@@ -52,13 +58,13 @@ export async function fetchWalletRegistryStatus(parameters: {
       dispatch: parameters.dispatch,
       publicKey: trimmedPublicKey,
       lookup,
-      nonce: parameters.defaultNonce,
+      nonce: defaultNonce,
     });
     await hydrateDefaultScalar({
       dispatch: parameters.dispatch,
       getState: parameters.getState,
       publicKey: trimmedPublicKey,
-      nonce: parameters.defaultNonce,
+      nonce: defaultNonce,
     });
     return "active";
   }

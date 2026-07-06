@@ -88,14 +88,14 @@ export function PrivateAssetTable({
             {translateOverview("privateAssetsTitle")}
           </h2>
         </div>
-        <div className="asset-balances-panel__meta">
+        {/* <div className="asset-balances-panel__meta">
           {postAddressPicker}
           <p className="asset-balances-panel__count">
             {translateAssets("privateAssets.assetsCount", {
               count: aggregatesWithZeroAssets.length,
             })}
           </p>
-        </div>
+        </div> */}
       </div>
       <PrivateAssetTableBody
         translateAssets={translateAssets}

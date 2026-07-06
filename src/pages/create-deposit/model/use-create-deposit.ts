@@ -1,8 +1,9 @@
 import { type FormEvent, useCallback, useState } from "react";
 import { useNavigate } from "react-router";
-import { useAppDispatch } from "@/store";
+import { useAppDispatch, useAppSelector } from "@/store";
 import { useWalletPrivateAddress } from "@/features/register-private-address";
 import type { AssetWithTrustline } from "@/entities/asset";
+import { selectWalletPublicKey } from "@/entities/wallet";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";
 import { useDepositTransaction } from "@/features/deposit";
 import { useCreateDepositForm } from "./use-create-deposit-form";
@@ -27,6 +28,7 @@ type SubmitDepositSuccessParameters = {
   selectedAsset: AssetWithTrustline;
   numericAmount: number;
   destinationPrivateAddressPreview: string;
+  walletPublicKey: string;
 };
 
 async function submitDepositSuccessFlow({
@@ -36,8 +38,10 @@ async function submitDepositSuccessFlow({
   selectedAsset,
   numericAmount,
   destinationPrivateAddressPreview,
+  walletPublicKey,
 }: SubmitDepositSuccessParameters) {
   const trimmedDestinationPrivateAddress = destinationPrivateAddressPreview.trim();
+  const trimmedWalletPublicKey = walletPublicKey.trim();
   const result = await submitDeposit({
     asset: selectedAsset,
     amountDisplay: numericAmount,
@@ -50,7 +54,7 @@ async function submitDepositSuccessFlow({
         type: "deposit",
         assetId: result.assetId,
         amount: result.amountDisplay,
-        counterparty: trimmedDestinationPrivateAddress,
+        counterparty: trimmedWalletPublicKey,
         senderPrivateAddress: trimmedDestinationPrivateAddress,
       }),
     ),
@@ -69,6 +73,7 @@ async function submitDepositSuccessFlow({
 export function useCreateDeposit() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const walletPublicKey = useAppSelector(selectWalletPublicKey) ?? "";
   const { ensureWalletPrivateAddress, ensureWalletScalar } =
     useWalletPrivateAddress();
   const {
@@ -99,6 +104,7 @@ export function useCreateDeposit() {
         selectedAsset: form.selectedAsset,
         numericAmount: form.numericAmount,
         destinationPrivateAddressPreview: privateAddress,
+        walletPublicKey,
       });
     } catch (error: unknown) {
       console.error("Deposit failed:", error);
@@ -116,6 +122,7 @@ export function useCreateDeposit() {
     isActionPending,
     navigate,
     submitDeposit,
+    walletPublicKey,
   ]);
 
   return {

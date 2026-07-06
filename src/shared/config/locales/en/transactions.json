@@ -11,6 +11,7 @@
   "clearFilterCount": "Clear {{count}} {{count, plural, one {filter} other {filters}}}",
   "noTransactionsFound": "No transactions found",
   "noTransactionsHint": "Adjust search, period, or filters to see more activity.",
+  "privateTransferSubtitle": "Private Transfer",
   "emptyState": {
     "loadingTitle": "Loading transactions",
     "loadingHint": "Fetching your recent activity.",
@@ -126,6 +127,7 @@
       "from": "From",
       "to": "To",
       "privateAccount": "Private account",
+      "privateAddress": "Private address",
       "transactionHash": "Transaction hash"
     },
     "timeline": {

@@ -5,8 +5,13 @@ import { useAssetLookup } from "@/entities/asset";
 import { StatusBadge } from "@/shared/ui/status-badge";
 import { TokenIcon } from "@/shared/ui/token-icon";
 import { cn } from "@/shared/lib/cn";
-import { formatSenderCounterpartyForDisplay } from "@/shared/lib/format-sender-counterparty-for-display";
 import type { Transaction } from "@/entities/transaction";
+import { selectWalletPublicKey } from "@/entities/wallet";
+import { useAppSelector } from "@/store";
+import {
+  formatTransactionTableSubtitle,
+  transactionTableSubtitleTitle,
+} from "../lib/format-transaction-table-subtitle";
 import {
   getTransactionLabel,
   getStatusLabel,
@@ -45,18 +50,27 @@ function TransactionDateCell(properties: TransactionDateCellProperties) {
 }
 
 export function TransactionTableRow(properties: TransactionTableRowProperties) {
-  const { t: translate } = useTranslation("history");
+  const { t: translateHistory } = useTranslation("history");
+  const { t: translateTransactions } = useTranslation("transactions");
   const { transaction } = properties;
   const navigate = useNavigate();
   const assetMap = useAssetLookup();
   const asset = assetMap.get(transaction.assetId);
   const assetLabel = asset?.name ?? transaction.assetId;
   const amountToneClass = getAmountToneClass(transaction.type);
-  const counterpartyTrimmed = transaction.counterparty.trim();
-  const counterpartyDisplay =
-    counterpartyTrimmed === ""
-      ? "—"
-      : formatSenderCounterpartyForDisplay(counterpartyTrimmed);
+  const walletPublicKey = useAppSelector(selectWalletPublicKey);
+  const counterpartyDisplay = formatTransactionTableSubtitle(
+    transaction,
+    walletPublicKey,
+    {
+      privateTransferLabel: translateTransactions("privateTransferSubtitle"),
+      assetFallback: assetLabel,
+    },
+  );
+  const counterpartyTitle = transactionTableSubtitleTitle(
+    transaction,
+    walletPublicKey,
+  );
   const detailsPath = buildTransactionsPathWithSelection(transaction.id);
 
   const handleRowClick = () => {
@@ -87,7 +101,7 @@ export function TransactionTableRow(properties: TransactionTableRowProperties) {
         <div className="flex items-center gap-3">
           <TransactionTypeIcon type={transaction.type} />
           <span className="text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
-            {getTransactionLabel(transaction.type, translate)}
+            {getTransactionLabel(transaction.type, translateHistory)}
           </span>
         </div>
       </td>
@@ -114,15 +128,13 @@ export function TransactionTableRow(properties: TransactionTableRowProperties) {
       </td>
       <td
         className="px-6 py-4 font-mono text-[13px] leading-[18px] whitespace-nowrap text-[var(--foreground-secondary)]"
-        title={
-          counterpartyTrimmed === "" ? undefined : transaction.counterparty
-        }
+        title={counterpartyTitle}
       >
         {counterpartyDisplay}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <StatusBadge variant={getStatusVariant(transaction.status)}>
-          {getStatusLabel(transaction.status, translate)}
+          {getStatusLabel(transaction.status, translateHistory)}
         </StatusBadge>
       </td>
     </tr>

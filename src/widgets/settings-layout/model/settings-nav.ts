@@ -3,9 +3,5 @@ export function isSettingsRoute(pathname: string): boolean {
 }
 
 export function isNoSidebarRoute(pathname: string): boolean {
-  return (
-    isSettingsRoute(pathname) ||
-    pathname === "/about" ||
-    pathname === "/privacy-policy"
-  );
+  return pathname === "/about" || pathname === "/privacy-policy";
 }

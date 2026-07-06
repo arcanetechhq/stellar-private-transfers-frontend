@@ -45,5 +45,6 @@ export async function runWalletCreatePrivateAddressFlow(
         : "unknown",
     );
     setStatus("error");
+    throw error;
   }
 }

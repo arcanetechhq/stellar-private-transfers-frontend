@@ -1,7 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { useAssetLookup } from "@/entities/asset";
 import type { Transaction } from "@/entities/transaction";
-import { formatSenderCounterpartyForDisplay } from "@/shared/lib/format-sender-counterparty-for-display";
+import { selectWalletPublicKey } from "@/entities/wallet";
+import { useAppSelector } from "@/store";
 import { TokenIcon } from "@/shared/ui/token-icon";
+import { formatTransactionTableSubtitle } from "../lib/format-transaction-table-subtitle";
 import {
   getAmountPrefix,
   getAmountToneClass,
@@ -41,13 +44,15 @@ export function TransactionFromToCell({
   transaction,
   title,
 }: TransactionFromToCellProperties) {
+  const { t: translate } = useTranslation("transactions");
   const assetMap = useAssetLookup();
   const asset = assetMap.get(transaction.assetId);
-  const counterpartyTrimmed = transaction.counterparty.trim();
-  const subtitle =
-    counterpartyTrimmed === ""
-      ? asset?.name ?? transaction.assetId.toUpperCase()
-      : formatSenderCounterpartyForDisplay(counterpartyTrimmed);
+  const walletPublicKey = useAppSelector(selectWalletPublicKey);
+  const assetFallback = asset?.name ?? transaction.assetId.toUpperCase();
+  const subtitle = formatTransactionTableSubtitle(transaction, walletPublicKey, {
+    privateTransferLabel: translate("privateTransferSubtitle"),
+    assetFallback,
+  });
 
   return (
     <div className="transaction-from-to-cell">

@@ -231,7 +231,9 @@ export function HeaderFaucetAssetRow({
             actionLabel
           )}
         </button>
-      ) : null}
+      ) : (
+        <span className="faucet-menu__action-slot" aria-hidden="true" />
+      )}
     </div>
   );
 }

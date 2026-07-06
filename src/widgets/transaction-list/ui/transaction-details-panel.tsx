@@ -4,8 +4,10 @@ import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAssetLookup } from "@/entities/asset";
 import type { Transaction } from "@/entities/transaction";
-import { formatSenderCounterpartyForDisplay } from "@/shared/lib/format-sender-counterparty-for-display";
+import { selectWalletPublicKey } from "@/entities/wallet";
+import { useAppSelector } from "@/store";
 import { TokenIcon } from "@/shared/ui/token-icon";
+import { formatTransactionPublicAddressForDisplay } from "../lib/format-transaction-public-address-for-display";
 import {
   getAmountPrefix,
   getStatusLabel,
@@ -110,6 +112,7 @@ export function TransactionDetailsPanel({
   const { chainEntry } = useTransactionDetailsPanel(transaction.id);
   const assetMap = useAssetLookup();
   const asset = assetMap.get(transaction.assetId);
+  const walletPublicKey = useAppSelector(selectWalletPublicKey);
 
   const { dateLabel, timeLabel } = formatTransactionDateTime(transaction.date);
   const isIncoming = isIncomingType(transaction.type);
@@ -123,11 +126,11 @@ export function TransactionDetailsPanel({
   const title = getTransactionLabel(transaction.type, (key) =>
     translateTransactions(key),
   );
-  const counterpartyTrimmed = transaction.counterparty.trim();
-  const counterpartyDisplay =
-    counterpartyTrimmed === ""
-      ? "—"
-      : formatSenderCounterpartyForDisplay(counterpartyTrimmed);
+  const publicAddressDisplay = formatTransactionPublicAddressForDisplay(
+    transaction,
+    walletPublicKey,
+  );
+  const privateAddressLabel = translateTransactions("details.fields.privateAddress");
   const amountPrefix = getAmountPrefix(transaction.type);
   const amountDisplay = `${amountPrefix}${transaction.amount.toLocaleString()} ${transaction.assetId.toUpperCase()}`;
   const paymentRail = translateTransactions("details.paymentRail", {
@@ -167,7 +170,7 @@ export function TransactionDetailsPanel({
         </span>
         <div className="transaction-details__hero-copy">
           <h2 className="transaction-details__title">{title}</h2>
-          <p className="transaction-details__subtitle">{counterpartyDisplay}</p>
+          <p className="transaction-details__subtitle">{publicAddressDisplay}</p>
         </div>
         <p
           className="transaction-details__amount"
@@ -246,22 +249,22 @@ export function TransactionDetailsPanel({
                     ? translateTransactions("details.fields.sender")
                     : translateTransactions("details.fields.recipient")
                 }
-                value={counterpartyDisplay}
+                value={publicAddressDisplay}
               />
               <TransactionDetailRow
                 label={translateTransactions("details.fields.from")}
                 value={
                   isIncoming
-                    ? counterpartyDisplay
-                    : translateTransactions("details.fields.privateAccount")
+                    ? publicAddressDisplay
+                    : privateAddressLabel
                 }
               />
               <TransactionDetailRow
                 label={translateTransactions("details.fields.to")}
                 value={
                   isIncoming
-                    ? translateTransactions("details.fields.privateAccount")
-                    : counterpartyDisplay
+                    ? privateAddressLabel
+                    : publicAddressDisplay
                 }
               />
               <TransactionDetailRow

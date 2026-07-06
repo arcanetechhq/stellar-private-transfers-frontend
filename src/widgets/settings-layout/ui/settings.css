@@ -5,10 +5,6 @@
   min-height: 0;
 }
 
-.workspace__inner:has(.settings-route) {
-  padding-left: 98px;
-}
-
 .settings-route__content {
   display: grid;
   width: 100%;
@@ -587,10 +583,6 @@ button.settings-chip:hover {
 }
 
 @media (max-width: 960px) {
-  .workspace__inner:has(.settings-route) {
-    padding-left: var(--space-6);
-  }
-
   .settings-identity-card {
     grid-template-columns: 32px minmax(0, 1fr);
   }

@@ -46,7 +46,7 @@ export function StellarWalletModalProvider({
   const [isOpen, setIsOpen] = useState(false);
   const [mode, setMode] = useState<StellarWalletModalMode>("picker");
   const [isChangeWallet, setIsChangeWallet] = useState(false);
-  const [isWalletChangeInProgress, setIsWalletChangeInProgress] = useState(false);
+  const [isWalletConnectInProgress, setIsWalletConnectInProgress] = useState(false);
 
   const open = useCallback((options: StellarWalletModalOpenOptions) => {
     setMode(options.mode);
@@ -67,13 +67,13 @@ export function StellarWalletModalProvider({
 
   const close = useCallback(() => {
     setIsOpen(false);
-    setIsWalletChangeInProgress(false);
+    setIsWalletConnectInProgress(false);
   }, []);
 
   const setOpen = useCallback((open: boolean) => {
     setIsOpen(open);
     if (!open) {
-      setIsWalletChangeInProgress(false);
+      setIsWalletConnectInProgress(false);
     }
   }, []);
 
@@ -82,8 +82,8 @@ export function StellarWalletModalProvider({
       isOpen,
       mode,
       isChangeWallet,
-      isWalletChangeInProgress,
-      setWalletChangeInProgress: setIsWalletChangeInProgress,
+      isWalletConnectInProgress,
+      setWalletConnectInProgress: setIsWalletConnectInProgress,
       open,
       openConnected,
       openPicker,
@@ -94,7 +94,7 @@ export function StellarWalletModalProvider({
       isOpen,
       mode,
       isChangeWallet,
-      isWalletChangeInProgress,
+      isWalletConnectInProgress,
       open,
       openConnected,
       openPicker,

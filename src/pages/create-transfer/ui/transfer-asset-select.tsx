@@ -51,14 +51,6 @@ export function TransferAssetSelect({
               </span>
             </span>
             <span className="send-money-asset-select__right">
-              <span>
-                {translate("availableBalance", {
-                  amount: formatTransferBalanceWithTicker(
-                    selectedAsset.balance,
-                    selectedAsset.assetId,
-                  ),
-                })}
-              </span>
               <ChevronDown size={18} strokeWidth={1.6} />
             </span>
           </>

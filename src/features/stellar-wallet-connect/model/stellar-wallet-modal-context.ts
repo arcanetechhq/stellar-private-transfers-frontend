@@ -10,8 +10,8 @@ export type StellarWalletModalContextValue = {
   isOpen: boolean;
   mode: StellarWalletModalMode;
   isChangeWallet: boolean;
-  isWalletChangeInProgress: boolean;
-  setWalletChangeInProgress: (inProgress: boolean) => void;
+  isWalletConnectInProgress: boolean;
+  setWalletConnectInProgress: (inProgress: boolean) => void;
   open: (options: StellarWalletModalOpenOptions) => void;
   openConnected: () => void;
   openPicker: (isChangeWallet?: boolean) => void;

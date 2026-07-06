@@ -37,7 +37,7 @@ export function WalletConnectPickerContent({
   const { t: translate } = useTranslation("common");
   const dispatch = useAppDispatch();
   const { refreshRegistryStatus } = useWalletPrivateAddress();
-  const { setWalletChangeInProgress } = useStellarWalletModal();
+  const { setWalletConnectInProgress } = useStellarWalletModal();
   const [view, setView] = useState<WalletPickerView>("recommended");
   const [connectingId, setConnectingId] = useState<string | null>(null);
   const [supportedWallets, setSupportedWallets] = useState<ISupportedWallet[]>(
@@ -88,10 +88,7 @@ export function WalletConnectPickerContent({
     }
 
     setConnectingId(moduleId);
-
-    if (isChangeWallet) {
-      setWalletChangeInProgress(true);
-    }
+    setWalletConnectInProgress(true);
 
     try {
       const result = await dispatch(connectStellarWalletModule(moduleId));
@@ -103,9 +100,7 @@ export function WalletConnectPickerContent({
       }
     } finally {
       setConnectingId(null);
-      if (isChangeWallet) {
-        setWalletChangeInProgress(false);
-      }
+      setWalletConnectInProgress(false);
     }
   };
 

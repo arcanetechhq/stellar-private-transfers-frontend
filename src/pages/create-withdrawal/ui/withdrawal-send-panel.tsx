@@ -2,9 +2,9 @@ import { Loader2 } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import type { AssetWithTrustline } from "@/entities/asset";
-import { NETWORK_FEE } from "../model/create-withdrawal";
 import {
   formatWithdrawalAmount,
+  formatWithdrawalBalanceWithTicker,
   parseWithdrawalAmountInput,
   parseWithdrawalBalance,
 } from "../lib/format-withdrawal-amount";
@@ -47,8 +47,11 @@ export function WithdrawalSendPanel({
     Number.isFinite(numericBalance) &&
     numericAmount > numericBalance;
   const recipientGetsDisplay = `${formatWithdrawalAmount(totalAmount)} ${ticker}`.trim();
-  const feeDisplay = `${formatWithdrawalAmount(NETWORK_FEE)} ${ticker}`.trim();
-  const minAmountDisplay = `0.00 ${ticker}`.trim();
+  const feeDisplay = `0 ${ticker}`.trim();
+  const availableBalanceDisplay = formatWithdrawalBalanceWithTicker(
+    selectedToken?.balance,
+    ticker,
+  );
 
   return (
     <div className="transfer-send-panel">
@@ -66,6 +69,11 @@ export function WithdrawalSendPanel({
           >
             <div className="send-money-amount-row__meta">
               <span>{translate("youSend")}</span>
+              <span>
+                {translate("availableForMax", {
+                  amount: availableBalanceDisplay,
+                })}
+              </span>
             </div>
             <div className="send-money-amount-row__input">
               <input
@@ -75,6 +83,7 @@ export function WithdrawalSendPanel({
                 value={amount}
                 onChange={(event) => onAmountChange(event.target.value)}
               />
+              <span className="send-money-amount-code">{ticker}</span>
               <button
                 type="button"
                 className="send-money-max"
@@ -84,7 +93,7 @@ export function WithdrawalSendPanel({
               </button>
             </div>
           </div>
-          <div className="send-money-amount-row">
+          <div className="send-money-amount-row send-money-amount-row--output">
             <div className="send-money-amount-row__meta">
               <span>{translate("recipientGets")}</span>
             </div>
@@ -102,11 +111,6 @@ export function WithdrawalSendPanel({
             <span className="send-money-summary-row__value">{feeDisplay}</span>
           </div>
         ) : null}
-
-        <div className="send-money-summary-row">
-          <span>{translate("minAmount")}</span>
-          <span className="send-money-summary-row__value">{minAmountDisplay}</span>
-        </div>
 
         {/* <WithdrawalInfoNotice /> */}
       </div>

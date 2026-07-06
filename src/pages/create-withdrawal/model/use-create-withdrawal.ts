@@ -9,7 +9,7 @@ import {
   parseWithdrawalAmountInput,
   parseWithdrawalBalance,
 } from "../lib/format-withdrawal-amount";
-import { PERCENTAGE_DIVISOR, NETWORK_FEE } from "./create-withdrawal";
+import { PERCENTAGE_DIVISOR } from "./create-withdrawal";
 import type { PrivateWithdrawalSuccess } from "./private-withdrawal-success";
 import { usePrivateWithdrawal } from "./use-private-withdrawal";
 import { usePrivateWithdrawalSubmitHandler } from "./use-private-withdrawal-submit-handler";
@@ -153,7 +153,6 @@ export function useCreateWithdrawal() {
     handleMaxAmount: amountInputs.handleMaxAmount,
     destinationWallet,
     receivedAmount: amountInputs.receivedAmount,
-    networkFee: NETWORK_FEE,
     canSubmit,
     isSubmitting,
     submitError,

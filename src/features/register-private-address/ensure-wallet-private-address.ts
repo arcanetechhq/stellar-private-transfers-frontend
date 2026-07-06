@@ -63,7 +63,7 @@ export function syncRegisteredWalletPrivateAddress(parameters: {
     parameters.publicKey,
     trimmedNonce,
   );
-  const diskAddress = fromDisk?.privateAddress.trim();
+  const diskAddress = fromDisk?.privateAddress?.trim();
   const localAddress = fromState ?? diskAddress;
   if (localAddress && localAddress !== registryAddress) {
     parameters.dispatch(clearScalars());
@@ -103,12 +103,13 @@ export async function ensureWalletPrivateAddressRecord(parameters: {
     parameters.publicKey,
     trimmedNonce,
   );
-  if (fromDisk?.privateAddress.trim()) {
+  const diskPrivateAddress = fromDisk?.privateAddress?.trim();
+  if (diskPrivateAddress) {
     parameters.dispatch(
       setPrivateAddressRecord({ nonce: trimmedNonce, entry: fromDisk }),
     );
     ensureDefaultNonce(parameters.dispatch, trimmedNonce);
-    return fromDisk.privateAddress.trim();
+    return diskPrivateAddress;
   }
   await runWalletCreatePrivateAddressFlow({
     dispatch: parameters.dispatch,

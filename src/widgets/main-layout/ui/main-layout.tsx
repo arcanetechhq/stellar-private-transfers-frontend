@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Outlet } from "react-router";
 import "./sidebar.css";
 import "./header-faucet.css";
@@ -7,11 +6,8 @@ import {
   selectIsWalletConnected,
   selectIsWalletKitLoaded,
 } from "@/entities/wallet";
-import {
-  isWalletRegistryChecking,
-  useWalletPrivateAddress,
-} from "@/features/register-private-address";
 import { StellarWalletModalProvider, useStellarWalletModal } from "@/features/stellar-wallet-connect";
+import { WalletOnboardingProvider, useWalletOnboarding } from "@/features/wallet-onboarding";
 import { ConnectWalletScreen } from "@/widgets/connect-wallet-guard";
 import { MainLayoutHeader } from "./main-layout-header";
 import { MainLayoutSidebar } from "./main-layout-sidebar";
@@ -27,7 +23,9 @@ import { useMainLayoutSidebarState } from "../lib/use-main-layout-sidebar-state"
 export function MainLayout() {
   return (
     <StellarWalletModalProvider>
-      <MainLayoutBody />
+      <WalletOnboardingProvider>
+        <MainLayoutBody />
+      </WalletOnboardingProvider>
     </StellarWalletModalProvider>
   );
 }
@@ -38,26 +36,12 @@ function MainLayoutBody() {
   const noSidebarRouteActive = isNoSidebarRoute(model.location.pathname);
   const isWalletConnected = useAppSelector(selectIsWalletConnected);
   const isWalletKitLoaded = useAppSelector(selectIsWalletKitLoaded);
-  const { registryStatus, isRegistryLoading } = useWalletPrivateAddress();
-  const { isWalletChangeInProgress } = useStellarWalletModal();
-  const [hasUnlockedApp, setHasUnlockedApp] = useState(false);
-  const isAccountConnecting =
-    isWalletConnected &&
-    isWalletRegistryChecking(registryStatus, isRegistryLoading);
-
-  useEffect(() => {
-    if (!isWalletConnected) {
-      setHasUnlockedApp(false);
-      return;
-    }
-    if (!isAccountConnecting) {
-      setHasUnlockedApp(true);
-    }
-  }, [isWalletConnected, isAccountConnecting]);
+  const { canEnterApp } = useWalletOnboarding();
+  const { isWalletConnectInProgress } = useStellarWalletModal();
 
   const showMainApp =
     isWalletConnected &&
-    (hasUnlockedApp || !isAccountConnecting || isWalletChangeInProgress);
+    (canEnterApp || isWalletConnectInProgress);
 
   return (
     <>

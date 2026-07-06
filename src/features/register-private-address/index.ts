@@ -12,3 +12,4 @@ export {
   registryStatusLabel,
   registryStatusTone,
 } from "./registry-status-display";
+export { fetchWalletRegistryStatus } from "./fetch-wallet-registry-status";

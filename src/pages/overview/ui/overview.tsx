@@ -8,7 +8,6 @@ import {
   sortTransactionsByDateDesc,
 } from "@/entities/transaction";
 import { TransactionsPanel } from "@/widgets/transaction-list";
-import { MonthlyNetInsights } from "@/widgets/monthly-net-insights";
 import { BalanceHero } from "./balance-hero";
 import { PrivateAssetTable } from "@/widgets/private-asset-table";
 
@@ -54,14 +53,15 @@ export function Overview() {
             assetCount={privateAssetCount}
           />
           <div className="h-full grid grid-cols-1 min-[1180px]:grid-cols-[1fr_416px] gap-4">
-            <TransactionsPanel
-              transactions={sortedTransactions}
-              isHydrated={transactionsHydrated}
-              variant="overview"
-            />
-            <div className="overview-right-rail">
-              <PrivateAssetTable/>
-              {/* <MonthlyNetInsights transactions={sortedTransactions} /> */}
+            <div className="overview-right-rail order-1 min-[1180px]:order-2 min-[1180px]:col-start-2 min-[1180px]:row-start-1">
+              <PrivateAssetTable />
+            </div>
+            <div className="order-2 min-h-0 min-[1180px]:order-1 min-[1180px]:col-start-1 min-[1180px]:row-start-1">
+              <TransactionsPanel
+                transactions={sortedTransactions}
+                isHydrated={transactionsHydrated}
+                variant="overview"
+              />
             </div>
           </div>
         </div>

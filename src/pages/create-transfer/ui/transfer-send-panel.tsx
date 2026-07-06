@@ -6,7 +6,7 @@ import type { AssetWithTrustline } from "@/entities/asset";
 import type { RecipientRegistryStatus } from "../model/use-recipient-registry-status";
 import { NETWORK_FEE } from "../model/create-transfer";
 import { formatTransferAmount } from "../lib/format-transfer-amount";
-import { parseTransferBalance } from "../lib/format-transfer-balance";
+import { formatTransferBalanceWithTicker, parseTransferBalance } from "../lib/format-transfer-balance";
 import { TransferAssetSelect } from "./transfer-asset-select";
 import { TransferRecipientControl } from "./transfer-recipient-control";
 
@@ -118,7 +118,10 @@ export function TransferSendPanel({
     numericAmount > numericBalance;
   const recipientGetsDisplay = `${formatTransferAmount(totalAmount)} ${ticker}`.trim();
   const feeDisplay = `${formatTransferAmount(NETWORK_FEE)} ${ticker}`.trim();
-  const minAmountDisplay = `0.00 ${ticker}`.trim();
+  const availableBalanceDisplay = formatTransferBalanceWithTicker(
+    selectedToken?.balance,
+    ticker,
+  );
 
   return (
     <div className="transfer-send-panel">
@@ -141,6 +144,11 @@ export function TransferSendPanel({
           >
             <div className="send-money-amount-row__meta">
               <span>{translate("youSend")}</span>
+              <span>
+                {translate("availableBalance", {
+                  amount: availableBalanceDisplay,
+                })}
+              </span>
             </div>
             <div className="send-money-amount-row__input">
               <input
@@ -150,6 +158,7 @@ export function TransferSendPanel({
                 value={amount}
                 onChange={(event) => onAmountChange(event.target.value)}
               />
+              <span className="send-money-amount-code">{ticker}</span>
               <button
                 type="button"
                 className="send-money-max"
@@ -159,7 +168,7 @@ export function TransferSendPanel({
               </button>
             </div>
           </div>
-          <div className="send-money-amount-row">
+          <div className="send-money-amount-row send-money-amount-row--output">
             <div className="send-money-amount-row__meta">
               <span>{translate("recipientGets")}</span>
             </div>
@@ -177,11 +186,6 @@ export function TransferSendPanel({
             <span className="send-money-summary-row__value">{feeDisplay}</span>
           </div>
         ) : null}
-
-        <div className="send-money-summary-row">
-          <span>{translate("minAmount")}</span>
-          <span className="send-money-summary-row__value">{minAmountDisplay}</span>
-        </div>
 
         <TransferPrivacyNotice recipientRegistryStatus={recipientRegistryStatus} />
       </div>
