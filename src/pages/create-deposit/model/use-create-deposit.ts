@@ -1,4 +1,4 @@
-import { type FormEvent, useCallback, useState } from "react";
+import { type FormEvent, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useAppDispatch } from "@/store";
 import { useWalletPrivateAddress } from "@/features/register-private-address";
@@ -68,54 +68,45 @@ async function submitDepositSuccessFlow({
 export function useCreateDeposit() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { ensureWalletPrivateAddress, ensureWalletScalar } =
-    useWalletPrivateAddress();
+  const { privateAddressStpl1 } = useWalletPrivateAddress();
   const {
     mutateAsync: submitDeposit,
     isPending: isSubmitting,
     error: submitError,
   } = useDepositTransaction();
   const form = useCreateDepositForm({ isSubmitting });
-  const [isPreparingWallet, setIsPreparingWallet] = useState(false);
-  const isActionPending = isSubmitting || isPreparingWallet;
 
-  const handleSubmit = useCallback(async (event: FormEvent) => {
-    event.preventDefault();
-    if (!form.selectedAsset || isActionPending) {
-      return;
-    }
-    setIsPreparingWallet(true);
-    try {
-      const privateAddress = await ensureWalletPrivateAddress();
-      await ensureWalletScalar();
-      if (!form.canSubmit) {
+  const handleSubmit = useCallback(
+    async (event: FormEvent) => {
+      event.preventDefault();
+      const trimmedPrivateAddress = privateAddressStpl1.trim();
+      if (!form.selectedAsset || !form.canSubmit || isSubmitting || !trimmedPrivateAddress) {
         return;
       }
-      await submitDepositSuccessFlow({
-        submitDeposit,
-        dispatch,
-        navigate,
-        selectedAsset: form.selectedAsset,
-        numericAmount: form.numericAmount,
-        destinationPrivateAddressPreview: privateAddress,
-      });
-    } catch {
-      return;
-    } finally {
-      setIsPreparingWallet(false);
-    }
-  }, [
-    dispatch,
-    ensureWalletPrivateAddress,
-    ensureWalletScalar,
-    form.canSubmit,
-    form.destinationPrivateAddressPreview,
-    form.numericAmount,
-    form.selectedAsset,
-    isActionPending,
-    navigate,
-    submitDeposit,
-  ]);
+      try {
+        await submitDepositSuccessFlow({
+          submitDeposit,
+          dispatch,
+          navigate,
+          selectedAsset: form.selectedAsset,
+          numericAmount: form.numericAmount,
+          destinationPrivateAddressPreview: trimmedPrivateAddress,
+        });
+      } catch {
+        return;
+      }
+    },
+    [
+      dispatch,
+      form.canSubmit,
+      form.numericAmount,
+      form.selectedAsset,
+      isSubmitting,
+      navigate,
+      privateAddressStpl1,
+      submitDeposit,
+    ],
+  );
 
   return {
     assets: form.assets,
@@ -131,10 +122,10 @@ export function useCreateDeposit() {
     networkFee: form.networkFee,
     receivedAmount: form.receivedAmount,
     handleSubmit,
-    canSubmit: form.canSubmit && !isActionPending,
+    canSubmit: form.canSubmit && !isSubmitting,
     selectedPrivateAddressNonce: form.selectedPrivateAddressNonce,
     destinationPrivateAddressPreview: form.destinationPrivateAddressPreview,
-    isSubmitting: isActionPending,
+    isSubmitting,
     shouldGeneratePrivateAddress: false,
     submitErrorMessage: submitError?.message,
   };

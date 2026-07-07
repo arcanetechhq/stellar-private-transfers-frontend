@@ -1,33 +1,24 @@
 import { useCallback, useState } from "react";
-import { StellarWalletsKit as StellarWalletsKitSdk } from "@creit-tech/stellar-wallets-kit/sdk";
 import {
-  buildCoinDeliveryPostBody,
   usePostCoinDeliveryMutation,
   type PostCoinDeliveryBody,
 } from "@/entities/coin-deliveries";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { useAppDispatch, useAppSelector, type AppDispatch } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
-import {
-  getDefaultStellarNetworkConfig,
-  getRequiredPrivacyPoolContractId,
-} from "@/shared/stellar/stellar-network-environment";
+import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import { addCoin } from "@/entities/coin";
-import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
-import { submitSorobanDeposit } from "@/shared/lib/privacy-pool/submit-soroban-deposit";
-import { resolveTokenContractId } from "@/shared/stellar/resolve-token-contract-id";
+import {
+  buildCoinItemFromSdkDeposit,
+  executeSdkDeposit,
+} from "@/shared/lib/privacy-sdk/execute-sdk-deposit.js";
+import { displayAmountToStroops } from "@/shared/lib/stellar/stroops.js";
+import { postDepositDelivery } from "./post-deposit-delivery.js";
 
 export interface DepositTransactionInput {
   asset: AssetWithTrustline;
   amountDisplay: number;
   privateAddress: string;
-}
-
-const { sorobanRpcUrl: defaultSorobanRpcUrl } = getDefaultStellarNetworkConfig();
-const STROOPS_PER_UNIT = 10_000_000;
-
-function displayAmountToStroops(amount: number): bigint {
-  return BigInt(Math.round(amount * STROOPS_PER_UNIT));
 }
 
 export interface DepositTransactionResult {
@@ -40,8 +31,6 @@ export interface DepositTransactionResult {
 
 interface RunDepositMutationInput extends DepositTransactionInput {
   walletPublicKey: string;
-  networkPassphrase: string;
-  sorobanRpcUrl: string;
 }
 
 interface RunDepositMutationContext {
@@ -49,6 +38,29 @@ interface RunDepositMutationContext {
   postCoinDelivery: (body: PostCoinDeliveryBody) => {
     unwrap: () => Promise<unknown>;
   };
+}
+
+async function persistDepositResult(input: {
+  assetId: string;
+  context: RunDepositMutationContext;
+  poolContract: string;
+  prepared: Awaited<ReturnType<typeof executeSdkDeposit>>["prepared"];
+  privateAddress: string;
+  txId: string;
+}): Promise<ReturnType<typeof buildCoinItemFromSdkDeposit>> {
+  const coinItem = buildCoinItemFromSdkDeposit({
+    prepared: input.prepared,
+    privateAddress: input.privateAddress,
+    assetId: input.assetId,
+    poolContract: input.poolContract,
+    txId: input.txId,
+  });
+  input.context.dispatch(addCoin(coinItem));
+  await postDepositDelivery({
+    coinItem,
+    postCoinDelivery: input.context.postCoinDelivery,
+  });
+  return coinItem;
 }
 
 async function runDepositMutation(
@@ -62,59 +74,25 @@ async function runDepositMutation(
   }
 
   const amountStroops = displayAmountToStroops(input.amountDisplay);
-  const tokenContract = resolveTokenContractId(input.asset.clientContract);
-  const { commitment_hex, coin, depositScalarHex, precommitementHex } =
-    await privacyPoolService.createAlignedShieldCoinData({
-      privateAddressStpl1: privateAddress,
-      amountStroops,
-      tokenAddress: tokenContract,
-    });
-
-  const txId = await submitSorobanDeposit({
-    contractId: poolContract,
+  const { receipt, prepared } = await executeSdkDeposit({
     walletPublicKey: input.walletPublicKey,
-    privateAddressStpl1: privateAddress,
-    coin,
-    depositScalarHex,
-    tokenAddress: tokenContract,
-    networkPassphrase: input.networkPassphrase,
-    sorobanRpcUrl: input.sorobanRpcUrl,
+    privateAddress,
+    assetId: input.asset.assetId,
+    amountStroops,
   });
-
-  context.dispatch(
-    addCoin({
-      commitmentHex: commitment_hex,
-      coin,
-      depositScalarHex,
-      precommitementHex,
-      privateAddress,
-      assetId: input.asset.assetId,
-      poolContract,
-      amountDisplay: input.amountDisplay,
-      status: "pending",
-      txId,
-    }),
-  );
-
-  try {
-    const body = await buildCoinDeliveryPostBody({
-      recipientPrivateAddressStpl1: privateAddress,
-      commitmentHex: commitment_hex,
-      coin,
-      depositScalarHex,
-      precommitementHex,
-      assetId: input.asset.assetId,
-      amountDisplay: input.amountDisplay,
-      txId,
-    });
-    await context.postCoinDelivery(body).unwrap();
-  } catch {
-    await Promise.resolve();
-  }
+  const txId = receipt.operationId;
+  const coinItem = await persistDepositResult({
+    assetId: input.asset.assetId,
+    context,
+    poolContract,
+    prepared,
+    privateAddress,
+    txId,
+  });
 
   return {
     txId,
-    commitmentHex: commitment_hex,
+    commitmentHex: coinItem.commitmentHex,
     assetId: input.asset.assetId,
     poolContract,
     amountDisplay: input.amountDisplay,
@@ -138,17 +116,13 @@ export function useDepositTransaction() {
         if (!walletPublicKey) {
           throw new Error("Wallet not connected");
         }
-        const { networkPassphrase } = await StellarWalletsKitSdk.getNetwork();
-        const result = await runDepositMutation(
+        return await runDepositMutation(
           { dispatch, postCoinDelivery },
           {
             ...input,
             walletPublicKey,
-            networkPassphrase,
-            sorobanRpcUrl: defaultSorobanRpcUrl,
           },
         );
-        return result;
       } catch (error_) {
         const nextError =
           error_ instanceof Error ? error_ : new Error(String(error_));
