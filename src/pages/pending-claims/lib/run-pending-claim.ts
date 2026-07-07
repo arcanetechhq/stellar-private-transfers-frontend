@@ -1,31 +1,20 @@
 import type { AssetDto } from "@/entities/asset";
 import { addCoin, type CoinData } from "@/entities/coin";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";
-import type { PendingClaimItem } from "@/entities/pending-claims";
+import type { PendingClaimItem } from "@/entities/pending-claims/model/pending-claim-types.js";
 import type { AppDispatch } from "@/store";
 import {
   buildCoinDeliveryPostBody,
   coinDeliveryApi,
 } from "@/entities/coin-deliveries";
-import { prepareConfidentialTransferProof } from "@/shared/lib/privacy-pool/privacy-pool-confidential-proofs";
-import {
-  fetchAndMergeMerkleState,
-  readLeafEphemeralHex,
-} from "@/shared/lib/privacy-pool/fetch-contract-merkle";
-import { submitSorobanConfidentialTransfer } from "@/shared/lib/privacy-pool/submit-soroban-confidential-transfer";
+import { validatePendingClaimOperation } from "@/shared/lib/privacy-sdk/operation-adapters.js";
+import { executeSdkPendingClaimTransfer } from "@/shared/lib/privacy-sdk/execute-sdk-pending-claim-transfer.js";
+import { getPrivacySdkClientOrThrow, tryGetPrivacySdkClient } from "@/shared/lib/privacy-sdk/transact-context.js";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
-import { resolveTokenContractId } from "@/shared/stellar/resolve-token-contract-id";
-import {
-  base64RecoveryScalar,
-  buildClaimOnboardingPayload,
-  claimToCoin,
-} from "./pending-claim-payload";
 import {
   baseUnitsToDisplayNumber,
   waitForClaimTransactionSuccess,
 } from "./pending-claim-confirmation";
-
-const MISSING_INDEX = -1;
 
 type PendingClaimRunParameters = {
   dispatch: AppDispatch;
@@ -33,103 +22,52 @@ type PendingClaimRunParameters = {
   asset: AssetDto;
   walletPublicKey: string;
   permanentPrivateAddress: string;
-  networkPassphrase: string;
-  sorobanRpcUrl: string;
 };
 
-async function loadClaimMerkleContext(parameters: {
-  poolContract: string;
-  walletPublicKey: string;
-  networkPassphrase: string;
-  sorobanRpcUrl: string;
+function readOutputCoin(outputRecord: {
+  coinNote?: CoinData;
+  commitmentHex?: string;
+  depositScalarHex?: string;
+  precommitementHex?: string;
+}): {
   coin: CoinData;
-}): Promise<{
-  commitments: string[];
-  ephemeral: { xHex: string; yHex: string };
-}> {
-  const { commitments } = await fetchAndMergeMerkleState({
-    poolContractId: parameters.poolContract,
-    walletPublicKey: parameters.walletPublicKey,
-    networkPassphrase: parameters.networkPassphrase,
-    sorobanRpcUrl: parameters.sorobanRpcUrl,
-  });
-  const leafIndex = commitments.indexOf(parameters.coin.commitment);
-  if (leafIndex === MISSING_INDEX) {
-    throw new Error("Pending claim commitment was not found in the pool");
+  commitmentHex: string;
+  depositScalarHex: string;
+  precommitementHex: string;
+} {
+  if (
+    !outputRecord.coinNote ||
+    !outputRecord.commitmentHex ||
+    !outputRecord.depositScalarHex ||
+    !outputRecord.precommitementHex
+  ) {
+    throw new Error("Pending claim transfer output is missing coin metadata");
   }
-  const ephemeral = await readLeafEphemeralHex({
-    poolContractId: parameters.poolContract,
-    walletPublicKey: parameters.walletPublicKey,
-    leafIndex,
-    networkPassphrase: parameters.networkPassphrase,
-    sorobanRpcUrl: parameters.sorobanRpcUrl,
-  });
-  return { commitments, ephemeral };
-}
-
-async function prepareClaimProof(parameters: {
-  run: PendingClaimRunParameters;
-  coin: CoinData;
-  tokenContract: string;
-  commitments: string[];
-  ephemeral: { xHex: string; yHex: string };
-}) {
-  return prepareConfidentialTransferProof({
-    coin: parameters.coin,
-    state: { commitments: parameters.commitments },
-    senderGAddress: parameters.run.walletPublicKey.trim(),
-    senderPrivKeyScalarHex: base64RecoveryScalar(
-      parameters.run.claim.encryptedRecoveryBase64,
-    ),
-    depositorEphemeralXHex: parameters.ephemeral.xHex,
-    depositorEphemeralYHex: parameters.ephemeral.yHex,
-    transferStroops: BigInt(parameters.coin.value),
-    recipientPrivateAddressStpl1: parameters.run.permanentPrivateAddress.trim(),
-    selfPrivateAddressStpl1ForChange: undefined,
-    tokenAddress: parameters.tokenContract,
-  });
-}
-
-async function submitClaimTransaction(parameters: {
-  run: PendingClaimRunParameters;
-  poolContract: string;
-  tokenContract: string;
-  coin: CoinData;
-  prepared: Awaited<ReturnType<typeof prepareConfidentialTransferProof>>;
-}): Promise<string> {
-  const permanentPrivateAddress = parameters.run.permanentPrivateAddress.trim();
-  return submitSorobanConfidentialTransfer({
-    contractId: parameters.poolContract,
-    walletPublicKey: parameters.run.walletPublicKey,
-    proofHex: parameters.prepared.proof_hex,
-    publicHex: parameters.prepared.public_hex,
-    applicationIdsPlaintext: parameters.prepared.applicationIdsPlaintext,
-    onboarding: buildClaimOnboardingPayload({
-      claim: parameters.run.claim,
-      privateAddressStpl1: permanentPrivateAddress,
-    }),
-    networkPassphrase: parameters.run.networkPassphrase,
-    sorobanRpcUrl: parameters.run.sorobanRpcUrl,
-  });
+  return {
+    coin: outputRecord.coinNote,
+    commitmentHex: outputRecord.commitmentHex,
+    depositScalarHex: outputRecord.depositScalarHex,
+    precommitementHex: outputRecord.precommitementHex,
+  };
 }
 
 function storeClaimedCoin(parameters: {
   run: PendingClaimRunParameters;
   poolContract: string;
   txId: string;
-  prepared: Awaited<ReturnType<typeof prepareConfidentialTransferProof>>;
+  output: ReturnType<typeof readOutputCoin>;
 }): void {
   parameters.run.dispatch(
     addCoin({
-      commitmentHex: parameters.prepared.recipientCoin.commitment_hex,
-      coin: parameters.prepared.recipientCoin.coin,
-      depositScalarHex: parameters.prepared.recipientCoin.depositScalarHex,
-      precommitementHex: parameters.prepared.recipientCoin.precommitementHex,
+      commitmentHex: parameters.output.commitmentHex,
+      coin: parameters.output.coin,
+      depositScalarHex: parameters.output.depositScalarHex,
+      precommitementHex: parameters.output.precommitementHex,
       privateAddress: parameters.run.permanentPrivateAddress.trim(),
       assetId: parameters.run.asset.assetId,
       poolContract: parameters.poolContract,
       amountDisplay: baseUnitsToDisplayNumber(
-        parameters.prepared.recipientCoin.coin.value,
+        parameters.output.coin.value,
         parameters.run.asset.decimals,
       ),
       status: "pending",
@@ -141,17 +79,17 @@ function storeClaimedCoin(parameters: {
 async function postClaimCoinDelivery(parameters: {
   run: PendingClaimRunParameters;
   txId: string;
-  prepared: Awaited<ReturnType<typeof prepareConfidentialTransferProof>>;
+  output: ReturnType<typeof readOutputCoin>;
 }): Promise<void> {
   const body = await buildCoinDeliveryPostBody({
     recipientPrivateAddressStpl1: parameters.run.permanentPrivateAddress,
-    commitmentHex: parameters.prepared.recipientCoin.commitment_hex,
-    coin: parameters.prepared.recipientCoin.coin,
-    depositScalarHex: parameters.prepared.recipientCoin.depositScalarHex,
-    precommitementHex: parameters.prepared.recipientCoin.precommitementHex,
+    commitmentHex: parameters.output.commitmentHex,
+    coin: parameters.output.coin,
+    depositScalarHex: parameters.output.depositScalarHex,
+    precommitementHex: parameters.output.precommitementHex,
     assetId: parameters.run.asset.assetId,
     amountDisplay: baseUnitsToDisplayNumber(
-      parameters.prepared.recipientCoin.coin.value,
+      parameters.output.coin.value,
       parameters.run.asset.decimals,
     ),
     txId: parameters.txId,
@@ -183,44 +121,54 @@ function recordClaimTransaction(parameters: {
 export async function runPendingClaim(
   parameters: PendingClaimRunParameters,
 ): Promise<string> {
-  const tokenContract = resolveTokenContractId(parameters.asset.clientContract);
+  const privacyClient = getPrivacySdkClientOrThrow();
+  const permanentPrivateAddress = parameters.permanentPrivateAddress.trim();
+  const optionalClient = tryGetPrivacySdkClient();
+  if (optionalClient) {
+    await validatePendingClaimOperation(optionalClient, {
+      claim: parameters.claim,
+      recipientPrivateAddress: permanentPrivateAddress,
+      assetId: parameters.asset.assetId,
+    });
+  }
   const poolContract = getRequiredPrivacyPoolContractId();
-  const coin = claimToCoin(parameters.claim);
-  const merkle = await loadClaimMerkleContext({
-    poolContract,
+  await privacyClient.syncPoolMerkleState({
+    poolContractId: poolContract,
     walletPublicKey: parameters.walletPublicKey,
-    networkPassphrase: parameters.networkPassphrase,
-    sorobanRpcUrl: parameters.sorobanRpcUrl,
-    coin,
   });
-  const prepared = await prepareClaimProof({
-    run: parameters,
-    coin,
-    tokenContract,
-    commitments: merkle.commitments,
-    ephemeral: merkle.ephemeral,
-  });
-  const txId = await submitClaimTransaction({
-    run: parameters,
-    poolContract,
-    tokenContract,
-    coin,
-    prepared,
+  const executed = await executeSdkPendingClaimTransfer({
+    client: privacyClient,
+    claim: parameters.claim,
+    assetId: parameters.asset.assetId,
+    permanentPrivateAddress,
   });
   await waitForClaimTransactionSuccess({
-    txId,
-    sorobanRpcUrl: parameters.sorobanRpcUrl,
+    txId: executed.operationId,
   });
+  const output = readOutputCoin(executed.outputRecord ?? {});
   const amountDisplay = baseUnitsToDisplayNumber(
-    prepared.recipientCoin.coin.value,
+    output.coin.value,
     parameters.asset.decimals,
   );
-  storeClaimedCoin({ run: parameters, poolContract, txId, prepared });
-  recordClaimTransaction({ run: parameters, txId, amountDisplay });
+  storeClaimedCoin({
+    run: parameters,
+    poolContract,
+    txId: executed.operationId,
+    output,
+  });
+  recordClaimTransaction({
+    run: parameters,
+    txId: executed.operationId,
+    amountDisplay,
+  });
   try {
-    await postClaimCoinDelivery({ run: parameters, txId, prepared });
+    await postClaimCoinDelivery({
+      run: parameters,
+      txId: executed.operationId,
+      output,
+    });
   } catch {
     await Promise.resolve();
   }
-  return txId;
+  return executed.operationId;
 }

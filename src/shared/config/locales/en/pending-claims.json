@@ -9,5 +9,11 @@
   "claim": "Claim",
   "claiming": "Claiming…",
   "claimError": "Could not claim pending note.",
-  "unknownAsset": "Unknown"
+  "unknownAsset": "Unknown",
+  "errors": {
+    "claimNotFound": "This pending claim is no longer available.",
+    "claimOwnerMismatch": "This pending claim belongs to another wallet.",
+    "claimAlreadySpent": "This pending claim was already spent.",
+    "claimMissingNullifier": "This pending claim is missing spend metadata."
+  }
 }

@@ -4,11 +4,11 @@ import { useAppDispatch, useAppSelector } from "@/store";
 import { useGetAssetsQuery, type AssetDto } from "@/entities/asset";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import {
-  pendingClaimsApi,
-  useListPendingClaimsQuery,
+  useSdkPendingClaimsList,
   type PendingClaimItem,
 } from "@/entities/pending-claims";
-import { tokenAddressToAssetLeg } from "@/shared/lib/privacy-pool/prove-transaction-input";
+import { tokenAddressToAssetLeg } from "@/shared/lib/privacy-sdk/index.js";
+import { usePrivacySdkClient } from "@/app/providers/privacy-sdk-provider";
 import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
 import { useWalletPrivateAddress } from "@/features/register-private-address";
 import { runPendingClaim } from "../lib/run-pending-claim";
@@ -20,14 +20,24 @@ function hexToDecimal(hex: string): string {
 }
 
 function assetMatchesClaim(asset: AssetDto, claim: PendingClaimItem): boolean {
+  return assetMatchesLegs(asset, {
+    assetHiHex: claim.assetHiHex,
+    assetLoHex: claim.assetLoHex,
+  });
+}
+
+function assetMatchesLegs(
+  asset: AssetDto,
+  legs: { assetHiHex: string; assetLoHex: string },
+): boolean {
   if (!asset.clientContract) {
     return false;
   }
   try {
     const [assetHi, assetLo] = tokenAddressToAssetLeg(asset.clientContract);
     return (
-      assetHi === hexToDecimal(claim.assetHiHex) &&
-      assetLo === hexToDecimal(claim.assetLoHex)
+      assetHi === hexToDecimal(legs.assetHiHex) &&
+      assetLo === hexToDecimal(legs.assetLoHex)
     );
   } catch {
     return false;
@@ -121,18 +131,27 @@ function PendingClaimsContent(parameters: {
 function usePendingClaimsPageModel(translate: (key: string) => string) {
   const dispatch = useAppDispatch();
   const publicKey = useAppSelector(selectWalletPublicKey);
+  const { client: privacyClient } = usePrivacySdkClient();
   const { ensureWalletPrivateAddress, refreshRegistryStatus } =
     useWalletPrivateAddress();
   const [claimingId, setClaimingId] = useState<number | undefined>();
   const [claimedIds, setClaimedIds] = useState<Set<number>>(() => new Set());
   const [claimError, setClaimError] = useState<string | undefined>();
-  const { data, isLoading, isError } = useListPendingClaimsQuery(
-    { ownerAddress: publicKey ?? "", page: 1, limit: 50 },
-    { skip: !publicKey },
+  const { data: assets } = useGetAssetsQuery();
+  const resolveClaimAsset = useMemo(
+    () => (tokenAddress: string) =>
+      assets?.find((asset) => asset.clientContract === tokenAddress)?.assetId,
+    [assets],
   );
+  const {
+    claims,
+    isLoading,
+    isError,
+    reload,
+  } = useSdkPendingClaimsList(publicKey ?? undefined, resolveClaimAsset);
   const visibleClaims = useMemo(
-    () => (data?.data ?? []).filter((claim) => !claimedIds.has(claim.id)),
-    [data?.data, claimedIds],
+    () => claims.filter((claim) => !claimedIds.has(claim.id)),
+    [claims, claimedIds],
   );
   const assetByClaimId = useClaimAssetMap(visibleClaims);
 
@@ -158,8 +177,11 @@ function usePendingClaimsPageModel(translate: (key: string) => string) {
         sorobanRpcUrl,
       });
       await refreshRegistryStatus();
-      dispatch(pendingClaimsApi.util.invalidateTags(["PendingClaims"]));
+      if (privacyClient) {
+        await privacyClient.removePendingClaims([String(claim.id)]);
+      }
       setClaimedIds((current) => new Set(current).add(claim.id));
+      await reload();
     } catch (error: unknown) {
       setClaimError(
         error instanceof Error ? error.message : translate("claimError"),
@@ -170,7 +192,7 @@ function usePendingClaimsPageModel(translate: (key: string) => string) {
   }
   return {
     publicKey,
-    data,
+    hasData: !isLoading,
     isLoading,
     isError,
     visibleClaims,
@@ -201,7 +223,7 @@ export function PendingClaimsPage() {
         translate={translate}
         isLoading={model.isLoading}
         isError={model.isError}
-        hasData={model.data !== undefined}
+        hasData={model.hasData}
         claimError={model.claimError}
         visibleClaims={model.visibleClaims}
         assetByClaimId={model.assetByClaimId}

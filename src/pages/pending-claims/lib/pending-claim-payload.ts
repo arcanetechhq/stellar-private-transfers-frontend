@@ -1,8 +1,9 @@
 import { Buffer } from "buffer";
-import type { CoinData } from "@auditable/privacy-pool-zk-sdk";
-import type { OnboardingPayload, PrivateAddressRegistration } from "contract";
+import type { CoinData } from "@/shared/lib/privacy-sdk/types.js";
+import type { OnboardingPayload } from "@arcane/privacy-sdk-stellar/transact";
+import type { PrivateAddressRegistration } from "@arcane/privacy-sdk-stellar/transact";
 import type { PendingClaimItem } from "@/entities/pending-claims";
-import { decodePrivateAddress } from "@/shared/lib/private-address/privacy-pool-sdk-private-address";
+import { decodePrivateAddress } from "@/shared/lib/privacy-sdk/index.js";
 
 const FIELD_HEX_LENGTH = 64;
 const SCALAR_HEX_PATTERN = new RegExp(
