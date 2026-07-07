@@ -19,8 +19,7 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "contract": ["./generated/contract/src/index.ts"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src", "src/vite-environment.d.ts", "tailwind.config.ts"]
