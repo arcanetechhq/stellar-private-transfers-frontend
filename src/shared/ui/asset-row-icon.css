@@ -1,0 +1,38 @@
+.asset-row-icon {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  background: var(--surface-control);
+}
+
+.asset-row-icon[data-asset='xlm'] {
+  background: #fff;
+}
+
+.asset-row-icon[data-asset='usdc'],
+.asset-row-icon[data-asset='usdt'] {
+  border-color: transparent;
+  background: transparent;
+}
+
+.asset-row-icon img {
+  display: block;
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.asset-row-icon[data-asset='usdc'] img,
+.asset-row-icon[data-asset='usdt'] img {
+  width: 42px;
+  height: 42px;
+}
+
+.asset-row-icon__fallback {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}

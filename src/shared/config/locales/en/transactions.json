@@ -110,14 +110,12 @@
       "attachments": "Attachments"
     },
     "sections": {
-      "transaction": "Transaction",
-      "payment": "Payment",
-      "counterparty": "Counterparty"
+      "details": "Details",
+      "transfer": "Transfer"
     },
     "fields": {
       "direction": "Direction",
-      "status": "Status",
-      "reference": "Reference",
+      "transactionId": "Transaction ID",
       "asset": "Asset",
       "network": "Network",
       "amount": "Amount",
@@ -127,8 +125,7 @@
       "from": "From",
       "to": "To",
       "privateAccount": "Private account",
-      "privateAddress": "Private address",
-      "transactionHash": "Transaction hash"
+      "privateAddress": "Private address"
     },
     "timeline": {
       "receivedTitle": "Transfer received",

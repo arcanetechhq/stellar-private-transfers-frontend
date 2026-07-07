@@ -4,7 +4,6 @@ import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import type { AssetWithTrustline } from "@/entities/asset";
 import type { RecipientRegistryStatus } from "../model/use-recipient-registry-status";
-import { NETWORK_FEE } from "../model/create-transfer";
 import { formatTransferAmount } from "../lib/format-transfer-amount";
 import { formatTransferBalanceWithTicker, parseTransferBalance } from "../lib/format-transfer-balance";
 import { TransferAssetSelect } from "./transfer-asset-select";
@@ -117,7 +116,7 @@ export function TransferSendPanel({
     Number.isFinite(numericBalance) &&
     numericAmount > numericBalance;
   const recipientGetsDisplay = `${formatTransferAmount(totalAmount)} ${ticker}`.trim();
-  const feeDisplay = `${formatTransferAmount(NETWORK_FEE)} ${ticker}`.trim();
+  const feeDisplay = `0 ${ticker}`.trim();
   const availableBalanceDisplay = formatTransferBalanceWithTicker(
     selectedToken?.balance,
     ticker,

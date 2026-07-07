@@ -1,12 +1,12 @@
 import { useEffect, type ReactNode } from "react";
 import "./transaction-details-panel.css";
-import { X } from "lucide-react";
+import { ArrowUpRightFromSquareIcon, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAssetLookup } from "@/entities/asset";
 import type { Transaction } from "@/entities/transaction";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { useAppSelector } from "@/store";
-import { TokenIcon } from "@/shared/ui/token-icon";
+import { AssetRowIcon } from "@/shared/ui/asset-row-icon";
 import { formatTransactionPublicAddressForDisplay } from "../lib/format-transaction-public-address-for-display";
 import {
   getAmountPrefix,
@@ -161,16 +161,12 @@ export function TransactionDetailsPanel({
       </button>
 
       <div className="transaction-details__hero">
-        <span className="transaction-details__asset-icon">
-          <TokenIcon
-            ticker={transaction.assetId.toUpperCase()}
-            logoUrl={asset?.logoUrl}
-            size="lg"
-          />
-        </span>
+        <AssetRowIcon
+          ticker={transaction.assetId.toUpperCase()}
+          logoUrl={asset?.logoUrl}
+        />
         <div className="transaction-details__hero-copy">
           <h2 className="transaction-details__title">{title}</h2>
-          <p className="transaction-details__subtitle">{publicAddressDisplay}</p>
         </div>
         <p
           className="transaction-details__amount"
@@ -182,102 +178,65 @@ export function TransactionDetailsPanel({
           <TransactionDetailsStatusBadge tone={resolveTransactionStatusTone(transaction.status)}>
             {statusLabel}
           </TransactionDetailsStatusBadge>
-          <span className="transaction-details__meta-text">
-            {direction} · {paymentRail}
-          </span>
+          <button className="transaction-detail-row__copy">
+            <ArrowUpRightFromSquareIcon/>
+          </button>
         </div>
-        {/* <div className="transaction-details__actions">
-          <button type="button" className="transaction-details__action-button">
-            <FileDown aria-hidden="true" size={16} strokeWidth={1.7} />
-            {translateDetails("downloadConfirmation")}
-          </button>
-          <button
-            type="button"
-            className="ui-icon-button transactions-refresh-button"
-            data-active={refreshing}
-            aria-label={translateTransactions("refresh")}
-            onClick={handleRefresh}
-          >
-            <RefreshCw aria-hidden="true" size={16} strokeWidth={1.7} />
-          </button>
-        </div> */}
       </div>
 
       <div className="transaction-details__tabs">
         <div className="transaction-info-stack">
-          <DetailSection title={translateTransactions("details.sections.transaction")}>
-              <TransactionDetailRow
-                label={translateTransactions("tableHeaders.date")}
-                value={`${dateLabel}, ${timeLabel}`}
-              />
-              <TransactionDetailRow
-                label={translateTransactions("details.fields.direction")}
-                value={direction}
-              />
-              <TransactionDetailRow
-                label={translateTransactions("details.fields.status")}
-                value={statusLabel}
-              />
-              <TransactionDetailRow
-                label={translateTransactions("details.fields.reference")}
-                value={transaction.id}
-                copyable
-              />
-            </DetailSection>
-            <DetailSection title={translateTransactions("details.sections.payment")}>
-              <TransactionDetailRow
-                label={translateTransactions("details.fields.asset")}
-                value={`${transaction.assetId.toUpperCase()} · ${asset?.name ?? transaction.assetId}`}
-              />
-              <TransactionDetailRow
-                label={translateTransactions("details.fields.network")}
-                value={translateTransactions("details.networkLabel")}
-              />
-              <TransactionDetailRow
-                label={translateTransactions("details.fields.amount")}
-                value={amountDisplay}
-              />
-              <TransactionDetailRow
-                label={translateTransactions("details.fields.fee")}
-                value={translateTransactions("details.feeFree")}
-              />
-            </DetailSection>
-            <DetailSection title={translateTransactions("details.sections.counterparty")}>
-              <TransactionDetailRow
-                label={
-                  isIncoming
-                    ? translateTransactions("details.fields.sender")
-                    : translateTransactions("details.fields.recipient")
-                }
-                value={publicAddressDisplay}
-              />
-              <TransactionDetailRow
-                label={translateTransactions("details.fields.from")}
-                value={
-                  isIncoming
-                    ? publicAddressDisplay
-                    : privateAddressLabel
-                }
-              />
-              <TransactionDetailRow
-                label={translateTransactions("details.fields.to")}
-                value={
-                  isIncoming
-                    ? privateAddressLabel
-                    : publicAddressDisplay
-                }
-              />
-              <TransactionDetailRow
-                label={translateTransactions("details.fields.transactionHash")}
-                value={transaction.id}
-                copyable
-              />
-            </DetailSection>
-            {chainEntry?.status === "loading" ? (
-              <p className="transaction-details__chain-hint">
-                {translateDetails("chainLoading")}
-              </p>
-            ) : null}
+          <DetailSection title={translateTransactions("details.sections.details")}>
+            <TransactionDetailRow
+              label={translateTransactions("tableHeaders.date")}
+              value={`${dateLabel}, ${timeLabel}`}
+            />
+            <TransactionDetailRow
+              label={translateTransactions("details.fields.direction")}
+              value={direction}
+            />
+            <TransactionDetailRow
+              label={translateTransactions("details.fields.asset")}
+              value={transaction.assetId.toUpperCase()}
+              // value={`${transaction.assetId.toUpperCase()} · ${asset?.name ?? transaction.assetId}`}
+            />
+            <TransactionDetailRow
+              label={translateTransactions("details.fields.network")}
+              value={translateTransactions("details.networkLabel")}
+            />
+            <TransactionDetailRow
+              label={translateTransactions("details.fields.amount")}
+              value={amountDisplay}
+            />
+            <TransactionDetailRow
+              label={translateTransactions("details.fields.fee")}
+              value={translateTransactions("details.feeFree")}
+            />
+          </DetailSection>
+          <DetailSection title={translateTransactions("details.sections.transfer")}>
+            <TransactionDetailRow
+              label={translateTransactions("details.fields.from")}
+              value={
+                isIncoming
+                  ? publicAddressDisplay
+                  : privateAddressLabel
+              }
+            />
+            <TransactionDetailRow
+              label={translateTransactions("details.fields.to")}
+              value={
+                isIncoming
+                  ? privateAddressLabel
+                  : publicAddressDisplay
+              }
+            />
+            <TransactionDetailRow
+              label={translateTransactions("details.fields.transactionId")}
+              value={transaction.id}
+              showLink
+              link={`https://stellar.expert/explorer/testnet/tx/${transaction.id}`}
+            />
+          </DetailSection>
         </div>
       </div>
     </section>

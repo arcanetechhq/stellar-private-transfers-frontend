@@ -48,12 +48,12 @@ export function EditContactScreen({
                 <Globe2 />
               </span>
               <span className="add-contact-identifier__copy">
-                <span>{translate("publicAddressLabel")}</span>
+                <span>{translate("stellarAddressLabel")}</span>
                 <input
                   data-testid="contacts-edit-recipient-input"
                   value={recipientValue}
                   onChange={(event) => setRecipientValue(event.target.value)}
-                  placeholder={translate("publicAddressPlaceholder")}
+                  placeholder={translate("stellarAddressPlaceholder")}
                   spellCheck={false}
                 />
               </span>

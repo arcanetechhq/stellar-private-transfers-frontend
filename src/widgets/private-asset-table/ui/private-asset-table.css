@@ -101,39 +101,6 @@
   border-top: 1px solid var(--border-subtle);
 }
 
-.asset-balance-row__icon {
-  display: inline-grid;
-  width: 42px;
-  height: 42px;
-  place-items: center;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-pill);
-  background: var(--surface-control);
-}
-
-.asset-balance-row__icon[data-asset='xlm'] {
-  background: #fff;
-}
-
-.asset-balance-row__icon[data-asset='usdc'],
-.asset-balance-row__icon[data-asset='usdt'] {
-  border-color: transparent;
-  background: transparent;
-}
-
-.asset-balance-row__icon img {
-  display: block;
-  width: 28px;
-  height: 28px;
-  object-fit: contain;
-}
-
-.asset-balance-row__icon[data-asset='usdc'] img,
-.asset-balance-row__icon[data-asset='usdt'] img {
-  width: 42px;
-  height: 42px;
-}
-
 .asset-balance-row__identity,
 .asset-balance-row__amount {
   display: grid;

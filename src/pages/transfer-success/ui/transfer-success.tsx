@@ -30,17 +30,21 @@ export function TransferSuccess(): React.JSX.Element {
   const deliveryWarning = state?.coinDeliveryWarning?.trim();
 
   return (
-    <div className="min-h-full bg-[var(--background)]">
-      <div className="deposit-flow" data-testid="transfer-success-screen">
-        {deliveryWarning ? (
-          <div
-            role="status"
-            className="private-deposit-success-warning"
-          >
-            {deliveryWarning}
-          </div>
-        ) : null}
-        <TransferSuccessPanel view={view} sourceWallet={publicKey ?? undefined} />
+    <div className="workspace__inner">
+      <div className="deposit-route">
+        <div className="deposit-flow" data-testid="transfer-success-screen">
+          {deliveryWarning ? (
+            <div
+              role="status"
+              className="private-deposit-success-warning"
+            >
+              {deliveryWarning}
+            </div>
+          ) : (
+            <div className="deposit-flow__title-spacer" aria-hidden="true" />
+          )}
+          <TransferSuccessPanel view={view} sourceWallet={publicKey ?? undefined} />
+        </div>
       </div>
     </div>
   );

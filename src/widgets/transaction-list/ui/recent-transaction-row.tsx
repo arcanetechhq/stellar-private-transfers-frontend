@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { useAssetLookup } from "@/entities/asset";
-import { TokenIcon } from "@/shared/ui/token-icon";
+import { AssetRowIcon } from "@/shared/ui/asset-row-icon";
 import { cn } from "@/shared/lib/cn";
 import type { Transaction } from "@/entities/transaction";
 import {
@@ -43,10 +43,9 @@ export function RecentTransactionRow(
               {getTransactionLabel(transaction.type, translate)}
             </p>
             <div className="flex items-center gap-1.5">
-              <TokenIcon
+              <AssetRowIcon
                 ticker={transaction.assetId.toUpperCase()}
                 logoUrl={asset?.logoUrl}
-                size="sm"
               />
               <span className="text-sm font-medium text-[var(--foreground-secondary)]">
                 {assetLabel}

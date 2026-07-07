@@ -3,7 +3,7 @@ import { useAssetLookup } from "@/entities/asset";
 import type { Transaction } from "@/entities/transaction";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { useAppSelector } from "@/store";
-import { TokenIcon } from "@/shared/ui/token-icon";
+import { AssetRowIcon } from "@/shared/ui/asset-row-icon";
 import { formatTransactionTableSubtitle } from "../lib/format-transaction-table-subtitle";
 import {
   getAmountPrefix,
@@ -56,11 +56,9 @@ export function TransactionFromToCell({
 
   return (
     <div className="transaction-from-to-cell">
-      <TokenIcon
+      <AssetRowIcon
         ticker={transaction.assetId.toUpperCase()}
         logoUrl={asset?.logoUrl}
-        // size="sm"
-        className="w-full h-full"
       />
       <div className="transaction-from-to-cell__copy">
         <span className="transaction-from-to-cell__title">{title}</span>

@@ -661,7 +661,7 @@
 .transaction-from-to-cell {
   display: grid;
   min-width: 0;
-  grid-template-columns: 40px minmax(0, 1fr);
+  grid-template-columns: 42px minmax(0, 1fr);
   align-items: center;
   gap: var(--space-3);
 }

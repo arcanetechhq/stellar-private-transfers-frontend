@@ -75,14 +75,17 @@ export function TransactionsPage() {
             onTransactionSelect={handleTransactionSelect}
           />
         </section>
-        {selectedTransaction ? (
-          <aside className="transactions-route__panel">
+        <aside
+          className="transactions-route__panel"
+          aria-hidden={!selectedTransaction}
+        >
+          {selectedTransaction ? (
             <TransactionDetailsPanel
               transaction={selectedTransaction}
               onClose={handleCloseDetails}
             />
-          </aside>
-        ) : null}
+          ) : null}
+        </aside>
       </div>
     </div>
   );

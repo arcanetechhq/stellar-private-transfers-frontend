@@ -9,5 +9,4 @@ export const HIDDEN_FEATURES = {
   settingsApiKeys: true,
   termsOfService: true,
   userId: true,
-  addContactTypeTabs: true,
 } as const;

@@ -1,16 +1,20 @@
-import type { MouseEvent, ReactNode } from "react";
-import { Copy } from "lucide-react";
+import type { MouseEvent } from "react";
+import { ArrowUpRightFromSquareIcon, Copy } from "lucide-react";
 
 type TransactionDetailRowProperties = {
   label: string;
   value: string;
+  link?: string;
   copyable?: boolean;
+  showLink?: boolean;
 };
 
 export function TransactionDetailRow({
   label,
   value,
+  link,
   copyable = false,
+  showLink = false,
 }: TransactionDetailRowProperties) {
   function handleCopy(event: MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
@@ -36,6 +40,16 @@ export function TransactionDetailRow({
             <Copy aria-hidden="true" />
           </button>
         ) : null}
+        {(showLink && link) && (
+          <button
+          type="button"
+          className="transaction-detail-row__copy"
+          aria-label={`Copy ${label}`}
+          onClick={() => window.open(link, "_blank")}
+        >
+          <ArrowUpRightFromSquareIcon aria-hidden="true" />
+        </button>
+        )}
       </span>
     </div>
   );

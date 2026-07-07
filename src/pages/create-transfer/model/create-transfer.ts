@@ -10,7 +10,5 @@ export const QUICK_PERCENTAGE_OPTIONS = [
 
 export const PERCENTAGE_DIVISOR = 100;
 
-export const NETWORK_FEE = 0.25;
-
 export const RECIPIENT_PREFIX_LENGTH = 6;
 export const RECIPIENT_SUFFIX_LENGTH = -4;

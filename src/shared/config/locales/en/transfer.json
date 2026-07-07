@@ -61,7 +61,7 @@
   "youSend": "You send",
   "recipientGets": "Recipient gets",
   "fee": "Fee",
-  "manualRecipient": "Manual recipient",
+  "manualRecipient": "Custom recipient",
   "clearRecipient": "Clear recipient",
   "stellarAddress": "ADDRESS",
   "review": {

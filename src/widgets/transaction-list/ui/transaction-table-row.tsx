@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { useAssetLookup } from "@/entities/asset";
 import { StatusBadge } from "@/shared/ui/status-badge";
-import { TokenIcon } from "@/shared/ui/token-icon";
+import { AssetRowIcon } from "@/shared/ui/asset-row-icon";
 import { cn } from "@/shared/lib/cn";
 import type { Transaction } from "@/entities/transaction";
 import { selectWalletPublicKey } from "@/entities/wallet";
@@ -107,10 +107,9 @@ export function TransactionTableRow(properties: TransactionTableRowProperties) {
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="flex items-center gap-2">
-          <TokenIcon
+          <AssetRowIcon
             ticker={transaction.assetId.toUpperCase()}
             logoUrl={asset?.logoUrl}
-            size="sm"
           />
           <span className="text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
             {assetLabel}

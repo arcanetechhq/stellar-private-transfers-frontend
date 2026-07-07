@@ -8,7 +8,6 @@ export {
   selectContacts,
   updateContact,
   type Contact,
-  type ContactAccountType,
   type ContactState,
 } from "./model/contact";
 export { loadContactState, saveContactState } from "./lib/persist-contact";

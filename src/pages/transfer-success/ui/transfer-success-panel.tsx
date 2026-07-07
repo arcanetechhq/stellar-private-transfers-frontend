@@ -86,8 +86,6 @@ export function TransferSuccessPanel({
 
   return (
     <>
-      <h2 className="deposit-flow__title">{pageTitle}</h2>
-
       <div
         className="private-deposit-success-card"
         role="status"

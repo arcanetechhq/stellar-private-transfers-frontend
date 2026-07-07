@@ -118,7 +118,7 @@ function BalanceVisibilityActions({
       >
         <EyeOff />
       </button>
-      <button
+      {/* <button
         type="button"
         aria-label={refreshBalanceLabel}
         title={refreshBalanceLabel}
@@ -127,7 +127,7 @@ function BalanceVisibilityActions({
         onClick={onRefresh}
       >
         <RefreshCw />
-      </button>
+      </button> */}
     </span>
   );
 }

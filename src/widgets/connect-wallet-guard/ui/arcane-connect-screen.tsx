@@ -1,4 +1,4 @@
-import { ArrowRight, Loader2, Wallet } from "lucide-react";
+import { ArrowRight, Loader2, RefreshCcw, Wallet } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Arcn from "@/shared/assets/logo-arcn";
 import { ArcaneShaderGradient } from "./arcane-shader-gradient";
@@ -111,7 +111,8 @@ export function ArcaneConnectScreen({
                 onClick={onRetry}
               >
                 <span>{translate("connectScreenRetry")}</span>
-                <ArrowRight size={20} strokeWidth={1.8} />
+                <RefreshCcw size={20} strokeWidth={1.8} />
+                {/* <ArrowRight size={20} strokeWidth={1.8} /> */}
               </button>
             </div>
           ) : null}
@@ -129,7 +130,7 @@ export function ArcaneConnectScreen({
                 <Wallet size={21} strokeWidth={1.8} />
               )}
               <span>{translate("connectWallet")}</span>
-              <ArrowRight size={20} strokeWidth={1.8} />
+              {/* <ArrowRight size={20} strokeWidth={1.8} /> */}
             </button>
           ) : null}
         </div>

@@ -6,8 +6,6 @@ export interface Contact {
   stellarAddress: string;
 }
 
-export type ContactAccountType = "userId" | "publicAddress" | "privateAddress";
-
 export const COPY_FEEDBACK_TIMEOUT_MS = 2000;
 
 export const INITIAL_CONTACTS: Contact[] = [];

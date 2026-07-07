@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import type { AggregatedPrivateAssetRow } from "@/entities/coin";
+import { AssetRowIcon } from "@/shared/ui/asset-row-icon";
 
 const SMALL_BALANCE_THRESHOLD = 1;
 const SMALL_BALANCE_MIN_FRACTION_DIGITS = 3;
@@ -27,43 +27,6 @@ function formatUsdAmount(value: number): string {
     minimumFractionDigits: USD_FRACTION_DIGITS,
     maximumFractionDigits: USD_FRACTION_DIGITS,
   });
-}
-
-function AssetRowIcon({
-  ticker,
-  logoUrl,
-}: {
-  ticker: string;
-  logoUrl?: string | null;
-}) {
-  const [failed, setFailed] = useState(false);
-  const assetKey = ticker.toLowerCase();
-
-  if (!logoUrl || failed) {
-    return (
-      <span className="asset-balance-row__icon" data-asset={assetKey}>
-        <span
-          aria-hidden="true"
-          className="text-[13px] font-semibold text-[var(--text-muted)]"
-        >
-          {ticker.slice(0, 1)}
-        </span>
-      </span>
-    );
-  }
-
-  return (
-    <span className="asset-balance-row__icon" data-asset={assetKey}>
-      <img
-        src={logoUrl}
-        alt=""
-        aria-hidden="true"
-        onError={() => {
-          setFailed(true);
-        }}
-      />
-    </span>
-  );
 }
 
 type PrivateAssetRowProperties = {

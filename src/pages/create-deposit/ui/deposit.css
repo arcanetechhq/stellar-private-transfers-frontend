@@ -25,6 +25,10 @@
   color: var(--text);
 }
 
+.deposit-flow__title-spacer {
+  min-height: 56px;
+}
+
 .deposit-flow__body {
   display: grid;
   min-height: 0;
@@ -973,6 +977,10 @@
     min-height: 44px;
     font-size: 32px;
     line-height: 44px;
+  }
+
+  .deposit-flow__title-spacer {
+    min-height: 44px;
   }
 
   .deposit-select-row,

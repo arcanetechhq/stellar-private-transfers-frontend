@@ -1,19 +1,24 @@
 import type { AssetDto } from "@/entities/asset";
 import { shortenPrivateAddressForDisplay } from "@/shared/lib/private-address/shorten-private-address-for-display";
 
+export type TransferSuccessFlow = "deposit" | "transfer" | "withdrawal";
+
 export interface TransferSuccessLocationState {
   amount?: number;
   assetId?: string;
   poolContract?: string;
   txId?: string;
   coinDeliveryWarning?: string;
+  flow?: TransferSuccessFlow;
 }
 
 export interface TransferSuccessViewModel {
+  flow: TransferSuccessFlow;
   txId: string;
   ticker: string;
   logoUrl: string | undefined;
   amountDisplay: string;
+  amountWithTicker: string;
   formattedTime: string;
   transactionIdShort: string;
   fullTransactionId: string;
@@ -47,6 +52,30 @@ function formatAmountDisplay(amount: number | undefined): string {
   });
 }
 
+function formatAmountWithTicker(
+  amount: number | undefined,
+  amountDisplay: string,
+  ticker: string,
+): string {
+  if (amount === undefined) {
+    return "—";
+  }
+  return `${amountDisplay} ${ticker}`.trim();
+}
+
+function resolveFlow(
+  stateFlow: TransferSuccessFlow | undefined,
+): TransferSuccessFlow {
+  if (
+    stateFlow === "deposit" ||
+    stateFlow === "transfer" ||
+    stateFlow === "withdrawal"
+  ) {
+    return stateFlow;
+  }
+  return "transfer";
+}
+
 function resolveTicker(
   stateAssetId: string | undefined,
   poolAssetId: string | undefined,
@@ -64,7 +93,10 @@ export function buildTransferSuccessViewModel(
     input.assetMatch?.assetId,
   );
   const logoUrl = input.assetMatch?.logoUrl;
-  const amountDisplay = formatAmountDisplay(amountFromState(input.state));
+  const amount = amountFromState(input.state);
+  const amountDisplay = formatAmountDisplay(amount);
+  const amountWithTicker = formatAmountWithTicker(amount, amountDisplay, ticker);
+  const flow = resolveFlow(input.state?.flow);
 
   const formattedTime = new Date().toLocaleString(input.language, {
     day: "numeric",
@@ -78,10 +110,12 @@ export function buildTransferSuccessViewModel(
     txId.length > 0 ? shortenPrivateAddressForDisplay(txId) : "—";
 
   return {
+    flow,
     txId,
     ticker,
     logoUrl,
     amountDisplay,
+    amountWithTicker,
     formattedTime,
     transactionIdShort,
     fullTransactionId: txId || input.fallbackTransactionLabel,

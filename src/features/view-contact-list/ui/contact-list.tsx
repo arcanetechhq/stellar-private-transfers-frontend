@@ -6,7 +6,6 @@ import { useAppSelector } from "@/store";
 import { selectContacts, type Contact } from "@/entities/contact";
 import { getContactInitials } from "../lib/get-contact-initials";
 import { ContactRowActions } from "./contact-row-actions";
-import { ContactTypeBadge } from "./contact-type-badge";
 import { ContactsSearchField } from "./contacts-search-field";
 import { RecordsTableContent } from "./records-table-content";
 
@@ -72,13 +71,8 @@ export function ContactList({ onAddContact }: ContactListProperties) {
         ),
       },
       {
-        key: "type",
-        title: translate("columnAccountType"),
-        render: () => <ContactTypeBadge type="publicAddress" />,
-      },
-      {
-        key: "account",
-        title: translate("columnAccount"),
+        key: "stellarAddress",
+        title: translate("columnStellarAddress"),
         render: (contact: Contact) => contact.stellarAddress,
       },
       {

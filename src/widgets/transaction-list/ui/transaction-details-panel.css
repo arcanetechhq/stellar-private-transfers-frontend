@@ -20,29 +20,19 @@
   min-height: 0;
   flex: 1;
   height: 100%;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-4);
+  grid-template-columns: minmax(0, 1fr) 0fr;
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0;
   align-items: stretch;
+  transition:
+    grid-template-columns 280ms ease,
+    grid-template-rows 280ms ease,
+    gap 280ms ease;
 }
 
 .transactions-route[data-details-open="true"] {
   grid-template-columns: minmax(0, 1fr) 440px;
-}
-
-.transactions-route[data-details-open="true"] .transaction-stat {
-  padding-right: var(--space-4);
-  padding-left: var(--space-4);
-}
-
-.transactions-route[data-details-open="true"] .transaction-stat__value {
-  font-size: 22px;
-  line-height: 30px;
-  letter-spacing: -0.2px;
-}
-
-.transactions-route[data-details-open="true"] .transaction-stat__meta {
-  font-size: 12px;
-  line-height: 18px;
+  gap: var(--space-4);
 }
 
 .transactions-route__main {
@@ -50,6 +40,7 @@
   min-width: 0;
   min-height: 0;
   height: 100%;
+  overflow: hidden;
 }
 
 .transactions-route__panel {
@@ -112,16 +103,6 @@
   border-bottom: 1px solid var(--border-subtle);
   padding-bottom: var(--space-5);
   text-align: center;
-}
-
-.transaction-details__asset-icon {
-  display: inline-grid;
-  width: 48px;
-  height: 48px;
-  place-items: center;
-  border-radius: var(--radius-4);
-  background: var(--surface-high);
-  box-shadow: inset 0 0 0 1px var(--border-subtle);
 }
 
 .transaction-details__hero-copy {
@@ -363,6 +344,7 @@
 
 .transaction-detail-row {
   display: grid;
+  align-items: center;
   grid-template-columns: minmax(110px, 0.7fr) minmax(0, 1fr);
   gap: var(--space-4);
   border-top: 1px solid var(--border-subtle);
@@ -581,29 +563,36 @@
 
 @media (max-width: 1100px) {
   .transactions-page {
-    height: auto;
+    height: 100%;
     min-height: calc(
       100vh - var(--page-header-height) - var(--transactions-page-padding-top) -
         var(--transactions-page-padding-bottom)
     );
   }
 
-  .transactions-route[data-details-open="true"] {
+  .transactions-route {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) 0fr;
+    gap: 0;
   }
 
-  .transactions-route__panel {
-    height: auto;
-    min-height: 420px;
+  .transactions-route[data-details-open="true"] {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 0fr minmax(0, 1fr);
   }
 
   .transaction-details.ui-card {
-    height: auto;
+    height: 100%;
+    min-height: 0;
     max-height: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .transactions-route {
+    transition: none;
+  }
+
   .transaction-details.ui-card {
     animation: none;
   }

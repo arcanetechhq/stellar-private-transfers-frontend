@@ -4,7 +4,6 @@ import { isValidStellarPublicAddress } from "@/shared/lib/stellar/is-valid-stell
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import type { RecipientRegistryStatus } from "./use-recipient-registry-status";
 import { parseTransferBalance } from "../lib/format-transfer-balance";
-import { NETWORK_FEE } from "./create-transfer";
 
 function recipientFieldErrorKey(parameters: {
   recipientTrim: string;
@@ -148,10 +147,11 @@ export function useTransferRecipientAndSubmitGates(parameters: {
   );
 
   const totalAmount = useMemo(() => {
-    if (!parameters.amount || Number.isNaN(Number.parseFloat(parameters.amount))) {
-      return NETWORK_FEE;
+    const parsed = Number.parseFloat(parameters.amount);
+    if (!parameters.amount || Number.isNaN(parsed)) {
+      return 0;
     }
-    return Number.parseFloat(parameters.amount) + NETWORK_FEE;
+    return parsed;
   }, [parameters.amount]);
 
   return {
