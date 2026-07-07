@@ -1,11 +1,7 @@
 import { useCallback, useState } from "react";
 import { useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
-import { registerPrivateAddressOnChain } from "@/shared/lib/registry/register-private-address-on-chain";
-import {
-  getDefaultStellarNetworkConfig,
-  getRequiredPrivateAddressRegistryContractId,
-} from "@/shared/stellar/stellar-network-environment";
+import { getPrivacySdkClientOrThrow } from "@/shared/lib/privacy-sdk/transact-context.js";
 import { useWalletPrivateAddress } from "./wallet-private-address-context";
 
 export type RegisterPrivateAddressFlowStatus =
@@ -32,14 +28,11 @@ export function useRegisterWalletPrivateAddress() {
     try {
       const privateAddress = await ensureWalletPrivateAddress();
       setStatus("registering");
-      const { networkPassphrase, sorobanRpcUrl } =
-        getDefaultStellarNetworkConfig();
-      await registerPrivateAddressOnChain({
-        registryContractId: getRequiredPrivateAddressRegistryContractId(),
+      const privacyClient = getPrivacySdkClientOrThrow();
+      await privacyClient.registerPrivateAddress({
+        owner: trimmedPublicKey,
         walletPublicKey: trimmedPublicKey,
         privateAddressStpl1: privateAddress,
-        networkPassphrase,
-        sorobanRpcUrl,
       });
       await refreshRegistryStatus();
       setStatus("success");

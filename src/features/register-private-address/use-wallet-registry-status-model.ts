@@ -1,15 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { useStore } from "react-redux";
 import { useAppDispatch, useAppSelector } from "@/store";
+import { usePrivacyPoolServiceConfigured } from "@/shared/hooks/use-privacy-pool-service-configured.js";
 import { selectDefaultNonce } from "@/entities/private-address";
 import { selectWalletPublicKey } from "@/entities/wallet";
-import { DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE } from "@/shared/lib/private-address/privacy-pool-sdk-private-address";
+import { DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE } from "@/shared/lib/privacy-sdk/index.js";
 import { fetchWalletRegistryStatus } from "./fetch-wallet-registry-status";
 import type { WalletRegistryStatus } from "./wallet-private-address-context";
 
 export function useWalletRegistryStatusModel() {
   const dispatch = useAppDispatch();
   const store = useStore();
+  const privacyPoolServiceReady = usePrivacyPoolServiceConfigured();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const defaultNonce =
     useAppSelector(selectDefaultNonce) ?? DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE;
@@ -41,8 +43,11 @@ export function useWalletRegistryStatusModel() {
   }, [publicKey, dispatch, defaultNonce, store]);
 
   useEffect(() => {
+    if (!privacyPoolServiceReady) {
+      return;
+    }
     void refreshRegistryStatus();
-  }, [refreshRegistryStatus]);
+  }, [refreshRegistryStatus, privacyPoolServiceReady]);
 
   return {
     registryStatus,

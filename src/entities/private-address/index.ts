@@ -1,21 +1,3 @@
-export {
-  clearScalars,
-  hydrateFromStorage,
-  resetForWalletChange,
-  setDefaultNonce,
-  setScalarForNonce,
-  setPrivateAddressRecord,
-  setPrivateAddressRecordAndScalar,
-  privateAddressReducer,
-  selectAllPrivateAddressNonces,
-  selectDefaultNonce,
-  selectNonceByPrivateAddress,
-  selectScalarByNonce,
-  selectScalarByPrivateAddress,
-  selectPrivateAddressByNonce,
-  selectPrivateAddressState,
-} from "./model/private-address";
-export type { PrivateAddressRootState } from "./model/private-address";
 export type {
   PrivateAddressState,
   PrivateAddressNonceEntry,
@@ -23,10 +5,18 @@ export type {
   PrivateAddressPersistedShape,
 } from "./model/types";
 export {
-  buildPrivateAddressPersistPayload,
+  selectAllPrivateAddressNonces,
+  selectDefaultNonce,
+  selectNonceByPrivateAddress,
+  selectScalarByNonce,
+  selectScalarByPrivateAddress,
+  selectPrivateAddressByNonce,
+  selectPrivateAddressState,
+} from "./model/private-address-selectors";
+export type { PrivateAddressRootState } from "./model/private-address-selectors";
+export {
   loadPrivateAddressState,
   readPrivateAddressRecordFromStorage,
-  savePrivateAddressState,
 } from "./lib/persist-private-address";
 export {
   ensurePrivateAddressScalarForNonce,

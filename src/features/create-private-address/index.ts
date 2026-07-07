@@ -7,7 +7,7 @@ export { runWalletCreatePrivateAddressFlow } from "@/entities/private-address";
 export type { EnsureScalarResult } from "@/entities/private-address";
 export { ensurePrivateAddressScalarForNonce } from "@/entities/private-address";
 export { useCreatePrivateAddress } from "./api/use-create-private-address";
-export { DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE } from "@/shared/lib/private-address/privacy-pool-sdk-private-address";
+export { DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE } from "@/shared/lib/privacy-sdk/index.js";
 export type {
   CreatePrivateAddressErrorKind,
   CreatePrivateAddressStatus,

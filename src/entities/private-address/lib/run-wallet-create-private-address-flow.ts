@@ -1,7 +1,6 @@
-import type { Dispatch, UnknownAction } from "@reduxjs/toolkit";
+import type { RootState } from "@/store";
 import { createPrivateAddressFromWalletSignature } from "./create-private-address-from-wallet-signature";
 import { isSignMessageUnsupportedError } from "@/shared/lib/wallet/sign-message-errors";
-import type { PrivateAddressState } from "../model/types";
 
 export type CreatePrivateAddressStatus =
   | "idle"
@@ -14,8 +13,7 @@ export type CreatePrivateAddressErrorKind =
   | "unknown";
 
 type RunWalletCreateParameters = {
-  dispatch: Dispatch<UnknownAction>;
-  getState: () => { privateAddress: PrivateAddressState };
+  getState: () => RootState;
   publicKey: string;
   trimmedNonce: string;
   setStatus: (value: CreatePrivateAddressStatus) => void;
@@ -25,13 +23,12 @@ type RunWalletCreateParameters = {
 export async function runWalletCreatePrivateAddressFlow(
   parameters: RunWalletCreateParameters,
 ): Promise<void> {
-  const { dispatch, getState, publicKey, trimmedNonce, setStatus, setErrorKind } =
+  const { getState, publicKey, trimmedNonce, setStatus, setErrorKind } =
     parameters;
   setStatus("pending");
   setErrorKind(undefined);
   try {
     await createPrivateAddressFromWalletSignature({
-      dispatch,
       getState,
       publicKey,
       trimmedNonce,
