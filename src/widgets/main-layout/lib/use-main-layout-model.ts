@@ -5,7 +5,7 @@ import { FileText, HelpCircle, History, Home, Inbox, Info, Users } from "lucide-
 import { i18n } from "@/shared/config/i18n-instance";
 import { useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
-import { usePendingClaimsCountQuery } from "@/entities/pending-claims";
+import { useSdkPendingClaimsCount } from "@/entities/pending-claims";
 import type { MainLayoutNavItem } from "./main-layout-navigation";
 
 export function useMainLayoutModel() {
@@ -13,11 +13,7 @@ export function useMainLayoutModel() {
   const location = useLocation();
   const mainReference = useRef<HTMLElement>(null);
   const publicKey = useAppSelector(selectWalletPublicKey);
-  const { data: pendingClaimsCountData } = usePendingClaimsCountQuery(
-    { ownerAddress: publicKey ?? "" },
-    { skip: !publicKey, pollingInterval: 30_000 },
-  );
-  const pendingClaimsBadgeCount = pendingClaimsCountData?.count ?? 0;
+  const pendingClaimsBadgeCount = useSdkPendingClaimsCount(publicKey ?? undefined);
 
   useLayoutEffect(() => {
     mainReference.current?.scrollTo(0, 0);

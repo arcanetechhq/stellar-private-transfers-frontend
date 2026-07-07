@@ -26,22 +26,22 @@ export type ChainDetailsEntry =
 export interface TransactionState {
   items: Transaction[];
   chainDetailsByHash: Record<string, ChainDetailsEntry>;
-  transactionsHydrated: boolean;
+  transactionsLoaded: boolean;
 }
 
 const initialState: TransactionState = {
   items: [],
   chainDetailsByHash: {},
-  transactionsHydrated: false,
+  transactionsLoaded: false,
 };
 
 const transactionSlice = createSlice({
   name: "transaction",
   initialState,
   reducers: {
-    hydrateTransactions: (state, action: PayloadAction<Transaction[]>) => {
+    replaceTransactionItems: (state, action: PayloadAction<Transaction[]>) => {
       state.items = action.payload;
-      state.transactionsHydrated = true;
+      state.transactionsLoaded = true;
     },
     addTransaction: (state, action: PayloadAction<Transaction>) => {
       const index = state.items.findIndex(
@@ -84,7 +84,7 @@ const transactionSlice = createSlice({
   },
 });
 
-export const { hydrateTransactions, addTransaction, resetForWalletChange } =
+export const { replaceTransactionItems, addTransaction, resetForWalletChange } =
   transactionSlice.actions;
 
 export const transactionReducer = transactionSlice.reducer;
@@ -94,8 +94,8 @@ export type TransactionRootState = { transaction: TransactionState };
 export const selectTransactions = (state: TransactionRootState) =>
   state.transaction.items;
 
-export const selectAreTransactionsHydrated = (state: TransactionRootState) =>
-  state.transaction.transactionsHydrated;
+export const selectAreTransactionsLoaded = (state: TransactionRootState) =>
+  state.transaction.transactionsLoaded;
 
 export const selectTransactionById =
   (id: string) => (state: TransactionRootState) =>

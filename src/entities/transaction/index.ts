@@ -1,10 +1,9 @@
 export {
-  hydrateTransactions,
   addTransaction,
   resetForWalletChange,
   transactionReducer,
   selectTransactions,
-  selectAreTransactionsHydrated,
+  selectAreTransactionsLoaded,
   selectTransactionById,
   selectChainDetailsForHash,
   type Transaction,
