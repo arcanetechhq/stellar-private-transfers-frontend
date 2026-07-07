@@ -20,6 +20,39 @@ type PrivateWithdrawalSubmit = (payload: {
   destinationAddress: string;
 }) => Promise<{ txId: string; coinDeliveryWarning?: string }>;
 
+function pushWithdrawalSuccess(parameters: {
+  dispatch: AppDispatch;
+  navigate: NavigateFunction;
+  poolContract: string;
+  senderPrivateAddress: string;
+  destinationTrim: string;
+  selectedAsset: AssetWithTrustline;
+  numericAmount: number;
+  result: { txId: string; coinDeliveryWarning?: string };
+}): void {
+  parameters.dispatch(
+    addTransaction(
+      buildUserTransaction({
+        txId: parameters.result.txId,
+        type: "withdrawal",
+        assetId: parameters.selectedAsset.assetId,
+        amount: parameters.numericAmount,
+        counterparty: parameters.destinationTrim,
+        senderPrivateAddress: parameters.senderPrivateAddress.trim(),
+      }),
+    ),
+  );
+  parameters.navigate(`/transfer-success/${encodeURIComponent(parameters.result.txId)}`, {
+    state: {
+      txId: parameters.result.txId,
+      amount: parameters.numericAmount,
+      assetId: parameters.selectedAsset.assetId,
+      poolContract: parameters.poolContract,
+      coinDeliveryWarning: parameters.result.coinDeliveryWarning,
+    },
+  });
+}
+
 export function usePrivateWithdrawalSubmitHandler(parameters: {
   dispatch: AppDispatch;
   canSubmit: boolean;
@@ -28,7 +61,6 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
   submit: PrivateWithdrawalSubmit;
   navigate: NavigateFunction;
   senderPrivateAddress: string;
-  ensureSenderScalar: () => Promise<string>;
   destinationTrim: string;
   numericAmount: number;
 }) {
@@ -47,34 +79,23 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
         asset: parameters.selectedAsset,
         destinationAddress: parameters.destinationTrim,
       });
-      await parameters.ensureSenderScalar();
+      const selectedAsset = parameters.selectedAsset;
       const result = await parameters.submit({
         senderPrivateAddress: parameters.senderPrivateAddress,
-        assetId: parameters.selectedAsset.assetId,
-        tokenContractRaw: parameters.selectedAsset.clientContract ?? "",
+        assetId: selectedAsset.assetId,
+        tokenContractRaw: selectedAsset.clientContract ?? "",
         amountDisplay: parameters.numericAmount,
         destinationAddress: parameters.destinationTrim,
       });
-      parameters.dispatch(
-        addTransaction(
-          buildUserTransaction({
-            txId: result.txId,
-            type: "withdrawal",
-            assetId: parameters.selectedAsset.assetId,
-            amount: parameters.numericAmount,
-            counterparty: parameters.destinationTrim,
-            senderPrivateAddress: parameters.senderPrivateAddress.trim(),
-          }),
-        ),
-      );
-      parameters.navigate(`/transfer-success/${encodeURIComponent(result.txId)}`, {
-        state: {
-          txId: result.txId,
-          amount: parameters.numericAmount,
-          assetId: parameters.selectedAsset.assetId,
-          poolContract,
-          coinDeliveryWarning: result.coinDeliveryWarning,
-        },
+      pushWithdrawalSuccess({
+        dispatch: parameters.dispatch,
+        navigate: parameters.navigate,
+        poolContract,
+        senderPrivateAddress: parameters.senderPrivateAddress,
+        destinationTrim: parameters.destinationTrim,
+        selectedAsset,
+        numericAmount: parameters.numericAmount,
+        result,
       });
     } catch (error: unknown) {
       if (isRejectedWithValue(error)) {

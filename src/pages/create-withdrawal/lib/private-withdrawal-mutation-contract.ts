@@ -1,18 +1,15 @@
 import type { AppDispatch } from "@/store";
-import type { CoinWithMetadata } from "@/entities/coin";
 
 export interface RunPrivateWithdrawalMutationInput {
   dispatch: AppDispatch;
   walletPublicKey: string;
   networkPassphrase: string;
   sorobanRpcUrl: string;
-  senderPrivKeyScalarHex: string;
   senderPrivateAddress: string;
   assetId: string;
   tokenContractRaw: string;
   amountDisplay: number;
   destinationAddress: string;
-  pickedCoins: CoinWithMetadata[];
 }
 
 export interface RunPrivateWithdrawalMutationResult {

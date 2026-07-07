@@ -28,13 +28,11 @@ export async function submitPrivateWithdrawalThunkBody(
       walletPublicKey: resolved.walletPublicKey,
       networkPassphrase: resolved.networkPassphrase,
       sorobanRpcUrl: resolved.sorobanRpcUrl,
-      senderPrivKeyScalarHex: resolved.senderPrivKeyScalarHex,
       senderPrivateAddress: resolved.senderTrim,
       assetId: resolved.payload.assetId,
       tokenContractRaw: resolved.payload.tokenContractRaw,
       amountDisplay: resolved.payload.amountDisplay,
       destinationAddress: resolved.payload.destinationAddress,
-      pickedCoins: resolved.pickedCoins,
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Withdrawal failed";
