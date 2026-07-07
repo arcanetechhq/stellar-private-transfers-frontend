@@ -24,7 +24,6 @@ export function useCreateTransfer() {
     defaultNonce: senderNonce,
     actionsEnabled,
     ensureWalletPrivateAddress,
-    ensureWalletScalar,
   } = useWalletPrivateAddress();
   const { assets, tokenUi, amountInputs, selectedAsset } = useTransferAssetModel(
     senderPrivateAddress,
@@ -53,7 +52,6 @@ export function useCreateTransfer() {
     submit,
     navigate,
     ensureWalletPrivateAddress,
-    ensureWalletScalar,
     recipientTrim: validation.recipientTrim,
     numericAmount: validation.numericAmount,
   });

@@ -5,7 +5,7 @@ export interface TransferSuccessLocationState {
   amount?: number;
   assetId?: string;
   poolContract?: string;
-  txId?: string;
+  txId?: unknown;
   coinDeliveryWarning?: string;
 }
 
@@ -55,10 +55,37 @@ function resolveTicker(
   return raw.toUpperCase();
 }
 
+function readTrimmedString(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed || undefined;
+}
+
+function readReceiptOperationId(value: unknown): string | undefined {
+  if (typeof value !== "object" || value === null) {
+    return undefined;
+  }
+  if (!Object.hasOwn(value, "operationId")) {
+    return undefined;
+  }
+  return readTrimmedString((value as { operationId?: unknown }).operationId);
+}
+
+function resolveTransactionId(stateTxId: unknown, routeId: string | undefined): string {
+  return (
+    readTrimmedString(stateTxId) ??
+    readReceiptOperationId(stateTxId) ??
+    readTrimmedString(routeId) ??
+    ""
+  );
+}
+
 export function buildTransferSuccessViewModel(
   input: BuildTransferSuccessViewInput,
 ): TransferSuccessViewModel {
-  const txId = (input.state?.txId ?? input.routeId ?? "").trim();
+  const txId = resolveTransactionId(input.state?.txId, input.routeId);
   const ticker = resolveTicker(
     input.state?.assetId,
     input.assetMatch?.assetId,

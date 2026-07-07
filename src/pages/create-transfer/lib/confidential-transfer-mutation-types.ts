@@ -1,4 +1,4 @@
-import type { OnboardingPayload } from "contract";
+import type { OnboardingPayload } from "@arcane/privacy-sdk-stellar/transact";
 import type { AppDispatch } from "@/store";
 import type { CoinWithMetadata } from "@/entities/coin";
 
@@ -7,7 +7,6 @@ export interface RunConfidentialTransferInput {
   walletPublicKey: string;
   networkPassphrase: string;
   sorobanRpcUrl: string;
-  senderPrivKeyScalarHex: string;
   senderPrivateAddress: string;
   recipientStellarAddress: string;
   recipientPrivateAddressStpl1: string;
