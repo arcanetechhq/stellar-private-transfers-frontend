@@ -1,4 +1,4 @@
-import type { CoinData } from "@auditable/privacy-pool-zk-sdk";
+import type { CoinData } from "@/shared/lib/privacy-sdk/types.js";
 
 export type CoinStatus = "pending" | "finalized" | "spent";
 
@@ -22,7 +22,7 @@ export interface CoinEntry {
   precommitementHex?: string;
 }
 
-export { type CoinData } from "@auditable/privacy-pool-zk-sdk";
+export { type CoinData } from "@/shared/lib/privacy-sdk/types.js";
 
 export interface AggregatedPrivateAssetRow {
   assetId: string;

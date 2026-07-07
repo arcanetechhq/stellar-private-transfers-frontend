@@ -1,8 +1,4 @@
-import {
-  encodeDecodedEphemeralKey,
-  type CoinData,
-} from "@auditable/privacy-pool-zk-sdk";
-import { decodePrivateAddress } from "@/shared/lib/private-address/privacy-pool-sdk-private-address";
+import type { CoinData } from "@/shared/lib/privacy-sdk/types.js";
 import {
   encryptCoinPayload,
   tagFromCiphertextBytes,
@@ -12,7 +8,11 @@ import {
   stringifyCoinDeliveryPayloadV1,
   type CoinDeliveryPayloadV1,
 } from "@/shared/lib/coin-delivery/payload-v1";
-import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
+import {
+  encodeEphemeralKeyFromDepositScalar,
+  getPrivacyPoolService,
+  sharedSecretFromDepositorPreimage,
+} from "@/shared/lib/privacy-sdk/index.js";
 import type { PostCoinDeliveryBody } from "../api/coin-delivery-api";
 
 const BASE64_CHUNK = 8192;
@@ -42,14 +42,11 @@ export interface BuildCoinDeliveryPostBodyInput {
 export async function buildCoinDeliveryPostBody(
   input: BuildCoinDeliveryPostBodyInput,
 ): Promise<PostCoinDeliveryBody> {
-  const sdk = await privacyPoolService.getInitializedSdk();
+  await getPrivacyPoolService().getInitializedSdk();
   const depositScalarHex = input.depositScalarHex;
-  const recipientPrivateAddress = decodePrivateAddress(
-    input.recipientPrivateAddressStpl1.trim(),
-  );
-  const shared = sdk.sharedSecretFromDepositorPreimage({
-    randomNonceScalar: depositScalarHex,
-    recipientStealthAddress: recipientPrivateAddress,
+  const shared = await sharedSecretFromDepositorPreimage({
+    depositScalarHex,
+    recipientPrivateAddressStpl1: input.recipientPrivateAddressStpl1.trim(),
   });
 
   const payload: CoinDeliveryPayloadV1 = {
@@ -64,11 +61,9 @@ export async function buildCoinDeliveryPostBody(
   };
 
   const plain = stringifyCoinDeliveryPayloadV1(payload);
-  const cipherBytes = await encryptCoinPayload(shared.x, plain);
+  const cipherBytes = await encryptCoinPayload(shared.sharedSecretX, plain);
   const tagBytes = await tagFromCiphertextBytes(cipherBytes);
-
-  const point = sdk.ecdhEphemeralPublicKeyFromScalarHex(depositScalarHex);
-  const ephemeralKey = encodeDecodedEphemeralKey(point);
+  const ephemeralKey = await encodeEphemeralKeyFromDepositScalar(depositScalarHex);
 
   return {
     recipientStealthAddress: input.recipientPrivateAddressStpl1.trim(),

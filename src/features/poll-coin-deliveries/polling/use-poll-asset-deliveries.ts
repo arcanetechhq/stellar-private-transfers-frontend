@@ -2,15 +2,11 @@ import { skipToken } from "@reduxjs/toolkit/query/react";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import {
-  addCoin,
-  finalizeCoin,
   normalizeCommitmentHex,
   selectCoinItems,
   type CoinData,
 } from "@/entities/coin";
 import {
-  addSeenTag,
-  existingSpentCoinMatchesIncomingDelivery,
   selectIsTagsHydrated,
   selectSeenTagsForAsset,
   useGetIncomingDeliveriesQuery,
@@ -25,8 +21,9 @@ import {
   DEFAULT_BLOOM_K,
   DEFAULT_BLOOM_M,
 } from "@/shared/lib/coin-delivery";
-import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
+import { getPrivacyPoolService } from "@/shared/lib/privacy-sdk/index.js";
 import { useBloomBitsForSeenTags } from "./use-bloom-bits-for-seen-tags";
+import { processIncomingDeliveryRows } from "./process-incoming-delivery-rows.js";
 
 const POLL_INTERVAL_MS = 12_000;
 
@@ -60,7 +57,7 @@ async function decryptDeliveryRow(
     return undefined;
   let sharedX: string;
   try {
-    sharedX = await privacyPoolService.sharedSecretX(
+    sharedX = await getPrivacyPoolService().sharedSecretX(
       recipientScalarHex,
       row.ephemeral_key,
     );
@@ -137,40 +134,21 @@ export function usePollAssetDeliveries({
   );
 
   useEffect(() => {
-    if (!data || !publicKey) return;
-    const processRows = async () => {
-      for (const row of data.data) {
-        const tagB64 = row.tag_base64.trim();
-        if (seenTags.includes(tagB64)) continue;
-        const decrypted = await decryptDeliveryRow(row, recipientScalarHex);
-        if (!decrypted) continue;
-        if (
-          existingSpentCoinMatchesIncomingDelivery(coinItems, {
-            commitmentHex: decrypted.commitmentHex,
-            coinCommitment: decrypted.coin.commitment,
-          })
-        ) {
-          dispatch(addSeenTag({ assetId, tagBase64: tagB64 }));
-          continue;
-        }
-        dispatch(
-          addCoin({
-            commitmentHex: decrypted.commitmentHex,
-            coin: decrypted.coin,
-            depositScalarHex: decrypted.depositScalarHex,
-            precommitementHex: decrypted.precommitementHex,
-            privateAddress,
-            assetId,
-            poolContract,
-            amountDisplay: decrypted.amountDisplay,
-            status: "pending",
-          }),
-        );
-        dispatch(finalizeCoin(decrypted.commitmentHex));
-        dispatch(addSeenTag({ assetId, tagBase64: tagB64 }));
-      }
-    };
-    void processRows();
+    if (!data || !publicKey) {
+      return;
+    }
+    void processIncomingDeliveryRows({
+      rows: data.data,
+      seenTags,
+      coinItems,
+      recipientScalarHex,
+      privateAddress,
+      assetId,
+      poolContract,
+      publicKey,
+      dispatch,
+      decryptDeliveryRow,
+    });
   }, [
     data,
     publicKey,
