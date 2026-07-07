@@ -37,3 +37,16 @@ export function stroopsToDisplayAmount(stroops: bigint): number {
   const fracPart = stroops % STROOPS_PER_UNIT;
   return Number(intPart) + Number(fracPart) / Number(STROOPS_PER_UNIT);
 }
+
+export function readStroopsBigInt(value: unknown): bigint {
+  if (typeof value === "bigint") {
+    return value;
+  }
+  if (typeof value === "number" && Number.isInteger(value)) {
+    return BigInt(value);
+  }
+  if (typeof value === "string" && /^\d+$/u.test(value.trim())) {
+    return BigInt(value.trim());
+  }
+  throw new Error("Invalid stroops amount");
+}

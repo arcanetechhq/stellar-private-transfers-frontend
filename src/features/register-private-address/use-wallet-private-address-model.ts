@@ -7,7 +7,7 @@ import {
   selectScalarByNonce,
 } from "@/entities/private-address";
 import { selectWalletPublicKey } from "@/entities/wallet";
-import { DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE } from "@/shared/lib/private-address/privacy-pool-sdk-private-address";
+import { DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE } from "@/shared/lib/privacy-sdk/index.js";
 import { ensureWalletPrivateAddressRecord } from "./ensure-wallet-private-address";
 import { ensureWalletScalarRecord } from "./ensure-wallet-scalar-record";
 
@@ -34,18 +34,22 @@ export function useWalletPrivateAddressModel() {
     });
   }, [publicKey, dispatch, defaultNonce]);
 
-  const ensureWalletScalar = useCallback(async () => {
-    const trimmedPublicKey = publicKey?.trim();
-    if (!trimmedPublicKey) {
-      throw new Error("Wallet is not connected");
-    }
-    return ensureWalletScalarRecord({
-      dispatch,
-      getState: store.getState,
-      publicKey: trimmedPublicKey,
-      defaultNonce,
-    });
-  }, [publicKey, dispatch, defaultNonce, store]);
+  const ensureWalletScalar = useCallback(
+    async (privateAddressStpl1?: string) => {
+      const trimmedPublicKey = publicKey?.trim();
+      if (!trimmedPublicKey) {
+        throw new Error("Wallet is not connected");
+      }
+      return ensureWalletScalarRecord({
+        dispatch,
+        getState: store.getState,
+        publicKey: trimmedPublicKey,
+        defaultNonce,
+        privateAddressStpl1,
+      });
+    },
+    [publicKey, dispatch, defaultNonce, store],
+  );
 
   return {
     privateAddressStpl1: privateAddressEntry?.privateAddress?.trim() ?? "",

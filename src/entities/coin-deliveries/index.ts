@@ -35,3 +35,5 @@ export {
   type BuildCoinDeliveryPostBodyInput,
 } from "./lib/build-coin-delivery-post-body";
 
+export { postOutputRecordDeliveries } from "./lib/post-output-record-deliveries";
+

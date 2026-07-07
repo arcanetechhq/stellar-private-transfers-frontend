@@ -1,5 +1,5 @@
 import type { CoinWithMetadata } from "../model/coin";
-import { MIN_CONFIDENTIAL_TRANSFER_STROOPS } from "@/shared/lib/privacy-pool/privacy-pool-confidential-proof-helpers";
+import { MIN_CONFIDENTIAL_TRANSFER_STROOPS } from "@/shared/lib/privacy-sdk/constants.js";
 
 export const CONFIDENTIAL_SPEND_INPUT_LIMIT = 2;
 export const CONFIDENTIAL_SPEND_OUTPUT_LIMIT = 2;

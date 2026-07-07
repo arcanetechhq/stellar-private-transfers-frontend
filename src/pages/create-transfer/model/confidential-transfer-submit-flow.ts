@@ -7,7 +7,6 @@ import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-netwo
 
 type ConfidentialTransferSubmit = (payload: {
   senderPrivateAddress: string;
-  senderPrivKeyScalarHex: string;
   recipientStellarAddress: string;
   assetId: string;
   tokenContractRaw: string;
@@ -27,11 +26,9 @@ export function readConfidentialTransferSubmitError(error: unknown): string {
 
 async function prepareWalletTransferKeys(parameters: {
   ensureWalletPrivateAddress: () => Promise<string>;
-  ensureWalletScalar: () => Promise<string>;
-}): Promise<{ senderPrivateAddress: string; senderPrivKeyScalarHex: string }> {
+}): Promise<{ senderPrivateAddress: string }> {
   const senderPrivateAddress = await parameters.ensureWalletPrivateAddress();
-  const senderPrivKeyScalarHex = await parameters.ensureWalletScalar();
-  return { senderPrivateAddress, senderPrivKeyScalarHex };
+  return { senderPrivateAddress };
 }
 
 async function submitPreparedConfidentialTransfer(parameters: {
@@ -40,11 +37,9 @@ async function submitPreparedConfidentialTransfer(parameters: {
   recipientTrim: string;
   numericAmount: number;
   senderPrivateAddress: string;
-  senderPrivKeyScalarHex: string;
 }): Promise<{ txId: string; coinDeliveryWarning?: string }> {
   return parameters.submit({
     senderPrivateAddress: parameters.senderPrivateAddress,
-    senderPrivKeyScalarHex: parameters.senderPrivKeyScalarHex,
     recipientStellarAddress: parameters.recipientTrim,
     assetId: parameters.selectedAsset.assetId,
     tokenContractRaw: parameters.selectedAsset.clientContract ?? "",
@@ -116,7 +111,6 @@ export async function runConfidentialTransferSubmitFlow(parameters: {
   dispatch: AppDispatch;
   navigate: NavigateFunction;
   ensureWalletPrivateAddress: () => Promise<string>;
-  ensureWalletScalar: () => Promise<string>;
   submit: ConfidentialTransferSubmit;
   selectedAsset: AssetWithTrustline;
   recipientTrim: string;
@@ -132,7 +126,6 @@ export async function runConfidentialTransferSubmitFlow(parameters: {
     recipientTrim: parameters.recipientTrim,
     numericAmount: parameters.numericAmount,
     senderPrivateAddress: preparedWallet.senderPrivateAddress,
-    senderPrivKeyScalarHex: preparedWallet.senderPrivKeyScalarHex,
   });
   recordSuccessfulTransfer({
     dispatch: parameters.dispatch,

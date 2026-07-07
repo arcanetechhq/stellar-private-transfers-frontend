@@ -1,22 +1,48 @@
 import type { AppDispatch } from "@/store";
 import type { Store } from "@reduxjs/toolkit";
 import type { RootState } from "@/store";
-import { ensurePrivateAddressScalarForNonce } from "@/entities/private-address";
-import { lookupWalletRegistryStatus } from "@/shared/lib/registry/registry-lookup";
 import {
-  getDefaultStellarNetworkConfig,
-  getRequiredPrivateAddressRegistryContractId,
-} from "@/shared/stellar/stellar-network-environment";
-import { DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE } from "@/shared/lib/private-address/privacy-pool-sdk-private-address";
+  ensurePrivateAddressScalarForNonce,
+  selectPrivateAddressByNonce,
+} from "@/entities/private-address";
+import { readWalletScalarFromState } from "@/shared/lib/privacy-sdk/read-wallet-scalar-from-state.js";
+import {
+  getPrivacySdkClientOrThrow,
+  tryGetPrivacySdkClient,
+} from "@/shared/lib/privacy-sdk/transact-context.js";
 import { syncRegisteredWalletPrivateAddress } from "./ensure-wallet-private-address";
 import type { WalletRegistryStatus } from "./wallet-private-address-context";
 
-function resolveDefaultNonce(nonce: string | undefined): string {
-  return (nonce ?? DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE).trim();
+async function resolveRegisteredStatus(parameters: {
+  dispatch: AppDispatch;
+  getState: Store<RootState>["getState"];
+  publicKey: string;
+  defaultNonce: string;
+  lookup: Awaited<ReturnType<ReturnType<typeof getPrivacySdkClientOrThrow>["checkRegistrationStatus"]>>;
+}): Promise<WalletRegistryStatus> {
+  if (parameters.lookup.status !== "registered" || !parameters.lookup.privateAddressStpl1) {
+    return "unregistered";
+  }
+  await syncRegisteredWalletPrivateAddress({
+    dispatch: parameters.dispatch,
+    publicKey: parameters.publicKey,
+    lookup: {
+      status: "registered",
+      privateAddressStpl1: parameters.lookup.privateAddressStpl1,
+      publicKeyXHex: parameters.lookup.publicKeyXHex ?? "",
+      publicKeyYHex: parameters.lookup.publicKeyYHex ?? "",
+    },
+    nonce: parameters.defaultNonce,
+  });
+  await hydrateDefaultScalar({
+    getState: parameters.getState,
+    publicKey: parameters.publicKey,
+    nonce: parameters.defaultNonce,
+  });
+  return "active";
 }
 
 async function hydrateDefaultScalar(parameters: {
-  dispatch: AppDispatch;
   getState: Store<RootState>["getState"];
   publicKey: string;
   nonce: string;
@@ -25,13 +51,22 @@ async function hydrateDefaultScalar(parameters: {
   if (!trimmedNonce) {
     return;
   }
-  const address =
-    parameters.getState().privateAddress.byNonce[trimmedNonce]?.privateAddress;
+  const address = selectPrivateAddressByNonce(trimmedNonce)(
+    parameters.getState(),
+  )?.privateAddress;
   if (!address?.trim()) {
     return;
   }
+  const cachedScalar = readWalletScalarFromState({
+    getState: parameters.getState,
+    publicKey: parameters.publicKey,
+    privateAddressStpl1: address,
+    defaultNonce: trimmedNonce,
+  });
+  if (cachedScalar) {
+    return;
+  }
   await ensurePrivateAddressScalarForNonce({
-    dispatch: parameters.dispatch,
     getState: parameters.getState,
     publicKey: parameters.publicKey,
     nonce: trimmedNonce,
@@ -42,31 +77,29 @@ export async function fetchWalletRegistryStatus(parameters: {
   dispatch: AppDispatch;
   getState: Store<RootState>["getState"];
   publicKey: string;
-  defaultNonce?: string;
+  defaultNonce: string;
 }): Promise<WalletRegistryStatus> {
   const trimmedPublicKey = parameters.publicKey.trim();
-  const defaultNonce = resolveDefaultNonce(parameters.defaultNonce);
-  const { networkPassphrase, sorobanRpcUrl } = getDefaultStellarNetworkConfig();
-  const lookup = await lookupWalletRegistryStatus({
-    registryContractId: getRequiredPrivateAddressRegistryContractId(),
-    walletPublicKey: trimmedPublicKey,
-    networkPassphrase,
-    sorobanRpcUrl,
-  });
-  if (lookup.status === "registered") {
-    syncRegisteredWalletPrivateAddress({
-      dispatch: parameters.dispatch,
-      publicKey: trimmedPublicKey,
-      lookup,
-      nonce: defaultNonce,
-    });
-    await hydrateDefaultScalar({
-      dispatch: parameters.dispatch,
-      getState: parameters.getState,
-      publicKey: trimmedPublicKey,
-      nonce: defaultNonce,
-    });
-    return "active";
+  const privacyClient = tryGetPrivacySdkClient();
+  if (!privacyClient) {
+    return "checking";
   }
-  return "unregistered";
+  try {
+    const lookup = await privacyClient.checkRegistrationStatus({
+      address: trimmedPublicKey,
+      walletPublicKey: trimmedPublicKey,
+    });
+    if (lookup.status === "registered") {
+      return resolveRegisteredStatus({
+        dispatch: parameters.dispatch,
+        getState: parameters.getState,
+        publicKey: trimmedPublicKey,
+        defaultNonce: parameters.defaultNonce,
+        lookup,
+      });
+    }
+    return "unregistered";
+  } catch {
+    return "lookup_failed";
+  }
 }

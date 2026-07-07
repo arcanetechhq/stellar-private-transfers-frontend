@@ -1,7 +1,7 @@
 import type { AppDispatch, RootState } from "@/store";
 import type { Store } from "@reduxjs/toolkit";
 import { selectDefaultNonce } from "@/entities/private-address";
-import { DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE } from "@/shared/lib/private-address/privacy-pool-sdk-private-address";
+import { DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE } from "@/shared/lib/privacy-sdk/index.js";
 import { claimNativeFaucetThunk } from "@/features/faucet";
 import { fetchWalletRegistryStatus } from "@/features/register-private-address";
 import { isStellarTestnet } from "./is-stellar-testnet";

@@ -1,7 +1,6 @@
 import type {
-  PrivateAddressState,
+  PrivateAddressNonceEntry,
   PrivateAddressPersistedShape,
-  PrivateAddressPersistedNonceEntry,
 } from "../model/types";
 
 function storageKeyForWallet(publicKey: string): string {
@@ -16,7 +15,7 @@ function isOptionalStringOrNullish(value: unknown): boolean {
   );
 }
 
-function isNonceEntry(value: unknown): value is PrivateAddressPersistedNonceEntry {
+function isNonceEntry(value: unknown): value is PrivateAddressPersistedShape["byNonce"][string] {
   if (typeof value !== "object" || value === null) {
     return false;
   }
@@ -77,41 +76,10 @@ export function loadPrivateAddressState(
   }
 }
 
-export function savePrivateAddressState(
-  publicKey: string,
-  state: PrivateAddressPersistedShape,
-): void {
-  try {
-    localStorage.setItem(
-      storageKeyForWallet(publicKey),
-      JSON.stringify(state),
-    );
-  } catch {
-    return;
-  }
-}
-
 export function readPrivateAddressRecordFromStorage(
   publicKey: string,
   nonce: string,
-): PrivateAddressPersistedNonceEntry | undefined {
+): (PrivateAddressNonceEntry & { recipientScalarHex?: string }) | undefined {
   const loaded = loadPrivateAddressState(publicKey);
   return loaded?.byNonce[nonce];
-}
-
-export function buildPrivateAddressPersistPayload(
-  state: PrivateAddressState,
-): PrivateAddressPersistedShape {
-  const byNonce: PrivateAddressPersistedShape["byNonce"] = {};
-  for (const [nonceKey, entry] of Object.entries(state.byNonce)) {
-    const scalarHex = state.scalarByNonce[nonceKey]?.trim();
-    byNonce[nonceKey] =
-      scalarHex !== undefined && scalarHex !== ""
-        ? { ...entry, recipientScalarHex: scalarHex }
-        : { ...entry };
-  }
-  return {
-    byNonce,
-    defaultNonce: state.defaultNonce,
-  };
 }

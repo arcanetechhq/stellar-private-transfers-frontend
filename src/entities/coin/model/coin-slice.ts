@@ -1,4 +1,8 @@
-import { createSelector, createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import {
+  createSelector,
+  createSlice,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
 import type { AggregatedPrivateAssetRow, CoinWithMetadata } from "./coin";
 import { normalizeCommitmentHex } from "../lib/persist-coin";
 import {
@@ -8,12 +12,10 @@ import {
 
 export interface CoinState {
   items: CoinWithMetadata[];
-  coinsHydrated: boolean;
 }
 
 const initialState: CoinState = {
   items: [],
-  coinsHydrated: false,
 };
 
 function commitmentKey(hex: string): string {
@@ -24,9 +26,8 @@ const coinSlice = createSlice({
   name: "coin",
   initialState,
   reducers: {
-    hydrateCoinState: (state, action: PayloadAction<CoinWithMetadata[]>) => {
+    replaceCoinItems: (state, action: PayloadAction<CoinWithMetadata[]>) => {
       state.items = action.payload;
-      state.coinsHydrated = true;
     },
     addCoin: (state, action: PayloadAction<CoinWithMetadata>) => {
       if (incomingSharesLedgerKeyWithAnyItem(state.items, action.payload)) {
@@ -58,7 +59,7 @@ const coinSlice = createSlice({
 });
 
 export const {
-  hydrateCoinState,
+  replaceCoinItems,
   addCoin,
   finalizeCoin,
   markCoinSpent,
@@ -93,13 +94,28 @@ export const selectPrivateAddressesWithCoins = (
   return [...unique];
 };
 
+export const selectFirstPrivateAddressWithFinalizedCoins = createSelector(
+  [selectCoinItems],
+  (items): string | undefined => {
+    const item = items.find((coin) => coin.status === "finalized");
+    return privateAddressKey(item?.privateAddress);
+  },
+);
+
 const EMPTY_FINALIZED_AGGREGATES: AggregatedPrivateAssetRow[] = [];
+
+function privateAddressKey(
+  privateAddress: string | undefined,
+): string | undefined {
+  const trimmed = privateAddress?.trim();
+  return trimmed || undefined;
+}
 
 export const selectFinalizedAggregatesForPrivateAddress = createSelector(
   [
     selectCoinItems,
     (_state: CoinRootState, privateAddress: string | undefined) =>
-      privateAddress?.trim(),
+      privateAddressKey(privateAddress),
   ],
   (items, privateAddress): AggregatedPrivateAssetRow[] => {
     if (!privateAddress) {
@@ -107,7 +123,8 @@ export const selectFinalizedAggregatesForPrivateAddress = createSelector(
     }
     const finalized = items.filter(
       (item) =>
-        item.privateAddress === privateAddress && item.status === "finalized",
+        privateAddressKey(item.privateAddress) === privateAddress &&
+        item.status === "finalized",
     );
     const byAsset = new Map<string, AggregatedPrivateAssetRow>();
     for (const item of finalized) {

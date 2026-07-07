@@ -3,7 +3,7 @@ import { useAppSelector } from "@/store";
 import { getAssetUsdPrice } from "@/entities/asset";
 import { selectCoinItems } from "@/entities/coin";
 import {
-  selectAreTransactionsHydrated,
+  selectAreTransactionsLoaded,
   selectTransactions,
   sortTransactionsByDateDesc,
 } from "@/entities/transaction";
@@ -22,7 +22,7 @@ export function Overview() {
   const privateCoinItems = useAppSelector(selectCoinItems);
 
   const transactions = useAppSelector(selectTransactions);
-  const transactionsHydrated = useAppSelector(selectAreTransactionsHydrated);
+  const transactionsLoaded = useAppSelector(selectAreTransactionsLoaded);
   const sortedTransactions = sortTransactionsByDateDesc(transactions);
 
   const privateAmountByAssetId = new Map<string, number>();
@@ -59,7 +59,7 @@ export function Overview() {
             <div className="order-2 min-h-0 min-[1180px]:order-1 min-[1180px]:col-start-1 min-[1180px]:row-start-1">
               <TransactionsPanel
                 transactions={sortedTransactions}
-                isHydrated={transactionsHydrated}
+                isHydrated={transactionsLoaded}
                 variant="overview"
               />
             </div>

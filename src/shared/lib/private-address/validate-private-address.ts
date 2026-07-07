@@ -1,4 +1,4 @@
-import { decodePrivateAddress } from "./privacy-pool-sdk-private-address";
+import { decodePrivateAddress } from "@/shared/lib/privacy-sdk/index.js";
 
 const PRIVATE_ADDRESS_PREFIX = "stpl1";
 

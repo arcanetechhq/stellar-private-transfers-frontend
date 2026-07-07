@@ -1,4 +1,4 @@
-import type { CoinData } from "@auditable/privacy-pool-zk-sdk";
+import type { CoinData } from "@/shared/lib/privacy-sdk/types.js";
 
 export const COIN_DELIVERY_PAYLOAD_VERSION = 1 as const;
 

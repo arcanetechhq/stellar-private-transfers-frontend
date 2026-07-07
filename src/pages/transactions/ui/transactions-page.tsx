@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { useAppSelector } from "@/store";
 import {
-  selectAreTransactionsHydrated,
+  selectAreTransactionsLoaded,
   selectTransactionById,
   selectTransactions,
   sortTransactionsByDateDesc,
@@ -21,7 +21,7 @@ export function TransactionsPage() {
     string | null
   >(selectedFromSearch);
   const transactions = useAppSelector(selectTransactions);
-  const transactionsHydrated = useAppSelector(selectAreTransactionsHydrated);
+  const transactionsLoaded = useAppSelector(selectAreTransactionsLoaded);
   const sortedTransactions = useMemo(
     () => sortTransactionsByDateDesc(transactions),
     [transactions],
@@ -69,7 +69,7 @@ export function TransactionsPage() {
         <section className="transactions-route__main">
           <TransactionsPanel
             transactions={sortedTransactions}
-            isHydrated={transactionsHydrated}
+            isHydrated={transactionsLoaded}
             variant="page"
             selectedTransactionId={selectedTransactionId ?? undefined}
             onTransactionSelect={handleTransactionSelect}

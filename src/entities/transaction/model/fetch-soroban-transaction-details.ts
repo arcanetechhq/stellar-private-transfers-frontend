@@ -1,11 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { Api, Server } from "@stellar/stellar-sdk/rpc";
-import { parseStellarRpcUnixTimestampSeconds } from "@/shared/lib/stellar/stellar-rpc-unix-timestamp";
-import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
-import {
-  extractInvokedPoolContractFromEnvelope,
-  tryExtractTransferAmountRawFromMeta,
-} from "@/shared/lib/stellar/soroban-transaction-meta";
+import { getPrivacySdkClientOrThrow } from "@/shared/lib/privacy-sdk/transact-context.js";
 
 export interface SorobanTransactionDetailsFulfilled {
   txHash: string;
@@ -27,33 +21,17 @@ type TransactionStateSlice = {
   transaction: { chainDetailsByHash: Record<string, ChainEntryLite | undefined> };
 };
 
-function buildSorobanSuccessPayload(
-  trimmed: string,
-  response: Api.GetSuccessfulTransactionResponse,
-): SorobanTransactionDetailsFulfilled {
-  const envelope = response.envelopeXdr;
-  const meta = response.resultMetaXdr;
-  const invokedPoolContractId =
-    extractInvokedPoolContractFromEnvelope(envelope);
-  const transferAmountRaw =
-    invokedPoolContractId === undefined
-      ? undefined
-      : tryExtractTransferAmountRawFromMeta(meta, invokedPoolContractId);
-  const responseRecord = response as {
-    createdAt?: unknown;
-    created_at?: unknown;
-  };
-  const createdAt = parseStellarRpcUnixTimestampSeconds(
-    responseRecord.createdAt ?? responseRecord.created_at,
-  );
-  return {
-    txHash: trimmed,
-    rpcStatus: "SUCCESS",
-    invokedPoolContractId,
-    transferAmountRaw,
-    ledger: response.ledger,
-    createdAt,
-  };
+const MILLISECONDS_PER_SECOND = 1000;
+
+function parseCreatedAtSeconds(createdAt: string | undefined): number | undefined {
+  if (!createdAt) {
+    return undefined;
+  }
+  const parsed = Date.parse(createdAt);
+  if (!Number.isFinite(parsed)) {
+    return undefined;
+  }
+  return Math.trunc(parsed / MILLISECONDS_PER_SECOND);
 }
 
 export const fetchSorobanTransactionDetails = createAsyncThunk<
@@ -67,32 +45,34 @@ export const fetchSorobanTransactionDetails = createAsyncThunk<
     if (!trimmed) {
       return rejectWithValue({ kind: "rpc_error", message: "Missing tx hash" });
     }
-    const { sorobanRpcUrl } = getDefaultStellarNetworkConfig();
-    const server = new Server(sorobanRpcUrl, { allowHttp: true });
-    let response: Api.GetTransactionResponse;
     try {
-      response = await server.getTransaction(trimmed);
+      const privacyClient = getPrivacySdkClientOrThrow();
+      const details = await privacyClient.getTransactionDetails(trimmed);
+      if (details.status === "failed") {
+        return rejectWithValue({
+          kind: "failed",
+          message: "Transaction failed on network",
+        });
+      }
+      return {
+        txHash: trimmed,
+        rpcStatus: "SUCCESS",
+        invokedPoolContractId: details.invokedPoolContractId,
+        transferAmountRaw: details.transferAmountRaw,
+        ledger: details.ledger ?? 0,
+        createdAt: parseCreatedAtSeconds(details.createdAt),
+      };
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Soroban request failed";
+      if (message.toLowerCase().includes("not found")) {
+        return rejectWithValue({
+          kind: "not_found",
+          message: "Transaction not found",
+        });
+      }
       return rejectWithValue({ kind: "rpc_error", message });
     }
-    if (response.status === Api.GetTransactionStatus.NOT_FOUND) {
-      return rejectWithValue({
-        kind: "not_found",
-        message: "Transaction not found",
-      });
-    }
-    if (response.status === Api.GetTransactionStatus.FAILED) {
-      return rejectWithValue({
-        kind: "failed",
-        message: "Transaction failed on network",
-      });
-    }
-    return buildSorobanSuccessPayload(
-      trimmed,
-      response as Api.GetSuccessfulTransactionResponse,
-    );
   },
   {
     condition: (txHash, { getState }) => {

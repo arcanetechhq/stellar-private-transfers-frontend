@@ -1,14 +1,12 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { AppDispatch, RootState } from "@/store";
 import { selectCoinItems } from "@/entities/coin";
-import { selectScalarByPrivateAddress } from "@/entities/private-address";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
 import { runConfidentialTransferMutation } from "../lib/run-confidential-transfer-mutation";
 
 export interface SubmitConfidentialTransferPayload {
   senderPrivateAddress: string;
-  senderPrivKeyScalarHex: string;
   recipientStellarAddress: string;
   assetId: string;
   tokenContractRaw: string;
@@ -28,15 +26,6 @@ export const submitConfidentialTransferThunk = createAsyncThunk<
       return rejectWithValue("Wallet not connected");
     }
     const senderTrim = payload.senderPrivateAddress.trim();
-    const senderPrivKeyScalarHex =
-      payload.senderPrivKeyScalarHex.trim() ||
-      selectScalarByPrivateAddress(senderTrim)(state)?.trim() ||
-      "";
-    if (!senderPrivKeyScalarHex) {
-      return rejectWithValue(
-        "PrivateAddress key scalar is missing; open private address settings first",
-      );
-    }
     const finalizedCoinsForSenderAndAsset = selectCoinItems(state).filter(
       (item) =>
         item.privateAddress === senderTrim &&
@@ -51,7 +40,6 @@ export const submitConfidentialTransferThunk = createAsyncThunk<
         walletPublicKey,
         networkPassphrase,
         sorobanRpcUrl,
-        senderPrivKeyScalarHex,
         senderPrivateAddress: senderTrim,
         recipientStellarAddress: payload.recipientStellarAddress.trim(),
         recipientPrivateAddressStpl1: "",

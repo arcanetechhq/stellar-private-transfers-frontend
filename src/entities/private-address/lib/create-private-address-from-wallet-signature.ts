@@ -1,17 +1,17 @@
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
-import type { Dispatch, UnknownAction } from "@reduxjs/toolkit";
-import {
-  setDefaultNonce,
-  setPrivateAddressRecordAndScalar,
-} from "../model/private-address";
-import type { PrivateAddressState } from "../model/types";
-import { privacyPoolService } from "@/shared/lib/privacy-pool/privacy-pool-service";
+import type { RootState } from "@/store";
+import { getPrivacyPoolService, buildPrivateAddressSignMessage } from "@/shared/lib/privacy-sdk/index.js";
 import { recipientScalarHexFromStellarSignature } from "@/shared/lib/private-address/recipient-scalar-hex";
-import { buildPrivateAddressSignMessage } from "@/shared/lib/private-address/privacy-pool-sdk-private-address";
+import { syncLocalPrivateAddressToSdkState } from "@/shared/lib/privacy-sdk/sync-local-private-address-to-sdk-state.js";
+import {
+  readWalletDefaultPrivateAddressNonceFromSdkState,
+  saveWalletPrivateAddressRecordToSdkState,
+  setWalletDefaultPrivateAddressNonceToSdkState,
+} from "@/shared/lib/privacy-sdk/wallet-private-address-sdk-state.js";
+import { saveWalletPrivateAddressScalarToSdkState } from "@/shared/lib/privacy-sdk/wallet-scalar-sdk-state.js";
 
 type CreatePrivateAddressFromWalletParameters = {
-  dispatch: Dispatch<UnknownAction>;
-  getState: () => { privateAddress: PrivateAddressState };
+  getState: () => RootState;
   publicKey: string;
   trimmedNonce: string;
 };
@@ -19,7 +19,7 @@ type CreatePrivateAddressFromWalletParameters = {
 export async function createPrivateAddressFromWalletSignature(
   parameters: CreatePrivateAddressFromWalletParameters,
 ): Promise<void> {
-  const { dispatch, getState, publicKey, trimmedNonce } = parameters;
+  const { getState, publicKey, trimmedNonce } = parameters;
   const message = buildPrivateAddressSignMessage(publicKey, trimmedNonce);
   const { networkPassphrase } = await StellarWalletsKit.getNetwork();
   const { signedMessage } = await StellarWalletsKit.signMessage(message, {
@@ -27,19 +27,35 @@ export async function createPrivateAddressFromWalletSignature(
     networkPassphrase,
   });
   const privateAddress =
-    await privacyPoolService.generatePrivateAddressFromStellarSignature(
+    await getPrivacyPoolService().generatePrivateAddressFromStellarSignature(
       signedMessage,
     );
   const createdAt = Date.now();
   const scalarHex = await recipientScalarHexFromStellarSignature(signedMessage);
-  dispatch(
-    setPrivateAddressRecordAndScalar({
+  await saveWalletPrivateAddressRecordToSdkState({
+    owner: publicKey,
+    nonce: trimmedNonce,
+    privateAddress,
+    createdAt,
+  });
+  await syncLocalPrivateAddressToSdkState({
+    walletPublicKey: publicKey,
+    privateAddressStpl1: privateAddress,
+    registered: false,
+  });
+  await saveWalletPrivateAddressScalarToSdkState({
+    owner: publicKey,
+    nonce: trimmedNonce,
+    scalarHex,
+  });
+  const existingDefault = readWalletDefaultPrivateAddressNonceFromSdkState({
+    state: getState(),
+    owner: publicKey,
+  });
+  if (!existingDefault) {
+    await setWalletDefaultPrivateAddressNonceToSdkState({
+      owner: publicKey,
       nonce: trimmedNonce,
-      entry: { privateAddress, createdAt },
-      scalarHex,
-    }),
-  );
-  if (getState().privateAddress.defaultNonce === undefined) {
-    dispatch(setDefaultNonce(trimmedNonce));
+    });
   }
 }

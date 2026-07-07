@@ -26,6 +26,9 @@
   "onboardingRecipientNotice": "Recipient not registered",
   "onboardingRecipientDescription": "This transfer will onboard the recipient via the private-address registry. They can claim the funds after connecting their wallet.",
   "onboardingTransfer": "Onboarding transfer",
+  "errors": {
+    "inputNoteAlreadySpent": "One of the selected private notes was already spent on-chain. Refresh your balance and try again."
+  },
   "max": "MAX",
   "availableForMax": "Private balance: {{amount}}",
   "maxButton": "Max",

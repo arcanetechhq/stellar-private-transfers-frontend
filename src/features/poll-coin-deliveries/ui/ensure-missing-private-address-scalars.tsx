@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useStore } from "react-redux";
-import { useAppDispatch, useAppSelector } from "@/store";
+import { useAppSelector } from "@/store";
 import {
   ensurePrivateAddressScalarForNonce,
   selectPrivateAddressState,
@@ -8,7 +8,6 @@ import {
 import { selectWalletPublicKey } from "@/entities/wallet";
 
 export function EnsureMissingPrivateAddressScalars() {
-  const dispatch = useAppDispatch();
   const store = useStore();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const { byNonce, scalarByNonce } = useAppSelector(selectPrivateAddressState);
@@ -44,8 +43,7 @@ export function EnsureMissingPrivateAddressScalars() {
         if (attemptedReference.current.has(nonce)) {
           continue;
         }
-        await ensurePrivateAddressScalarForNonce({
-          dispatch,
+        const result = await ensurePrivateAddressScalarForNonce({
           getState: store.getState,
           publicKey,
           nonce,
@@ -53,14 +51,16 @@ export function EnsureMissingPrivateAddressScalars() {
         if (cancelled) {
           return;
         }
-        attemptedReference.current.add(nonce);
+        if (result.ok) {
+          attemptedReference.current.add(nonce);
+        }
       }
     };
     void run();
     return () => {
       cancelled = true;
     };
-  }, [publicKey, missingSignature, dispatch, store]);
+  }, [publicKey, missingSignature, store]);
 
   return null;
 }

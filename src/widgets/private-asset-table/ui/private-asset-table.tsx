@@ -4,7 +4,10 @@ import { Wallet } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppSelector } from "@/store";
 import { getAssetUsdPrice, useGetAssetsQuery } from "@/entities/asset";
-import { selectFinalizedAggregatesForPrivateAddress } from "@/entities/coin";
+import {
+  selectFirstPrivateAddressWithFinalizedCoins,
+  selectFinalizedAggregatesForPrivateAddress,
+} from "@/entities/coin";
 import {
   selectDefaultNonce,
   selectPrivateAddressByNonce,
@@ -22,15 +25,28 @@ export function PrivateAssetTable({
   const { t: translateAssets } = useTranslation("assets");
   const { t: translateOverview } = useTranslation("overview");
   const defaultNonce = useAppSelector(selectDefaultNonce);
-  const selectedPrivateAddress = useAppSelector(
-    selectPrivateAddressByNonce(defaultNonce ?? ""),
-  );
-  const aggregates = useAppSelector((state) =>
-    selectFinalizedAggregatesForPrivateAddress(
+  const selectedPrivateAddress = useAppSelector((state) =>
+    selectPrivateAddressByNonce(defaultNonce ?? "")(
       state,
-      selectedPrivateAddress?.privateAddress ?? undefined,
-    ),
+    )?.privateAddress.trim(),
   );
+  const fallbackPrivateAddress = useAppSelector(
+    selectFirstPrivateAddressWithFinalizedCoins,
+  );
+  const selectedAggregates = useAppSelector((state) =>
+    selectFinalizedAggregatesForPrivateAddress(state, selectedPrivateAddress),
+  );
+  const fallbackAggregates = useAppSelector((state) =>
+    selectFinalizedAggregatesForPrivateAddress(state, fallbackPrivateAddress),
+  );
+  const useFallbackAggregates =
+    selectedAggregates.length === 0 && fallbackAggregates.length > 0;
+  const effectivePrivateAddress = useFallbackAggregates
+    ? fallbackPrivateAddress
+    : selectedPrivateAddress;
+  const aggregates = useFallbackAggregates
+    ? fallbackAggregates
+    : selectedAggregates;
   const { data: assetCatalog } = useGetAssetsQuery();
 
   const aggregatesWithZeroAssets = useMemo(() => {
@@ -88,18 +104,13 @@ export function PrivateAssetTable({
             {translateOverview("privateAssetsTitle")}
           </h2>
         </div>
-        {/* <div className="asset-balances-panel__meta">
-          {postAddressPicker}
-          <p className="asset-balances-panel__count">
-            {translateAssets("privateAssets.assetsCount", {
-              count: aggregatesWithZeroAssets.length,
-            })}
-          </p>
-        </div> */}
+        {postAddressPicker ? (
+          <div className="asset-balances-panel__meta">{postAddressPicker}</div>
+        ) : undefined}
       </div>
       <PrivateAssetTableBody
         translateAssets={translateAssets}
-        noncesLength={selectedPrivateAddress ? 1 : 0}
+        noncesLength={effectivePrivateAddress ? 1 : 0}
         aggregates={aggregatesWithZeroAssets}
         assetMetaById={assetMetaById}
         assetUsdPriceById={assetUsdPriceById}

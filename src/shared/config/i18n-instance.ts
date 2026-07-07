@@ -17,6 +17,7 @@ import enAssets from "./locales/en/assets.json";
 import enTransactions from "./locales/en/transactions.json";
 import enDataExport from "./locales/en/dataExport.json";
 import enKyt from "./locales/en/kyt.json";
+import enPendingClaims from "./locales/en/pending-claims.json";
 
 const NAMESPACES = [
   "common",
@@ -36,6 +37,7 @@ const NAMESPACES = [
   "transactions",
   "dataExport",
   "kyt",
+  "pendingClaims",
 ] as const;
 
 i18n.use(initReactI18next).init({
@@ -63,6 +65,7 @@ i18n.use(initReactI18next).init({
       transactions: enTransactions,
       dataExport: enDataExport,
       kyt: enKyt,
+      pendingClaims: enPendingClaims,
     },
   },
 });

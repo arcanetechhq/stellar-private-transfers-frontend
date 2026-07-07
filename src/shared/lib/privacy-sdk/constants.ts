@@ -1,0 +1,2 @@
+export const MIN_CONFIDENTIAL_TRANSFER_STROOPS = 1n;
+export const ZERO_STROOPS = 0n;

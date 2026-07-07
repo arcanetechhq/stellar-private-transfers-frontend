@@ -8,20 +8,29 @@ export type {
 
 export {
   coinReducer,
-  hydrateCoinState,
   addCoin,
   finalizeCoin,
   markCoinSpent,
   resetCoinState,
   selectCoinItems,
   selectCoinsByPrivateAddress,
+  selectFirstPrivateAddressWithFinalizedCoins,
   selectPrivateAddressesWithCoins,
   selectFinalizedAggregatesForPrivateAddress,
   type CoinState,
   type CoinRootState,
 } from "./model/coin-slice";
+export { coinSdkSyncMiddleware } from "./model/coin-sdk-sync-middleware.js";
+export {
+  syncCoinItemsToSdkState,
+  upsertPrivateRecordToSdkState,
+} from "./lib/sync-private-records-to-sdk.js";
 
-export { normalizeCommitmentHex, loadCoinState, saveCoinState } from "./lib/persist-coin";
+export { normalizeCommitmentHex } from "./lib/persist-coin";
+export {
+  mapPrivateRecordsToCoinItems,
+  mapPrivateRecordToCoinWithMetadata,
+} from "./lib/map-private-records-to-coins.js";
 
 export { existingSpentCoinMatchesIncomingDelivery } from "./lib/ledger-commitment";
 
@@ -34,4 +43,3 @@ export {
 } from "./lib/private-spend-coin-selection";
 
 export { withZeroAmountPrivateAssetRows } from "./lib/private-asset-aggregates";
-

@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import { lookupRecipientPrivateAddress } from "@/shared/lib/registry/registry-lookup";
-import {
-  getDefaultStellarNetworkConfig,
-  getRequiredPrivateAddressRegistryContractId,
-} from "@/shared/stellar/stellar-network-environment";
+import { usePrivacySdkClient } from "@/app/providers/privacy-sdk-provider";
 import { isValidStellarPublicAddress } from "@/shared/lib/stellar/is-valid-stellar-public-address";
 
 const RECIPIENT_LOOKUP_DEBOUNCE_MS = 400;
@@ -20,6 +16,7 @@ export function useRecipientRegistryStatus(parameters: {
   walletPublicKey: string | undefined;
 }): RecipientRegistryStatus {
   const [status, setStatus] = useState<RecipientRegistryStatus>("idle");
+  const { client, ready } = usePrivacySdkClient();
   const recipientTrim = parameters.recipient.trim();
   const walletPublicKey = parameters.walletPublicKey?.trim() ?? "";
   const recipientValid = isValidStellarPublicAddress(recipientTrim);
@@ -27,10 +24,10 @@ export function useRecipientRegistryStatus(parameters: {
     recipientTrim.length > 0 &&
     walletPublicKey.length > 0 &&
     recipientTrim !== walletPublicKey;
-  const shouldLookup = recipientValid && recipientDiffersFromSender;
+  const shouldLookup = recipientValid && recipientDiffersFromSender && ready && Boolean(client);
 
   useEffect(() => {
-    if (!shouldLookup) {
+    if (!shouldLookup || !client) {
       setStatus("idle");
       return;
     }
@@ -40,14 +37,9 @@ export function useRecipientRegistryStatus(parameters: {
       void (async () => {
         setStatus("checking");
         try {
-          const { networkPassphrase, sorobanRpcUrl } =
-            getDefaultStellarNetworkConfig();
-          const lookup = await lookupRecipientPrivateAddress({
-            registryContractId: getRequiredPrivateAddressRegistryContractId(),
-            recipientStellarAddress: recipientTrim,
+          const lookup = await client.checkRegistrationStatus({
+            address: recipientTrim,
             walletPublicKey,
-            networkPassphrase,
-            sorobanRpcUrl,
           });
           if (cancelled) {
             return;
@@ -67,7 +59,7 @@ export function useRecipientRegistryStatus(parameters: {
       cancelled = true;
       globalThis.clearTimeout(timeoutId);
     };
-  }, [recipientTrim, shouldLookup, walletPublicKey]);
+  }, [client, recipientTrim, shouldLookup, walletPublicKey]);
 
   return status;
 }

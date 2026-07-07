@@ -13,7 +13,7 @@ Short overview of **stellar-payment-client-v2**: a React client for Stellar paym
 | Styling             | **Tailwind CSS** 4, **shadcn/ui**-style primitives (**Radix UI**), **MUI** + **Emotion**, `class-variance-authority`, `tailwind-merge`                                                                                                                               |
 | i18n                | **i18next**, **react-i18next** (`shared/config/locales/`)                                                                                                                                                                                                            |
 | Blockchain / wallet | `@creit-tech/stellar-wallets-kit` (JSR)                                                                                                                                                                                                                              |
-| Global client state | **Redux Toolkit** (`@reduxjs/toolkit`), **react-redux** — store and typed hooks in `src/store/`, contact slice in `entities/contact/`                                                                                                                                                      |
+| Global client state | **Redux Toolkit** (`@reduxjs/toolkit`), **react-redux** — store and typed hooks in `src/store/`, contact slice in `entities/contact/`                                                                                                                                |
 | Linting             | **ESLint** 9 (flat config: `eslint.config.ts`) — `typescript-eslint`, `eslint-plugin-react`, `eslint-plugin-sonarjs`, `eslint-plugin-unicorn`, `eslint-plugin-tailwindcss`, `eslint-plugin-better-max-params`, custom **no-comments** rule (`eslint/no-comments.js`) |
 | Path alias          | `@/*` → `src/*`                                                                                                                                                                                                                                                      |
 
@@ -33,9 +33,9 @@ JSR registry for scoped packages: see `.npmrc` (`@jsr:registry`).
 
 | Piece                                                                          | Role                                                                                                                                                                                                           |
 | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`src/store/store.ts`](src/store/store.ts)                                   | `configureStore` with reducer key **`contact`**. Optional `preloadedState.contact` from `loadContactState()` (localStorage). `store.subscribe` calls `saveContactState` on the `contact` branch after updates. |
+| [`src/store/store.ts`](src/store/store.ts)                                     | `configureStore` with reducer key **`contact`**. Optional `preloadedState.contact` from `loadContactState()` (localStorage). `store.subscribe` calls `saveContactState` on the `contact` branch after updates. |
 | [`src/store/hooks.ts`](src/store/hooks.ts)                                     | Typed **`useAppDispatch`** and **`useAppSelector`**.                                                                                                                                                           |
-| [`src/store/redux-hooks.d.ts`](src/store/redux-hooks.d.ts)                     | Type alias **`UseAppSelector`** (`TypedUseSelectorHook<RootState>`). Import from `@/store` or `@/store/redux-hooks`.                                                                                             |
+| [`src/store/redux-hooks.d.ts`](src/store/redux-hooks.d.ts)                     | Type alias **`UseAppSelector`** (`TypedUseSelectorHook<RootState>`). Import from `@/store` or `@/store/redux-hooks`.                                                                                           |
 | [`src/app/providers/store-provider.tsx`](src/app/providers/store-provider.tsx) | Wraps the tree with **`Provider`** from `react-redux`. Composed in [`src/app/app.tsx`](src/app/app.tsx) (outside `I18nProvider`, inside is fine too if order changes).                                         |
 
 **`RootState.contact`**: `{ items: Contact[] }` — list and `addContact` live in **`src/entities/contact/model/contact.ts`**. Persistence (read/write JSON, key `stellar-payment-contact-v1`) is in **`src/entities/contact/lib/persist-contact.ts`** and is only wired from `src/store/store.ts`, not from feature UI.
@@ -69,6 +69,7 @@ Extra material (`references/`, `templates/`) sits inside each skill folder.
 - Respect project **ESLint** rules (including function/file size limits, `better-max-params`, and the custom comment rule with TODO/FIXME/NOTE allowed). Use the ESLint MPC to perform the linting
 - Keep diffs focused: change only what the task needs; match style of surrounding code.
 - Do not add markdown documentation unless explicitly requested; this file is the exception as the agent convention.
+- Strictly forbid `Reflect` usage (`Reflect.get`, `Reflect.has`, and related APIs); use direct property access and `Object.hasOwn` checks instead.
 
 ## Learned User Preferences
 
@@ -81,18 +82,21 @@ Extra material (`references/`, `templates/`) sits inside each skill folder.
 - Home Send/Deposit/Withdraw stay disabled until registry status is `active`; show Register account CTA while `checking` or `unregistered`.
 - Transaction flows must reuse wallet private address and scalar from the provider (`ensureWalletPrivateAddress` / `ensureWalletScalar`), not regenerate or re-sign unnecessarily.
 - Do not use `VITE_NOTE_AUDIT_PUBLIC_KEY_X` / `VITE_NOTE_AUDIT_PUBLIC_KEY_Y`; use single `VITE_STELLAR_AUDIT_PUBLIC_KEY` for ZK audit public key.
+- Do not read `state.privacySdkState` or whole SDK state branches directly in features/entities; use `@arcane/privacy-sdk-stellar` read API methods or `shared/lib/privacy-sdk` point reads only.
+- Do not call `privacySdkState.bridge`, `bridge.init`, `stellarStateDefinitions`, or bridge-writer helpers in app code; SDK state writes go through public `StellarPrivacyClient` methods (for example `saveWalletPrivateAddressRecord`, `saveWalletPrivateAddressScalar`) via `getPrivacySdkClientOrThrow()`.
 
 ## Learned Workspace Facts
 
-- Local Node version is pinned in **`.nvmrc`** at the repo root; use it when switching versions for commands in this project.
-- **`index.html`** uses the product title **Arcane private payments** (not generic Stellar wording).
+- Local Node version is pinned in **`.nvmrc`** at the repo root (use it when switching versions); **`index.html`** uses the product title **Arcane private payments** (not generic Stellar wording).
 - For privacy-pool prove transaction inputs, `tokenAddress` should come from the asset API field `clientContract` (not from a token symbol/code field).
 - Contacts store `stellarAddress` (validated Stellar G-address); transfers resolve recipients via on-chain registry lookup.
-- Soroban bindings: pool client in `generated/contract`, registry client in `generated/registry` (`registry-contract` package alias).
-- Required contract env vars: `VITE_POOL_CONTRACT`, `VITE_PRIVATE_ADDRESS_REGISTRY_CONTRACT`.
-- ZK audit env: `VITE_APPLICATION_ID` and `VITE_STELLAR_AUDIT_PUBLIC_KEY` (128-char lowercase `X`+`Y` hex from audit-backend app create); resolved in `build-transaction-audit-parameters.ts` via `@auditable/privacy-pool-zk-sdk` `resolveTransactionAuditParams`.
-- Local `@auditable/privacy-pool-zk-sdk`: `cd soroban-privacy-pools/client-sdk && npm run build && npm link`, then `cd stellar-payment-client-v2 && npm link @auditable/privacy-pool-zk-sdk` (re-run link after `npm install` in the client).
+- `@arcane/privacy-sdk-stellar` owns generated pool/registry bindings and Soroban RPC; payment client passes only network, wallet, state, assets, policy, and `transactEnvironment.signTransaction` — no local `generated/contract`, `registry-contract`, `@stellar/stellar-sdk/rpc`, or contract client factories.
+- Required contract and ZK audit env vars: `VITE_POOL_CONTRACT`, `VITE_PRIVATE_ADDRESS_REGISTRY_CONTRACT`, `VITE_APPLICATION_ID`, `VITE_STELLAR_AUDIT_PUBLIC_KEY` (128-char lowercase `X`+`Y` hex from audit-backend app create); resolved in `build-transaction-audit-parameters.ts` via `@auditable/privacy-pool-zk-sdk` `resolveTransactionAuditParams`.
+- Local linked packages: `@auditable/privacy-pool-zk-sdk` from `soroban-privacy-pools/client-sdk`; `@arcane/privacy-sdk-{core,state-redux,state-memory,stellar}` from `privacy-layer-sdk` (build each package, `npm link`, then link into the payment client; re-run after `npm install`). When linking, `core` and `state-redux` must be globally linked before `stellar`, otherwise `npm link` for the stellar package tries to fetch the private `@arcane/privacy-sdk-core` from the public registry and fails.
 - Never generate ptau or Groth16 zkey in automation; use artifacts from `soroban-privacy-pools` (`client-sdk/assets`, user-maintained).
 - Pending claims UI uses `entities/pending-claims` RTK Query against backend `/api/pending-claims`.
 - `WalletPrivateAddressProvider` centralizes registry status, wallet `stpl1`/scalar, and `actionsEnabled`; unregistered-recipient transfers use temporary recipient scalar + pool `transact(..., onboarding)` with `senderPrivKeyScalarHex` from `ensureWalletScalar()`.
 - Registry/SDK serialization: `get_private_address` simulate may return void/null, `{ tag: "None" }`, `{ tag: "Some", values: [record] }`, or a direct record; SDK `Option<T>` is `T | undefined`, contract UDT void unions use `{ tag: "None" }` without `values`.
+- KYT inspect rejections surface in Sonner toasts via `KytInspectError` and localized strings in `shared/config/locales/kyt.json` from `requestKytPassageForPoolInteraction`.
+- SDK operation wrappers must read the tx hash from `receipt.operationId` after `execute()`, not the whole receipt object (deposit/claim/transfer already do this); passing the raw receipt into `state.txId`/success-screen navigation breaks `.trim()`-style string handling downstream.
+- After SDK transfer/withdraw execute, post every deliverable `outputRecords` entry (target and change notes with `privateAddress`, `coinNote`, `commitmentHex`, and `depositScalarHex`) via `postOutputRecordDeliveries`; deposits post the deposited note through `postDepositDelivery`.

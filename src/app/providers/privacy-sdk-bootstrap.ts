@@ -1,0 +1,86 @@
+import {
+  createDefaultTransactEngine,
+  createStellarPolicyAdapterFromEnvironment,
+  createStellarPrivacyClientFromResolvedConfig,
+  getPrivacyPoolService,
+  isStellarPrivacyClient,
+  loadDefaultStellarBrowserAssets,
+  resolveStellarPrivacyClientConfig,
+  type StellarBrowserPrivacyClientConfig,
+  type StellarPrivacyClient,
+} from "@arcane/privacy-sdk-stellar";
+import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
+import type { PrivacyPoolService } from "@arcane/privacy-sdk-stellar/transact";
+import {
+  buildStellarTransactEnvironment,
+  readAuditPublicKeyHexFromEnvironment,
+} from "@/shared/lib/privacy-sdk/build-transact-environment.js";
+import {
+  attachPrivacyTransactRuntimeResolverProxies,
+  setPrivacyTransactContext,
+} from "@/shared/lib/privacy-sdk/transact-context.js";
+
+async function createWalletAdapter(networkPassphrase: string) {
+  return {
+    getAddress: async () => {
+      const { address } = await StellarWalletsKit.getAddress();
+      return address;
+    },
+    authorizeMessage: async (message: Uint8Array | string) => {
+      const payload =
+        typeof message === "string" ? message : new TextDecoder().decode(message);
+      const { signedMessage } = await StellarWalletsKit.signMessage(payload, {
+        networkPassphrase,
+      });
+      return new TextEncoder().encode(signedMessage);
+    },
+    signTransactionPayload: async (payload: { operationId: string; signed: boolean }) =>
+      payload,
+  };
+}
+
+async function initializePrivacySdkClient(
+  stateAdapter: StellarBrowserPrivacyClientConfig["state"],
+  assets: Awaited<ReturnType<typeof loadDefaultStellarBrowserAssets>>,
+) {
+  const transactEnvironment = attachPrivacyTransactRuntimeResolverProxies(
+    buildStellarTransactEnvironment(),
+  );
+  const resolved = await resolveStellarPrivacyClientConfig(
+    {
+      network: transactEnvironment.network,
+      wallet: await createWalletAdapter(transactEnvironment.network.networkPassphrase),
+      state: stateAdapter,
+      assets,
+      auditPublicKeyHex: readAuditPublicKeyHexFromEnvironment(),
+      transactEnvironment,
+      policy: createStellarPolicyAdapterFromEnvironment(transactEnvironment),
+    },
+    async (input) => createDefaultTransactEngine(input.assets, input.transactEnvironment),
+  );
+  if (!resolved.ok) {
+    throw new Error("Privacy SDK client rejected during initialization.");
+  }
+  const engineTransactEnvironment = resolved.config.transactEnvironment;
+  if (!engineTransactEnvironment) {
+    throw new Error("Privacy SDK transact environment is missing after resolve.");
+  }
+  attachPrivacyTransactRuntimeResolverProxies(engineTransactEnvironment);
+  const created = createStellarPrivacyClientFromResolvedConfig(resolved.config);
+  if (!isStellarPrivacyClient(created)) {
+    throw new Error("Privacy SDK client rejected during initialization.");
+  }
+  setPrivacyTransactContext({
+    transactEnvironment: engineTransactEnvironment,
+    client: created,
+    privacyPoolService: getPrivacyPoolService() as unknown as PrivacyPoolService,
+  });
+  return created;
+}
+
+export async function bootstrapPrivacySdkClient(
+  stateAdapter: StellarBrowserPrivacyClientConfig["state"],
+): Promise<StellarPrivacyClient> {
+  const assets = await loadDefaultStellarBrowserAssets();
+  return initializePrivacySdkClient(stateAdapter, assets);
+}

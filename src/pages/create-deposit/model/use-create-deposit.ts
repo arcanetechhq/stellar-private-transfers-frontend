@@ -1,4 +1,4 @@
-import { type FormEvent, useCallback, useState } from "react";
+import { type FormEvent, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { useWalletPrivateAddress } from "@/features/register-private-address";
@@ -74,56 +74,47 @@ export function useCreateDeposit() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const walletPublicKey = useAppSelector(selectWalletPublicKey) ?? "";
-  const { ensureWalletPrivateAddress, ensureWalletScalar } =
-    useWalletPrivateAddress();
+  const { privateAddressStpl1 } = useWalletPrivateAddress();
   const {
     mutateAsync: submitDeposit,
     isPending: isSubmitting,
     error: submitError,
   } = useDepositTransaction();
   const form = useCreateDepositForm({ isSubmitting });
-  const [isPreparingWallet, setIsPreparingWallet] = useState(false);
-  const isActionPending = isSubmitting || isPreparingWallet;
 
-  const handleSubmit = useCallback(async (event: FormEvent) => {
-    event.preventDefault();
-    if (!form.selectedAsset || isActionPending) {
-      return;
-    }
-    setIsPreparingWallet(true);
-    try {
-      const privateAddress = await ensureWalletPrivateAddress();
-      await ensureWalletScalar();
-      if (!form.canSubmit) {
+  const handleSubmit = useCallback(
+    async (event: FormEvent) => {
+      event.preventDefault();
+      const trimmedPrivateAddress = privateAddressStpl1.trim();
+      if (!form.selectedAsset || !form.canSubmit || isSubmitting || !trimmedPrivateAddress) {
         return;
       }
-      await submitDepositSuccessFlow({
-        submitDeposit,
-        dispatch,
-        navigate,
-        selectedAsset: form.selectedAsset,
-        numericAmount: form.numericAmount,
-        destinationPrivateAddressPreview: privateAddress,
-        walletPublicKey,
-      });
-    } catch (error: unknown) {
-      console.error("Deposit failed:", error);
-    } finally {
-      setIsPreparingWallet(false);
-    }
-  }, [
-    dispatch,
-    ensureWalletPrivateAddress,
-    ensureWalletScalar,
-    form.canSubmit,
-    form.destinationPrivateAddressPreview,
-    form.numericAmount,
-    form.selectedAsset,
-    isActionPending,
-    navigate,
-    submitDeposit,
-    walletPublicKey,
-  ]);
+      try {
+        await submitDepositSuccessFlow({
+          submitDeposit,
+          dispatch,
+          navigate,
+          selectedAsset: form.selectedAsset,
+          numericAmount: form.numericAmount,
+          destinationPrivateAddressPreview: trimmedPrivateAddress,
+          walletPublicKey,
+        });
+      } catch (error: unknown) {
+        console.error("Deposit failed:", error);
+      }
+    },
+    [
+      dispatch,
+      form.canSubmit,
+      form.numericAmount,
+      form.selectedAsset,
+      isSubmitting,
+      navigate,
+      privateAddressStpl1,
+      submitDeposit,
+      walletPublicKey,
+    ],
+  );
 
   return {
     assets: form.assets,
@@ -139,10 +130,10 @@ export function useCreateDeposit() {
     networkFee: form.networkFee,
     receivedAmount: form.receivedAmount,
     handleSubmit,
-    canSubmit: form.canSubmit && !isActionPending,
+    canSubmit: form.canSubmit && !isSubmitting,
     selectedPrivateAddressNonce: form.selectedPrivateAddressNonce,
     destinationPrivateAddressPreview: form.destinationPrivateAddressPreview,
-    isSubmitting: isActionPending,
+    isSubmitting,
     shouldGeneratePrivateAddress: false,
     submitErrorMessage: submitError?.message,
   };

@@ -1,0 +1,19 @@
+{
+  "title": "Pending claims",
+  "subtitle": "Onboarding notes indexed for your Stellar address. Claim them after registering your private address.",
+  "connectWalletPrompt": "Connect your wallet to view pending claims.",
+  "loading": "Loading pending claims…",
+  "loadError": "Could not load pending claims.",
+  "empty": "No pending claims for this wallet.",
+  "fromTx": "Pool tx",
+  "claim": "Claim",
+  "claiming": "Claiming…",
+  "claimError": "Could not claim pending note.",
+  "unknownAsset": "Unknown",
+  "errors": {
+    "claimNotFound": "This pending claim is no longer available.",
+    "claimOwnerMismatch": "This pending claim belongs to another wallet.",
+    "claimAlreadySpent": "This pending claim was already spent.",
+    "claimMissingNullifier": "This pending claim is missing spend metadata."
+  }
+}
