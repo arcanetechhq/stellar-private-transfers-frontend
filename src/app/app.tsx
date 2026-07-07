@@ -1,3 +1,4 @@
+import React from "react";
 import { RouterProvider } from "react-router/dom";
 import { I18nProvider } from "./providers/i18n-provider";
 import { StoreProvider } from "./providers/store-provider";

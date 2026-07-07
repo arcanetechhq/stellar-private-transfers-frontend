@@ -1,21 +1,21 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { type AssetWithTrustline } from "@/entities/asset";
-import { isNumericDecimalInput } from "@/shared/lib/numeric-decimal-input";
 import { isValidStellarPublicAddress } from "@/shared/lib/stellar/is-valid-stellar-public-address";
-import {
-  parseWithdrawalAmountInput,
-  parseWithdrawalBalance,
-} from "../lib/format-withdrawal-amount";
-import { PERCENTAGE_DIVISOR } from "./create-withdrawal";
+import { parseWithdrawalAmountInput } from "../lib/format-withdrawal-amount";
 import type { PrivateWithdrawalSuccess } from "./private-withdrawal-success";
 import { usePrivateWithdrawal } from "./use-private-withdrawal";
 import { usePrivateWithdrawalSubmitHandler } from "./use-private-withdrawal-submit-handler";
 import { useWithdrawalPrivateAssets } from "./use-withdrawal-private-assets";
+import { useWithdrawalAmountInputs } from "./use-withdrawal-amount-inputs";
+import {
+  useWithdrawalFlowStepHandlers,
+  type WithdrawalFlowStep,
+} from "./use-withdrawal-flow-step-handlers";
 
-export type WithdrawalFlowStep = "form" | "review" | "success";
+export type { WithdrawalFlowStep } from "./use-withdrawal-flow-step-handlers";
 
 interface WithdrawalCanSubmitInput {
   senderPrivateAddress: string;
@@ -39,40 +39,6 @@ function computeWithdrawalCanSubmit(input: WithdrawalCanSubmitInput): boolean {
   );
 }
 
-function useWithdrawalAmountInputs(
-  selectedAsset: AssetWithTrustline | undefined,
-) {
-  const [amount, setAmount] = useState("");
-  const numericBalance = parseWithdrawalBalance(selectedAsset?.balance);
-  const handlePercentage = (percentage: number) => {
-    setAmount(((numericBalance * percentage) / PERCENTAGE_DIVISOR).toString());
-  };
-  const handleMaxAmount = () => {
-    if (selectedAsset?.balance) {
-      setAmount(selectedAsset.balance.replaceAll(",", ""));
-    }
-  };
-  const receivedAmount = useMemo(() => {
-    if (!amount) {
-      return 0;
-    }
-    return parseWithdrawalAmountInput(amount);
-  }, [amount]);
-  const handleAmountChange = (value: string) => {
-    if (value === "" || isNumericDecimalInput(value)) {
-      setAmount(value);
-    }
-  };
-  return {
-    amount,
-    handleAmountChange,
-    handlePercentage,
-    handleMaxAmount,
-    receivedAmount,
-    numericBalance,
-  };
-}
-
 export function useCreateWithdrawal() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -89,11 +55,7 @@ export function useCreateWithdrawal() {
     useWithdrawalPrivateAssets(assetIdFromUrl);
   const [destinationWallet, setDestinationWallet] = useState("");
   useEffect(() => {
-    if (publicKey) {
-      setDestinationWallet(publicKey);
-    } else {
-      setDestinationWallet("");
-    }
+    setDestinationWallet(publicKey ?? "");
   }, [publicKey]);
   const selectedAsset = tokenUi.selectedToken;
   const amountInputs = useWithdrawalAmountInputs(selectedAsset);
@@ -122,25 +84,14 @@ export function useCreateWithdrawal() {
         setStep("success");
       },
     });
-
-  function handleOpenReview() {
-    if (!canSubmit || isSubmitting) {
-      return;
-    }
-    setSubmitError(undefined);
-    setStep("review");
-  }
-
-  function handleCloseReview() {
-    if (isSubmitting) {
-      return;
-    }
-    setStep("form");
-  }
-
-  function handleSuccessDone() {
-    navigate("/", { flushSync: true });
-  }
+  const { handleOpenReview, handleCloseReview, handleSuccessDone } =
+    useWithdrawalFlowStepHandlers({
+      navigate,
+      canSubmit,
+      isSubmitting,
+      setSubmitError,
+      setStep,
+    });
 
   return {
     assets: privateAssets,

@@ -20,6 +20,17 @@ type PrivateWithdrawalSubmit = (payload: {
   destinationAddress: string;
 }) => Promise<{ txId: string; coinDeliveryWarning?: string }>;
 
+function readWithdrawalSubmitError(error: unknown): string {
+  if (isRejectedWithValue(error)) {
+    const payload = error.payload;
+    return typeof payload === "string" ? payload : "Withdrawal failed";
+  }
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return "Withdrawal failed";
+}
+
 function pushWithdrawalSuccess(parameters: {
   dispatch: AppDispatch;
   navigate: NavigateFunction;
@@ -111,16 +122,7 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
       });
     } catch (error: unknown) {
       console.error("Withdrawal failed:", error);
-      if (isRejectedWithValue(error)) {
-        const payload = error.payload;
-        setSubmitError(
-          typeof payload === "string" ? payload : "Withdrawal failed",
-        );
-      } else if (error instanceof Error) {
-        setSubmitError(error.message);
-      } else {
-        setSubmitError("Withdrawal failed");
-      }
+      setSubmitError(readWithdrawalSubmitError(error));
     } finally {
       parameters.setIsSubmitting(false);
     }

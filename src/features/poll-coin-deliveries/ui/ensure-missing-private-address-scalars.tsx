@@ -61,6 +61,4 @@ export function EnsureMissingPrivateAddressScalars() {
       cancelled = true;
     };
   }, [publicKey, missingSignature, store]);
-
-  return null;
 }

@@ -19,7 +19,7 @@ export function WalletPrivateAddressProvider({
         onClose={value.closeRegistryRegistrationModal}
         onRegistered={() => {
           value.closeRegistryRegistrationModal();
-          void value.refreshRegistryStatus();
+          value.refreshRegistryStatus().catch(() => {});
         }}
       />
     </WalletPrivateAddressContext.Provider>

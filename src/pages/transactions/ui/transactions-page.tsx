@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { useAppSelector } from "@/store";
 import {
@@ -18,7 +18,7 @@ export function TransactionsPage() {
   const [searchParameters, setSearchParameters] = useSearchParams();
   const selectedFromSearch = readSelectedTransactionIdFromSearch(searchParameters);
   const [selectedTransactionId, setSelectedTransactionId] = useState<
-    string | null
+    string | undefined
   >(selectedFromSearch);
   const transactions = useAppSelector(selectTransactions);
   const transactionsLoaded = useAppSelector(selectAreTransactionsLoaded);
@@ -38,7 +38,8 @@ export function TransactionsPage() {
 
   function handleTransactionSelect(transactionId: string) {
     setSelectedTransactionId((current) => {
-      const nextSelectedId = current === transactionId ? null : transactionId;
+      const nextSelectedId =
+        current === transactionId ? undefined : transactionId;
       setSearchParameters(
         (currentParameters) =>
           writeSelectedTransactionIdToSearch(
@@ -52,10 +53,10 @@ export function TransactionsPage() {
   }
 
   function handleCloseDetails() {
-    setSelectedTransactionId(null);
+    setSelectedTransactionId(undefined);
     setSearchParameters(
       (currentParameters) =>
-        writeSelectedTransactionIdToSearch(currentParameters, null),
+        writeSelectedTransactionIdToSearch(currentParameters),
       { replace: true },
     );
   }
@@ -71,7 +72,7 @@ export function TransactionsPage() {
             transactions={sortedTransactions}
             isHydrated={transactionsLoaded}
             variant="page"
-            selectedTransactionId={selectedTransactionId ?? undefined}
+            selectedTransactionId={selectedTransactionId}
             onTransactionSelect={handleTransactionSelect}
           />
         </section>
@@ -79,12 +80,12 @@ export function TransactionsPage() {
           className="transactions-route__panel"
           aria-hidden={!selectedTransaction}
         >
-          {selectedTransaction ? (
+          {selectedTransaction && (
             <TransactionDetailsPanel
               transaction={selectedTransaction}
               onClose={handleCloseDetails}
             />
-          ) : null}
+          )}
         </aside>
       </div>
     </div>

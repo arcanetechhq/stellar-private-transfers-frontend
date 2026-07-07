@@ -14,14 +14,14 @@ export function buildTransactionsPathWithSelection(
 
 export function readSelectedTransactionIdFromSearch(
   searchParameters: URLSearchParams,
-): string | null {
+): string | undefined {
   const value = searchParameters.get(SELECTED_TRANSACTION_SEARCH_KEY)?.trim();
-  return value && value.length > 0 ? value : null;
+  return value && value.length > 0 ? value : undefined;
 }
 
 export function writeSelectedTransactionIdToSearch(
   searchParameters: URLSearchParams,
-  transactionId: string | null,
+  transactionId?: string,
 ): URLSearchParams {
   const next = new URLSearchParams(searchParameters);
   if (transactionId) {
