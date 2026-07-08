@@ -6,8 +6,8 @@ import React, {
   useState,
   type ReactNode,
 } from "react";
-import type { StellarPrivacyClient } from "@arcane/privacy-sdk-stellar";
-import { hydrateReduxPrivacySdkState } from "@arcane/privacy-sdk-state-redux";
+import type { StellarPrivacyClient } from "@arcanetech/privacy-sdk-stellar";
+import { hydrateReduxPrivacySdkState } from "@arcanetech/privacy-sdk-state-redux";
 import {
   collectPoolContractIdsFromCoinItems,
   loadPrivacySdkState,

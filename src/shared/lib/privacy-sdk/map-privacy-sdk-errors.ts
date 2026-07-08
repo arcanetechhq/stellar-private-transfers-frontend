@@ -1,8 +1,8 @@
-import type { PrivacySdkError } from "@arcane/privacy-sdk-core";
-import { KytInspectError, parseKytReasonCode } from "@arcane/privacy-sdk-stellar/transact";
+import type { PrivacySdkError } from "@arcanetech/privacy-sdk-core";
+import { KytInspectError, parseKytReasonCode } from "@arcanetech/privacy-sdk-stellar/transact";
 import { i18n } from "@/shared/config/i18n-instance.js";
 
-export { KytInspectError, parseKytReasonCode } from "@arcane/privacy-sdk-stellar/transact";
+export { KytInspectError, parseKytReasonCode } from "@arcanetech/privacy-sdk-stellar/transact";
 
 const PENDING_CLAIM_ERROR_KEYS: Record<string, string> = {
   pending_claim_not_found: "pendingClaims:errors.claimNotFound",

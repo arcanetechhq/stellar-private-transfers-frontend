@@ -1,7 +1,7 @@
 import {
   resolvePoolApplicationId,
   type StellarTransactEnvironment,
-} from "@arcane/privacy-sdk-stellar/transact";
+} from "@arcanetech/privacy-sdk-stellar/transact";
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
 import { Networks } from "@stellar/stellar-sdk";
 import { normalizeSorobanContractId } from "@/shared/stellar/normalize-soroban-contract-id.js";

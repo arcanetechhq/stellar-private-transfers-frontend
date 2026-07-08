@@ -1,4 +1,4 @@
-import * as StellarPrivacySdk from "@arcane/privacy-sdk-stellar";
+import * as StellarPrivacySdk from "@arcanetech/privacy-sdk-stellar";
 import { getPrivacySdkClientOrThrow } from "./transact-context.js";
 
 type PrivacySdkStateRoot = { privacySdkState?: unknown };

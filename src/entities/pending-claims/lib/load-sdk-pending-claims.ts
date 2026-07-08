@@ -1,7 +1,7 @@
 import type {
   StellarPendingClaim,
   StellarPrivacyClient,
-} from "@arcane/privacy-sdk-stellar";
+} from "@arcanetech/privacy-sdk-stellar";
 import { getRequiredApiBaseUrl } from "@/shared/stellar/stellar-network-environment.js";
 import { assetLegToTokenAddress } from "@/shared/lib/privacy-sdk/index.js";
 import type { PendingClaimItem } from "../model/pending-claim-types.js";

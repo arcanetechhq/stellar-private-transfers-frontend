@@ -4,7 +4,7 @@ import type {
   RunConfidentialTransferResult,
 } from "./confidential-transfer-mutation-types";
 import { prepareTransferExecution } from "./run-confidential-transfer-prepare";
-import type { TemporaryRecipientKeyMaterial } from "@arcane/privacy-sdk-stellar/transact";
+import type { TemporaryRecipientKeyMaterial } from "@arcanetech/privacy-sdk-stellar/transact";
 
 export type {
   RunConfidentialTransferInput,

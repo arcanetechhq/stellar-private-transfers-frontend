@@ -1,4 +1,4 @@
-import type { StellarAsset } from "@arcane/privacy-sdk-stellar";
+import type { StellarAsset } from "@arcanetech/privacy-sdk-stellar";
 import type { AssetDto } from "@/entities/asset";
 
 export function mapAssetDtoToStellarAsset(asset: AssetDto): StellarAsset {

@@ -1,7 +1,7 @@
 import type {
   StellarPrivacyClient,
   StellarPrivateRecord,
-} from "@arcane/privacy-sdk-stellar";
+} from "@arcanetech/privacy-sdk-stellar";
 import {
   mapPrivacySdkError,
   mapPrivacySdkErrors,

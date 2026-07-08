@@ -1,5 +1,5 @@
 import { getConfiguredPrivacyPoolService } from "./transact-context.js";
-import { decodePrivateAddress } from "@arcane/privacy-sdk-stellar/transact";
+import { decodePrivateAddress } from "@arcanetech/privacy-sdk-stellar/transact";
 
 type EphemeralPoint = {
   x: string;

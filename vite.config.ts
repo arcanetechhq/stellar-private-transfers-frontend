@@ -4,8 +4,6 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
 const projectRoot = path.resolve(__dirname);
-const privacyLayerSdkRoot = path.resolve(projectRoot, "../privacy-layer-sdk");
-const sorobanPrivacyPoolsRoot = path.resolve(projectRoot, "../soroban-privacy-pools");
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
@@ -14,7 +12,7 @@ export default defineConfig({
   },
   server: {
     fs: {
-      allow: [projectRoot, privacyLayerSdkRoot, sorobanPrivacyPoolsRoot],
+      allow: [projectRoot],
     },
   },
   resolve: {

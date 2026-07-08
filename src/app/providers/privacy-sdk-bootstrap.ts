@@ -8,9 +8,9 @@ import {
   resolveStellarPrivacyClientConfig,
   type StellarBrowserPrivacyClientConfig,
   type StellarPrivacyClient,
-} from "@arcane/privacy-sdk-stellar";
+} from "@arcanetech/privacy-sdk-stellar";
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
-import type { PrivacyPoolService } from "@arcane/privacy-sdk-stellar/transact";
+import type { PrivacyPoolService } from "@arcanetech/privacy-sdk-stellar/transact";
 import {
   buildStellarTransactEnvironment,
   readAuditPublicKeyHexFromEnvironment,

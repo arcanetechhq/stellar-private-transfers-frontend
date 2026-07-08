@@ -1,5 +1,5 @@
 import type { Middleware, UnknownAction } from "@reduxjs/toolkit";
-import { STATE_BRIDGE_APPLY_WRITE } from "@arcane/privacy-sdk-state-redux";
+import { STATE_BRIDGE_APPLY_WRITE } from "@arcanetech/privacy-sdk-state-redux";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import type { RootState } from "@/store";
 import { savePrivacySdkState } from "../lib/persist-privacy-sdk-state.js";
@@ -34,4 +34,4 @@ export const privacySdkPersistMiddleware: Middleware<object, RootState> =
     return result;
   };
 
-export type { PrivacySdkStateReducerAction } from "@arcane/privacy-sdk-state-redux";
+export type { PrivacySdkStateReducerAction } from "@arcanetech/privacy-sdk-state-redux";

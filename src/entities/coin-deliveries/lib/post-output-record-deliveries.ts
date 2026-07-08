@@ -1,4 +1,4 @@
-import type { StellarPrivateRecord } from "@arcane/privacy-sdk-stellar";
+import type { StellarPrivateRecord } from "@arcanetech/privacy-sdk-stellar";
 import type { AppDispatch } from "@/store";
 import { stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops";
 import { buildCoinDeliveryPostBody } from "./build-coin-delivery-post-body";

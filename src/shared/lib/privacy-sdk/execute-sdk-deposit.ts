@@ -1,4 +1,4 @@
-import type { StellarPreparedOperation } from "@arcane/privacy-sdk-stellar";
+import type { StellarPreparedOperation } from "@arcanetech/privacy-sdk-stellar";
 import type { CoinWithMetadata } from "@/entities/coin";
 import { stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops.js";
 import { DEPOSIT_DISCLOSURE } from "./operation-adapters.js";

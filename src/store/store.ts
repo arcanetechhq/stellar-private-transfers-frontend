@@ -2,7 +2,7 @@ import { combineReducers, configureStore, Tuple } from "@reduxjs/toolkit";
 import {
   bindReduxStateAdapter,
   createReduxStateAdapter,
-} from "@arcane/privacy-sdk-state-redux";
+} from "@arcanetech/privacy-sdk-state-redux";
 import {
   contactReducer,
   loadContactState,

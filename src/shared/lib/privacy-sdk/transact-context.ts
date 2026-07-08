@@ -1,11 +1,11 @@
-import type { StellarPrivacyClient } from "@arcane/privacy-sdk-stellar";
+import type { StellarPrivacyClient } from "@arcanetech/privacy-sdk-stellar";
 import type {
   BuildTransferOnboardingAtExecuteInput,
   OnboardingPayload,
   PrivacyPoolService,
   StellarTransactEnvironment,
   TransferRecipientExecutionContext,
-} from "@arcane/privacy-sdk-stellar/transact";
+} from "@arcanetech/privacy-sdk-stellar/transact";
 
 let privacyPoolServiceInstance: PrivacyPoolService | undefined;
 let transactEnvironment: StellarTransactEnvironment | undefined;

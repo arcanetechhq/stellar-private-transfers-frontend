@@ -1,4 +1,4 @@
-import type { OnboardingPayload } from "@arcane/privacy-sdk-stellar/transact";
+import type { OnboardingPayload } from "@arcanetech/privacy-sdk-stellar/transact";
 import type { AppDispatch } from "@/store";
 import type { CoinWithMetadata } from "@/entities/coin";
 

@@ -1,4 +1,4 @@
-import type { StellarPrivacyClient } from "@arcane/privacy-sdk-stellar";
+import type { StellarPrivacyClient } from "@arcanetech/privacy-sdk-stellar";
 import { displayAmountToStroops } from "@/shared/lib/stellar/stroops";
 import { validateWithdrawOperation } from "@/shared/lib/privacy-sdk/operation-adapters.js";
 import type { RunPrivateWithdrawalMutationInput } from "./private-withdrawal-mutation-contract";

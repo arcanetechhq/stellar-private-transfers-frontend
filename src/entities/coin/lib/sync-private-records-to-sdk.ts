@@ -1,4 +1,4 @@
-import type { StellarPrivateRecord } from "@arcane/privacy-sdk-stellar";
+import type { StellarPrivateRecord } from "@arcanetech/privacy-sdk-stellar";
 import { tryGetPrivacySdkClient } from "@/shared/lib/privacy-sdk/transact-context.js";
 import type { CoinWithMetadata } from "../model/coin.js";
 import { mapCoinWithMetadataToPrivateRecord } from "@/shared/lib/privacy-sdk/upsert-private-record.js";

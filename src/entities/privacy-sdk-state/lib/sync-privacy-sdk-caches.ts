@@ -1,4 +1,4 @@
-import type { StellarPrivacyClient } from "@arcane/privacy-sdk-stellar";
+import type { StellarPrivacyClient } from "@arcanetech/privacy-sdk-stellar";
 import { assetApi, type AssetDto } from "@/entities/asset";
 import { syncCoinItemsToSdkState } from "@/entities/coin/lib/sync-private-records-to-sdk.js";
 import type { RootState } from "@/store";

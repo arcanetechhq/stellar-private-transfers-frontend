@@ -1,7 +1,7 @@
 import {
   buildPoolTransactionAuditParameters as sdkBuildPoolTransactionAuditParameters,
   parseAuditPublicKeyFromEnvHex,
-} from "@arcane/privacy-sdk-stellar/transact";
+} from "@arcanetech/privacy-sdk-stellar/transact";
 import { readPoolApplicationIdFromEnvironment } from "./build-transact-environment.js";
 import { getConfiguredPrivacyPoolService } from "./transact-context.js";
 import { readClientEnvironment } from "./read-client-environment.js";
@@ -41,14 +41,14 @@ export {
   tokenAddressToAssetLeg,
   frDecimalToPaddedBytes32,
   runTtlPreflight,
-} from "@arcane/privacy-sdk-stellar/transact";
+} from "@arcanetech/privacy-sdk-stellar/transact";
 
 export type {
   KytApplicationIdHints,
   OnboardingPayload,
   RequestKytPassageForPoolInteractionInput,
   StellarTransactEnvironment,
-} from "@arcane/privacy-sdk-stellar/transact";
+} from "@arcanetech/privacy-sdk-stellar/transact";
 
 export { buildStellarTransactEnvironment } from "./build-transact-environment.js";
 export {

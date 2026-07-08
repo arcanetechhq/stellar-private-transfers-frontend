@@ -1,4 +1,4 @@
-import type { StellarPendingClaim } from "@arcane/privacy-sdk-stellar";
+import type { StellarPendingClaim } from "@arcanetech/privacy-sdk-stellar";
 import type { PendingClaimItem } from "../model/pending-claim-types.js";
 
 function defaultString(value: string | undefined): string {

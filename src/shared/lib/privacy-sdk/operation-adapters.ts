@@ -1,4 +1,4 @@
-import type { StellarPrivacyClient } from "@arcane/privacy-sdk-stellar";
+import type { StellarPrivacyClient } from "@arcanetech/privacy-sdk-stellar";
 import { mapPrivacySdkErrors } from "./map-privacy-sdk-errors.js";
 import {
   mapPendingClaimItemToSdkClaim,

@@ -2,7 +2,7 @@ import type {
   StellarPendingClaim,
   StellarPrivacyClient,
   StellarPrivateRecord,
-} from "@arcane/privacy-sdk-stellar";
+} from "@arcanetech/privacy-sdk-stellar";
 import type { PendingClaimItem } from "@/entities/pending-claims/model/pending-claim-types.js";
 import { mapPrivacySdkErrors } from "@/shared/lib/privacy-sdk/map-privacy-sdk-errors.js";
 

@@ -2,7 +2,7 @@ import type { Middleware } from "@reduxjs/toolkit";
 import {
   STATE_BRIDGE_APPLY_WRITE,
   STATE_BRIDGE_HYDRATE,
-} from "@arcane/privacy-sdk-state-redux";
+} from "@arcanetech/privacy-sdk-state-redux";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import type { RootState } from "@/store";
 import { mapPrivateRecordsToCoinItemsFromSdkState } from "../lib/map-private-records-to-coins.js";

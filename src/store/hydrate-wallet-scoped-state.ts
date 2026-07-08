@@ -12,7 +12,7 @@ import {
   resetForWalletChange as resetTransactionsForWalletChange,
 } from "@/entities/transaction/model/transaction.js";
 import { mergeLegacyPrivateAddressIntoSdkBranch } from "@/shared/lib/privacy-sdk/wallet-private-address-sdk-branch.js";
-import { hydrateReduxPrivacySdkState } from "@arcane/privacy-sdk-state-redux";
+import { hydrateReduxPrivacySdkState } from "@arcanetech/privacy-sdk-state-redux";
 import type { AppDispatch } from "./store.js";
 
 type DispatchAction = Parameters<AppDispatch>[0];

@@ -1,5 +1,5 @@
-import type { StellarPrivateRecord } from "@arcane/privacy-sdk-stellar";
-import * as StellarPrivacySdk from "@arcane/privacy-sdk-stellar";
+import type { StellarPrivateRecord } from "@arcanetech/privacy-sdk-stellar";
+import * as StellarPrivacySdk from "@arcanetech/privacy-sdk-stellar";
 import {
   stroopsToDisplayAmount,
   readStroopsBigInt,

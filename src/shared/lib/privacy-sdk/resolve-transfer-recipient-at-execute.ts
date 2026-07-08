@@ -1,5 +1,5 @@
 import { getPrivacySdkClientOrThrow } from "./transact-context.js";
-import type { TransferRecipientExecutionContext } from "@arcane/privacy-sdk-stellar/transact";
+import type { TransferRecipientExecutionContext } from "@arcanetech/privacy-sdk-stellar/transact";
 
 export async function resolveTransferRecipientAtExecute(input: {
   recipientStellarAddress: string;
@@ -12,4 +12,4 @@ export async function resolveTransferRecipientAtExecute(input: {
   });
 }
 
-export { buildTransferOnboardingAtExecute } from "@arcane/privacy-sdk-stellar/transact";
+export { buildTransferOnboardingAtExecute } from "@arcanetech/privacy-sdk-stellar/transact";

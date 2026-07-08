@@ -1,4 +1,4 @@
-import type { PrivacyPoolService } from "@arcane/privacy-sdk-stellar/transact";
+import type { PrivacyPoolService } from "@arcanetech/privacy-sdk-stellar/transact";
 
 export type CoinData = Awaited<
   ReturnType<PrivacyPoolService["createAlignedShieldCoinData"]>
