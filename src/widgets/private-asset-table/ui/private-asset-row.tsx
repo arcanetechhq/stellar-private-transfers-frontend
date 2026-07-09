@@ -2,32 +2,10 @@ import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import type { AggregatedPrivateAssetRow } from "@/entities/coin";
 import { AssetRowIcon } from "@/shared/ui/asset-row-icon";
-
-const SMALL_BALANCE_THRESHOLD = 1;
-const SMALL_BALANCE_MIN_FRACTION_DIGITS = 3;
-const SMALL_BALANCE_MAX_FRACTION_DIGITS = 8;
-const REGULAR_BALANCE_FRACTION_DIGITS = 2;
-const USD_FRACTION_DIGITS = 2;
-
-function formatAggregatedBalance(value: number): string {
-  if (value < SMALL_BALANCE_THRESHOLD) {
-    return value.toLocaleString("en-US", {
-      minimumFractionDigits: SMALL_BALANCE_MIN_FRACTION_DIGITS,
-      maximumFractionDigits: SMALL_BALANCE_MAX_FRACTION_DIGITS,
-    });
-  }
-  return value.toLocaleString("en-US", {
-    minimumFractionDigits: REGULAR_BALANCE_FRACTION_DIGITS,
-    maximumFractionDigits: REGULAR_BALANCE_FRACTION_DIGITS,
-  });
-}
-
-function formatUsdAmount(value: number): string {
-  return value.toLocaleString("en-US", {
-    minimumFractionDigits: USD_FRACTION_DIGITS,
-    maximumFractionDigits: USD_FRACTION_DIGITS,
-  });
-}
+import {
+  formatAggregatedBalance,
+  formatUsdAmount,
+} from "../lib/format-asset-balance-amount";
 
 type PrivateAssetRowProperties = {
   row: AggregatedPrivateAssetRow;

@@ -25,7 +25,7 @@ export function Overview() {
 
   const transactions = useAppSelector(selectTransactions);
   const transactionsLoaded = useAppSelector(selectAreTransactionsLoaded);
-  const { mergedTransactions, claimControls } =
+  const { mergedTransactions, pendingAssetClaims, claimControls } =
     useTransactionPanelPendingClaims(transactions);
 
   const privateAmountByAssetId = new Map<string, number>();
@@ -57,14 +57,16 @@ export function Overview() {
           />
           <div className="grid grid-cols-1 min-[1180px]:grid-cols-[1fr_416px] gap-4">
             <div className="overview-right-rail order-1 min-[1180px]:order-2 min-[1180px]:col-start-2 min-[1180px]:row-start-1">
-              <PrivateAssetTable />
+              <PrivateAssetTable
+                pendingAssetClaims={pendingAssetClaims}
+                claimControls={claimControls}
+              />
             </div>
             <div className="order-2 min-[1180px]:order-1 min-[1180px]:col-start-1 min-[1180px]:row-start-1">
               <TransactionsPanel
                 transactions={mergedTransactions}
                 isHydrated={transactionsLoaded}
                 variant="overview"
-                claimControls={claimControls}
               />
             </div>
           </div>

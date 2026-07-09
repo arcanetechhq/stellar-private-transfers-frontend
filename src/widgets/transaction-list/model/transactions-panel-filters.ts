@@ -1,5 +1,4 @@
 import type { Transaction } from "@/entities/transaction";
-import { pinActivePendingClaimTransactions } from "../lib/pin-active-pending-claim-transactions.js";
 
 export type TransactionPeriod = "last30Days" | "last3Months" | "thisYear";
 export type TransactionTypeFilter = "all" | "incoming" | "outgoing";
@@ -127,7 +126,7 @@ export function filterTransactions(options: {
     );
   });
 
-  return pinActivePendingClaimTransactions(filtered, (left, right) =>
+  return filtered.toSorted((left, right) =>
     compareTransactions(left, right, filters.sort),
   );
 }

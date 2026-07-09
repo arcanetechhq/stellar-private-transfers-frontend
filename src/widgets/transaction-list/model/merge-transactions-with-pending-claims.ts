@@ -1,6 +1,8 @@
-import type { Transaction } from "@/entities/transaction";
 import { isPendingClaimTransactionId } from "@/entities/pending-claims";
-import { pinActivePendingClaimTransactions } from "../lib/pin-active-pending-claim-transactions.js";
+import {
+  sortTransactionsByDateDesc,
+  type Transaction,
+} from "@/entities/transaction";
 
 function shouldShowPendingClaimRowFromApi(
   row: Transaction,
@@ -40,7 +42,7 @@ export function mergeTransactionsWithPendingClaims(parameters: {
     }
     return true;
   });
-  return pinActivePendingClaimTransactions([
+  return sortTransactionsByDateDesc([
     ...activePendingClaimRows,
     ...storedTransactions,
   ]);

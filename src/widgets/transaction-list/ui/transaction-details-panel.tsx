@@ -13,7 +13,6 @@ import {
   getStatusLabel,
   resolveTransactionActivityTitle,
 } from "../lib/transaction-display";
-import { useTransactionDetailsPanel } from "../model/use-transaction-details-panel";
 import { TransactionDetailRow } from "./transaction-detail-row";
 
 type TransactionDetailsPanelProperties = {
@@ -107,9 +106,7 @@ export function TransactionDetailsPanel({
   transaction,
   onClose,
 }: TransactionDetailsPanelProperties) {
-  const { t: translateDetails } = useTranslation("transactionDetails");
   const { t: translateTransactions } = useTranslation("transactions");
-  const { chainEntry } = useTransactionDetailsPanel(transaction.id);
   const assetMap = useAssetLookup();
   const asset = assetMap.get(transaction.assetId);
   const walletPublicKey = useAppSelector(selectWalletPublicKey);
@@ -132,10 +129,9 @@ export function TransactionDetailsPanel({
   );
   const privateAddressLabel = translateTransactions("details.fields.privateAddress");
   const amountPrefix = getAmountPrefix(transaction.type);
-  const amountDisplay = `${amountPrefix}${transaction.amount.toLocaleString()} ${transaction.assetId.toUpperCase()}`;
-  const paymentRail = translateTransactions("details.paymentRail", {
-    asset: transaction.assetId.toUpperCase(),
-  });
+  const ticker = transaction.assetId.toUpperCase();
+  const amountDisplay = `${amountPrefix}${transaction.amount.toLocaleString()} ${ticker}`;
+  const feeDisplay = `0 ${ticker}`;
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -178,7 +174,12 @@ export function TransactionDetailsPanel({
           <TransactionDetailsStatusBadge tone={resolveTransactionStatusTone(transaction.status)}>
             {statusLabel}
           </TransactionDetailsStatusBadge>
-          <button className="transaction-detail-row__copy">
+          <button 
+            type="button"
+            aria-label={`View on Stellar Explorer`}
+            className="transaction-detail-row__copy"
+            onClick={() => window.open(`https://stellar.expert/explorer/testnet/tx/${transaction.id}`, "_blank")}
+          >
             <ArrowUpRightFromSquareIcon/>
           </button>
         </div>
@@ -210,7 +211,7 @@ export function TransactionDetailsPanel({
             />
             <TransactionDetailRow
               label={translateTransactions("details.fields.fee")}
-              value={translateTransactions("details.feeFree")}
+              value={feeDisplay}
             />
           </DetailSection>
           <DetailSection title={translateTransactions("details.sections.transfer")}>

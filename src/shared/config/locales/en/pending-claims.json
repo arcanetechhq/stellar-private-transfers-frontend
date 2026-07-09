@@ -8,6 +8,9 @@
   "fromTx": "Pool tx",
   "claim": "Claim",
   "claiming": "Claiming…",
+  "receive": "Receive",
+  "receiving": "Receiving",
+  "readyToReceive": "Ready to receive",
   "claimError": "Could not claim pending note.",
   "unknownAsset": "Unknown",
   "errors": {

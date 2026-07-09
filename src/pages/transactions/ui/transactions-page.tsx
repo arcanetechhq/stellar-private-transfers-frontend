@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { useAppSelector } from "@/store";
 import {
@@ -9,7 +9,7 @@ import {
   readSelectedTransactionIdFromSearch,
   TransactionDetailsPanel,
   TransactionsPanel,
-  useTransactionPanelPendingClaims,
+  useTransactionsWithPendingClaims,
   writeSelectedTransactionIdToSearch,
 } from "@/widgets/transaction-list";
 
@@ -21,8 +21,8 @@ export function TransactionsPage() {
   >(selectedFromSearch);
   const transactions = useAppSelector(selectTransactions);
   const transactionsLoaded = useAppSelector(selectAreTransactionsLoaded);
-  const { mergedTransactions, claimControls } =
-    useTransactionPanelPendingClaims(transactions);
+  const { mergedTransactions } =
+    useTransactionsWithPendingClaims(transactions);
 
   const selectedTransaction = useMemo(
     () =>
@@ -36,30 +36,33 @@ export function TransactionsPage() {
     setSelectedTransactionId(selectedFromSearch);
   }, [selectedFromSearch]);
 
-  function handleTransactionSelect(transactionId: string) {
-    setSelectedTransactionId((current) => {
-      const nextSelectedId =
-        current === transactionId ? undefined : transactionId;
-      setSearchParameters(
-        (currentParameters) =>
-          writeSelectedTransactionIdToSearch(
-            currentParameters,
-            nextSelectedId,
-          ),
-        { replace: true },
-      );
-      return nextSelectedId;
-    });
-  }
+  const handleTransactionSelect = useCallback(
+    (transactionId: string) => {
+      setSelectedTransactionId((current) => {
+        const nextSelectedId =
+          current === transactionId ? undefined : transactionId;
+        setSearchParameters(
+          (currentParameters) =>
+            writeSelectedTransactionIdToSearch(
+              currentParameters,
+              nextSelectedId,
+            ),
+          { replace: true },
+        );
+        return nextSelectedId;
+      });
+    },
+    [setSearchParameters],
+  );
 
-  function handleCloseDetails() {
+  const handleCloseDetails = useCallback(() => {
     setSelectedTransactionId(undefined);
     setSearchParameters(
       (currentParameters) =>
         writeSelectedTransactionIdToSearch(currentParameters),
       { replace: true },
     );
-  }
+  }, [setSearchParameters]);
 
   return (
     <div className="transactions-page bg-background">
@@ -74,7 +77,6 @@ export function TransactionsPage() {
             variant="page"
             selectedTransactionId={selectedTransactionId}
             onTransactionSelect={handleTransactionSelect}
-            claimControls={claimControls}
           />
         </section>
         <aside

@@ -48,9 +48,6 @@
     "activity": "Activity",
     "amount": "Amount"
   },
-  "pendingClaimAction": "Claim",
-  "pendingClaimSubtitle": "Onboarding transfer",
-  "pendingClaimSettledSubtitle": "Incoming · claimed",
   "claimCreditSubtitle": "Credited to private balance",
   "pagination": {
     "navLabel": "Transaction list pagination",
@@ -91,10 +88,13 @@
     "deposit": "Deposit",
     "sent": "Sent",
     "received": "Received",
-    "incomingTransfer": "Incoming transfer",
+    "pending": "Received",
     "claimed": "Claimed",
     "withdrawal": "Withdrawal",
     "merge": "Merge"
+  },
+  "transactionSubtitle": {
+    "pending": "Private transfer"
   },
   "statusLabels": {
     "completed": "Completed",

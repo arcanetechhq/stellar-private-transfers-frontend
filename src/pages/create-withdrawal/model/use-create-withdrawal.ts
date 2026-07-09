@@ -78,6 +78,7 @@ export function useCreateWithdrawal() {
       navigate,
       senderPrivateAddress: withdrawalSender.senderPrivateAddress,
       destinationTrim,
+      connectedPublicKey: publicKey?.trim() ?? "",
       numericAmount: Number.isNaN(numericAmount) ? 0 : numericAmount,
       onSuccess: (result) => {
         setSuccessResult(result);

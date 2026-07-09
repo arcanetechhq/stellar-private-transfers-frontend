@@ -1,10 +1,6 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useAppSelector } from "@/store";
-import {
-  assetApi,
-  useAssetsWithTrustlines,
-  type AssetWithTrustline,
-} from "@/entities/asset";
+import { assetApi } from "@/entities/asset";
 import {
   mapPendingClaimToTransaction,
   resolveAssetIdFromTokenAddress,
@@ -19,12 +15,14 @@ import { mergeTransactionsWithPendingClaims } from "./merge-transactions-with-pe
 export function useTransactionsWithPendingClaims(transactions: Transaction[]) {
   const publicKey = useAppSelector(selectWalletPublicKey);
   const { data: assets } = assetApi.useGetAssetsQuery();
-  const { assets: assetsWithTrustlines } = useAssetsWithTrustlines(publicKey);
+  const assetsReference = useRef(assets);
+  assetsReference.current = assets;
+  const hasSyncedWithAssetsReference = useRef(false);
 
   const resolveAsset = useCallback(
     (tokenAddress: string) =>
-      resolveAssetIdFromTokenAddress(tokenAddress, assets),
-    [assets],
+      resolveAssetIdFromTokenAddress(tokenAddress, assetsReference.current),
+    [],
   );
 
   const {
@@ -34,13 +32,22 @@ export function useTransactionsWithPendingClaims(transactions: Transaction[]) {
     removeClaim: removePendingClaim,
   } = useSdkPendingClaimsList(publicKey, resolveAsset);
 
+  useEffect(() => {
+    if (!assets?.length) {
+      hasSyncedWithAssetsReference.current = false;
+      return;
+    }
+    if (hasSyncedWithAssetsReference.current) {
+      return;
+    }
+    hasSyncedWithAssetsReference.current = true;
+    void reloadPendingClaims({ silent: true });
+  }, [assets, reloadPendingClaims]);
+
   const pendingClaimContext = useMemo(() => {
     const claimsById = new Map<number, PendingClaimItem>();
     const assetIdsByClaimId = new Map<number, string>();
     const pendingClaimRows: Transaction[] = [];
-    const assetsById = new Map<string, AssetWithTrustline>(
-      assetsWithTrustlines.map((asset) => [asset.assetId, asset]),
-    );
 
     for (const claim of claims) {
       const assetId = resolvePendingClaimAssetId(claim, assets);
@@ -58,18 +65,37 @@ export function useTransactionsWithPendingClaims(transactions: Transaction[]) {
       claimsById,
       assetIdsByClaimId,
       pendingClaimRows,
-      assetsById,
     };
-  }, [assets, assetsWithTrustlines, claims]);
+  }, [assets, claims]);
 
-  const mergedTransactions = useMemo(
-    () =>
-      mergeTransactionsWithPendingClaims({
-        transactions,
-        pendingClaimRows: pendingClaimContext.pendingClaimRows,
-      }),
-    [pendingClaimContext.pendingClaimRows, transactions],
-  );
+  const mergedTransactionsReference = useRef<Transaction[]>([]);
+  const mergedTransactions = useMemo(() => {
+    const next = mergeTransactionsWithPendingClaims({
+      transactions,
+      pendingClaimRows: pendingClaimContext.pendingClaimRows,
+    });
+    const previous = mergedTransactionsReference.current;
+    if (
+      previous.length === next.length &&
+      previous.every((transaction, index) => {
+        const candidate = next[index];
+        return (
+          candidate !== undefined &&
+          transaction.id === candidate.id &&
+          transaction.status === candidate.status &&
+          transaction.amount === candidate.amount &&
+          transaction.date === candidate.date &&
+          transaction.assetId === candidate.assetId &&
+          transaction.type === candidate.type &&
+          transaction.counterparty === candidate.counterparty
+        );
+      })
+    ) {
+      return previous;
+    }
+    mergedTransactionsReference.current = next;
+    return next;
+  }, [pendingClaimContext.pendingClaimRows, transactions]);
 
   return {
     mergedTransactions,

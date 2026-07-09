@@ -1,6 +1,5 @@
 import { useCallback, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store";
-import type { AssetWithTrustline } from "@/entities/asset";
 import {
   parsePendingClaimTransactionId,
   type PendingClaimItem,
@@ -30,7 +29,6 @@ export function useClaimPendingClaim(parameters?: {
     async (input: {
       claim: PendingClaimItem;
       assetId: string;
-      asset: AssetWithTrustline | undefined;
     }) => {
       const trimmedPublicKey = publicKey?.trim();
       if (!trimmedPublicKey || !actionsEnabled) {
@@ -43,10 +41,8 @@ export function useClaimPendingClaim(parameters?: {
         await ensureWalletScalar();
         await runPendingClaimMutation({
           dispatch,
-          publicKey: trimmedPublicKey,
           claim: input.claim,
           assetId: input.assetId,
-          asset: input.asset,
           permanentPrivateAddress,
         });
         onClaimed?.(input.claim.id);
@@ -70,7 +66,6 @@ export function useClaimPendingClaim(parameters?: {
     (
       transactionId: string,
       claimsById: ReadonlyMap<number, PendingClaimItem>,
-      assetsById: ReadonlyMap<string, AssetWithTrustline>,
       assetIdsByClaimId: ReadonlyMap<number, string>,
     ) => {
       const pendingClaimId = parsePendingClaimTransactionId(transactionId);
@@ -85,7 +80,6 @@ export function useClaimPendingClaim(parameters?: {
       void claimPending({
         claim,
         assetId,
-        asset: assetsById.get(assetId),
       });
     },
     [claimPending],

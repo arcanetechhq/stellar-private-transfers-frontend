@@ -64,10 +64,7 @@ export function TransactionTableRow(properties: TransactionTableRowProperties) {
     walletPublicKey,
     {
       privateTransferLabel: translateTransactions("privateTransferSubtitle"),
-      pendingClaimLabel: translateTransactions("pendingClaimSubtitle"),
-      pendingClaimSettledLabel: translateTransactions(
-        "pendingClaimSettledSubtitle",
-      ),
+      pendingSubtitle: translateTransactions("transactionSubtitle.pending"),
       claimCreditLabel: translateTransactions("claimCreditSubtitle"),
       assetFallback: assetLabel,
     },

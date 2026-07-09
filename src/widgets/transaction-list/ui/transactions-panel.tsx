@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./transactions-panel.css";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -39,12 +39,6 @@ type TransactionsPanelProperties = {
   variant: TransactionsPanelVariant;
   selectedTransactionId?: string;
   onTransactionSelect?: (transactionId: string) => void;
-  claimControls?: {
-    claimingId: number | undefined;
-    canClaim: boolean;
-    onClaim: (transactionId: string) => void;
-    error?: string;
-  };
 };
 
 const defaultFilters: TransactionPanelFilterState = {
@@ -92,7 +86,6 @@ export function TransactionsPanel({
   variant,
   selectedTransactionId,
   onTransactionSelect,
-  claimControls,
 }: TransactionsPanelProperties) {
   const { t: translate } = useTranslation("transactions");
   const navigate = useNavigate();
@@ -140,6 +133,8 @@ export function TransactionsPanel({
     () => filterTransactions({ transactions, filters }),
     [filters, transactions],
   );
+  const filteredTransactionsReference = useRef(filteredTransactions);
+  filteredTransactionsReference.current = filteredTransactions;
 
   const totalPages = getTransactionsPageCount(
     filteredTransactions.length,
@@ -158,14 +153,16 @@ export function TransactionsPanel({
       return;
     }
     const pageForSelection = findTransactionPage(
-      filteredTransactions,
+      filteredTransactionsReference.current,
       selectedTransactionId,
       TRANSACTIONS_PANEL_PAGE_SIZE,
     );
     if (pageForSelection !== null) {
-      setCurrentPage(pageForSelection);
+      setCurrentPage((current) =>
+        current === pageForSelection ? current : pageForSelection,
+      );
     }
-  }, [filteredTransactions, selectedTransactionId, variant]);
+  }, [selectedTransactionId, variant]);
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -197,8 +194,11 @@ export function TransactionsPanel({
         ? "empty"
         : "filtered";
 
-  const getLabel = (transaction: Transaction) =>
-    resolveTransactionActivityTitle(transaction, (key) => translate(key));
+  const getLabel = useCallback(
+    (transaction: Transaction) =>
+      resolveTransactionActivityTitle(transaction, (key) => translate(key)),
+    [translate],
+  );
 
   const handleSort = useCallback((key: TransactionSortKey) => {
     setFilters((current) => ({
@@ -233,15 +233,8 @@ export function TransactionsPanel({
         />
       ),
       getTransactionLabel: getLabel,
-      ...(claimControls
-        ? {
-            claimingId: claimControls.claimingId,
-            canClaim: claimControls.canClaim,
-            onClaim: claimControls.onClaim,
-          }
-        : {}),
     });
-  }, [claimControls, filters.sort, getLabel, handleSort, translate]);
+  }, [filters.sort, getLabel, handleSort, translate]);
 
   function clearFilters() {
     setFilters(defaultFilters);
@@ -252,13 +245,16 @@ export function TransactionsPanel({
     window.setTimeout(() => setRefreshing(false), 650);
   }
 
-  function handleRowClick(transaction: Transaction) {
-    if (variant === "page" && onTransactionSelect) {
-      onTransactionSelect(transaction.id);
-      return;
-    }
-    navigate(buildTransactionsPathWithSelection(transaction.id));
-  }
+  const handleRowClick = useCallback(
+    (transaction: Transaction) => {
+      if (variant === "page" && onTransactionSelect) {
+        onTransactionSelect(transaction.id);
+        return;
+      }
+      navigate(buildTransactionsPathWithSelection(transaction.id));
+    },
+    [navigate, onTransactionSelect, variant],
+  );
 
   return (
     <section
@@ -335,11 +331,6 @@ export function TransactionsPanel({
         </div>
       )}
       <div className="transactions-panel__table">
-        {claimControls?.error ? (
-          <p className="transactions-panel__claim-error" role="alert">
-            {claimControls.error}
-          </p>
-        ) : null}
         {visibleTransactions.length > 0 ? (
           <TransactionsDataTable
             columns={columns}

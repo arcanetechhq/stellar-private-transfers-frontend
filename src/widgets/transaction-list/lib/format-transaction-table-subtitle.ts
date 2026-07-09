@@ -18,17 +18,13 @@ export function formatTransactionTableSubtitle(
   walletPublicKey: string | undefined,
   options: {
     privateTransferLabel: string;
-    pendingClaimLabel: string;
-    pendingClaimSettledLabel: string;
+    pendingSubtitle: string;
     claimCreditLabel: string;
     assetFallback: string;
   },
 ): string {
   if (isPendingClaimTransactionId(transaction.id)) {
-    if (transaction.status === "pending") {
-      return options.pendingClaimLabel;
-    }
-    return options.pendingClaimSettledLabel;
+    return options.pendingSubtitle;
   }
   if (transaction.type === "claim") {
     return options.claimCreditLabel;

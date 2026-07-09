@@ -125,18 +125,12 @@ export function buildTransactionTableColumns(options: {
   activityTitle: ReactNode;
   amountTitle: ReactNode;
   getTransactionLabel: (transaction: Transaction) => string;
-  claimingId?: number;
-  canClaim?: boolean;
-  onClaim?: (transactionId: string) => void;
 }): TransactionsDataTableColumn<Transaction>[] {
   const {
     dateTitle,
     activityTitle,
     amountTitle,
     getTransactionLabel,
-    claimingId,
-    canClaim,
-    onClaim,
   } = options;
 
   const columns: TransactionsDataTableColumn<Transaction>[] = [
@@ -159,9 +153,6 @@ export function buildTransactionTableColumns(options: {
         <TransactionActivityCell
           transaction={transaction}
           title={getTransactionLabel(transaction)}
-          claimingId={claimingId}
-          canClaim={canClaim}
-          onClaim={onClaim}
         />
       ),
     },

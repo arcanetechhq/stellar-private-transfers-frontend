@@ -20,7 +20,7 @@ export function resolveTransactionActivityTitle(
   translate: (key: string) => string,
 ): string {
   if (isPendingClaimTransactionId(transaction.id)) {
-    return translate("transactionLabels.incomingTransfer");
+    return translate("transactionLabels.pending");
   }
   return getTransactionLabel(transaction.type, translate);
 }

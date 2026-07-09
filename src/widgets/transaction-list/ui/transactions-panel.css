@@ -468,16 +468,6 @@
   overflow-x: hidden;
 }
 
-.transactions-panel__claim-error {
-  margin: 0 0 var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-3);
-  background: color-mix(in srgb, var(--error) 12%, transparent);
-  color: var(--error);
-  font-size: 13px;
-  line-height: 18px;
-}
-
 .transaction-activity-cell {
   display: flex;
   min-width: 0;
@@ -488,56 +478,6 @@
 .transaction-activity-cell .transaction-from-to-cell {
   flex: 1 1 auto;
   min-width: 0;
-}
-
-.transaction-claim-action {
-  display: inline-flex;
-  min-width: 96px;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  border: 1px solid transparent;
-  border-radius: var(--radius-4);
-  padding: var(--space-1) var(--space-4);
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 22px;
-  white-space: nowrap;
-  cursor: pointer;
-  transition:
-    background-color 300ms ease,
-    border-color 300ms ease,
-    box-shadow 300ms ease,
-    color 300ms ease,
-    opacity 300ms ease,
-    transform 100ms ease;
-}
-
-.transaction-claim-action svg {
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  stroke-width: 1.6;
-}
-
-.transaction-claim-action[data-variant='primary'] {
-  background: var(--button-primary-background);
-  color: var(--button-primary-text);
-}
-
-.transaction-claim-action[data-variant='primary']:hover:not(:disabled) {
-  background: var(--button-primary-hover-background);
-}
-
-.transaction-claim-action:active:not(:disabled) {
-  transform: translateY(0) scale(0.99);
-}
-
-.transaction-claim-action:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-  transform: none;
 }
 
 .transactions-panel--page .transactions-panel-empty {

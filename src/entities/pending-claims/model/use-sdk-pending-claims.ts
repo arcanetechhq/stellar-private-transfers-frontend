@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePrivacySdkClient } from "@/app/providers/privacy-sdk-provider.js";
 import { getRequiredApiBaseUrl } from "@/shared/stellar/stellar-network-environment.js";
+import { arePendingClaimsEqual } from "../lib/are-pending-claims-equal.js";
 import type { PendingClaimItem } from "../model/pending-claim-types.js";
 import { loadSdkPendingClaims } from "../lib/load-sdk-pending-claims.js";
 
@@ -13,36 +14,52 @@ export function useSdkPendingClaimsList(
   claims: PendingClaimItem[];
   isLoading: boolean;
   isError: boolean;
-  reload: () => Promise<void>;
+  reload: (options?: { silent?: boolean }) => Promise<void>;
   removeClaim: (claimId: number) => void;
 } {
   const { client, ready } = usePrivacySdkClient();
   const [claims, setClaims] = useState<PendingClaimItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState(false);
+  const resolveAssetReference = useRef(resolveAsset);
+  resolveAssetReference.current = resolveAsset;
+  const hasLoadedReference = useRef(false);
 
-  const reload = useCallback(async () => {
-    const trimmedOwner = ownerAddress?.trim();
-    if (!trimmedOwner || !client || !ready) {
-      setClaims([]);
-      return;
-    }
-    setIsLoading(true);
-    setIsError(false);
-    try {
-      const mappedClaims = await loadSdkPendingClaims({
-        client,
-        owner: trimmedOwner,
-        ready,
-        resolveAsset,
-      });
-      setClaims(mappedClaims);
-    } catch {
-      setIsError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [client, ownerAddress, ready, resolveAsset]);
+  const reload = useCallback(
+    async (options?: { silent?: boolean }) => {
+      const trimmedOwner = ownerAddress?.trim();
+      if (!trimmedOwner || !client || !ready) {
+        hasLoadedReference.current = false;
+        setClaims((current) => (current.length === 0 ? current : []));
+        return;
+      }
+      const silent = options?.silent === true && hasLoadedReference.current;
+      if (!silent) {
+        setIsLoading(true);
+      }
+      setIsError(false);
+      try {
+        const mappedClaims = await loadSdkPendingClaims({
+          client,
+          owner: trimmedOwner,
+          ready,
+          resolveAsset: (tokenAddress) =>
+            resolveAssetReference.current(tokenAddress),
+        });
+        hasLoadedReference.current = true;
+        setClaims((current) =>
+          arePendingClaimsEqual(current, mappedClaims) ? current : mappedClaims,
+        );
+      } catch {
+        setIsError(true);
+      } finally {
+        if (!silent) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [client, ownerAddress, ready],
+  );
 
   useEffect(() => {
     void reload();
@@ -54,7 +71,7 @@ export function useSdkPendingClaimsList(
       return;
     }
     const intervalId = globalThis.setInterval(() => {
-      void reload();
+      void reload({ silent: true });
     }, REFRESH_INTERVAL_MS);
     return () => {
       globalThis.clearInterval(intervalId);

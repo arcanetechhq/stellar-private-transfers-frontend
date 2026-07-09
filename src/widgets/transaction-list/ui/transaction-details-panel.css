@@ -44,9 +44,9 @@
   align-content: start;
   grid-auto-rows: max-content;
   width: 100%;
+  height: fit-content;
   min-height: 0;
   flex: 1;
-  height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
   padding: var(--space-6);

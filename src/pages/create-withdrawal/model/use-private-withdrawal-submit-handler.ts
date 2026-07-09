@@ -9,7 +9,7 @@ import type { AppDispatch } from "@/store";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
-import { assertWithdrawalDestinationCanReceiveAsset } from "../lib/withdrawal-destination-trustline";
+import { ensureWithdrawalDestinationCanReceiveAsset } from "../lib/withdrawal-destination-trustline";
 import type { PrivateWithdrawalSuccess } from "./private-withdrawal-success";
 
 type PrivateWithdrawalSubmit = (payload: {
@@ -31,20 +31,18 @@ function readWithdrawalSubmitError(error: unknown): string {
   return "Withdrawal failed";
 }
 
-function pushWithdrawalSuccess(parameters: {
+function recordWithdrawalTransaction(parameters: {
   dispatch: AppDispatch;
-  navigate: NavigateFunction;
-  poolContract: string;
   senderPrivateAddress: string;
   destinationTrim: string;
   selectedAsset: AssetWithTrustline;
   numericAmount: number;
-  result: { txId: string; coinDeliveryWarning?: string };
+  txId: string;
 }): void {
   parameters.dispatch(
     addTransaction(
       buildUserTransaction({
-        txId: parameters.result.txId,
+        txId: parameters.txId,
         type: "withdrawal",
         assetId: parameters.selectedAsset.assetId,
         amount: parameters.numericAmount,
@@ -53,6 +51,15 @@ function pushWithdrawalSuccess(parameters: {
       }),
     ),
   );
+}
+
+function navigateWithdrawalSuccess(parameters: {
+  navigate: NavigateFunction;
+  poolContract: string;
+  selectedAsset: AssetWithTrustline;
+  numericAmount: number;
+  result: { txId: string; coinDeliveryWarning?: string };
+}): void {
   parameters.navigate(`/transfer-success/${encodeURIComponent(parameters.result.txId)}`, {
     state: {
       txId: parameters.result.txId,
@@ -73,6 +80,7 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
   navigate: NavigateFunction;
   senderPrivateAddress: string;
   destinationTrim: string;
+  connectedPublicKey: string;
   numericAmount: number;
   onSuccess?: (result: PrivateWithdrawalSuccess) => void;
 }) {
@@ -86,9 +94,11 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
     parameters.setIsSubmitting(true);
     setSubmitError(undefined);
     try {
-      await assertWithdrawalDestinationCanReceiveAsset({
+      await ensureWithdrawalDestinationCanReceiveAsset({
+        dispatch: parameters.dispatch,
         asset: parameters.selectedAsset,
         destinationAddress: parameters.destinationTrim,
+        connectedPublicKey: parameters.connectedPublicKey,
       });
       const selectedAsset = parameters.selectedAsset;
       const result = await parameters.submit({
@@ -97,6 +107,14 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
         tokenContractRaw: selectedAsset.clientContract ?? "",
         amountDisplay: parameters.numericAmount,
         destinationAddress: parameters.destinationTrim,
+      });
+      recordWithdrawalTransaction({
+        dispatch: parameters.dispatch,
+        senderPrivateAddress: parameters.senderPrivateAddress,
+        destinationTrim: parameters.destinationTrim,
+        selectedAsset,
+        numericAmount: parameters.numericAmount,
+        txId: result.txId,
       });
       const successResult: PrivateWithdrawalSuccess = {
         txId: result.txId,
@@ -110,12 +128,9 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
         parameters.onSuccess(successResult);
         return;
       }
-      pushWithdrawalSuccess({
-        dispatch: parameters.dispatch,
+      navigateWithdrawalSuccess({
         navigate: parameters.navigate,
         poolContract,
-        senderPrivateAddress: parameters.senderPrivateAddress,
-        destinationTrim: parameters.destinationTrim,
         selectedAsset,
         numericAmount: parameters.numericAmount,
         result,
