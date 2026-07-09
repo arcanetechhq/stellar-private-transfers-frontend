@@ -33,6 +33,11 @@ const iconConfigMap: Record<string, IconConfig> = {
     color: "#10B981",
     background: "#ECFDF5",
   },
+  claim: {
+    IconComponent: ArrowDownToLine,
+    color: "#059669",
+    background: "#ECFDF5",
+  },
   withdrawal: {
     IconComponent: ArrowUpFromLine,
     color: "#6B7280",

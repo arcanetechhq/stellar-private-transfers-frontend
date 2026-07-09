@@ -7,7 +7,7 @@ import { useAppSelector } from "@/store";
 import type { Transaction } from "@/entities/transaction";
 import { selectIsWalletConnected } from "@/entities/wallet";
 import { TransactionsExportModal } from "@/features/export-transactions";
-import { getTransactionLabel } from "../lib/transaction-display";
+import { resolveTransactionActivityTitle } from "../lib/transaction-display";
 import {
   collectTransactionAssetIds,
   countActiveFilters,
@@ -39,6 +39,12 @@ type TransactionsPanelProperties = {
   variant: TransactionsPanelVariant;
   selectedTransactionId?: string;
   onTransactionSelect?: (transactionId: string) => void;
+  claimControls?: {
+    claimingId: number | undefined;
+    canClaim: boolean;
+    onClaim: (transactionId: string) => void;
+    error?: string;
+  };
 };
 
 const defaultFilters: TransactionPanelFilterState = {
@@ -86,6 +92,7 @@ export function TransactionsPanel({
   variant,
   selectedTransactionId,
   onTransactionSelect,
+  claimControls,
 }: TransactionsPanelProperties) {
   const { t: translate } = useTranslation("transactions");
   const navigate = useNavigate();
@@ -191,7 +198,7 @@ export function TransactionsPanel({
         : "filtered";
 
   const getLabel = (transaction: Transaction) =>
-    getTransactionLabel(transaction.type, (key) => translate(key));
+    resolveTransactionActivityTitle(transaction, (key) => translate(key));
 
   const handleSort = useCallback((key: TransactionSortKey) => {
     setFilters((current) => ({
@@ -216,7 +223,7 @@ export function TransactionsPanel({
           onSort={handleSort}
         />
       ),
-      fromToTitle: translate("tableHeaders.fromTo"),
+      activityTitle: translate("tableHeaders.activity"),
       amountTitle: (
         <TransactionsSortHeader
           columnKey="amount"
@@ -226,8 +233,15 @@ export function TransactionsPanel({
         />
       ),
       getTransactionLabel: getLabel,
+      ...(claimControls
+        ? {
+            claimingId: claimControls.claimingId,
+            canClaim: claimControls.canClaim,
+            onClaim: claimControls.onClaim,
+          }
+        : {}),
     });
-  }, [filters.sort, handleSort, translate]);
+  }, [claimControls, filters.sort, getLabel, handleSort, translate]);
 
   function clearFilters() {
     setFilters(defaultFilters);
@@ -321,6 +335,11 @@ export function TransactionsPanel({
         </div>
       )}
       <div className="transactions-panel__table">
+        {claimControls?.error ? (
+          <p className="transactions-panel__claim-error" role="alert">
+            {claimControls.error}
+          </p>
+        ) : null}
         {visibleTransactions.length > 0 ? (
           <TransactionsDataTable
             columns={columns}

@@ -1,3 +1,5 @@
+import { isPendingClaimTransactionId } from "@/entities/pending-claims";
+
 export function getTransactionLabel(
   type: string,
   translate: (key: string) => string,
@@ -6,10 +8,21 @@ export function getTransactionLabel(
     deposit: translate("transactionLabels.deposit"),
     sent: translate("transactionLabels.sent"),
     received: translate("transactionLabels.received"),
+    claim: translate("transactionLabels.claimed"),
     withdrawal: translate("transactionLabels.withdrawal"),
     merge: translate("transactionLabels.merge"),
   };
   return map[type] ?? type;
+}
+
+export function resolveTransactionActivityTitle(
+  transaction: { id: string; type: string },
+  translate: (key: string) => string,
+): string {
+  if (isPendingClaimTransactionId(transaction.id)) {
+    return translate("transactionLabels.incomingTransfer");
+  }
+  return getTransactionLabel(transaction.type, translate);
 }
 
 export function getStatusLabel(
@@ -53,7 +66,8 @@ export function getAmountToneClass(type: string): string {
       return "text-error";
     }
     case "received":
-    case "deposit": {
+    case "deposit":
+    case "claim": {
       return "text-success";
     }
     default: {
@@ -69,7 +83,8 @@ export function getAmountPrefix(type: string) {
       return "-";
     }
     case "received":
-    case "deposit": {
+    case "deposit":
+    case "claim": {
       return "+";
     }
     default: {

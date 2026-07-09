@@ -82,7 +82,7 @@ function MainLayoutBody() {
                 setWalletOpen={model.setWalletOpen}
               />
 
-              <main ref={model.mainReference} className="flex-1 overflow-auto">
+              <main ref={model.mainReference}>
                 <Outlet
                   key={`${model.location.pathname}:${model.location.key}`}
                 />

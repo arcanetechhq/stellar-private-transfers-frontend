@@ -8,6 +8,7 @@
 }
 
 .deposit-flow {
+  --deposit-flow-title-offset: 56px;
   display: grid;
   width: min(630px, 100%);
   margin: 0 auto;
@@ -17,7 +18,7 @@
 
 .deposit-flow__title {
   margin: 0;
-  min-height: 56px;
+  min-height: var(--deposit-flow-title-offset);
   font-size: 40px;
   line-height: 56px;
   font-weight: 500;
@@ -25,8 +26,20 @@
   color: var(--text);
 }
 
-.deposit-flow__title-spacer {
-  min-height: 56px;
+.deposit-flow[data-testid="transfer-success-screen"] {
+  --deposit-success-available-height: calc(
+    100dvh - var(--page-header-height) - var(--workspace-top-space) -
+      var(--workspace-bottom-space) - var(--space-8) - var(--space-6)
+  );
+  display: flex;
+  max-height: var(--deposit-success-available-height);
+  min-height: 0;
+  flex-direction: column;
+}
+
+.deposit-flow__title-offset {
+  flex: 0 1 var(--deposit-flow-title-offset);
+  min-height: 0;
 }
 
 .deposit-flow__body {
@@ -811,6 +824,7 @@
 
 .private-deposit-success-card {
   display: grid;
+  flex-shrink: 0;
   overflow: hidden;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-4);
@@ -970,17 +984,13 @@
 
 @media (max-width: 720px) {
   .deposit-flow {
+    --deposit-flow-title-offset: 44px;
     width: 100%;
   }
 
   .deposit-flow__title {
-    min-height: 44px;
     font-size: 32px;
     line-height: 44px;
-  }
-
-  .deposit-flow__title-spacer {
-    min-height: 44px;
   }
 
   .deposit-select-row,

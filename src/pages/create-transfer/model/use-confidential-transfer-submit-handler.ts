@@ -29,6 +29,7 @@ export function useConfidentialTransferSubmitHandler(parameters: {
   submit: ConfidentialTransferSubmit;
   navigate: NavigateFunction;
   ensureWalletPrivateAddress: () => Promise<string>;
+  ensureWalletScalar: (privateAddressStpl1?: string) => Promise<string>;
   recipientTrim: string;
   numericAmount: number;
   onSuccess?: (result: ConfidentialTransferSuccess) => void;
@@ -50,6 +51,7 @@ export function useConfidentialTransferSubmitHandler(parameters: {
         dispatch: parameters.dispatch,
         navigate: parameters.navigate,
         ensureWalletPrivateAddress: parameters.ensureWalletPrivateAddress,
+        ensureWalletScalar: parameters.ensureWalletScalar,
         submit: parameters.submit,
         selectedAsset: parameters.selectedAsset,
         recipientTrim: parameters.recipientTrim,

@@ -41,6 +41,9 @@ export interface PrivacyTransactRuntimeResolvers {
   buildTransferOnboardingAtExecute?: (
     input: BuildTransferOnboardingAtExecuteInput,
   ) => Promise<OnboardingPayload>;
+  ensureSenderPrivKeyScalarHex?: (
+    privateAddressStpl1: string,
+  ) => Promise<string>;
 }
 
 let transactRuntimeResolvers: PrivacyTransactRuntimeResolvers = {};
@@ -80,6 +83,15 @@ export function attachPrivacyTransactRuntimeResolverProxies(
     }
     return resolver(input);
   };
+  if (transactRuntimeResolvers.ensureSenderPrivKeyScalarHex) {
+    environment.ensureSenderPrivKeyScalarHex = (privateAddressStpl1) => {
+      const resolver = transactRuntimeResolvers.ensureSenderPrivKeyScalarHex;
+      if (!resolver) {
+        throw new Error("Sender private key scalar resolver is not configured.");
+      }
+      return resolver(privateAddressStpl1);
+    };
+  }
   return environment;
 }
 

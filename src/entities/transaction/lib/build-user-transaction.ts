@@ -4,7 +4,8 @@ export type UserTransactionFlowType =
   | "deposit"
   | "received"
   | "sent"
-  | "withdrawal";
+  | "withdrawal"
+  | "claim";
 
 export interface BuildUserTransactionInput {
   txId: string;

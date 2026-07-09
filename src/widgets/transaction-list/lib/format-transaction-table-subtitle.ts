@@ -1,4 +1,5 @@
 import type { Transaction } from "@/entities/transaction";
+import { isPendingClaimTransactionId } from "@/entities/pending-claims";
 import {
   formatTransactionPublicAddressForDisplay,
   resolveTransactionPublicAddress,
@@ -17,9 +18,21 @@ export function formatTransactionTableSubtitle(
   walletPublicKey: string | undefined,
   options: {
     privateTransferLabel: string;
+    pendingClaimLabel: string;
+    pendingClaimSettledLabel: string;
+    claimCreditLabel: string;
     assetFallback: string;
   },
 ): string {
+  if (isPendingClaimTransactionId(transaction.id)) {
+    if (transaction.status === "pending") {
+      return options.pendingClaimLabel;
+    }
+    return options.pendingClaimSettledLabel;
+  }
+  if (transaction.type === "claim") {
+    return options.claimCreditLabel;
+  }
   if (isPrivateTransferTableType(transaction.type)) {
     return options.privateTransferLabel;
   }

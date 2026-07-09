@@ -1,4 +1,5 @@
 import type { Transaction } from "@/entities/transaction";
+import { pinActivePendingClaimTransactions } from "../lib/pin-active-pending-claim-transactions.js";
 
 export type TransactionPeriod = "last30Days" | "last3Months" | "thisYear";
 export type TransactionTypeFilter = "all" | "incoming" | "outgoing";
@@ -44,7 +45,11 @@ function matchesTransactionType(
     return true;
   }
   if (typeFilter === "incoming") {
-    return transaction.type === "received" || transaction.type === "deposit";
+    return (
+      transaction.type === "received" ||
+      transaction.type === "deposit" ||
+      transaction.type === "claim"
+    );
   }
   return transaction.type === "sent" || transaction.type === "withdrawal";
 }
@@ -122,7 +127,7 @@ export function filterTransactions(options: {
     );
   });
 
-  return [...filtered].toSorted((left, right) =>
+  return pinActivePendingClaimTransactions(filtered, (left, right) =>
     compareTransactions(left, right, filters.sort),
   );
 }

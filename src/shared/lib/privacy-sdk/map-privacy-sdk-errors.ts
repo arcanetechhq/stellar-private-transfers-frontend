@@ -1,4 +1,7 @@
-import type { PrivacySdkError } from "@arcanetech/privacy-sdk-core";
+import {
+  isPrivacySdkError,
+  type PrivacySdkError,
+} from "@arcanetech/privacy-sdk-core";
 import { KytInspectError, parseKytReasonCode } from "@arcanetech/privacy-sdk-stellar/transact";
 import { i18n } from "@/shared/config/i18n-instance.js";
 
@@ -69,14 +72,37 @@ function mapPrivacySdkErrorMessage(error: PrivacySdkError): string {
   return error.message;
 }
 
+function readErrorLikeMessage(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null || !("message" in error)) {
+    return undefined;
+  }
+  const message = (error as { message?: unknown }).message;
+  if (typeof message !== "string") {
+    return undefined;
+  }
+  const trimmed = message.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
 export function mapPrivacySdkError(error: unknown): string {
   if (error instanceof KytInspectError) {
     return error.message;
   }
+  if (isPrivacySdkError(error)) {
+    return mapPrivacySdkErrorMessage(error);
+  }
   if (error instanceof Error) {
     return error.message;
   }
-  return String(error);
+  if (typeof error === "string") {
+    const trimmed = error.trim();
+    return trimmed.length > 0 ? trimmed : "Operation failed";
+  }
+  const messageLike = readErrorLikeMessage(error);
+  if (messageLike) {
+    return messageLike;
+  }
+  return "Operation failed";
 }
 
 export function mapPrivacySdkErrors(errors: PrivacySdkError[]): string {

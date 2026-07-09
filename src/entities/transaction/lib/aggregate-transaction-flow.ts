@@ -1,13 +1,19 @@
 import { getAssetUsdPrice } from "@/entities/asset";
 import type { Transaction } from "../model/transaction";
 
+const PENDING_CLAIM_TRANSACTION_ID_PREFIX = "pending-claim-";
+
+function isPendingClaimHistoryTransactionId(transactionId: string): boolean {
+  return transactionId.startsWith(PENDING_CLAIM_TRANSACTION_ID_PREFIX);
+}
+
 export type TransactionFlowTotals = {
   inflowUsd: number;
   outflowUsd: number;
 };
 
 function isIncomingType(type: Transaction["type"]): boolean {
-  return type === "received" || type === "deposit";
+  return type === "received" || type === "deposit" || type === "claim";
 }
 
 function isOutgoingType(type: Transaction["type"]): boolean {
@@ -34,6 +40,10 @@ export function aggregateTransactionFlow(
 
   for (const transaction of transactions) {
     if (isPendingStatus(transaction.status) || transaction.status === "failed") {
+      continue;
+    }
+
+    if (isPendingClaimHistoryTransactionId(transaction.id)) {
       continue;
     }
 

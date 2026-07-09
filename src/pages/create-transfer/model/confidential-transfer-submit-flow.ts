@@ -3,6 +3,7 @@ import type { NavigateFunction } from "react-router";
 import type { AppDispatch } from "@/store";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";
+import { mapPrivacySdkError } from "@/shared/lib/privacy-sdk/map-privacy-sdk-errors.js";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 
 type ConfidentialTransferSubmit = (payload: {
@@ -16,18 +17,22 @@ type ConfidentialTransferSubmit = (payload: {
 export function readConfidentialTransferSubmitError(error: unknown): string {
   if (isRejectedWithValue(error)) {
     const payload = error.payload;
-    return typeof payload === "string" ? payload : "Transfer failed";
+    if (typeof payload === "string") {
+      return payload;
+    }
+    const mapped = mapPrivacySdkError(payload);
+    return mapped === "Operation failed" ? "Transfer failed" : mapped;
   }
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return "Transfer failed";
+  const mapped = mapPrivacySdkError(error);
+  return mapped === "Operation failed" ? "Transfer failed" : mapped;
 }
 
 async function prepareWalletTransferKeys(parameters: {
   ensureWalletPrivateAddress: () => Promise<string>;
+  ensureWalletScalar: (privateAddressStpl1?: string) => Promise<string>;
 }): Promise<{ senderPrivateAddress: string }> {
   const senderPrivateAddress = await parameters.ensureWalletPrivateAddress();
+  await parameters.ensureWalletScalar(senderPrivateAddress);
   return { senderPrivateAddress };
 }
 
@@ -111,6 +116,7 @@ export async function runConfidentialTransferSubmitFlow(parameters: {
   dispatch: AppDispatch;
   navigate: NavigateFunction;
   ensureWalletPrivateAddress: () => Promise<string>;
+  ensureWalletScalar: (privateAddressStpl1?: string) => Promise<string>;
   submit: ConfidentialTransferSubmit;
   selectedAsset: AssetWithTrustline;
   recipientTrim: string;

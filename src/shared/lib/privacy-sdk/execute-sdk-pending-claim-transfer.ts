@@ -4,7 +4,7 @@ import type {
   StellarPrivateRecord,
 } from "@arcanetech/privacy-sdk-stellar";
 import type { PendingClaimItem } from "@/entities/pending-claims/model/pending-claim-types.js";
-import { mapPrivacySdkErrors } from "@/shared/lib/privacy-sdk/map-privacy-sdk-errors.js";
+import { mapPrivacySdkError, mapPrivacySdkErrors } from "@/shared/lib/privacy-sdk/map-privacy-sdk-errors.js";
 
 export const PENDING_CLAIM_TRANSFER_DISCLOSURE = {
   senderAddress: "public" as const,
@@ -57,13 +57,17 @@ export async function executeSdkPendingClaimTransfer(parameters: {
   if (prepared.status === "rejected") {
     throw new Error(mapPrivacySdkErrors(prepared.errors));
   }
-  const receipt = await prepared.execute();
-  const operationId = receipt.operationId || "";
-  if (!operationId) {
-    throw new Error("SDK pending claim transfer did not return operation id");
+  try {
+    const receipt = await prepared.execute();
+    const operationId = receipt.operationId || "";
+    if (!operationId) {
+      throw new Error("SDK pending claim transfer did not return operation id");
+    }
+    return {
+      operationId,
+      outputRecord: prepared.prepared.outputRecords[0],
+    };
+  } catch (error) {
+    throw new Error(mapPrivacySdkError(error));
   }
-  return {
-    operationId,
-    outputRecord: prepared.prepared.outputRecords[0],
-  };
 }

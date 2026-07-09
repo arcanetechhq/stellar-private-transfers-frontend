@@ -13,11 +13,11 @@ import {
   transactionTableSubtitleTitle,
 } from "../lib/format-transaction-table-subtitle";
 import {
-  getTransactionLabel,
   getStatusLabel,
   getStatusVariant,
   getAmountToneClass,
   getAmountPrefix,
+  resolveTransactionActivityTitle,
 } from "../lib/transaction-display";
 import { buildTransactionsPathWithSelection } from "../lib/transactions-selection-path";
 import { TransactionTypeIcon } from "./transaction-type-icon";
@@ -64,6 +64,11 @@ export function TransactionTableRow(properties: TransactionTableRowProperties) {
     walletPublicKey,
     {
       privateTransferLabel: translateTransactions("privateTransferSubtitle"),
+      pendingClaimLabel: translateTransactions("pendingClaimSubtitle"),
+      pendingClaimSettledLabel: translateTransactions(
+        "pendingClaimSettledSubtitle",
+      ),
+      claimCreditLabel: translateTransactions("claimCreditSubtitle"),
       assetFallback: assetLabel,
     },
   );
@@ -101,7 +106,9 @@ export function TransactionTableRow(properties: TransactionTableRowProperties) {
         <div className="flex items-center gap-3">
           <TransactionTypeIcon type={transaction.type} />
           <span className="text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
-            {getTransactionLabel(transaction.type, translateHistory)}
+            {resolveTransactionActivityTitle(transaction, (key) =>
+              translateTransactions(key),
+            )}
           </span>
         </div>
       </td>

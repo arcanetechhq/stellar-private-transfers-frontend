@@ -41,7 +41,7 @@ export function TransferSuccess(): React.JSX.Element {
               {deliveryWarning}
             </div>
           ) : (
-            <div className="deposit-flow__title-spacer" aria-hidden="true" />
+            <div className="deposit-flow__title-offset" aria-hidden="true" />
           )}
           <TransferSuccessPanel view={view} sourceWallet={publicKey ?? undefined} />
         </div>

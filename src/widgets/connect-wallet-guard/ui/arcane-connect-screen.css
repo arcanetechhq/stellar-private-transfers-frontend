@@ -162,19 +162,6 @@
   opacity: 0.5;
 }
 
-.arcane-connect-status {
-  display: inline-flex;
-  width: fit-content;
-  max-width: 420px;
-  height: 58px;
-  align-items: center;
-  gap: 12px;
-  color: var(--arcane-connect-muted);
-  font-size: 19px;
-  font-weight: 650;
-  line-height: 24px;
-}
-
 .arcane-connect-error {
   display: flex;
   width: min(420px, 100%);

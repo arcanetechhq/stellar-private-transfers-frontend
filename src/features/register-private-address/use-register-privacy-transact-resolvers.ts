@@ -16,6 +16,7 @@ import { resolveTokenContractId } from "@/shared/stellar/resolve-token-contract-
 interface RuntimeResolverParameters {
   assets: AssetDto[] | undefined;
   walletPublicKey: string | undefined;
+  ensureWalletScalar: (privateAddressStpl1?: string) => Promise<string>;
 }
 
 function createRuntimeResolvers(
@@ -32,6 +33,8 @@ function createRuntimeResolvers(
     },
     resolveTransferRecipientAtExecute,
     buildTransferOnboardingAtExecute,
+    ensureSenderPrivKeyScalarHex: (privateAddressStpl1) =>
+      parameters.ensureWalletScalar(privateAddressStpl1),
     resolveTokenContractId: (assetId) => {
       const asset = parameters.assets?.find((entry) => entry.assetId === assetId);
       if (!asset?.clientContract) {
@@ -42,14 +45,18 @@ function createRuntimeResolvers(
   };
 }
 
-export function useRegisterPrivacyTransactResolvers(): void {
+export function useRegisterPrivacyTransactResolvers(parameters: {
+  ensureWalletScalar: (privateAddressStpl1?: string) => Promise<string>;
+}): void {
   const walletPublicKey = useAppSelector(selectWalletPublicKey);
   const { data: assets } = assetApi.useGetAssetsQuery();
+  const ensureWalletScalar = parameters.ensureWalletScalar;
 
   useEffect(() => {
     registerPrivacyTransactRuntimeResolvers(createRuntimeResolvers({
       assets,
       walletPublicKey,
+      ensureWalletScalar,
     }));
-  }, [assets, walletPublicKey]);
+  }, [assets, ensureWalletScalar, walletPublicKey]);
 }

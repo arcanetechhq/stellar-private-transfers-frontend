@@ -10,7 +10,9 @@ export function WalletPrivateAddressProvider({
   children: ReactNode;
 }) {
   const value = useWalletPrivateAddressProviderState();
-  useRegisterPrivacyTransactResolvers();
+  useRegisterPrivacyTransactResolvers({
+    ensureWalletScalar: value.ensureWalletScalar,
+  });
   return (
     <WalletPrivateAddressContext.Provider value={value}>
       {children}

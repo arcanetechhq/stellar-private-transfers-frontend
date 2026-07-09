@@ -11,7 +11,7 @@ import { formatTransactionPublicAddressForDisplay } from "../lib/format-transact
 import {
   getAmountPrefix,
   getStatusLabel,
-  getTransactionLabel,
+  resolveTransactionActivityTitle,
 } from "../lib/transaction-display";
 import { useTransactionDetailsPanel } from "../model/use-transaction-details-panel";
 import { TransactionDetailRow } from "./transaction-detail-row";
@@ -22,7 +22,7 @@ type TransactionDetailsPanelProperties = {
 };
 
 function isIncomingType(type: Transaction["type"]): boolean {
-  return type === "received" || type === "deposit";
+  return type === "received" || type === "deposit" || type === "claim";
 }
 
 function isPendingStatus(status: Transaction["status"]): boolean {
@@ -123,7 +123,7 @@ export function TransactionDetailsPanel({
   const statusLabel = getStatusLabel(transaction.status, (key) =>
     translateTransactions(key),
   );
-  const title = getTransactionLabel(transaction.type, (key) =>
+  const title = resolveTransactionActivityTitle(transaction, (key) =>
     translateTransactions(key),
   );
   const publicAddressDisplay = formatTransactionPublicAddressForDisplay(

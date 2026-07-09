@@ -1,16 +1,15 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { useAppSelector } from "@/store";
 import {
   selectAreTransactionsLoaded,
-  selectTransactionById,
   selectTransactions,
-  sortTransactionsByDateDesc,
 } from "@/entities/transaction";
 import {
   readSelectedTransactionIdFromSearch,
   TransactionDetailsPanel,
   TransactionsPanel,
+  useTransactionPanelPendingClaims,
   writeSelectedTransactionIdToSearch,
 } from "@/widgets/transaction-list";
 
@@ -22,14 +21,15 @@ export function TransactionsPage() {
   >(selectedFromSearch);
   const transactions = useAppSelector(selectTransactions);
   const transactionsLoaded = useAppSelector(selectAreTransactionsLoaded);
-  const sortedTransactions = useMemo(
-    () => sortTransactionsByDateDesc(transactions),
-    [transactions],
-  );
-  const selectedTransaction = useAppSelector((state) =>
-    selectedTransactionId
-      ? selectTransactionById(selectedTransactionId)(state)
-      : undefined,
+  const { mergedTransactions, claimControls } =
+    useTransactionPanelPendingClaims(transactions);
+
+  const selectedTransaction = useMemo(
+    () =>
+      selectedTransactionId
+        ? mergedTransactions.find((item) => item.id === selectedTransactionId)
+        : undefined,
+    [mergedTransactions, selectedTransactionId],
   );
 
   useEffect(() => {
@@ -69,11 +69,12 @@ export function TransactionsPage() {
       >
         <section className="transactions-route__main">
           <TransactionsPanel
-            transactions={sortedTransactions}
+            transactions={mergedTransactions}
             isHydrated={transactionsLoaded}
             variant="page"
             selectedTransactionId={selectedTransactionId}
             onTransactionSelect={handleTransactionSelect}
+            claimControls={claimControls}
           />
         </section>
         <aside

@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useAssetLookup } from "@/entities/asset";
 import type { Transaction } from "@/entities/transaction";
+import { isPendingClaimTransactionId } from "@/entities/pending-claims";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { useAppSelector } from "@/store";
 import { AssetRowIcon } from "@/shared/ui/asset-row-icon";
@@ -9,6 +10,7 @@ import {
   getAmountPrefix,
   getAmountToneClass,
 } from "../lib/transaction-display";
+import { TransactionClaimActionCell } from "./transaction-claim-action-cell";
 
 type TransactionDateCellProperties = {
   date: string;
@@ -51,6 +53,9 @@ export function TransactionFromToCell({
   const assetFallback = asset?.name ?? transaction.assetId.toUpperCase();
   const subtitle = formatTransactionTableSubtitle(transaction, walletPublicKey, {
     privateTransferLabel: translate("privateTransferSubtitle"),
+    pendingClaimLabel: translate("pendingClaimSubtitle"),
+    pendingClaimSettledLabel: translate("pendingClaimSettledSubtitle"),
+    claimCreditLabel: translate("claimCreditSubtitle"),
     assetFallback,
   });
 
@@ -68,6 +73,36 @@ export function TransactionFromToCell({
   );
 }
 
+type TransactionActivityCellProperties = {
+  transaction: Transaction;
+  title: string;
+  claimingId?: number;
+  canClaim?: boolean;
+  onClaim?: (transactionId: string) => void;
+};
+
+export function TransactionActivityCell({
+  transaction,
+  title,
+  claimingId,
+  canClaim,
+  onClaim,
+}: TransactionActivityCellProperties) {
+  return (
+    <div className="transaction-activity-cell">
+      <TransactionFromToCell transaction={transaction} title={title} />
+      {onClaim && canClaim ? (
+        <TransactionClaimActionCell
+          transaction={transaction}
+          claimingId={claimingId}
+          canClaim={canClaim}
+          onClaim={onClaim}
+        />
+      ) : null}
+    </div>
+  );
+}
+
 type TransactionAmountCellProperties = {
   transaction: Transaction;
 };
@@ -75,6 +110,12 @@ type TransactionAmountCellProperties = {
 function getAmountTone(
   transaction: Transaction,
 ): "positive" | "negative" | "pending" | "neutral" {
+  if (
+    isPendingClaimTransactionId(transaction.id) &&
+    transaction.status === "completed"
+  ) {
+    return "neutral";
+  }
   if (
     transaction.status === "pending" ||
     transaction.status === "processing" ||
@@ -95,7 +136,11 @@ function getAmountTone(
 export function TransactionAmountCell({
   transaction,
 }: TransactionAmountCellProperties) {
-  const amountPrefix = getAmountPrefix(transaction.type);
+  const amountPrefix =
+    isPendingClaimTransactionId(transaction.id) &&
+    transaction.status === "completed"
+      ? ""
+      : getAmountPrefix(transaction.type);
   const tone = getAmountTone(transaction);
 
   return (

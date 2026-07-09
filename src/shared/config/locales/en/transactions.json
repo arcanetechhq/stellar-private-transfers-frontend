@@ -45,9 +45,13 @@
   },
   "tableHeaders": {
     "date": "Date",
-    "fromTo": "From/To",
+    "activity": "Activity",
     "amount": "Amount"
   },
+  "pendingClaimAction": "Claim",
+  "pendingClaimSubtitle": "Onboarding transfer",
+  "pendingClaimSettledSubtitle": "Incoming · claimed",
+  "claimCreditSubtitle": "Credited to private balance",
   "pagination": {
     "navLabel": "Transaction list pagination",
     "previous": "Previous page",
@@ -87,6 +91,8 @@
     "deposit": "Deposit",
     "sent": "Sent",
     "received": "Received",
+    "incomingTransfer": "Incoming transfer",
+    "claimed": "Claimed",
     "withdrawal": "Withdrawal",
     "merge": "Merge"
   },

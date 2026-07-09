@@ -1,9 +1,9 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { Transaction } from "@/entities/transaction";
 import {
+  TransactionActivityCell,
   TransactionAmountCell,
   TransactionDateCell,
-  TransactionFromToCell,
 } from "./transaction-table-cells";
 
 export type TransactionsDataTableColumn<T> = {
@@ -122,13 +122,24 @@ export function TransactionsDataTable<T>({
 
 export function buildTransactionTableColumns(options: {
   dateTitle: ReactNode;
-  fromToTitle: ReactNode;
+  activityTitle: ReactNode;
   amountTitle: ReactNode;
   getTransactionLabel: (transaction: Transaction) => string;
+  claimingId?: number;
+  canClaim?: boolean;
+  onClaim?: (transactionId: string) => void;
 }): TransactionsDataTableColumn<Transaction>[] {
-  const { dateTitle, fromToTitle, amountTitle, getTransactionLabel } = options;
+  const {
+    dateTitle,
+    activityTitle,
+    amountTitle,
+    getTransactionLabel,
+    claimingId,
+    canClaim,
+    onClaim,
+  } = options;
 
-  return [
+  const columns: TransactionsDataTableColumn<Transaction>[] = [
     {
       key: "date",
       title: dateTitle,
@@ -140,27 +151,33 @@ export function buildTransactionTableColumns(options: {
       ),
     },
     {
-      key: "fromTo",
-      title: fromToTitle,
-      flex: 1.4,
+      key: "activity",
+      title: activityTitle,
+      flex: 1,
       minWidth: 48,
       render: (transaction) => (
-        <TransactionFromToCell
+        <TransactionActivityCell
           transaction={transaction}
           title={getTransactionLabel(transaction)}
+          claimingId={claimingId}
+          canClaim={canClaim}
+          onClaim={onClaim}
         />
       ),
     },
-    {
-      key: "amount",
-      title: amountTitle,
-      flex: 0.8,
-      minWidth: 20,
-      maxWidth: 180,
-      align: "right",
-      render: (transaction) => (
-        <TransactionAmountCell transaction={transaction} />
-      ),
-    },
   ];
+
+  columns.push({
+    key: "amount",
+    title: amountTitle,
+    flex: 0.8,
+    minWidth: 20,
+    maxWidth: 180,
+    align: "right",
+    render: (transaction) => (
+      <TransactionAmountCell transaction={transaction} />
+    ),
+  });
+
+  return columns;
 }

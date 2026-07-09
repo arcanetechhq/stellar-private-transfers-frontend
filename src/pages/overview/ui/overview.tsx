@@ -5,9 +5,11 @@ import { selectCoinItems } from "@/entities/coin";
 import {
   selectAreTransactionsLoaded,
   selectTransactions,
-  sortTransactionsByDateDesc,
 } from "@/entities/transaction";
-import { TransactionsPanel } from "@/widgets/transaction-list";
+import {
+  TransactionsPanel,
+  useTransactionPanelPendingClaims,
+} from "@/widgets/transaction-list";
 import { BalanceHero } from "./balance-hero";
 import { PrivateAssetTable } from "@/widgets/private-asset-table";
 
@@ -23,7 +25,8 @@ export function Overview() {
 
   const transactions = useAppSelector(selectTransactions);
   const transactionsLoaded = useAppSelector(selectAreTransactionsLoaded);
-  const sortedTransactions = sortTransactionsByDateDesc(transactions);
+  const { mergedTransactions, claimControls } =
+    useTransactionPanelPendingClaims(transactions);
 
   const privateAmountByAssetId = new Map<string, number>();
   for (const item of privateCoinItems) {
@@ -46,21 +49,22 @@ export function Overview() {
 
   return (
     <React.Fragment>
-      <div className="w-full h-full min-h-full p-[24px] pt-[8px] bg-background">
-        <div className="w-full h-full flex flex-col gap-4">
+      <div className="w-full min-h-full p-[24px] pt-[8px] bg-background">
+        <div className="w-full flex flex-col gap-4">
           <BalanceHero
             balance={formatUsdBalance(totalUsdBalance)}
             assetCount={privateAssetCount}
           />
-          <div className="h-full grid grid-cols-1 min-[1180px]:grid-cols-[1fr_416px] gap-4">
+          <div className="grid grid-cols-1 min-[1180px]:grid-cols-[1fr_416px] gap-4">
             <div className="overview-right-rail order-1 min-[1180px]:order-2 min-[1180px]:col-start-2 min-[1180px]:row-start-1">
               <PrivateAssetTable />
             </div>
-            <div className="order-2 min-h-0 min-[1180px]:order-1 min-[1180px]:col-start-1 min-[1180px]:row-start-1">
+            <div className="order-2 min-[1180px]:order-1 min-[1180px]:col-start-1 min-[1180px]:row-start-1">
               <TransactionsPanel
-                transactions={sortedTransactions}
+                transactions={mergedTransactions}
                 isHydrated={transactionsLoaded}
                 variant="overview"
+                claimControls={claimControls}
               />
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { ArrowRight, Loader2, RefreshCcw, Wallet } from "lucide-react";
+import { Loader2, RefreshCcw, Wallet } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Arcn from "@/shared/assets/logo-arcn";
 import { ArcaneShaderGradient } from "./arcane-shader-gradient";
@@ -84,22 +84,6 @@ export function ArcaneConnectScreen({
             </p>
           </div>
 
-          {isBusyPhase ? (
-            <div
-              className="arcane-connect-status"
-              role="status"
-              aria-live="polite"
-            >
-              <Loader2
-                size={21}
-                strokeWidth={1.8}
-                className="animate-spin"
-                aria-hidden="true"
-              />
-              <span>{translate(resolveStatusTitleKey(phase))}</span>
-            </div>
-          ) : null}
-
           {isErrorPhase ? (
             <div className="arcane-connect-error" role="alert">
               <p className="arcane-connect-error__message">
@@ -112,27 +96,36 @@ export function ArcaneConnectScreen({
               >
                 <span>{translate("connectScreenRetry")}</span>
                 <RefreshCcw size={20} strokeWidth={1.8} />
-                {/* <ArrowRight size={20} strokeWidth={1.8} /> */}
               </button>
             </div>
-          ) : null}
-
-          {phase === "prompt" ? (
+          ) : (
             <button
               type="button"
               className="arcane-connect-primary"
-              disabled={connectDisabled || isConnectingWallet}
+              disabled={connectDisabled || isBusyPhase || isConnectingWallet}
               onClick={onConnectWallet}
+              {...(isBusyPhase
+                ? { "aria-live": "polite" as const, role: "status" as const }
+                : {})}
             >
-              {isConnectingWallet ? (
-                <Loader2 size={21} strokeWidth={1.8} className="animate-spin" />
-              ) : (
-                <Wallet size={21} strokeWidth={1.8} />
-              )}
-              <span>{translate("connectWallet")}</span>
-              {/* <ArrowRight size={20} strokeWidth={1.8} /> */}
+              {phase === "prompt" ? (
+                <Wallet size={21} strokeWidth={1.8} aria-hidden="true" />
+              ) : null}
+              <span>
+                {isBusyPhase
+                  ? translate(resolveStatusTitleKey(phase))
+                  : translate("connectWallet")}
+              </span>
+              {isBusyPhase ? (
+                <Loader2
+                  size={21}
+                  strokeWidth={1.8}
+                  className="animate-spin"
+                  aria-hidden="true"
+                />
+              ) : null}
             </button>
-          ) : null}
+          )}
         </div>
 
         <aside className="arcane-connect-visual" aria-hidden="true">

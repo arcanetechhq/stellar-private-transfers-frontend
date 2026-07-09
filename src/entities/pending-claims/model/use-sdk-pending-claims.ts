@@ -14,6 +14,7 @@ export function useSdkPendingClaimsList(
   isLoading: boolean;
   isError: boolean;
   reload: () => Promise<void>;
+  removeClaim: (claimId: number) => void;
 } {
   const { client, ready } = usePrivacySdkClient();
   const [claims, setClaims] = useState<PendingClaimItem[]>([]);
@@ -60,7 +61,11 @@ export function useSdkPendingClaimsList(
     };
   }, [client, ownerAddress, ready, reload]);
 
-  return { claims, isLoading, isError, reload };
+  const removeClaim = useCallback((claimId: number) => {
+    setClaims((current) => current.filter((claim) => claim.id !== claimId));
+  }, []);
+
+  return { claims, isLoading, isError, reload, removeClaim };
 }
 
 export function useSdkPendingClaimsCount(ownerAddress: string | undefined): number {

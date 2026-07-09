@@ -6,7 +6,7 @@ import { AssetRowIcon } from "@/shared/ui/asset-row-icon";
 import { cn } from "@/shared/lib/cn";
 import type { Transaction } from "@/entities/transaction";
 import {
-  getTransactionLabel,
+  resolveTransactionActivityTitle,
   getAmountToneClass,
   getAmountPrefix,
 } from "../lib/transaction-display";
@@ -22,6 +22,7 @@ export function RecentTransactionRow(
 ) {
   const { transaction } = properties;
   const { t: translate } = useTranslation("overview");
+  const { t: translateTransactions } = useTranslation("transactions");
   const assetMap = useAssetLookup();
   const asset = assetMap.get(transaction.assetId);
   const assetLabel = asset?.name ?? transaction.assetId;
@@ -40,7 +41,9 @@ export function RecentTransactionRow(
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <p className="truncate text-sm leading-5 font-semibold text-[var(--foreground-primary)]">
-              {getTransactionLabel(transaction.type, translate)}
+              {resolveTransactionActivityTitle(transaction, (key) =>
+                translateTransactions(key),
+              )}
             </p>
             <div className="flex items-center gap-1.5">
               <AssetRowIcon

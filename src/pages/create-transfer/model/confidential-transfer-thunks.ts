@@ -2,6 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import type { AppDispatch, RootState } from "@/store";
 import { selectCoinItems } from "@/entities/coin";
 import { selectWalletPublicKey } from "@/entities/wallet";
+import { mapPrivacySdkError } from "@/shared/lib/privacy-sdk/map-privacy-sdk-errors.js";
 import { getDefaultStellarNetworkConfig } from "@/shared/stellar/stellar-network-environment";
 import { runConfidentialTransferMutation } from "../lib/run-confidential-transfer-mutation";
 
@@ -49,9 +50,10 @@ export const submitConfidentialTransferThunk = createAsyncThunk<
         finalizedCoinsForSenderAndAsset,
       });
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Transfer failed";
-      return rejectWithValue(message);
+      const message = mapPrivacySdkError(error);
+      return rejectWithValue(
+        message === "Operation failed" ? "Transfer failed" : message,
+      );
     }
   },
 );

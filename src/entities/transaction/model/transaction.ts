@@ -7,7 +7,7 @@ import {
 export interface Transaction {
   id: string;
   date: string;
-  type: "sent" | "received" | "deposit" | "withdrawal" | "merge";
+  type: "sent" | "received" | "deposit" | "withdrawal" | "merge" | "claim";
   assetId: string;
   amount: number;
   counterparty: string;
