@@ -1,5 +1,7 @@
 import {
+  configurePrivacyPoolService,
   createDefaultTransactEngine,
+  createPrivacyPoolService,
   createStellarPolicyAdapterFromEnvironment,
   createStellarPrivacyClientFromResolvedConfig,
   getPrivacyPoolService,
@@ -10,7 +12,10 @@ import {
   type StellarPrivacyClient,
 } from "@arcanetech/privacy-sdk-stellar";
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
-import type { PrivacyPoolService } from "@arcanetech/privacy-sdk-stellar/transact";
+import type {
+  PrivacyPoolService,
+  StellarTransactEnvironment,
+} from "@arcanetech/privacy-sdk-stellar/transact";
 import {
   buildStellarTransactEnvironment,
   readAuditPublicKeyHexFromEnvironment,
@@ -37,6 +42,25 @@ async function createWalletAdapter(networkPassphrase: string) {
     signTransactionPayload: async (payload: { operationId: string; signed: boolean }) =>
       payload,
   };
+}
+
+function resolveConfiguredPrivacyPoolService(
+  assets: Awaited<ReturnType<typeof loadDefaultStellarBrowserAssets>>,
+  transactEnvironment: StellarTransactEnvironment,
+): PrivacyPoolService {
+  try {
+    return getPrivacyPoolService() as unknown as PrivacyPoolService;
+  } catch {
+    const service = createPrivacyPoolService({
+      assets,
+      applicationId: transactEnvironment.network.applicationId,
+      ...(transactEnvironment.auditPublicKey
+        ? { auditPublicKey: transactEnvironment.auditPublicKey }
+        : {}),
+    });
+    configurePrivacyPoolService(service);
+    return service as unknown as PrivacyPoolService;
+  }
 }
 
 async function initializePrivacySdkClient(
@@ -70,10 +94,14 @@ async function initializePrivacySdkClient(
   if (!isStellarPrivacyClient(created)) {
     throw new Error("Privacy SDK client rejected during initialization.");
   }
+  const privacyPoolService = resolveConfiguredPrivacyPoolService(
+    assets,
+    engineTransactEnvironment,
+  );
   setPrivacyTransactContext({
     transactEnvironment: engineTransactEnvironment,
     client: created,
-    privacyPoolService: getPrivacyPoolService() as unknown as PrivacyPoolService,
+    privacyPoolService,
   });
   return created;
 }

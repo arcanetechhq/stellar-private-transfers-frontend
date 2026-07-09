@@ -14,6 +14,7 @@ import {
   useWalletPrivateAddress,
 } from "@/features/register-private-address";
 import { useStellarWalletModal } from "@/features/stellar-wallet-connect";
+import { usePrivacyPoolServiceConfigured } from "@/shared/hooks/use-privacy-pool-service-configured.js";
 import { runWalletOnboardingFlow } from "../lib/run-wallet-onboarding-flow";
 import {
   WalletOnboardingContext,
@@ -41,6 +42,7 @@ export function WalletOnboardingProvider({
   const store = useStore();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const isWalletKitLoaded = useAppSelector(selectIsWalletKitLoaded);
+  const privacyPoolServiceReady = usePrivacyPoolServiceConfigured();
   const { refreshRegistryStatus } = useWalletPrivateAddress();
   const { register } = useRegisterWalletPrivateAddress();
   const {
@@ -116,11 +118,11 @@ export function WalletOnboardingProvider({
 
   const retry = useCallback(() => {
     const trimmedPublicKey = publicKey?.trim();
-    if (!trimmedPublicKey) {
+    if (!trimmedPublicKey || !privacyPoolServiceReady) {
       return;
     }
     void runOnboarding({ blocking: true, targetPublicKey: trimmedPublicKey });
-  }, [publicKey, runOnboarding]);
+  }, [publicKey, privacyPoolServiceReady, runOnboarding]);
 
   useEffect(() => {
     const trimmedPublicKey = publicKey?.trim();
@@ -130,6 +132,13 @@ export function WalletOnboardingProvider({
       setReadyPublicKey(undefined);
       setHasUnlockedApp(false);
       setErrorMessage(undefined);
+      return;
+    }
+
+    if (!privacyPoolServiceReady) {
+      if (!hasUnlockedApp) {
+        setPhase("checking");
+      }
       return;
     }
 
@@ -155,6 +164,7 @@ export function WalletOnboardingProvider({
     });
   }, [
     publicKey,
+    privacyPoolServiceReady,
     isWalletKitLoaded,
     isWalletConnectInProgress,
     isWalletPickerOpen,
