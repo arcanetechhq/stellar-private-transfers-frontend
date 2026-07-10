@@ -45,6 +45,7 @@ export function CreateTransfer(): React.JSX.Element {
             totalAmount={transfer.totalAmount}
             canContinue={transfer.canSubmit}
             isSubmitting={transfer.isSubmitting}
+            noteLimitAlert={transfer.noteLimitAlert}
             excludeStellarAddress={transfer.publicKey ?? undefined}
             onAmountChange={transfer.handleAmountChange}
             onRecipientChange={transfer.setRecipient}

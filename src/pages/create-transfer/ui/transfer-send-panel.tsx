@@ -19,6 +19,10 @@ interface TransferSendPanelProperties {
   totalAmount: number;
   canContinue: boolean;
   isSubmitting: boolean;
+  noteLimitAlert?: {
+    title: string;
+    subtitle: string;
+  };
   excludeStellarAddress?: string;
   onAmountChange: (value: string) => void;
   onRecipientChange: (value: string) => void;
@@ -95,6 +99,7 @@ export function TransferSendPanel({
   totalAmount,
   canContinue,
   isSubmitting,
+  noteLimitAlert,
   excludeStellarAddress,
   onAmountChange,
   onRecipientChange,
@@ -115,6 +120,7 @@ export function TransferSendPanel({
     hasAmount &&
     Number.isFinite(numericBalance) &&
     numericAmount > numericBalance;
+  const amountInvalid = exceedsBalance || Boolean(noteLimitAlert);
   const recipientGetsDisplay = `${formatTransferAmount(totalAmount)} ${ticker}`.trim();
   const feeDisplay = `0 ${ticker}`.trim();
   const availableBalanceDisplay = formatTransferBalanceWithTicker(
@@ -139,7 +145,7 @@ export function TransferSendPanel({
         <div className="send-money-amount-panel">
           <div
             className="send-money-amount-row"
-            data-invalid={exceedsBalance ? "true" : undefined}
+            data-invalid={amountInvalid ? "true" : undefined}
           >
             <div className="send-money-amount-row__meta">
               <span>{translate("youSend")}</span>
@@ -178,6 +184,13 @@ export function TransferSendPanel({
             </div>
           </div>
         </div>
+
+        {noteLimitAlert ? (
+          <div className="send-money-error" role="alert">
+            <p className="send-money-error__title">{noteLimitAlert.title}</p>
+            <p className="send-money-error__subtitle">{noteLimitAlert.subtitle}</p>
+          </div>
+        ) : null}
 
         {hasAmount ? (
           <div className="send-money-summary-row">

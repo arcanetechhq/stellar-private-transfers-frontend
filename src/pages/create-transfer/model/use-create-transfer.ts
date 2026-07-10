@@ -28,6 +28,7 @@ export function useCreateTransfer() {
     canSubmit: model.validation.canSubmit,
     isSubmitting: model.isActionPending,
     submitError: model.submitError,
+    noteLimitAlert: model.noteLimitAlert,
     recipientRegistryStatus: model.recipientRegistryStatus,
     senderNonce: model.senderNonce,
     senderPrivateAddress: model.senderPrivateAddress,

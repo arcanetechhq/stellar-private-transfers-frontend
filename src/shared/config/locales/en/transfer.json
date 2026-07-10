@@ -30,6 +30,8 @@
     "inputNoteAlreadySpent": "One of the selected private notes was already spent on-chain. Refresh your balance and try again."
   },
   "max": "MAX",
+  "amountExceedsNoteLimitTitle": "Amount exceeds the limit",
+  "amountExceedsNoteLimitSubtitle": "Enter a smaller amount and try again",
   "availableForMax": "Private balance: {{amount}}",
   "maxButton": "Max",
   "selectContact": "Select Contact",

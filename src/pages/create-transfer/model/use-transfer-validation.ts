@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { isValidStellarPublicAddress } from "@/shared/lib/stellar/is-valid-stellar-public-address";
+import { amountInputToStroops } from "@/shared/lib/stellar/stroops";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import type { RecipientRegistryStatus } from "./use-recipient-registry-status";
 import { parseTransferBalance } from "../lib/format-transfer-balance";
@@ -50,12 +51,17 @@ function transferAmountWithinBalance(parameters: {
   amount: string;
   numericAmount: number;
   numericBalance: number;
+  maxNoteStroops: bigint;
 }): boolean {
+  const amountStroops = amountInputToStroops(parameters.amount);
   return (
     parameters.amount !== "" &&
     !Number.isNaN(parameters.numericAmount) &&
     parameters.numericAmount > 0 &&
-    parameters.numericAmount <= parameters.numericBalance
+    parameters.numericAmount <= parameters.numericBalance &&
+    amountStroops !== undefined &&
+    amountStroops > 0n &&
+    amountStroops <= parameters.maxNoteStroops
   );
 }
 
@@ -69,6 +75,7 @@ function transferFormCanSubmit(parameters: {
   amount: string;
   numericAmount: number;
   numericBalance: number;
+  maxNoteStroops: bigint;
   isSubmitting: boolean;
   actionsEnabled: boolean;
   recipientRegistryStatus: RecipientRegistryStatus;
@@ -88,6 +95,7 @@ function transferFormCanSubmit(parameters: {
       amount: parameters.amount,
       numericAmount: parameters.numericAmount,
       numericBalance: parameters.numericBalance,
+      maxNoteStroops: parameters.maxNoteStroops,
     }) &&
     !parameters.isSubmitting
   );
@@ -99,6 +107,7 @@ export function useTransferRecipientAndSubmitGates(parameters: {
   recipient: string;
   selectedAsset: AssetWithTrustline | undefined;
   amount: string;
+  maxNoteStroops: bigint;
   isSubmitting: boolean;
   actionsEnabled: boolean;
   recipientRegistryStatus: RecipientRegistryStatus;
@@ -131,6 +140,7 @@ export function useTransferRecipientAndSubmitGates(parameters: {
     amount: parameters.amount,
     numericAmount,
     numericBalance,
+    maxNoteStroops: parameters.maxNoteStroops,
     isSubmitting: parameters.isSubmitting,
     actionsEnabled: parameters.actionsEnabled,
     recipientRegistryStatus: parameters.recipientRegistryStatus,

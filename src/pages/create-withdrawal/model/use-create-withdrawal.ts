@@ -4,17 +4,10 @@ import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { type AssetWithTrustline } from "@/entities/asset";
-import {
-  formatMaxWithdrawBalanceInput,
-  getMaxWithdrawStroops,
-  selectCoinItems,
-} from "@/entities/coin";
+import { getMaxWithdrawStroops, selectCoinItems } from "@/entities/coin";
 import { isValidStellarPublicAddress } from "@/shared/lib/stellar/is-valid-stellar-public-address";
 import { amountInputToStroops } from "@/shared/lib/stellar/stroops";
-import {
-  formatWithdrawalBalanceWithTicker,
-  parseWithdrawalAmountInput,
-} from "../lib/format-withdrawal-amount";
+import { parseWithdrawalAmountInput } from "../lib/format-withdrawal-amount";
 import type { PrivateWithdrawalSuccess } from "./private-withdrawal-success";
 import { usePrivateWithdrawal } from "./use-private-withdrawal";
 import { usePrivateWithdrawalSubmitHandler } from "./use-private-withdrawal-submit-handler";
@@ -85,15 +78,6 @@ export function useCreateWithdrawal() {
       }),
     [coins, selectedAsset?.assetId, withdrawalSender.senderPrivateAddress],
   );
-  const maxNoteAmountInput = useMemo(
-    () =>
-      formatMaxWithdrawBalanceInput({
-        coins,
-        privateAddress: withdrawalSender.senderPrivateAddress,
-        assetId: selectedAsset?.assetId ?? "",
-      }),
-    [coins, selectedAsset?.assetId, withdrawalSender.senderPrivateAddress],
-  );
   const amountStroops = amountInputToStroops(amountInputs.amount);
   const exceedsNoteLimit =
     amountStroops !== undefined &&
@@ -103,12 +87,7 @@ export function useCreateWithdrawal() {
   const noteLimitAlert = exceedsNoteLimit
     ? {
         title: translate("amountExceedsNoteLimitTitle"),
-        subtitle: translate("amountExceedsNoteLimitSubtitle", {
-          amount: formatWithdrawalBalanceWithTicker(
-            maxNoteAmountInput,
-            selectedAsset?.assetId.toUpperCase() ?? "",
-          ),
-        }),
+        subtitle: translate("amountExceedsNoteLimitSubtitle"),
       }
     : undefined;
   const canSubmit = computeWithdrawalCanSubmit({
