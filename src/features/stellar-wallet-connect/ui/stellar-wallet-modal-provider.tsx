@@ -9,6 +9,7 @@ import {
   type StellarWalletModalOpenOptions,
 } from "../model/stellar-wallet-modal-context";
 import { StellarWalletModal } from "./stellar-wallet-modal";
+import { isWalletPickerUiEnabled } from "../lib/wallet-options";
 
 type StellarWalletModalProviderProperties = {
   children: ReactNode;
@@ -23,6 +24,8 @@ function StellarWalletModalHost() {
   }
 
   const { isOpen, mode, isChangeWallet, setOpen } = context;
+  const showModal =
+    isOpen && (mode === "connected" || isWalletPickerUiEnabled);
 
   const handleDisconnect = async () => {
     await dispatch(disconnectStellarWallet());
@@ -30,7 +33,7 @@ function StellarWalletModalHost() {
 
   return (
     <StellarWalletModal
-      open={isOpen}
+      open={showModal}
       onOpenChange={setOpen}
       mode={mode}
       publicKey={publicKey}

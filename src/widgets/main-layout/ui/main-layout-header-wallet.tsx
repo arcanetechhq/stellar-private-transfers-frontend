@@ -1,8 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import {
+  connectFreighterWallet,
   disconnectStellarWallet,
+  isWalletPickerUiEnabled,
   useStellarWalletModal,
 } from "@/features/stellar-wallet-connect";
 import { shortenStellarAddress } from "@/shared/lib/shorten-stellar-address";
@@ -25,6 +27,7 @@ export function MainLayoutHeaderWallet({
   const publicKey = useAppSelector(selectWalletPublicKey);
   const isConnected = Boolean(publicKey);
   const { openPicker } = useStellarWalletModal();
+  const [isConnectingFreighter, setIsConnectingFreighter] = useState(false);
   const accountMenuReference = useRef<HTMLDivElement>(null);
 
   const shortAddress = publicKey ? shortenStellarAddress(publicKey, 4, 3) : "";
@@ -60,13 +63,38 @@ export function MainLayoutHeaderWallet({
     await dispatch(disconnectStellarWallet());
   };
 
+  const reconnectFreighter = async () => {
+    setIsConnectingFreighter(true);
+    try {
+      await dispatch(disconnectStellarWallet());
+      await connectFreighterWallet(dispatch);
+    } finally {
+      setIsConnectingFreighter(false);
+    }
+  };
+
   const handleChangeWallet = () => {
     setWalletOpen(false);
-    openPicker(true);
+    if (isWalletPickerUiEnabled) {
+      openPicker(true);
+      return;
+    }
+    void reconnectFreighter();
   };
 
   const handleConnect = () => {
-    openPicker();
+    if (isWalletPickerUiEnabled) {
+      openPicker();
+      return;
+    }
+    void (async () => {
+      setIsConnectingFreighter(true);
+      try {
+        await connectFreighterWallet(dispatch);
+      } finally {
+        setIsConnectingFreighter(false);
+      }
+    })();
   };
 
   if (isConnected && publicKey) {
@@ -92,12 +120,15 @@ export function MainLayoutHeaderWallet({
     <button
       type="button"
       className="topbar-action user-menu user-menu--connect"
+      disabled={isConnectingFreighter}
       onClick={handleConnect}
     >
       <span className="user-menu__wallet-icon" aria-hidden="true">
         <Wallet size={18} strokeWidth={1.6} />
       </span>
-      <span className="user-menu__name">{translate("common:connectWallet")}</span>
+      <span className="user-menu__name">
+        {translate("common:connectFreighter")}
+      </span>
     </button>
   );
 }

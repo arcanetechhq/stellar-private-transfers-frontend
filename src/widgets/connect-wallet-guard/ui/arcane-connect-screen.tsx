@@ -1,6 +1,7 @@
-import { Loader2, RefreshCcw, Wallet } from "lucide-react";
+import { Loader2, RefreshCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Arcn from "@/shared/assets/logo-arcn";
+import { FREIGHTER_ICON_URL } from "@/features/stellar-wallet-connect";
 import { ArcaneShaderGradient } from "./arcane-shader-gradient";
 import "./arcane-connect-screen.css";
 
@@ -19,6 +20,7 @@ type ArcaneConnectScreenProperties = {
   errorMessage?: string;
   onConnectWallet: () => void;
   onRetry: () => void;
+  onChangeWallet: () => void;
 };
 
 function resolveStatusTitleKey(phase: ArcaneConnectScreenPhase): string {
@@ -41,6 +43,96 @@ function resolveStatusTitleKey(phase: ArcaneConnectScreenPhase): string {
   }
 }
 
+function FreighterButtonIcon() {
+  return (
+    <img
+      className="arcane-connect-primary__wallet-icon"
+      src={FREIGHTER_ICON_URL}
+      alt=""
+      width={21}
+      height={21}
+      aria-hidden="true"
+    />
+  );
+}
+
+function ArcaneConnectPrimaryAction(properties: {
+  phase: ArcaneConnectScreenPhase;
+  connectDisabled: boolean;
+  isConnectingWallet: boolean;
+  isBusyPhase: boolean;
+  onConnectWallet: () => void;
+}) {
+  const { t: translate } = useTranslation("common");
+  const {
+    phase,
+    connectDisabled,
+    isConnectingWallet,
+    isBusyPhase,
+    onConnectWallet,
+  } = properties;
+
+  return (
+    <button
+      type="button"
+      className="arcane-connect-primary"
+      disabled={connectDisabled || isBusyPhase || isConnectingWallet}
+      onClick={onConnectWallet}
+      {...(isBusyPhase
+        ? { "aria-live": "polite" as const, role: "status" as const }
+        : {})}
+    >
+      {phase === "prompt" ? <FreighterButtonIcon /> : null}
+      <span>
+        {isBusyPhase
+          ? translate(resolveStatusTitleKey(phase))
+          : translate("connectFreighter")}
+      </span>
+      {isBusyPhase ? (
+        <Loader2
+          size={21}
+          strokeWidth={1.8}
+          className="animate-spin"
+          aria-hidden="true"
+        />
+      ) : null}
+    </button>
+  );
+}
+
+function ArcaneConnectErrorActions(properties: {
+  errorMessage?: string;
+  onRetry: () => void;
+  onChangeWallet: () => void;
+}) {
+  const { t: translate } = useTranslation("common");
+
+  return (
+    <div className="arcane-connect-error" role="alert">
+      <p className="arcane-connect-error__message">
+        {properties.errorMessage ?? translate("connectScreenSetupFailed")}
+      </p>
+      <div className="arcane-connect-actions">
+        <button
+          type="button"
+          className="arcane-connect-primary"
+          onClick={properties.onRetry}
+        >
+          <span>{translate("connectScreenRetry")}</span>
+          <RefreshCcw size={20} strokeWidth={1.8} />
+        </button>
+        <button
+          type="button"
+          className="arcane-connect-secondary"
+          onClick={properties.onChangeWallet}
+        >
+          <span>{translate("connectScreenReconnectFreighter")}</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function ArcaneConnectScreen({
   phase,
   connectDisabled,
@@ -48,6 +140,7 @@ export function ArcaneConnectScreen({
   errorMessage,
   onConnectWallet,
   onRetry,
+  onChangeWallet,
 }: ArcaneConnectScreenProperties) {
   const { t: translate } = useTranslation("common");
   const isBusyPhase =
@@ -78,53 +171,23 @@ export function ArcaneConnectScreen({
                 {translate("connectScreenTitleLine2")}
               </span>
             </h1>
-
-            <p>
-              {translate("connectScreenDescription")}
-            </p>
+            <p>{translate("connectScreenDescription")}</p>
           </div>
 
           {isErrorPhase ? (
-            <div className="arcane-connect-error" role="alert">
-              <p className="arcane-connect-error__message">
-                {errorMessage ?? translate("connectScreenSetupFailed")}
-              </p>
-              <button
-                type="button"
-                className="arcane-connect-primary"
-                onClick={onRetry}
-              >
-                <span>{translate("connectScreenRetry")}</span>
-                <RefreshCcw size={20} strokeWidth={1.8} />
-              </button>
-            </div>
+            <ArcaneConnectErrorActions
+              errorMessage={errorMessage}
+              onRetry={onRetry}
+              onChangeWallet={onChangeWallet}
+            />
           ) : (
-            <button
-              type="button"
-              className="arcane-connect-primary"
-              disabled={connectDisabled || isBusyPhase || isConnectingWallet}
-              onClick={onConnectWallet}
-              {...(isBusyPhase
-                ? { "aria-live": "polite" as const, role: "status" as const }
-                : {})}
-            >
-              {phase === "prompt" ? (
-                <Wallet size={21} strokeWidth={1.8} aria-hidden="true" />
-              ) : null}
-              <span>
-                {isBusyPhase
-                  ? translate(resolveStatusTitleKey(phase))
-                  : translate("connectWallet")}
-              </span>
-              {isBusyPhase ? (
-                <Loader2
-                  size={21}
-                  strokeWidth={1.8}
-                  className="animate-spin"
-                  aria-hidden="true"
-                />
-              ) : null}
-            </button>
+            <ArcaneConnectPrimaryAction
+              phase={phase}
+              connectDisabled={connectDisabled}
+              isConnectingWallet={isConnectingWallet}
+              isBusyPhase={isBusyPhase}
+              onConnectWallet={onConnectWallet}
+            />
           )}
         </div>
 

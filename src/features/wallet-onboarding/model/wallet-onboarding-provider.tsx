@@ -15,6 +15,7 @@ import {
 } from "@/features/register-private-address";
 import { useStellarWalletModal } from "@/features/stellar-wallet-connect";
 import { usePrivacyPoolServiceConfigured } from "@/shared/hooks/use-privacy-pool-service-configured.js";
+import { isWalletNetworkMismatchError } from "../lib/wallet-network-mismatch-error";
 import { runWalletOnboardingFlow } from "../lib/run-wallet-onboarding-flow";
 import {
   WalletOnboardingContext,
@@ -24,6 +25,12 @@ import {
 
 type WalletOnboardingProviderProperties = {
   children: ReactNode;
+};
+
+type OnboardingBlock = {
+  publicKey: string;
+  kind: "error" | "wrong_network";
+  message?: string;
 };
 
 function mapFlowStepToPhase(
@@ -56,6 +63,17 @@ export function WalletOnboardingProvider({
   const [hasUnlockedApp, setHasUnlockedApp] = useState(false);
   const [readyPublicKey, setReadyPublicKey] = useState<string | undefined>();
   const runReference = useRef(0);
+  const onboardingBlockReference = useRef<OnboardingBlock | undefined>(
+    undefined,
+  );
+
+  const clearOnboardingBlock = useCallback(() => {
+    onboardingBlockReference.current = undefined;
+  }, []);
+
+  const blockOnboarding = useCallback((block: OnboardingBlock) => {
+    onboardingBlockReference.current = block;
+  }, []);
 
   const runOnboarding = useCallback(
     async (parameters: {
@@ -69,6 +87,7 @@ export function WalletOnboardingProvider({
 
       const runId = runReference.current + 1;
       runReference.current = runId;
+      clearOnboardingBlock();
       setErrorMessage(undefined);
 
       if (parameters.blocking) {
@@ -96,6 +115,7 @@ export function WalletOnboardingProvider({
         }
 
         await refreshRegistryStatus();
+        clearOnboardingBlock();
         setReadyPublicKey(trimmedPublicKey);
         setPhase("ready");
         setHasUnlockedApp(true);
@@ -103,17 +123,37 @@ export function WalletOnboardingProvider({
         if (runReference.current !== runId) {
           return;
         }
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Wallet setup failed";
-        if (parameters.blocking) {
-          setPhase("error");
-          setErrorMessage(message);
+        if (!parameters.blocking) {
+          return;
         }
+        if (isWalletNetworkMismatchError(error)) {
+          blockOnboarding({
+            publicKey: trimmedPublicKey,
+            kind: "wrong_network",
+          });
+          setPhase("wrong_network");
+          setErrorMessage(undefined);
+          return;
+        }
+        const message =
+          error instanceof Error ? error.message : "Wallet setup failed";
+        blockOnboarding({
+          publicKey: trimmedPublicKey,
+          kind: "error",
+          message,
+        });
+        setPhase("error");
+        setErrorMessage(message);
       }
     },
-    [dispatch, refreshRegistryStatus, register, store],
+    [
+      blockOnboarding,
+      clearOnboardingBlock,
+      dispatch,
+      refreshRegistryStatus,
+      register,
+      store,
+    ],
   );
 
   const retry = useCallback(() => {
@@ -121,13 +161,15 @@ export function WalletOnboardingProvider({
     if (!trimmedPublicKey || !privacyPoolServiceReady) {
       return;
     }
+    clearOnboardingBlock();
     void runOnboarding({ blocking: true, targetPublicKey: trimmedPublicKey });
-  }, [publicKey, privacyPoolServiceReady, runOnboarding]);
+  }, [clearOnboardingBlock, publicKey, privacyPoolServiceReady, runOnboarding]);
 
   useEffect(() => {
     const trimmedPublicKey = publicKey?.trim();
     if (!trimmedPublicKey) {
       runReference.current += 1;
+      clearOnboardingBlock();
       setPhase("idle");
       setReadyPublicKey(undefined);
       setHasUnlockedApp(false);
@@ -145,11 +187,14 @@ export function WalletOnboardingProvider({
     if (!isWalletKitLoaded || isWalletConnectInProgress || isWalletPickerOpen) {
       if (isWalletPickerOpen) {
         runReference.current += 1;
-        if (!hasUnlockedApp) {
-          setPhase("idle");
-          setErrorMessage(undefined);
-        }
       }
+      return;
+    }
+
+    const onboardingBlock = onboardingBlockReference.current;
+    if (onboardingBlock && onboardingBlock.publicKey === trimmedPublicKey) {
+      setPhase(onboardingBlock.kind);
+      setErrorMessage(onboardingBlock.message);
       return;
     }
 
@@ -170,6 +215,7 @@ export function WalletOnboardingProvider({
     isWalletPickerOpen,
     readyPublicKey,
     hasUnlockedApp,
+    clearOnboardingBlock,
     runOnboarding,
   ]);
 
@@ -179,18 +225,33 @@ export function WalletOnboardingProvider({
       Boolean(trimmedPublicKey) &&
       readyPublicKey === trimmedPublicKey &&
       phase === "ready";
+    const isBlockedPhase =
+      phase === "error" || phase === "wrong_network";
     const canEnterApp = Boolean(
       trimmedPublicKey &&
-        (isOnboardedForWallet || (hasUnlockedApp && phase !== "error")),
+        (isOnboardedForWallet || (hasUnlockedApp && !isBlockedPhase)),
+    );
+    const shouldShowMainApp = Boolean(
+      canEnterApp ||
+        (trimmedPublicKey && hasUnlockedApp && isWalletConnectInProgress),
     );
 
     return {
       phase,
       canEnterApp,
+      shouldShowMainApp,
       errorMessage,
       retry,
     };
-  }, [phase, errorMessage, retry, publicKey, readyPublicKey, hasUnlockedApp]);
+  }, [
+    phase,
+    errorMessage,
+    retry,
+    publicKey,
+    readyPublicKey,
+    hasUnlockedApp,
+    isWalletConnectInProgress,
+  ]);
 
   return (
     <WalletOnboardingContext.Provider value={value}>

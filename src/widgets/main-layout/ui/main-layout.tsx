@@ -6,7 +6,7 @@ import {
   selectIsWalletConnected,
   selectIsWalletKitLoaded,
 } from "@/entities/wallet";
-import { StellarWalletModalProvider, useStellarWalletModal } from "@/features/stellar-wallet-connect";
+import { StellarWalletModalProvider } from "@/features/stellar-wallet-connect";
 import { WalletOnboardingProvider, useWalletOnboarding } from "@/features/wallet-onboarding";
 import { ConnectWalletScreen } from "@/widgets/connect-wallet-guard";
 import { MainLayoutHeader } from "./main-layout-header";
@@ -36,12 +36,9 @@ function MainLayoutBody() {
   const noSidebarRouteActive = isNoSidebarRoute(model.location.pathname);
   const isWalletConnected = useAppSelector(selectIsWalletConnected);
   const isWalletKitLoaded = useAppSelector(selectIsWalletKitLoaded);
-  const { canEnterApp } = useWalletOnboarding();
-  const { isWalletConnectInProgress } = useStellarWalletModal();
+  const { shouldShowMainApp } = useWalletOnboarding();
 
-  const showMainApp =
-    isWalletConnected &&
-    (canEnterApp || isWalletConnectInProgress);
+  const showMainApp = isWalletConnected && shouldShowMainApp;
 
   return (
     <>

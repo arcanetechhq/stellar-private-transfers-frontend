@@ -1,6 +1,12 @@
 export const FREIGHTER_WALLET_ID = "freighter";
 export const LOBSTR_WALLET_ID = "lobstr";
 
+export const FREIGHTER_ICON_URL =
+  "https://stellar.creit.tech/wallet-icons/freighter.png";
+export const FREIGHTER_PRODUCT_URL = "https://freighter.app";
+
+export const isWalletPickerUiEnabled = false;
+
 export type WalletConnectOptionId =
   | typeof FREIGHTER_WALLET_ID
   | typeof LOBSTR_WALLET_ID
@@ -24,7 +30,8 @@ export const WALLET_CONNECT_OPTIONS: WalletConnectOption[] = [
     descriptionKey: "walletOptionFreighterDescription",
     badgeKey: "walletOptionFreighterBadge",
     moduleId: FREIGHTER_WALLET_ID,
-    productUrl: "https://freighter.app",
+    productUrl: FREIGHTER_PRODUCT_URL,
+    iconUrl: FREIGHTER_ICON_URL,
   },
   {
     id: LOBSTR_WALLET_ID,

@@ -148,6 +148,14 @@
   line-height: 24px;
 }
 
+.arcane-connect-primary__wallet-icon {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 auto;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
 .arcane-connect-primary:hover:not(:disabled) {
   background: #0a2540;
   box-shadow: 0 18px 34px rgba(6, 26, 47, 0.22);
@@ -176,6 +184,49 @@
   font-size: 16px;
   font-weight: 550;
   line-height: 24px;
+}
+
+.arcane-connect-actions {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.arcane-connect-secondary {
+  display: inline-flex;
+  width: 100%;
+  max-width: 420px;
+  height: 58px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 1px solid rgba(7, 26, 47, 0.16);
+  border-radius: var(--radius-4);
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--arcane-connect-ink);
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 22px;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    transform 100ms ease;
+}
+
+.arcane-connect-secondary span {
+  font-size: 19px;
+  line-height: 24px;
+}
+
+.arcane-connect-secondary:hover {
+  border-color: rgba(7, 26, 47, 0.28);
+  background: #ffffff;
+}
+
+.arcane-connect-secondary:active {
+  transform: translateY(1px);
 }
 
 .arcane-connect-visual {
@@ -244,6 +295,10 @@
   .arcane-connect-primary {
     max-width: 390px;
   }
+
+  .arcane-connect-secondary {
+    max-width: 390px;
+  }
 }
 
 @media (max-width: 860px) {
@@ -282,6 +337,10 @@
   }
 
   .arcane-connect-primary {
+    max-width: none;
+  }
+
+  .arcane-connect-secondary {
     max-width: none;
   }
 

@@ -6,11 +6,13 @@ export type WalletOnboardingPhase =
   | "funding"
   | "registering"
   | "ready"
+  | "wrong_network"
   | "error";
 
 export type WalletOnboardingContextValue = {
   phase: WalletOnboardingPhase;
   canEnterApp: boolean;
+  shouldShowMainApp: boolean;
   errorMessage: string | undefined;
   retry: () => void;
 };

@@ -3,6 +3,7 @@ import type { Store } from "@reduxjs/toolkit";
 import { selectDefaultNonce } from "@/entities/private-address";
 import { DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE } from "@/shared/lib/privacy-sdk/index.js";
 import { ensureTestnetNativeFunding } from "./ensure-testnet-native-funding";
+import { ensureWalletNetworkMatchesApp } from "./ensure-wallet-network-matches-app";
 import { ensureWalletRegistryActive } from "./ensure-wallet-registry-active";
 
 export type WalletOnboardingFlowPhase =
@@ -29,6 +30,7 @@ export async function runWalletOnboardingFlow(
   }
 
   parameters.onStep("checking");
+  await ensureWalletNetworkMatchesApp();
 
   await ensureTestnetNativeFunding({
     dispatch: parameters.dispatch,

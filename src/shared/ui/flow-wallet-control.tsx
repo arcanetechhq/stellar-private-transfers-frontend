@@ -1,8 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { Wallet } from "lucide-react";
-import { useAppSelector } from "@/store";
+import { useAppDispatch, useAppSelector } from "@/store";
 import { selectWalletPublicKey, useWalletProviderLabel } from "@/entities/wallet";
-import { useStellarWalletModal } from "@/features/stellar-wallet-connect";
+import {
+  connectFreighterWallet,
+  isWalletPickerUiEnabled,
+  useStellarWalletModal,
+} from "@/features/stellar-wallet-connect";
 import { shortenStellarAddress } from "@/shared/lib/shorten-stellar-address";
 
 type FlowWalletControlProperties = {
@@ -34,13 +38,30 @@ export function FlowWalletControl({
   manageConnectedWalletLabel,
   connectWalletLabel,
 }: FlowWalletControlProperties): React.JSX.Element {
+  const dispatch = useAppDispatch();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const providerLabel = useWalletProviderLabel();
-  const { openPicker } = useStellarWalletModal();
+  const { openPicker, openConnected } = useStellarWalletModal();
+  const [isConnectingFreighter, setIsConnectingFreighter] = useState(false);
   const isConnected = Boolean(publicKey);
 
   function handleConnect() {
-    openPicker(isConnected);
+    if (isWalletPickerUiEnabled) {
+      openPicker(isConnected);
+      return;
+    }
+    if (isConnected) {
+      openConnected();
+      return;
+    }
+    void (async () => {
+      setIsConnectingFreighter(true);
+      try {
+        await connectFreighterWallet(dispatch);
+      } finally {
+        setIsConnectingFreighter(false);
+      }
+    })();
   }
 
   const subtitle = isConnected
@@ -65,6 +86,7 @@ export function FlowWalletControl({
           className="send-flow-wallet-control__action"
           data-connected={isConnected ? "true" : undefined}
           aria-label={isConnected ? manageConnectedWalletLabel : connectWalletLabel}
+          disabled={isConnectingFreighter}
           onClick={handleConnect}
         >
           {isConnected ? changeLabel : connectLabel}
