@@ -5,8 +5,7 @@ import {
   hasClaimedFaucetToday,
   markFaucetClaimedToday,
 } from "./faucet-daily-limit";
-
-const FRIENDBOT_URL = "https://friendbot.stellar.org";
+import { fundNativeViaFriendbot } from "./fund-native-via-friendbot";
 
 export type FaucetStatus =
   | "idle"
@@ -54,13 +53,9 @@ export function useFaucetForNative(): UseFaucetResult {
     }
     setStatus("loading");
     try {
-      const url = `${FRIENDBOT_URL}?addr=${encodeURIComponent(address)}`;
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Friendbot error: ${response.status}`);
-      }
+      const result = await fundNativeViaFriendbot(address);
       markFaucetClaimedToday(address, "xlm");
-      setStatus("success");
+      setStatus(result === "already_funded" ? "limited" : "success");
     } catch {
       setStatus("error");
     }

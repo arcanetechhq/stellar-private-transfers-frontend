@@ -1,10 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { type AssetWithTrustline } from "@/entities/asset";
+import {
+  formatMaxWithdrawBalanceInput,
+  getMaxWithdrawStroops,
+  selectCoinItems,
+} from "@/entities/coin";
 import { isValidStellarPublicAddress } from "@/shared/lib/stellar/is-valid-stellar-public-address";
-import { parseWithdrawalAmountInput } from "../lib/format-withdrawal-amount";
+import { amountInputToStroops } from "@/shared/lib/stellar/stroops";
+import {
+  formatWithdrawalBalanceWithTicker,
+  parseWithdrawalAmountInput,
+} from "../lib/format-withdrawal-amount";
 import type { PrivateWithdrawalSuccess } from "./private-withdrawal-success";
 import { usePrivateWithdrawal } from "./use-private-withdrawal";
 import { usePrivateWithdrawalSubmitHandler } from "./use-private-withdrawal-submit-handler";
@@ -22,11 +32,13 @@ interface WithdrawalCanSubmitInput {
   selectedAsset: AssetWithTrustline | undefined;
   amount: string;
   numericBalance: number;
+  maxNoteStroops: bigint;
   destinationWallet: string;
 }
 
 function computeWithdrawalCanSubmit(input: WithdrawalCanSubmitInput): boolean {
   const numericAmount = parseWithdrawalAmountInput(input.amount);
+  const amountStroops = amountInputToStroops(input.amount);
   return (
     input.senderPrivateAddress !== "" &&
     input.selectedAsset !== undefined &&
@@ -34,6 +46,9 @@ function computeWithdrawalCanSubmit(input: WithdrawalCanSubmitInput): boolean {
     !Number.isNaN(numericAmount) &&
     numericAmount > 0 &&
     numericAmount <= input.numericBalance &&
+    amountStroops !== undefined &&
+    amountStroops > 0n &&
+    amountStroops <= input.maxNoteStroops &&
     input.destinationWallet !== "" &&
     isValidStellarPublicAddress(input.destinationWallet.trim())
   );
@@ -42,10 +57,12 @@ function computeWithdrawalCanSubmit(input: WithdrawalCanSubmitInput): boolean {
 export function useCreateWithdrawal() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { t: translate } = useTranslation("withdrawal");
   const { submit } = usePrivateWithdrawal();
   const [searchParameters] = useSearchParams();
   const assetIdFromUrl = searchParameters.get("assetId");
   const publicKey = useAppSelector(selectWalletPublicKey);
+  const coins = useAppSelector(selectCoinItems);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [step, setStep] = useState<WithdrawalFlowStep>("form");
   const [successResult, setSuccessResult] = useState<
@@ -59,11 +76,47 @@ export function useCreateWithdrawal() {
   }, [publicKey]);
   const selectedAsset = tokenUi.selectedToken;
   const amountInputs = useWithdrawalAmountInputs(selectedAsset);
+  const maxNoteStroops = useMemo(
+    () =>
+      getMaxWithdrawStroops({
+        coins,
+        privateAddress: withdrawalSender.senderPrivateAddress,
+        assetId: selectedAsset?.assetId ?? "",
+      }),
+    [coins, selectedAsset?.assetId, withdrawalSender.senderPrivateAddress],
+  );
+  const maxNoteAmountInput = useMemo(
+    () =>
+      formatMaxWithdrawBalanceInput({
+        coins,
+        privateAddress: withdrawalSender.senderPrivateAddress,
+        assetId: selectedAsset?.assetId ?? "",
+      }),
+    [coins, selectedAsset?.assetId, withdrawalSender.senderPrivateAddress],
+  );
+  const amountStroops = amountInputToStroops(amountInputs.amount);
+  const exceedsNoteLimit =
+    amountStroops !== undefined &&
+    amountStroops > 0n &&
+    maxNoteStroops > 0n &&
+    amountStroops > maxNoteStroops;
+  const noteLimitAlert = exceedsNoteLimit
+    ? {
+        title: translate("amountExceedsNoteLimitTitle"),
+        subtitle: translate("amountExceedsNoteLimitSubtitle", {
+          amount: formatWithdrawalBalanceWithTicker(
+            maxNoteAmountInput,
+            selectedAsset?.assetId.toUpperCase() ?? "",
+          ),
+        }),
+      }
+    : undefined;
   const canSubmit = computeWithdrawalCanSubmit({
     senderPrivateAddress: withdrawalSender.senderPrivateAddress,
     selectedAsset,
     amount: amountInputs.amount,
     numericBalance: amountInputs.numericBalance,
+    maxNoteStroops,
     destinationWallet,
   });
   const numericAmount = parseWithdrawalAmountInput(amountInputs.amount);
@@ -107,6 +160,7 @@ export function useCreateWithdrawal() {
     canSubmit,
     isSubmitting,
     submitError,
+    noteLimitAlert,
     step,
     successResult,
     handleOpenReview,

@@ -38,6 +38,39 @@ export function stroopsToDisplayAmount(stroops: bigint): number {
   return Number(intPart) + Number(fracPart) / Number(STROOPS_PER_UNIT);
 }
 
+export function amountInputToStroops(amount: string): bigint | undefined {
+  const normalized = amount.trim().replaceAll(",", "");
+  if (!normalized) {
+    return undefined;
+  }
+  if (!/^\d+(\.\d*)?$/u.test(normalized)) {
+    return undefined;
+  }
+  const [wholeRaw, fracRaw = ""] = normalized.split(".");
+  const whole = wholeRaw || "0";
+  const frac = fracRaw
+    .replaceAll(/\D/g, "")
+    .padEnd(STELLAR_FRACTION_DIGITS, "0")
+    .slice(0, STELLAR_FRACTION_DIGITS);
+  return BigInt(whole) * STROOPS_PER_UNIT + BigInt(frac);
+}
+
+export function stroopsToAmountInputString(stroops: bigint): string {
+  if (stroops <= 0n) {
+    return "0";
+  }
+  const intPart = stroops / STROOPS_PER_UNIT;
+  const fracPart = stroops % STROOPS_PER_UNIT;
+  if (fracPart === 0n) {
+    return intPart.toString();
+  }
+  const fracString = fracPart
+    .toString()
+    .padStart(STELLAR_FRACTION_DIGITS, "0")
+    .replace(/0+$/, "");
+  return `${intPart.toString()}.${fracString}`;
+}
+
 export function readStroopsBigInt(value: unknown): bigint {
   if (typeof value === "bigint") {
     return value;

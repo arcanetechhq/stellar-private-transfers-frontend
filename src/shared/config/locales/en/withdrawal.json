@@ -21,6 +21,8 @@
   "selectFromContacts": "Select from Contacts",
   "max": "MAX",
   "availableForMax": "Private balance: {{amount}}",
+  "amountExceedsNoteLimitTitle": "Amount is too large for one withdrawal.",
+  "amountExceedsNoteLimitSubtitle": "You can send up to {{amount}} at a time.",
   "maxButton": "Max",
   "selectContact": "Select Contact",
   "noContactsFound": "No contacts found",

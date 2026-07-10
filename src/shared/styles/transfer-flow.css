@@ -638,6 +638,21 @@
   font-weight: 500;
 }
 
+.send-money-error__title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 600;
+}
+
+.send-money-error__subtitle {
+  margin: var(--space-1) 0 0;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
 .send-money-summary-row {
   display: flex;
   min-height: 44px;

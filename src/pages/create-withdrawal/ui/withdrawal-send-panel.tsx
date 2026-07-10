@@ -9,7 +9,6 @@ import {
   parseWithdrawalBalance,
 } from "../lib/format-withdrawal-amount";
 import { WithdrawalAssetSelect } from "./withdrawal-asset-select";
-import { WithdrawalInfoNotice } from "./withdrawal-info-notice";
 import { WithdrawalWalletControl } from "./withdrawal-wallet-control";
 
 interface WithdrawalSendPanelProperties {
@@ -19,6 +18,10 @@ interface WithdrawalSendPanelProperties {
   totalAmount: number;
   canContinue: boolean;
   isSubmitting: boolean;
+  noteLimitAlert?: {
+    title: string;
+    subtitle: string;
+  };
   onAmountChange: (value: string) => void;
   onTokenSelect: (asset: AssetWithTrustline) => void;
   onMaxAmount: () => void;
@@ -32,6 +35,7 @@ export function WithdrawalSendPanel({
   totalAmount,
   canContinue,
   isSubmitting,
+  noteLimitAlert,
   onAmountChange,
   onTokenSelect,
   onMaxAmount,
@@ -46,6 +50,7 @@ export function WithdrawalSendPanel({
     hasAmount &&
     Number.isFinite(numericBalance) &&
     numericAmount > numericBalance;
+  const amountInvalid = exceedsBalance || Boolean(noteLimitAlert);
   const recipientGetsDisplay = `${formatWithdrawalAmount(totalAmount)} ${ticker}`.trim();
   const feeDisplay = `0 ${ticker}`.trim();
   const availableBalanceDisplay = formatWithdrawalBalanceWithTicker(
@@ -65,7 +70,7 @@ export function WithdrawalSendPanel({
         <div className="send-money-amount-panel">
           <div
             className="send-money-amount-row"
-            data-invalid={exceedsBalance ? "true" : undefined}
+            data-invalid={amountInvalid ? "true" : undefined}
           >
             <div className="send-money-amount-row__meta">
               <span>{translate("youSend")}</span>
@@ -105,14 +110,19 @@ export function WithdrawalSendPanel({
           </div>
         </div>
 
+        {noteLimitAlert ? (
+          <div className="send-money-error" role="alert">
+            <p className="send-money-error__title">{noteLimitAlert.title}</p>
+            <p className="send-money-error__subtitle">{noteLimitAlert.subtitle}</p>
+          </div>
+        ) : null}
+
         {hasAmount ? (
           <div className="send-money-summary-row">
             <span>{translate("fee")}</span>
             <span className="send-money-summary-row__value">{feeDisplay}</span>
           </div>
         ) : null}
-
-        {/* <WithdrawalInfoNotice /> */}
       </div>
 
       <button

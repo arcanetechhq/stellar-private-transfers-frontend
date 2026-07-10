@@ -43,3 +43,10 @@ export {
 } from "./lib/private-spend-coin-selection";
 
 export { withZeroAmountPrivateAssetRows } from "./lib/private-asset-aggregates";
+
+export {
+  formatLargestFinalizedNoteBalanceInput,
+  formatMaxWithdrawBalanceInput,
+  getLargestFinalizedNoteStroops,
+  getMaxWithdrawStroops,
+} from "./lib/largest-finalized-note-balance";

@@ -8,15 +8,16 @@
     "dev": "vite",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
-    "test": "jest --config jest.config.mjs"
+    "test": "jest --config jest.config.mjs",
+    "postinstall": "patch-package"
   },
   "engines": {
     "node": ">=20.10.0"
   },
   "dependencies": {
     "@arcanetech/privacy-sdk-core": "0.2.1",
-    "@arcanetech/privacy-sdk-stellar": "0.2.3",
     "@arcanetech/privacy-sdk-state-redux": "0.2.1",
+    "@arcanetech/privacy-sdk-stellar": "0.2.3",
     "@creit-tech/stellar-wallets-kit": "npm:@jsr/creit-tech__stellar-wallets-kit@^2.1.0",
     "@radix-ui/react-accordion": "1.2.3",
     "@radix-ui/react-alert-dialog": "1.1.6",
@@ -85,6 +86,7 @@
     "eslint-plugin-unicorn": "^64.0.0",
     "globals": "^14.0.0",
     "jest": "^30.3.0",
+    "patch-package": "^8.0.1",
     "tailwindcss": "4.1.12",
     "ts-jest": "^29.4.9",
     "tsarch": "^5.4.1",

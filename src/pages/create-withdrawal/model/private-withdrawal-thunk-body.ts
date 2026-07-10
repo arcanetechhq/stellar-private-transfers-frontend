@@ -1,4 +1,5 @@
 import type { AppDispatch, RootState } from "@/store";
+import { mapPrivacySdkError } from "@/shared/lib/privacy-sdk/map-privacy-sdk-errors.js";
 import {
   runPrivateWithdrawalMutation,
   type RunPrivateWithdrawalMutationResult,
@@ -35,7 +36,8 @@ export async function submitPrivateWithdrawalThunkBody(
       destinationAddress: resolved.payload.destinationAddress,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Withdrawal failed";
-    return parameters.rejectWithValue(message) as RunPrivateWithdrawalMutationResult;
+    return parameters.rejectWithValue(
+      mapPrivacySdkError(error),
+    ) as RunPrivateWithdrawalMutationResult;
   }
 }

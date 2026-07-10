@@ -9,8 +9,7 @@ import {
   assertFaucetClaimAllowed,
   markFaucetClaimedToday,
 } from "../lib/faucet-daily-limit";
-
-const FRIENDBOT_URL = "https://friendbot.stellar.org";
+import { fundNativeViaFriendbot } from "../lib/fund-native-via-friendbot";
 
 interface ClaimFaucetInput {
   publicKey: string;
@@ -28,11 +27,7 @@ export const claimNativeFaucetThunk = createAsyncThunk<
   }
   dispatch(claimStarted(assetId));
   try {
-    const url = `${FRIENDBOT_URL}?addr=${encodeURIComponent(publicKey)}`;
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Friendbot error: ${String(response.status)}`);
-    }
+    await fundNativeViaFriendbot(publicKey);
     markFaucetClaimedToday(publicKey, assetId);
     await dispatch(refreshAssetsWithTrustlinesThunk()).unwrap();
   } finally {

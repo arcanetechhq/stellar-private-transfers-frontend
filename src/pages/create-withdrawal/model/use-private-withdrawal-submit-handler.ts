@@ -8,6 +8,7 @@ import type { NavigateFunction } from "react-router";
 import type { AppDispatch } from "@/store";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";
+import { mapPrivacySdkError } from "@/shared/lib/privacy-sdk/map-privacy-sdk-errors.js";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import { ensureWithdrawalDestinationCanReceiveAsset } from "../lib/withdrawal-destination-trustline";
 import type { PrivateWithdrawalSuccess } from "./private-withdrawal-success";
@@ -23,12 +24,19 @@ type PrivateWithdrawalSubmit = (payload: {
 function readWithdrawalSubmitError(error: unknown): string {
   if (isRejectedWithValue(error)) {
     const payload = error.payload;
-    return typeof payload === "string" ? payload : "Withdrawal failed";
+    if (typeof payload === "string" && payload.trim().length > 0) {
+      return payload;
+    }
+    return mapPrivacySdkError(payload);
   }
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return "Withdrawal failed";
+  return mapPrivacySdkError(error);
+}
+
+function logWithdrawalFailure(error: unknown): string {
+  const mapped = readWithdrawalSubmitError(error);
+  console.error("Withdrawal failed:", error);
+  console.error("Withdrawal failed (mapped):", mapped);
+  return mapped;
 }
 
 function recordWithdrawalTransaction(parameters: {
@@ -136,8 +144,7 @@ export function usePrivateWithdrawalSubmitHandler(parameters: {
         result,
       });
     } catch (error: unknown) {
-      console.error("Withdrawal failed:", error);
-      setSubmitError(readWithdrawalSubmitError(error));
+      setSubmitError(logWithdrawalFailure(error));
     } finally {
       parameters.setIsSubmitting(false);
     }
