@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Check } from "lucide-react";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
@@ -13,15 +14,23 @@ import { addAssetTrustlineThunk } from "@/features/add-asset-trustline";
 import {
   claimIssuedAssetThunk,
   claimNativeFaucetThunk,
+  hasClaimedFaucetToday,
 } from "@/features/faucet";
 
-type FaucetRowState = "idle" | "adding" | "ready" | "claiming" | "success";
+type FaucetRowState =
+  | "idle"
+  | "adding"
+  | "ready"
+  | "claiming"
+  | "success"
+  | "limited";
 
 interface ResolveFaucetRowStateInput {
   asset: AssetWithTrustline;
   canClaim: boolean;
   isSubmittingTrustline: boolean;
   isClaimLoading: boolean;
+  claimedToday: boolean;
 }
 
 function resolveFaucetRowState({
@@ -29,12 +38,16 @@ function resolveFaucetRowState({
   canClaim,
   isSubmittingTrustline,
   isClaimLoading,
+  claimedToday,
 }: ResolveFaucetRowStateInput): FaucetRowState {
   if (asset.trustlineStatus === "loading" || isSubmittingTrustline) {
     return "adding";
   }
   if (isClaimLoading) {
     return "claiming";
+  }
+  if (claimedToday && canClaim) {
+    return "limited";
   }
   const addRequired = asset.trustlineStatus !== "native";
   if (
@@ -54,7 +67,11 @@ function resolveActionLabel(
   translate: TFunction<"assets">,
 ): string {
   const isReady = rowState === "ready";
-  if (isReady || (!addRequired && rowState === "idle" && canClaim)) {
+  const canShowClaim =
+    isReady ||
+    rowState === "limited" ||
+    (!addRequired && rowState === "idle" && canClaim);
+  if (canShowClaim) {
     return translate("faucet.claimLabel");
   }
   return translate("trustline.add");
@@ -78,6 +95,9 @@ function resolveStatusLabel(
     }
     case "success": {
       return translate("faucet.statusClaimed", { amount: claimAmount, symbol });
+    }
+    case "limited": {
+      return translate("faucet.statusLimited");
     }
     default: {
       return translate("faucet.statusAvailable", { amount: claimAmount, symbol });
@@ -113,6 +133,15 @@ export function HeaderFaucetAssetRow({
   const isClaimLoading = useAppSelector((state) =>
     selectIsClaimLoadingForAsset(state, asset.assetId),
   );
+  const [claimedToday, setClaimedToday] = useState(false);
+
+  useEffect(() => {
+    setClaimedToday(
+      walletPublicKey
+        ? hasClaimedFaucetToday(walletPublicKey, asset.assetId)
+        : false,
+    );
+  }, [walletPublicKey, asset.assetId]);
 
   const symbol = asset.assetId.toUpperCase();
   const isSubmittingTrustline =
@@ -126,10 +155,13 @@ export function HeaderFaucetAssetRow({
     canClaim,
     isSubmittingTrustline,
     isClaimLoading,
+    claimedToday,
   });
   const isBusy = rowState === "adding" || rowState === "claiming";
   const needsTrustline = asset.trustlineStatus === "missing";
   const showAction = needsTrustline || canClaim;
+  const actionDisabled =
+    isBusy || !walletPublicKey || rowState === "limited";
 
   const actionLabel = resolveActionLabel(
     rowState,
@@ -148,7 +180,7 @@ export function HeaderFaucetAssetRow({
   );
 
   const handleAction = () => {
-    if (isBusy || !walletPublicKey) {
+    if (isBusy || !walletPublicKey || rowState === "limited") {
       return;
     }
 
@@ -172,22 +204,30 @@ export function HeaderFaucetAssetRow({
       return;
     }
 
-    if (asset.trustlineStatus === "native") {
-      void dispatch(
-        claimNativeFaucetThunk({
-          publicKey: walletPublicKey,
-          assetId: asset.assetId,
-        }),
-      );
-      return;
-    }
+    const claimPromise =
+      asset.trustlineStatus === "native"
+        ? dispatch(
+            claimNativeFaucetThunk({
+              publicKey: walletPublicKey,
+              assetId: asset.assetId,
+            }),
+          )
+        : dispatch(
+            claimIssuedAssetThunk({
+              publicKey: walletPublicKey,
+              assetId: asset.assetId,
+            }),
+          );
 
-    void dispatch(
-      claimIssuedAssetThunk({
-        publicKey: walletPublicKey,
-        assetId: asset.assetId,
-      }),
-    );
+    void claimPromise.then((result) => {
+      if (claimNativeFaucetThunk.fulfilled.match(result)) {
+        setClaimedToday(true);
+        return;
+      }
+      if (claimIssuedAssetThunk.fulfilled.match(result)) {
+        setClaimedToday(true);
+      }
+    });
   };
 
   return (
@@ -216,7 +256,7 @@ export function HeaderFaucetAssetRow({
           className="faucet-menu__action"
           data-state={rowState}
           data-testid={`faucet-claim-${symbol.toLowerCase()}`}
-          disabled={isBusy || !walletPublicKey}
+          disabled={actionDisabled}
           role="menuitem"
           onClick={handleAction}
         >

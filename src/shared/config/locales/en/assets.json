@@ -28,8 +28,10 @@
     "statusReady": "{{amount}} {{symbol}} ready to claim",
     "statusClaiming": "Claiming test funds...",
     "statusClaimed": "{{amount}} {{symbol}} claimed",
-    "statusAvailable": "{{amount}} {{symbol}} available"
+    "statusAvailable": "{{amount}} {{symbol}} available",
+    "statusLimited": "Already claimed today."
   },
+
   "noAssetsFound": "No assets found",
   "tableHeaders": {
     "asset": "Asset",

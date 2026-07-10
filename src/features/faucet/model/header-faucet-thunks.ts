@@ -5,13 +5,27 @@ import {
   claimStarted,
   refreshAssetsWithTrustlinesThunk,
 } from "@/entities/asset";
+import {
+  assertFaucetClaimAllowed,
+  markFaucetClaimedToday,
+} from "../lib/faucet-daily-limit";
 
 const FRIENDBOT_URL = "https://friendbot.stellar.org";
 
+interface ClaimFaucetInput {
+  publicKey: string;
+  assetId: string;
+  ignoreDailyLimit?: boolean;
+}
+
 export const claimNativeFaucetThunk = createAsyncThunk<
   void,
-  { publicKey: string; assetId: string }
->("faucet/claimNative", async ({ publicKey, assetId }, { dispatch }) => {
+  ClaimFaucetInput
+>("faucet/claimNative", async (input, { dispatch }) => {
+  const { publicKey, assetId, ignoreDailyLimit = false } = input;
+  if (!ignoreDailyLimit) {
+    assertFaucetClaimAllowed(publicKey, assetId);
+  }
   dispatch(claimStarted(assetId));
   try {
     const url = `${FRIENDBOT_URL}?addr=${encodeURIComponent(publicKey)}`;
@@ -19,6 +33,7 @@ export const claimNativeFaucetThunk = createAsyncThunk<
     if (!response.ok) {
       throw new Error(`Friendbot error: ${String(response.status)}`);
     }
+    markFaucetClaimedToday(publicKey, assetId);
     await dispatch(refreshAssetsWithTrustlinesThunk()).unwrap();
   } finally {
     dispatch(claimFinished(assetId));
@@ -27,13 +42,18 @@ export const claimNativeFaucetThunk = createAsyncThunk<
 
 export const claimIssuedAssetThunk = createAsyncThunk<
   void,
-  { publicKey: string; assetId: string }
->("faucet/claimIssued", async ({ publicKey, assetId }, { dispatch }) => {
+  ClaimFaucetInput
+>("faucet/claimIssued", async (input, { dispatch }) => {
+  const { publicKey, assetId, ignoreDailyLimit = false } = input;
+  if (!ignoreDailyLimit) {
+    assertFaucetClaimAllowed(publicKey, assetId);
+  }
   dispatch(claimStarted(assetId));
   try {
     await dispatch(
       assetApi.endpoints.mintAsset.initiate({ assetId, address: publicKey }),
     ).unwrap();
+    markFaucetClaimedToday(publicKey, assetId);
     await dispatch(refreshAssetsWithTrustlinesThunk()).unwrap();
   } finally {
     dispatch(claimFinished(assetId));

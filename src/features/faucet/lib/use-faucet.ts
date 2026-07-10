@@ -1,15 +1,29 @@
 import { useCallback, useState } from "react";
 import { useMintAssetMutation } from "@/entities/asset";
+import {
+  assertFaucetClaimAllowed,
+  hasClaimedFaucetToday,
+  markFaucetClaimedToday,
+} from "./faucet-daily-limit";
 
 const FRIENDBOT_URL = "https://friendbot.stellar.org";
 
-export type FaucetStatus = "idle" | "loading" | "success" | "error";
+export type FaucetStatus =
+  | "idle"
+  | "loading"
+  | "success"
+  | "error"
+  | "limited";
 
 function assetFaucetStatusFromMutation(parameters: {
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
+  isLimited: boolean;
 }): FaucetStatus {
+  if (parameters.isLimited) {
+    return "limited";
+  }
   if (parameters.isLoading) {
     return "loading";
   }
@@ -32,6 +46,12 @@ export function useFaucetForNative(): UseFaucetResult {
   const [status, setStatus] = useState<FaucetStatus>("idle");
 
   const mint = useCallback(async (address: string) => {
+    try {
+      assertFaucetClaimAllowed(address, "xlm");
+    } catch {
+      setStatus("limited");
+      return;
+    }
     setStatus("loading");
     try {
       const url = `${FRIENDBOT_URL}?addr=${encodeURIComponent(address)}`;
@@ -39,6 +59,7 @@ export function useFaucetForNative(): UseFaucetResult {
       if (!response.ok) {
         throw new Error(`Friendbot error: ${response.status}`);
       }
+      markFaucetClaimedToday(address, "xlm");
       setStatus("success");
     } catch {
       setStatus("error");
@@ -55,19 +76,32 @@ export function useFaucetForNative(): UseFaucetResult {
 export function useFaucetForAsset(assetId: string): UseFaucetResult {
   const [mintAsset, { isLoading, isSuccess, isError, reset: resetMutation }] =
     useMintAssetMutation();
+  const [isLimited, setIsLimited] = useState(false);
 
   const status: FaucetStatus = assetFaucetStatusFromMutation({
     isLoading,
     isSuccess,
     isError,
+    isLimited,
   });
 
   const mint = useCallback(
     async (address: string) => {
-      await mintAsset({ assetId, address });
+      if (hasClaimedFaucetToday(address, assetId)) {
+        setIsLimited(true);
+        return;
+      }
+      setIsLimited(false);
+      await mintAsset({ assetId, address }).unwrap();
+      markFaucetClaimedToday(address, assetId);
     },
     [mintAsset, assetId],
   );
 
-  return { mint, status, reset: resetMutation };
+  const reset = useCallback(() => {
+    setIsLimited(false);
+    resetMutation();
+  }, [resetMutation]);
+
+  return { mint, status, reset };
 }

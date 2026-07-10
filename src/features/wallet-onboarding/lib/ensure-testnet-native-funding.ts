@@ -27,6 +27,7 @@ export async function ensureTestnetNativeFunding(parameters: {
       claimNativeFaucetThunk({
         publicKey: parameters.publicKey,
         assetId: NATIVE_ASSET_ID,
+        ignoreDailyLimit: true,
       }),
     )
     .unwrap();

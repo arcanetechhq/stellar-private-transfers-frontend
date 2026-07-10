@@ -22,13 +22,18 @@ export function FaucetButton({
 }: FaucetButtonProperties) {
   const { t: translate } = useTranslation("assets");
   const isLoading = status === "loading";
+  const isLimited = status === "limited";
 
   return (
     <button
-      disabled={isLoading || !address}
+      disabled={isLoading || isLimited || !address}
       className={`${BASE_CLASSES} ${FAUCET_CLASSES}`}
       onClick={() => void onMint(address)}
-      title={translate("faucet.hint")}
+      title={
+        isLimited
+          ? translate("faucet.statusLimited")
+          : translate("faucet.hint")
+      }
     >
       {isLoading ? (
         <Loader2 className="h-3.5 w-3.5 animate-spin" />
