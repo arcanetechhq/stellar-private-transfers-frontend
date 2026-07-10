@@ -53,7 +53,7 @@ export function WrongNetworkModal({
             className="testnet-notice-modal__action"
             onClick={onRetry}
           >
-            <span>{translate("connectScreenRetry")}</span>
+            <span>{translate("connectScreenDone")}</span>
           </button>
         </DialogPrimitive.Content>
       </DialogPortal>

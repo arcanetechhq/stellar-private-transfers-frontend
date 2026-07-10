@@ -5,6 +5,7 @@ import {
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
 import { Networks } from "@stellar/stellar-sdk";
 import { normalizeSorobanContractId } from "@/shared/stellar/normalize-soroban-contract-id.js";
+import { getRequiredApiBaseUrl } from "@/shared/stellar/stellar-network-environment.js";
 import { readClientEnvironment } from "./read-client-environment.js";
 
 const DEFAULT_SOROBAN_RPC = "https://soroban-testnet.stellar.org";
@@ -33,10 +34,6 @@ function readRequiredContractEnvironment(name: string): string {
   return normalizeSorobanContractId(readRequiredEnvironment(name));
 }
 
-function readRequiredApiBaseUrl(): string {
-  return readRequiredEnvironment("VITE_API_BASE_URL").replace(/\/$/, "");
-}
-
 export function readPoolApplicationIdFromEnvironment(): string {
   return resolvePoolApplicationId(readClientEnvironment("VITE_APPLICATION_ID"));
 }
@@ -57,7 +54,7 @@ export function buildStellarTransactEnvironment(): StellarTransactEnvironment {
       applicationId: readPoolApplicationIdFromEnvironment(),
     },
     kyt: {
-      apiBaseUrl: readRequiredApiBaseUrl(),
+      apiBaseUrl: getRequiredApiBaseUrl(),
       kytPassageRegistryContract: readRequiredContractEnvironment("VITE_KYT_PASSAGE_REGISTRY_CONTRACT"),
       registerPassageOnChain: false,
     },

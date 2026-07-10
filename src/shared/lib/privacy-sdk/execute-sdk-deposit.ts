@@ -2,7 +2,10 @@ import type { StellarPreparedOperation } from "@arcanetech/privacy-sdk-stellar";
 import type { CoinWithMetadata } from "@/entities/coin";
 import { stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops.js";
 import { DEPOSIT_DISCLOSURE } from "./operation-adapters.js";
-import { mapPrivacySdkErrors } from "./map-privacy-sdk-errors.js";
+import {
+  mapPrivacySdkError,
+  mapPrivacySdkErrors,
+} from "./map-privacy-sdk-errors.js";
 import { getPrivacySdkClientOrThrow } from "./transact-context.js";
 
 export async function executeSdkDeposit(input: {
@@ -22,11 +25,15 @@ export async function executeSdkDeposit(input: {
   if (prepared.status === "rejected") {
     throw new Error(mapPrivacySdkErrors(prepared.errors));
   }
-  const receipt = await prepared.execute();
-  return {
-    receipt,
-    prepared: prepared.prepared,
-  };
+  try {
+    const receipt = await prepared.execute();
+    return {
+      receipt,
+      prepared: prepared.prepared,
+    };
+  } catch (error) {
+    throw new Error(mapPrivacySdkError(error));
+  }
 }
 
 export function buildCoinItemFromSdkDeposit(input: {

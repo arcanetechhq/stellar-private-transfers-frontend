@@ -58,5 +58,5 @@ export function getRequiredApiBaseUrl(): string {
   if (!raw) {
     throw new Error("Missing VITE_API_BASE_URL environment variable");
   }
-  return raw.replace(/\/$/, "");
+  return raw.replace(/\/$/u, "");
 }

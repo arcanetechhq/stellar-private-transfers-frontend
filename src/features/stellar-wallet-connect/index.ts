@@ -6,6 +6,10 @@ export {
 } from "./model/stellar-wallet-thunks";
 export { connectFreighterWallet } from "./lib/connect-freighter-wallet";
 export {
+  openFreighterProductUrl,
+  resolveFreighterAvailability,
+} from "./lib/resolve-freighter-availability";
+export {
   FREIGHTER_ICON_URL,
   FREIGHTER_PRODUCT_URL,
   FREIGHTER_WALLET_ID,

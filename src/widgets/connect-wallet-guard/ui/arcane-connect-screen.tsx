@@ -17,6 +17,7 @@ type ArcaneConnectScreenProperties = {
   phase: ArcaneConnectScreenPhase;
   connectDisabled: boolean;
   isConnectingWallet: boolean;
+  isFreighterAvailable: boolean;
   errorMessage?: string;
   onConnectWallet: () => void;
   onRetry: () => void;
@@ -61,6 +62,7 @@ function ArcaneConnectPrimaryAction(properties: {
   connectDisabled: boolean;
   isConnectingWallet: boolean;
   isBusyPhase: boolean;
+  isFreighterAvailable: boolean;
   onConnectWallet: () => void;
 }) {
   const { t: translate } = useTranslation("common");
@@ -69,8 +71,12 @@ function ArcaneConnectPrimaryAction(properties: {
     connectDisabled,
     isConnectingWallet,
     isBusyPhase,
+    isFreighterAvailable,
     onConnectWallet,
   } = properties;
+  const promptLabel = isFreighterAvailable
+    ? translate("connectFreighter")
+    : translate("installFreighter");
 
   return (
     <button
@@ -84,9 +90,7 @@ function ArcaneConnectPrimaryAction(properties: {
     >
       {phase === "prompt" ? <FreighterButtonIcon /> : null}
       <span>
-        {isBusyPhase
-          ? translate(resolveStatusTitleKey(phase))
-          : translate("connectFreighter")}
+        {isBusyPhase ? translate(resolveStatusTitleKey(phase)) : promptLabel}
       </span>
       {isBusyPhase ? (
         <Loader2
@@ -137,6 +141,7 @@ export function ArcaneConnectScreen({
   phase,
   connectDisabled,
   isConnectingWallet,
+  isFreighterAvailable,
   errorMessage,
   onConnectWallet,
   onRetry,
@@ -186,6 +191,7 @@ export function ArcaneConnectScreen({
               connectDisabled={connectDisabled}
               isConnectingWallet={isConnectingWallet}
               isBusyPhase={isBusyPhase}
+              isFreighterAvailable={isFreighterAvailable}
               onConnectWallet={onConnectWallet}
             />
           )}

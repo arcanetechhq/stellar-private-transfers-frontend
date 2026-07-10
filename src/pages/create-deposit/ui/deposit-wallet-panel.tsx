@@ -5,7 +5,7 @@ import { useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { formatDepositBalance } from "../lib/format-deposit-balance";
-import { computeDepositSpendableBalanceDisplay } from "../lib/compute-deposit-spendable-balance";
+import { formatDepositSpendableBalanceInput } from "../lib/compute-deposit-spendable-balance";
 import { DepositWalletControl } from "./deposit-wallet-control";
 
 interface DepositWalletPanelProperties {
@@ -31,13 +31,11 @@ export function DepositWalletPanel({
   const publicKey = useAppSelector(selectWalletPublicKey);
   const walletConnected = Boolean(publicKey);
   const ticker = selectedAsset?.assetId.toUpperCase() ?? "";
-  const spendableBalanceDisplay = computeDepositSpendableBalanceDisplay(
+  const spendableBalanceInput = formatDepositSpendableBalanceInput(
     selectedAsset,
     selectedAsset?.balance,
   );
-  const availableBalance = formatDepositBalance(
-    spendableBalanceDisplay > 0 ? spendableBalanceDisplay.toString() : "0",
-  );
+  const availableBalance = formatDepositBalance(spendableBalanceInput);
   const numericAmount = Number.parseFloat(amount);
   const hasAmount = Number.isFinite(numericAmount) && numericAmount > 0;
   const feeDisplay = `0 ${ticker}`.trim();
@@ -75,7 +73,7 @@ export function DepositWalletPanel({
               <button
                 type="button"
                 className="send-money-max"
-                disabled={!walletConnected}
+                disabled={!walletConnected || spendableBalanceInput === "0"}
                 onClick={onMaxAmount}
               >
                 {translate("max")}

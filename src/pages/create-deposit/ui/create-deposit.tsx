@@ -2,11 +2,13 @@ import React from "react";
 import "@/shared/styles/transfer-flow.css";
 import { useTranslation } from "react-i18next";
 import type { AssetWithTrustline } from "@/entities/asset";
+import { stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops";
 import type { DepositMode } from "../lib/deposit-mode";
 import {
-  computeDepositSpendableBalanceDisplay,
+  computeDepositSpendableBalanceStroops,
+  depositAmountInputToStroops,
   isNativeXlmDepositAsset,
-  NATIVE_XLM_SAC_MINIMUM_BALANCE_XLM,
+  NATIVE_XLM_DEPOSIT_RESERVE_XLM,
 } from "../lib/compute-deposit-spendable-balance";
 import {
   DEPOSIT_NETWORK_OPTIONS,
@@ -39,40 +41,38 @@ function buildWalletErrorMessage(
     return submitErrorMessage;
   }
 
-  const numericAmount = Number.parseFloat(amount);
-  const numericBalance = Number.parseFloat(selectedAsset?.balance ?? "0");
-  const spendableBalance = computeDepositSpendableBalanceDisplay(
+  const amountStroops = depositAmountInputToStroops(amount);
+  if (amountStroops === undefined || amountStroops <= 0n) {
+    return undefined;
+  }
+
+  const balanceStroops =
+    depositAmountInputToStroops(selectedAsset?.balance ?? "0") ?? 0n;
+  const spendableBalanceStroops = computeDepositSpendableBalanceStroops(
     selectedAsset,
     selectedAsset?.balance,
   );
-  const hasAmount = Number.isFinite(numericAmount) && numericAmount > 0;
-  const exceedsSpendableBalance =
-    hasAmount &&
-    Number.isFinite(spendableBalance) &&
-    numericAmount > spendableBalance;
+  const exceedsSpendableBalance = amountStroops > spendableBalanceStroops;
 
   if (
     exceedsSpendableBalance &&
     isNativeXlmDepositAsset(selectedAsset) &&
-    numericAmount <= numericBalance
+    amountStroops <= balanceStroops
   ) {
     return translate("nativeXlmReserveRequired", {
-      amount: NATIVE_XLM_SAC_MINIMUM_BALANCE_XLM.toString(),
+      amount: NATIVE_XLM_DEPOSIT_RESERVE_XLM.toString(),
     });
   }
 
-  const exceedsBalance =
-    hasAmount &&
-    Number.isFinite(numericBalance) &&
-    numericAmount > numericBalance;
-
+  const exceedsBalance = amountStroops > balanceStroops;
   if (!exceedsBalance && !exceedsSpendableBalance) {
     return undefined;
   }
 
-  const shortfall = exceedsSpendableBalance
-    ? numericAmount - spendableBalance
-    : numericAmount - numericBalance;
+  const shortfallStroops = exceedsSpendableBalance
+    ? amountStroops - spendableBalanceStroops
+    : amountStroops - balanceStroops;
+  const shortfall = stroopsToDisplayAmount(shortfallStroops);
   const ticker = selectedAsset?.assetId.toUpperCase() ?? "";
   return translate("insufficientBalance", {
     amount: `${shortfall.toLocaleString("en-US", {

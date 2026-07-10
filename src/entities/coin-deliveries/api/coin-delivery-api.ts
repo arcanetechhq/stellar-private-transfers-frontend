@@ -1,8 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
-const environmentRecord = (
-  import.meta as ImportMeta & { env: Record<string, string | undefined> }
-).env;
+import { getRequiredApiBaseUrl } from "@/shared/stellar/stellar-network-environment";
 
 export interface PostCoinDeliveryBody {
   recipientStealthAddress: string;
@@ -51,7 +48,7 @@ export interface FetchIncomingParameters {
 export const coinDeliveryApi = createApi({
   reducerPath: "coinDeliveryApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: environmentRecord.VITE_API_BASE_URL,
+    baseUrl: getRequiredApiBaseUrl(),
   }),
   endpoints: (builder) => ({
     getIncomingDeliveries: builder.query<

@@ -1,5 +1,8 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
+import {
+  getRequiredApiBaseUrl,
+  getRequiredPrivacyPoolContractId,
+} from "@/shared/stellar/stellar-network-environment";
 
 interface AssetApiDto {
   id: number;
@@ -46,7 +49,7 @@ export const assetApi = createApi({
   reducerPath: "assetApi",
   tagTypes: ["Asset"],
   baseQuery: fetchBaseQuery({
-    baseUrl: import.meta.env.VITE_API_BASE_URL as string,
+    baseUrl: getRequiredApiBaseUrl(),
   }),
   endpoints: (builder) => ({
     getAssets: builder.query<AssetDto[], void>({

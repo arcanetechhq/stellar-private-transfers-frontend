@@ -9,7 +9,10 @@ import {
 import { useWalletPrivateAddress } from "@/features/register-private-address";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import { NETWORK_FEE } from "./create-deposit";
-import { computeDepositSpendableBalanceDisplay } from "../lib/compute-deposit-spendable-balance";
+import {
+  computeDepositSpendableBalanceDisplay,
+  computeDepositSpendableBalanceStroops,
+} from "../lib/compute-deposit-spendable-balance";
 import { resolveSelectedDepositAsset } from "./resolve-selected-deposit-asset";
 import { computeDepositCanSubmit } from "./compute-deposit-can-submit";
 import { computeReceivedAmount } from "./compute-received-amount";
@@ -43,6 +46,10 @@ export function useCreateDepositForm({
     assetIdFromUrl,
   });
 
+  const spendableBalanceStroops = computeDepositSpendableBalanceStroops(
+    selectedAsset,
+    selectedAsset?.balance,
+  );
   const spendableBalanceDisplay = computeDepositSpendableBalanceDisplay(
     selectedAsset,
     selectedAsset?.balance,
@@ -77,8 +84,7 @@ export function useCreateDepositForm({
   const canSubmit = actionsEnabled && computeDepositCanSubmit({
     selectedAsset,
     amount,
-    numericAmount,
-    spendableBalanceDisplay,
+    spendableBalanceStroops,
     hasPoolContract,
     hasPrivateAddress,
     hasPrivateAddressScalar,

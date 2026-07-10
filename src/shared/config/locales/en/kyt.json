@@ -1,5 +1,6 @@
 {
   "inspectRejectedTitle": "Compliance check failed",
+  "apiReturnedHtml": "KYT inspect returned HTML instead of JSON. Check Network for kyt/passages/inspect (status and response body).",
   "reasonDefault": "This transaction did not pass compliance screening.",
   "reason_predicate_non_compliant": "Address {{address}} did not pass compliance screening.",
   "reason_private_address_owner_unresolved": "Could not verify the owner for private address {{address}}.",

@@ -1,10 +1,10 @@
 import type { AssetWithTrustline } from "@/entities/asset";
+import { depositAmountInputToStroops } from "../lib/compute-deposit-spendable-balance";
 
 export interface DepositCanSubmitInput {
   selectedAsset: AssetWithTrustline | undefined;
   amount: string;
-  numericAmount: number;
-  spendableBalanceDisplay: number;
+  spendableBalanceStroops: bigint;
   hasPoolContract: boolean;
   hasPrivateAddress: boolean;
   hasPrivateAddressScalar: boolean;
@@ -18,13 +18,11 @@ export function computeDepositCanSubmit(input: DepositCanSubmitInput): boolean {
   if (input.amount === "") {
     return false;
   }
-  if (Number.isNaN(input.numericAmount)) {
+  const amountStroops = depositAmountInputToStroops(input.amount);
+  if (amountStroops === undefined || amountStroops <= 0n) {
     return false;
   }
-  if (input.numericAmount <= 0) {
-    return false;
-  }
-  if (input.numericAmount > input.spendableBalanceDisplay) {
+  if (amountStroops > input.spendableBalanceStroops) {
     return false;
   }
   if (!input.hasPoolContract) {

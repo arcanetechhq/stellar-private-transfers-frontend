@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { selectIsWalletConnected } from "@/entities/wallet";
 import {
@@ -7,11 +7,14 @@ import {
   type WalletOnboardingPhase,
 } from "@/features/wallet-onboarding";
 import {
+  FREIGHTER_PRODUCT_URL,
   TestnetNoticeModal,
   WrongNetworkModal,
   connectFreighterWallet,
   disconnectStellarWallet,
   isWalletPickerUiEnabled,
+  openFreighterProductUrl,
+  resolveFreighterAvailability,
   useStellarWalletModal,
 } from "@/features/stellar-wallet-connect";
 import {
@@ -93,9 +96,16 @@ export function ConnectWalletScreen({
     useStellarWalletModal();
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
   const [isConnectingFreighter, setIsConnectingFreighter] = useState(false);
+  const [isFreighterAvailable, setIsFreighterAvailable] = useState<
+    boolean | undefined
+  >();
+  const [freighterProductUrl, setFreighterProductUrl] = useState(
+    FREIGHTER_PRODUCT_URL,
+  );
   const isPickerOpen =
     isWalletPickerUiEnabled && isOpen && mode === "picker";
   const isWrongNetwork = phase === "wrong_network";
+  const isCheckingFreighter = isFreighterAvailable === undefined;
   const screenPhase = resolveConnectScreenPhase({
     isWalletConnected,
     walletKitLoaded,
@@ -104,6 +114,37 @@ export function ConnectWalletScreen({
     onboardingPhase: phase,
   });
 
+  useEffect(() => {
+    if (!walletKitLoaded) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const refreshFreighterAvailability = () => {
+      void resolveFreighterAvailability().then((result) => {
+        if (cancelled) {
+          return;
+        }
+        setIsFreighterAvailable(result.isAvailable);
+        setFreighterProductUrl(result.productUrl);
+      });
+    };
+
+    refreshFreighterAvailability();
+
+    const handleWindowFocus = () => {
+      refreshFreighterAvailability();
+    };
+
+    globalThis.addEventListener("focus", handleWindowFocus);
+
+    return () => {
+      cancelled = true;
+      globalThis.removeEventListener("focus", handleWindowFocus);
+    };
+  }, [walletKitLoaded]);
+
   const connectFreighter = async () => {
     setIsConnectingFreighter(true);
     try {
@@ -111,6 +152,14 @@ export function ConnectWalletScreen({
     } finally {
       setIsConnectingFreighter(false);
     }
+  };
+
+  const handleConnectOrInstallFreighter = () => {
+    if (isFreighterAvailable === false) {
+      openFreighterProductUrl(freighterProductUrl);
+      return;
+    }
+    void connectFreighter();
   };
 
   const handleConnectWallet = () => {
@@ -122,7 +171,7 @@ export function ConnectWalletScreen({
       openPicker();
       return;
     }
-    void connectFreighter();
+    handleConnectOrInstallFreighter();
   };
 
   const handleChooseWallet = () => {
@@ -133,7 +182,7 @@ export function ConnectWalletScreen({
         openPicker();
         return;
       }
-      void connectFreighter();
+      handleConnectOrInstallFreighter();
     });
   };
 
@@ -143,7 +192,7 @@ export function ConnectWalletScreen({
         openPicker(true);
         return;
       }
-      void connectFreighter();
+      handleConnectOrInstallFreighter();
     });
   };
 
@@ -158,13 +207,14 @@ export function ConnectWalletScreen({
     <>
       <ArcaneConnectScreen
         phase={screenPhase}
-        connectDisabled={!walletKitLoaded}
+        connectDisabled={!walletKitLoaded || isCheckingFreighter}
         isConnectingWallet={
           !walletKitLoaded ||
           isConnectingFreighter ||
           isPickerOpen ||
           isWalletConnectInProgress
         }
+        isFreighterAvailable={isFreighterAvailable !== false}
         errorMessage={errorMessage}
         onConnectWallet={handleConnectWallet}
         onRetry={retry}

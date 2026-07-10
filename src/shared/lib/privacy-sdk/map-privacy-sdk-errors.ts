@@ -69,7 +69,17 @@ function mapPrivacySdkErrorMessage(error: PrivacySdkError): string {
       return mapped;
     }
   }
-  return error.message;
+  if (typeof error.message === "string" && error.message.trim().length > 0) {
+    return error.message;
+  }
+  if (error.details !== undefined) {
+    try {
+      return JSON.stringify(error.details);
+    } catch {
+      return `${error.code}: Operation failed`;
+    }
+  }
+  return `${error.code}: Operation failed`;
 }
 
 function readErrorLikeMessage(error: unknown): string | undefined {
@@ -84,6 +94,28 @@ function readErrorLikeMessage(error: unknown): string | undefined {
   return trimmed.length > 0 ? trimmed : undefined;
 }
 
+function isHtmlAsJsonParseError(message: string): boolean {
+  const normalized = message.toLowerCase();
+  return (
+    normalized.includes("unexpected token") &&
+    (normalized.includes("<!doctype") || normalized.includes("\"<\"") || normalized.includes("'<'"))
+  );
+}
+
+function mapThrownErrorMessage(message: string): string {
+  if (isHtmlAsJsonParseError(message)) {
+    return i18n.t("apiReturnedHtml", {
+      ns: "kyt",
+      defaultValue:
+        "KYT inspect returned HTML instead of JSON. Check Network for kyt/passages/inspect (status and response body).",
+    });
+  }
+  if (message.includes("KYT inspect returned HTML")) {
+    return message;
+  }
+  return message;
+}
+
 export function mapPrivacySdkError(error: unknown): string {
   if (error instanceof KytInspectError) {
     return error.message;
@@ -92,17 +124,21 @@ export function mapPrivacySdkError(error: unknown): string {
     return mapPrivacySdkErrorMessage(error);
   }
   if (error instanceof Error) {
-    return error.message;
+    return mapThrownErrorMessage(error.message);
   }
   if (typeof error === "string") {
     const trimmed = error.trim();
-    return trimmed.length > 0 ? trimmed : "Operation failed";
+    return trimmed.length > 0 ? mapThrownErrorMessage(trimmed) : "Operation failed";
   }
   const messageLike = readErrorLikeMessage(error);
   if (messageLike) {
-    return messageLike;
+    return mapThrownErrorMessage(messageLike);
   }
-  return "Operation failed";
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return "Operation failed";
+  }
 }
 
 export function mapPrivacySdkErrors(errors: PrivacySdkError[]): string {

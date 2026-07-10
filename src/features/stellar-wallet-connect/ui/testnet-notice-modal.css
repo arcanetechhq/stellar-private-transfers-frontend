@@ -42,7 +42,7 @@
   left: 50%;
   z-index: var(--z-modal);
   display: grid;
-  width: min(440px, calc(100vw - 32px));
+  width: min(480px, calc(100vw - 32px));
   gap: 28px;
   padding: 36px 32px 32px;
   border: 1px solid rgba(7, 26, 47, 0.08);

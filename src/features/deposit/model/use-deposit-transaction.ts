@@ -12,6 +12,7 @@ import {
   buildCoinItemFromSdkDeposit,
   executeSdkDeposit,
 } from "@/shared/lib/privacy-sdk/execute-sdk-deposit.js";
+import { mapPrivacySdkError } from "@/shared/lib/privacy-sdk/map-privacy-sdk-errors.js";
 import { displayAmountToStroops } from "@/shared/lib/stellar/stroops.js";
 import { postDepositDelivery } from "./post-deposit-delivery.js";
 
@@ -124,8 +125,7 @@ export function useDepositTransaction() {
           },
         );
       } catch (error_) {
-        const nextError =
-          error_ instanceof Error ? error_ : new Error(String(error_));
+        const nextError = new Error(mapPrivacySdkError(error_));
         setError(nextError);
         throw nextError;
       } finally {
