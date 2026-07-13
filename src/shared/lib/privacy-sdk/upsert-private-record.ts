@@ -18,8 +18,12 @@ export function mapCoinWithMetadataToPrivateRecord(
     privateAddress: coin.privateAddress,
     amountDisplay: coin.amountDisplay,
     coinNote: coin.coin,
-    ...(coin.depositScalarHex ? { depositScalarHex: coin.depositScalarHex } : {}),
-    ...(coin.precommitementHex ? { precommitementHex: coin.precommitementHex } : {}),
+    ...(coin.depositScalarHex
+      ? { depositScalarHex: coin.depositScalarHex }
+      : {}),
+    ...(coin.precommitementHex
+      ? { precommitementHex: coin.precommitementHex }
+      : {}),
     ...(coin.txId ? { txHash: coin.txId } : {}),
   };
 }

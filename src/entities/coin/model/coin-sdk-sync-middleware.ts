@@ -24,7 +24,9 @@ export const coinSdkSyncMiddleware: Middleware<object, RootState> =
   (store) => (next) => (action) => {
     const result = next(action);
     if (isPrivacySdkBranchAction(action)) {
-      const mappedItems = mapPrivateRecordsToCoinItemsFromSdkState(store.getState());
+      const mappedItems = mapPrivateRecordsToCoinItemsFromSdkState(
+        store.getState(),
+      );
       store.dispatch(replaceCoinItems(mappedItems));
     }
     if (

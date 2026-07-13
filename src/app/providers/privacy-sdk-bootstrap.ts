@@ -33,14 +33,18 @@ async function createWalletAdapter(networkPassphrase: string) {
     },
     authorizeMessage: async (message: Uint8Array | string) => {
       const payload =
-        typeof message === "string" ? message : new TextDecoder().decode(message);
+        typeof message === "string"
+          ? message
+          : new TextDecoder().decode(message);
       const { signedMessage } = await StellarWalletsKit.signMessage(payload, {
         networkPassphrase,
       });
       return new TextEncoder().encode(signedMessage);
     },
-    signTransactionPayload: async (payload: { operationId: string; signed: boolean }) =>
-      payload,
+    signTransactionPayload: async (payload: {
+      operationId: string;
+      signed: boolean;
+    }) => payload,
   };
 }
 
@@ -73,21 +77,26 @@ async function initializePrivacySdkClient(
   const resolved = await resolveStellarPrivacyClientConfig(
     {
       network: transactEnvironment.network,
-      wallet: await createWalletAdapter(transactEnvironment.network.networkPassphrase),
+      wallet: await createWalletAdapter(
+        transactEnvironment.network.networkPassphrase,
+      ),
       state: stateAdapter,
       assets,
       auditPublicKeyHex: readAuditPublicKeyHexFromEnvironment(),
       transactEnvironment,
       policy: createStellarPolicyAdapterFromEnvironment(transactEnvironment),
     },
-    async (input) => createDefaultTransactEngine(input.assets, input.transactEnvironment),
+    async (input) =>
+      createDefaultTransactEngine(input.assets, input.transactEnvironment),
   );
   if (!resolved.ok) {
     throw new Error("Privacy SDK client rejected during initialization.");
   }
   const engineTransactEnvironment = resolved.config.transactEnvironment;
   if (!engineTransactEnvironment) {
-    throw new Error("Privacy SDK transact environment is missing after resolve.");
+    throw new Error(
+      "Privacy SDK transact environment is missing after resolve.",
+    );
   }
   attachPrivacyTransactRuntimeResolverProxies(engineTransactEnvironment);
   const created = createStellarPrivacyClientFromResolvedConfig(resolved.config);

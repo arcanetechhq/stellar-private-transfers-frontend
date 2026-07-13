@@ -6,13 +6,20 @@ type EphemeralPoint = {
   y: string;
 };
 
-type InitializedSdk = Awaited<ReturnType<ReturnType<typeof getPrivacyPoolService>["getInitializedSdk"]>>;
+type InitializedSdk = Awaited<
+  ReturnType<ReturnType<typeof getPrivacyPoolService>["getInitializedSdk"]>
+>;
 
-function readEncodeDecodedEphemeralKey(sdk: InitializedSdk): (point: EphemeralPoint) => string {
-  const candidate = (sdk as { encodeDecodedEphemeralKey?: (point: EphemeralPoint) => string })
-    .encodeDecodedEphemeralKey;
+function readEncodeDecodedEphemeralKey(
+  sdk: InitializedSdk,
+): (point: EphemeralPoint) => string {
+  const candidate = (
+    sdk as { encodeDecodedEphemeralKey?: (point: EphemeralPoint) => string }
+  ).encodeDecodedEphemeralKey;
   if (typeof candidate !== "function") {
-    throw new TypeError("Privacy pool SDK does not expose encodeDecodedEphemeralKey");
+    throw new TypeError(
+      "Privacy pool SDK does not expose encodeDecodedEphemeralKey",
+    );
   }
   return candidate;
 }
@@ -20,7 +27,9 @@ function readEncodeDecodedEphemeralKey(sdk: InitializedSdk): (point: EphemeralPo
 function readGenerateRandomScalarHex32(sdk: InitializedSdk): () => string {
   const ctor = sdk.constructor as { generateRandomScalarHex32?: () => string };
   if (typeof ctor.generateRandomScalarHex32 !== "function") {
-    throw new TypeError("Privacy pool SDK does not expose generateRandomScalarHex32");
+    throw new TypeError(
+      "Privacy pool SDK does not expose generateRandomScalarHex32",
+    );
   }
   return ctor.generateRandomScalarHex32.bind(ctor);
 }

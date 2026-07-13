@@ -37,7 +37,9 @@ export function restoreWalletLocalSlices(
     legacy: legacyPrivateAddress,
   });
   if (Object.keys(mergedBranch).length > 0) {
-    dispatch(hydrateReduxPrivacySdkState(mergedBranch) as unknown as DispatchAction);
+    dispatch(
+      hydrateReduxPrivacySdkState(mergedBranch) as unknown as DispatchAction,
+    );
   }
 }
 

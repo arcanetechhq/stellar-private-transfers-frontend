@@ -33,7 +33,11 @@ function readWalletScalarsRecord(
     return undefined;
   }
   const scalars = (wallet as Record<string, unknown>).privateAddressScalars;
-  if (typeof scalars !== "object" || scalars === null || Array.isArray(scalars)) {
+  if (
+    typeof scalars !== "object" ||
+    scalars === null ||
+    Array.isArray(scalars)
+  ) {
     return undefined;
   }
   return scalars as Record<string, unknown>;
@@ -47,7 +51,9 @@ function readScalarHexFromEntry(entry: unknown): string | undefined {
     return undefined;
   }
   const scalarHex = (entry as Record<string, unknown>).scalarHex;
-  return typeof scalarHex === "string" ? scalarHex.trim() || undefined : undefined;
+  return typeof scalarHex === "string"
+    ? scalarHex.trim() || undefined
+    : undefined;
 }
 
 export function readWalletScalarHexFromSdkBranch(input: {
@@ -68,7 +74,9 @@ export function readWalletScalarHexFromSdkState(input: {
   owner: string;
   nonce: string;
 }): string | undefined {
-  return readWalletPrivateAddressScalarFromStateSnapshot?.(input)?.scalarHex.trim();
+  return readWalletPrivateAddressScalarFromStateSnapshot?.(
+    input,
+  )?.scalarHex.trim();
 }
 
 export async function saveWalletPrivateAddressScalarToSdkState(input: {
@@ -125,10 +133,10 @@ export function listWalletScalarsForOwnerFromSdkState(input: {
   state: PrivacySdkStateRoot;
   owner: string;
 }): Array<{ nonce: string; scalarHex: string }> {
-  return (listWalletPrivateAddressScalarsForOwnerFromStateSnapshot?.(input) ?? []).map(
-    (entry) => ({
+  return (
+    listWalletPrivateAddressScalarsForOwnerFromStateSnapshot?.(input) ?? []
+  ).map((entry) => ({
     nonce: entry.nonce.trim(),
     scalarHex: entry.scalarHex.trim(),
-    }),
-  );
+  }));
 }

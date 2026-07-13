@@ -12,7 +12,9 @@ function readCachedAssets(state: RootState): AssetDto[] | undefined {
   return cached && cached.length > 0 ? cached : undefined;
 }
 
-export function collectPoolContractIdsFromCoinItems(state: RootState): string[] {
+export function collectPoolContractIdsFromCoinItems(
+  state: RootState,
+): string[] {
   const unique = new Set<string>();
   for (const item of state.coin.items) {
     const poolContract = item.poolContract?.trim();
@@ -149,7 +151,10 @@ export function startPoolMerkleBackgroundSync(input: {
     }
   };
   void syncAll();
-  const intervalId = globalThis.setInterval(syncAll, POOL_MERKLE_SYNC_INTERVAL_MS);
+  const intervalId = globalThis.setInterval(
+    syncAll,
+    POOL_MERKLE_SYNC_INTERVAL_MS,
+  );
   return () => {
     cancelled = true;
     globalThis.clearInterval(intervalId);

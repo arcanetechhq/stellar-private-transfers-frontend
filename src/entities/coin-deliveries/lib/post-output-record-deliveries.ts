@@ -16,9 +16,9 @@ function isDeliverableOutputRecord(
 ): record is DeliverableOutputRecord {
   return Boolean(
     record.privateAddress?.trim() &&
-      record.commitmentHex &&
-      record.coinNote &&
-      record.depositScalarHex,
+    record.commitmentHex &&
+    record.coinNote &&
+    record.depositScalarHex,
   );
 }
 
@@ -27,7 +27,9 @@ export async function postOutputRecordDeliveries(parameters: {
   txId: string;
   dispatch: AppDispatch;
 }): Promise<string | undefined> {
-  const deliverable = parameters.outputRecords.filter(isDeliverableOutputRecord);
+  const deliverable = parameters.outputRecords.filter(
+    isDeliverableOutputRecord,
+  );
   const warnings: string[] = [];
   for (const record of deliverable) {
     const warning = await postCoinDeliveryBestEffort(parameters.dispatch, () =>

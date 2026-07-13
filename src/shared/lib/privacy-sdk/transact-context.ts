@@ -55,7 +55,9 @@ export function attachPrivacyTransactRuntimeResolverProxies(
     environment.resolveTokenContractId = (assetId) => {
       const resolver = transactRuntimeResolvers.resolveTokenContractId;
       if (!resolver) {
-        throw new Error(`Token contract is not configured for asset ${assetId}.`);
+        throw new Error(
+          `Token contract is not configured for asset ${assetId}.`,
+        );
       }
       return resolver(assetId);
     };

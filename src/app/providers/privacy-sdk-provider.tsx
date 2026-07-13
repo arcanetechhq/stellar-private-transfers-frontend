@@ -51,9 +51,14 @@ function usePrivacySdkCacheSync(
     const trimmedPublicKey = walletPublicKey?.trim();
     if (trimmedPublicKey) {
       const loadedPrivacySdkState = loadPrivacySdkState(trimmedPublicKey);
-      if (loadedPrivacySdkState && Object.keys(store.getState().privacySdkState).length === 0) {
+      if (
+        loadedPrivacySdkState &&
+        Object.keys(store.getState().privacySdkState).length === 0
+      ) {
         store.dispatch(
-          hydrateReduxPrivacySdkState(loadedPrivacySdkState) as unknown as StoreDispatchAction,
+          hydrateReduxPrivacySdkState(
+            loadedPrivacySdkState,
+          ) as unknown as StoreDispatchAction,
         );
       }
     }
@@ -73,7 +78,8 @@ function usePrivacySdkCacheSync(
     return startPoolMerkleBackgroundSync({
       client,
       walletPublicKey,
-      getPoolContractIds: () => collectPoolContractIdsFromCoinItems(store.getState()),
+      getPoolContractIds: () =>
+        collectPoolContractIdsFromCoinItems(store.getState()),
     });
   }, [client, ready, walletPublicKey]);
 }
@@ -88,7 +94,9 @@ export function PrivacySdkProvider({ children }: { children: ReactNode }) {
 
     const runBootstrap = async () => {
       try {
-        const created = await bootstrapPrivacySdkClient(privacySdkState.adapter);
+        const created = await bootstrapPrivacySdkClient(
+          privacySdkState.adapter,
+        );
         if (cancelled) {
           return;
         }
@@ -132,6 +140,8 @@ export function PrivacySdkProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <PrivacySdkContext.Provider value={value}>{children}</PrivacySdkContext.Provider>
+    <PrivacySdkContext.Provider value={value}>
+      {children}
+    </PrivacySdkContext.Provider>
   );
 }

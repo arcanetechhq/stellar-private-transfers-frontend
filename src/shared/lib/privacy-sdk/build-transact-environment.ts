@@ -9,6 +9,7 @@ import { getRequiredApiBaseUrl } from "@/shared/stellar/stellar-network-environm
 import { readClientEnvironment } from "./read-client-environment.js";
 
 const DEFAULT_SOROBAN_RPC = "https://soroban-testnet.stellar.org";
+const ZERO_ZK_CONFIG_NONCE = 0n;
 
 function readNetworkPassphraseAndRpc(): {
   networkPassphrase: string;
@@ -42,6 +43,19 @@ export function readAuditPublicKeyHexFromEnvironment(): string {
   return readRequiredEnvironment("VITE_STELLAR_AUDIT_PUBLIC_KEY");
 }
 
+export function readZkConfigNonceFromEnvironment(): bigint {
+  const raw = readRequiredEnvironment("VITE_ZK_CONFIG_NONCE");
+  try {
+    const parsed = BigInt(raw);
+    if (parsed < ZERO_ZK_CONFIG_NONCE) {
+      throw new Error("VITE_ZK_CONFIG_NONCE must be a non-negative integer");
+    }
+    return parsed;
+  } catch {
+    throw new Error("VITE_ZK_CONFIG_NONCE must be a non-negative integer");
+  }
+}
+
 export function buildStellarTransactEnvironment(): StellarTransactEnvironment {
   const { networkPassphrase, sorobanRpcUrl } = readNetworkPassphraseAndRpc();
   return {
@@ -50,19 +64,27 @@ export function buildStellarTransactEnvironment(): StellarTransactEnvironment {
       rpcUrl: sorobanRpcUrl,
       networkPassphrase,
       poolContract: readRequiredContractEnvironment("VITE_POOL_CONTRACT"),
-      registryContract: readRequiredContractEnvironment("VITE_PRIVATE_ADDRESS_REGISTRY_CONTRACT"),
+      registryContract: readRequiredContractEnvironment(
+        "VITE_PRIVATE_ADDRESS_REGISTRY_CONTRACT",
+      ),
       applicationId: readPoolApplicationIdFromEnvironment(),
     },
+    zkConfigNonce: readZkConfigNonceFromEnvironment(),
     kyt: {
       apiBaseUrl: getRequiredApiBaseUrl(),
-      kytPassageRegistryContract: readRequiredContractEnvironment("VITE_KYT_PASSAGE_REGISTRY_CONTRACT"),
+      kytPassageRegistryContract: readRequiredContractEnvironment(
+        "VITE_KYT_PASSAGE_REGISTRY_CONTRACT",
+      ),
       registerPassageOnChain: false,
     },
     signTransaction: async (input) => {
-      const { signedTxXdr } = await StellarWalletsKit.signTransaction(input.xdr, {
-        networkPassphrase: input.networkPassphrase,
-        address: input.address,
-      });
+      const { signedTxXdr } = await StellarWalletsKit.signTransaction(
+        input.xdr,
+        {
+          networkPassphrase: input.networkPassphrase,
+          address: input.address,
+        },
+      );
       return { signedTxXdr };
     },
   };

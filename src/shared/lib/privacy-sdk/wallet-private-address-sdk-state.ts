@@ -70,7 +70,11 @@ function readWalletRecords(
     return undefined;
   }
   const records = wallet.privateAddressRecords;
-  if (typeof records !== "object" || records === null || Array.isArray(records)) {
+  if (
+    typeof records !== "object" ||
+    records === null ||
+    Array.isArray(records)
+  ) {
     return undefined;
   }
   return records as Record<string, unknown>;
@@ -129,7 +133,11 @@ export function readWalletDefaultPrivateAddressNonceFromSdkBranch(input: {
     return undefined;
   }
   const defaults = wallet.defaultPrivateAddressNonce;
-  if (typeof defaults !== "object" || defaults === null || Array.isArray(defaults)) {
+  if (
+    typeof defaults !== "object" ||
+    defaults === null ||
+    Array.isArray(defaults)
+  ) {
     return undefined;
   }
   const value = (defaults as Record<string, unknown>)[input.owner.trim()];
@@ -174,7 +182,9 @@ export function listWalletPrivateAddressRecordsForOwnerFromSdkState(input: {
   state: PrivacySdkStateRoot;
   owner: string;
 }): Array<{ nonce: string; entry: PrivateAddressNonceEntry }> {
-  return (listWalletPrivateAddressRecordsForOwnerFromStateSnapshot?.(input) ?? [])
+  return (
+    listWalletPrivateAddressRecordsForOwnerFromStateSnapshot?.(input) ?? []
+  )
     .map((record) => ({
       nonce: record.nonce.trim(),
       entry: {
@@ -208,7 +218,9 @@ export async function saveWalletPrivateAddressRecordToSdkState(input: {
 async function writeOwnerNonceOperation(input: {
   owner: string;
   nonce: string;
-  type: "setWalletDefaultPrivateAddressNonce" | "deleteWalletPrivateAddressScalar";
+  type:
+    | "setWalletDefaultPrivateAddressNonce"
+    | "deleteWalletPrivateAddressScalar";
 }): Promise<void> {
   const owner = input.owner.trim();
   const nonce = input.nonce.trim();
@@ -261,7 +273,10 @@ export async function clearWalletPrivateAddressScalarsForOwner(
     .filter(Boolean);
   await Promise.all(
     nonces.map((nonce) =>
-      deleteWalletPrivateAddressScalarFromSdkState({ owner: trimmedOwner, nonce }),
+      deleteWalletPrivateAddressScalarFromSdkState({
+        owner: trimmedOwner,
+        nonce,
+      }),
     ),
   );
 }

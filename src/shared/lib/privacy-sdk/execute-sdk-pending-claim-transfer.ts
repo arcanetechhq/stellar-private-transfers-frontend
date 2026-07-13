@@ -47,7 +47,10 @@ export async function executeSdkPendingClaimTransfer(parameters: {
   const prepared = await parameters.client.transfer({
     from: {
       kind: "pendingClaim",
-      claim: mapPendingClaimItemToSdkClaim(parameters.claim, parameters.assetId),
+      claim: mapPendingClaimItemToSdkClaim(
+        parameters.claim,
+        parameters.assetId,
+      ),
     },
     to: parameters.permanentPrivateAddress.trim(),
     asset: parameters.assetId,
