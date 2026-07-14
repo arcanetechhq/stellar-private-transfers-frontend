@@ -100,9 +100,9 @@
   color: var(--positive);
 }
 
-.transaction-stat[data-tone="danger"] .transaction-stat__value {
+/* .transaction-stat[data-tone="danger"] .transaction-stat__value {
   color: var(--danger);
-}
+} */
 
 .transaction-stat__label,
 .transaction-stat__value,
@@ -714,11 +714,15 @@
 }
 
 .transaction-amount-cell__value[data-tone="negative"] {
-  color: var(--danger);
+  color: var(--warning);
 }
 
 .transaction-amount-cell__value[data-tone="pending"] {
-  color: var(--warning);
+  color: var(--positive);
+}
+
+.transaction-amount-cell__value[data-tone="neutral"] {
+  color: var(--text-muted);
 }
 
 .transaction-amount-cell__asset {

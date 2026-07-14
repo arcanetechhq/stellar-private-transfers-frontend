@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Networks } from "@stellar/stellar-sdk";
-import { ArrowDown, ArrowDownToLine } from "lucide-react";
+import { ArrowDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppSelector } from "@/store";
 import { useAssetsWithTrustlines } from "@/entities/asset";
@@ -78,7 +78,10 @@ export function HeaderFaucetMenu({
           role="menu"
           aria-label={translate("faucet.menuTitle")}
         >
-          <h2 className="faucet-menu__title">{translate("faucet.menuTitle")}</h2>
+          <div className="faucet-menu__header">
+            <h2 className="faucet-menu__title">{translate("faucet.menuTitle")}</h2>
+            <p className="faucet-menu__description">{translate("faucet.menuDescription")}</p>
+          </div>
           <div className="faucet-menu__list">
             {sortedAssets.length === 0 ? (
               <p className="faucet-menu__empty">{translate("noAssetsFound")}</p>

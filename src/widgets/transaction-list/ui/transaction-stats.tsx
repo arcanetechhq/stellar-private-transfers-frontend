@@ -7,7 +7,7 @@ import {
 type TransactionStatsProperties = {
   stats: TransactionStatItem[];
   resolveLabel: (stat: TransactionStatItem) => string;
-  resolvePendingMeta: (count: number) => string;
+  // resolvePendingMeta: (count: number) => string;
 };
 
 function MoneyValue({ value }: { value: string }) {
@@ -28,7 +28,7 @@ function MoneyValue({ value }: { value: string }) {
 export function TransactionStats({
   stats,
   resolveLabel,
-  resolvePendingMeta,
+  // resolvePendingMeta,
 }: TransactionStatsProperties): ReactNode {
   return (
     <div className="transaction-stats" data-count={stats.length}>
@@ -38,11 +38,11 @@ export function TransactionStats({
           <p className="transaction-stat__value">
             <MoneyValue value={formatTransactionStatUsd(stat.valueUsd)} />
           </p>
-          {stat.id === "pending" && stat.pendingCount !== undefined ? (
+          {/* {stat.id === "pending" && stat.pendingCount !== undefined ? (
             <span className="transaction-stat__meta">
               {resolvePendingMeta(stat.pendingCount)}
             </span>
-          ) : null}
+          ) : null} */}
         </div>
       ))}
     </div>

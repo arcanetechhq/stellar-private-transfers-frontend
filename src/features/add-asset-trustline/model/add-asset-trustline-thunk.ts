@@ -17,6 +17,7 @@ interface TrustlineTarget {
 
 export interface AddAssetTrustlineThunkPayload extends TrustlineTarget {
   publicKey: string;
+  skipRefresh?: boolean;
 }
 
 export const addAssetTrustlineThunk = createAsyncThunk<
@@ -39,7 +40,9 @@ export const addAssetTrustlineThunk = createAsyncThunk<
       publicKey: target.publicKey,
       xdr,
     });
-    await dispatch(refreshAssetsWithTrustlinesThunk()).unwrap();
+    if (!target.skipRefresh) {
+      await dispatch(refreshAssetsWithTrustlinesThunk()).unwrap();
+    }
   } finally {
     dispatch(trustlineSubmitFinished());
   }

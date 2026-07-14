@@ -280,9 +280,9 @@ export function TransactionsPanel({
           <TransactionStats
             stats={transactionStats}
             resolveLabel={(stat) => translate(`stats.${stat.id}`)}
-            resolvePendingMeta={(count) =>
-              translate("stats.pendingMeta", { count })
-            }
+            // resolvePendingMeta={(count) =>
+            //   translate("stats.pendingMeta", { count })
+            // }
           />
           <PageTransactionsHeader
             searchPlaceholder={translate("searchPlaceholder")}

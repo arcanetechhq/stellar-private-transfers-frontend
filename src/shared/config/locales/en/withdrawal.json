@@ -2,6 +2,7 @@
   "backToHome": "Back to Home",
   "pageTitle": "Withdraw",
   "pageSubtitle": "Move funds from your private balance to a public wallet",
+  "flowTitle": "Withdraw to public balance",
   "summary": "Summary",
   "asset": "Asset",
   "amount": "Amount",

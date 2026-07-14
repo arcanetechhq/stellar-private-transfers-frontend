@@ -35,6 +35,7 @@ export function CreateTransfer(): React.JSX.Element {
     <div className="workspace__inner">
       <div className="transfer-route">
         <div className="transfer-flow">
+          <h2 className="transfer-flow__title">{translate("flowTitle")}</h2>
           <TransferSendPanel
             assets={transfer.assets}
             selectedToken={transfer.selectedToken}

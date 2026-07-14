@@ -8,11 +8,22 @@
 }
 
 .transfer-flow {
+  --transfer-flow-title-offset: 56px;
   display: grid;
   width: min(620px, 100%);
   margin: 0 auto;
   align-content: start;
   gap: var(--space-4);
+}
+
+.transfer-flow__title {
+  margin: 0;
+  min-height: var(--transfer-flow-title-offset);
+  font-size: 40px;
+  line-height: 56px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  color: var(--text);
 }
 
 .transfer-send-panel {
@@ -739,8 +750,14 @@
 
 @media (max-width: 720px) {
   .transfer-flow {
+    --transfer-flow-title-offset: 44px;
     width: 100%;
     padding: 0 var(--space-4);
+  }
+
+  .transfer-flow__title {
+    font-size: 32px;
+    line-height: 44px;
   }
 
   .send-money-asset-select__button {

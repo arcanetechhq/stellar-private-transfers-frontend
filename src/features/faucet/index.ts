@@ -5,6 +5,7 @@ export {
   claimIssuedAssetThunk,
   claimNativeFaucetThunk,
 } from "./model/header-faucet-thunks";
+export { useClaimFaucet } from "./model/use-claim-faucet";
 export {
   FaucetDailyLimitError,
   hasClaimedFaucetToday,

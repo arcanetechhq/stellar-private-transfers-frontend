@@ -208,7 +208,7 @@ export function ConnectedWalletPanel({
       <AccountMenuDivider />
 
       <div className="account-menu__section account-menu__actions" role="group">
-        {/* <button
+        <button
           type="button"
           className="account-menu__item"
           role="menuitem"
@@ -216,7 +216,7 @@ export function ConnectedWalletPanel({
         >
           <RefreshCw size={24} strokeWidth={1.5} />
           <span>{translate("common:changeWallet")}</span>
-        </button> */}
+        </button>
 
         <button
           type="button"

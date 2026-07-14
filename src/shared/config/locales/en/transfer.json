@@ -2,6 +2,7 @@
   "backToHome": "Back to Home",
   "pageTitle": "Send money",
   "pageSubtitle": "Send a private cryptocurrency transfer",
+  "flowTitle": "Send assets privately",
   "recipientAddress": "Recipient Address",
   "recipientPlaceholder": "Enter recipient Stellar adress",
   "selectFromContacts": "Select from Contacts",

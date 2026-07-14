@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import {
   connectFreighterWallet,
   disconnectStellarWallet,
   isWalletPickerUiEnabled,
+  syncFreighterWalletAccount,
   useStellarWalletModal,
 } from "@/features/stellar-wallet-connect";
 import { shortenStellarAddress } from "@/shared/lib/shorten-stellar-address";
@@ -23,6 +26,7 @@ export function MainLayoutHeaderWallet({
   walletOpen,
   setWalletOpen,
 }: MainLayoutHeaderWalletProperties) {
+  const { t: translateCommon } = useTranslation("common");
   const dispatch = useAppDispatch();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const isConnected = Boolean(publicKey);
@@ -63,23 +67,31 @@ export function MainLayoutHeaderWallet({
     await dispatch(disconnectStellarWallet());
   };
 
-  const reconnectFreighter = async () => {
-    setIsConnectingFreighter(true);
-    try {
-      await dispatch(disconnectStellarWallet());
-      await connectFreighterWallet(dispatch);
-    } finally {
-      setIsConnectingFreighter(false);
-    }
-  };
-
   const handleChangeWallet = () => {
     setWalletOpen(false);
     if (isWalletPickerUiEnabled) {
       openPicker(true);
       return;
     }
-    void reconnectFreighter();
+
+    void (async () => {
+      setIsConnectingFreighter(true);
+      try {
+        const result = await syncFreighterWalletAccount({
+          dispatch,
+          currentPublicKey: publicKey,
+        });
+        if (result === "unchanged") {
+          toast.message(translateCommon("changeWalletUnchanged"));
+          return;
+        }
+        if (result === "failed") {
+          toast.error(translateCommon("changeWalletFailed"));
+        }
+      } finally {
+        setIsConnectingFreighter(false);
+      }
+    })();
   };
 
   const handleConnect = () => {

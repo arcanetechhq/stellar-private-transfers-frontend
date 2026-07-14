@@ -81,7 +81,7 @@ export function FlowWalletControl({
           </span>
           <span className="send-wallet-control__value">{subtitle}</span>
         </span>
-        <button
+        {/* <button
           type="button"
           className="send-flow-wallet-control__action"
           data-connected={isConnected ? "true" : undefined}
@@ -90,7 +90,7 @@ export function FlowWalletControl({
           onClick={handleConnect}
         >
           {isConnected ? changeLabel : connectLabel}
-        </button>
+        </button> */}
       </div>
     </div>
   );

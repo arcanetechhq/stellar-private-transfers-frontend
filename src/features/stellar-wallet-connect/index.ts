@@ -5,6 +5,8 @@ export {
   syncWalletAddressFromKit,
 } from "./model/stellar-wallet-thunks";
 export { connectFreighterWallet } from "./lib/connect-freighter-wallet";
+export { syncFreighterWalletAccount } from "./lib/sync-freighter-wallet-account";
+export type { SyncFreighterWalletResult } from "./lib/sync-freighter-wallet-account";
 export {
   openFreighterProductUrl,
   resolveFreighterAvailability,

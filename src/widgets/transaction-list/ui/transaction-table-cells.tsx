@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { getAssetUsdPrice, useAssetLookup } from "@/entities/asset";
+import { isPendingClaimTransactionId } from "@/entities/pending-claims";
 import type { Transaction } from "@/entities/transaction";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { useAppSelector } from "@/store";
@@ -94,6 +95,12 @@ type TransactionAmountCellProperties = {
 function getAmountTone(
   transaction: Transaction,
 ): "positive" | "negative" | "pending" | "neutral" {
+  if (
+    isPendingClaimTransactionId(transaction.id) &&
+    transaction.status === "completed"
+  ) {
+    return "neutral";
+  }
   if (
     transaction.status === "pending" ||
     transaction.status === "processing" ||

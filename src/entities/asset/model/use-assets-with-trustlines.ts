@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAppSelector } from "@/store/hooks";
 import {
   fetchAccountBalances,
@@ -88,6 +88,7 @@ export function useAssetsWithTrustlines(publicKey: string | undefined): {
     useState<StellarBalance[] | undefined>();
   const [isTrustlineLoading, setIsTrustlineLoading] = useState(false);
   const [fetchCounter, setFetchCounter] = useState(0);
+  const loadedForPublicKeyReference = useRef<string | undefined>(undefined);
 
   const refetch = useCallback(() => {
     setFetchCounter((count) => count + 1);
@@ -95,22 +96,31 @@ export function useAssetsWithTrustlines(publicKey: string | undefined): {
 
   useEffect(() => {
     if (!publicKey || !backendAssets) {
+      loadedForPublicKeyReference.current = undefined;
       setStellarBalances(undefined);
+      setIsTrustlineLoading(false);
       return;
     }
 
     let cancelled = false;
-    setIsTrustlineLoading(true);
+    const hasCachedBalances =
+      loadedForPublicKeyReference.current === publicKey;
+    if (!hasCachedBalances) {
+      setStellarBalances(undefined);
+      setIsTrustlineLoading(true);
+    }
 
     fetchAccountBalances(horizonServer, publicKey)
       .then((balances) => {
         if (!cancelled) {
+          loadedForPublicKeyReference.current = publicKey;
           setStellarBalances(balances);
           setIsTrustlineLoading(false);
         }
       })
       .catch(() => {
         if (!cancelled) {
+          loadedForPublicKeyReference.current = publicKey;
           setStellarBalances([]);
           setIsTrustlineLoading(false);
         }

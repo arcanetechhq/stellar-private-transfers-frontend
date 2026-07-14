@@ -69,12 +69,12 @@ export function computeTransactionStats(options: {
       valueUsd: outflowUsd,
       tone: "danger",
     },
-    {
-      id: "pending",
-      valueUsd: pendingUsd,
-      pendingCount,
-      tone: "warning",
-    },
+    // {
+    //   id: "pending",
+    //   valueUsd: pendingUsd,
+    //   pendingCount,
+    //   tone: "warning",
+    // },
   ];
 }
 

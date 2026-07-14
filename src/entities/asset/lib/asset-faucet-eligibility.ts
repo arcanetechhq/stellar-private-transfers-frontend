@@ -11,9 +11,15 @@ export function isAssetFaucetClaimable(
   if (!showFaucet) {
     return false;
   }
-  const isNative = asset.trustlineStatus === "native";
+  if (asset.trustlineStatus === "native") {
+    return true;
+  }
+  if (!asset.mintable) {
+    return false;
+  }
   return (
-    isNative || (asset.mintable && asset.trustlineStatus === "exists")
+    asset.trustlineStatus === "exists" ||
+    asset.trustlineStatus === "missing"
   );
 }
 

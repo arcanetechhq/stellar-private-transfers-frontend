@@ -30,6 +30,7 @@ export function CreateWithdrawal(): React.JSX.Element {
     <div className="workspace__inner">
       <div className="transfer-route">
         <div className="transfer-flow">
+          <h2 className="transfer-flow__title">{translate("flowTitle")}</h2>
           <WithdrawalSendPanel
             assets={withdrawal.assets}
             selectedToken={withdrawal.selectedToken}

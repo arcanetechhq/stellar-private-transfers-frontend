@@ -45,6 +45,8 @@
   "walletGuardDescription": "Connect a wallet before entering the dashboard. Until then, balances, assets, and transfer flows remain unavailable.",
   "walletGuardHint": "Wallet connection is required to continue.",
   "changeWallet": "Change Wallet",
+  "changeWalletUnchanged": "Same Freighter account is already connected.",
+  "changeWalletFailed": "Could not sync Freighter account. Try again.",
   "disconnect": "Disconnect",
   "connected": "Connected",
   "notifications": "Notifications",

@@ -80,7 +80,7 @@
   right: 0;
   z-index: var(--z-header-popover);
   display: grid;
-  width: min(420px, calc(100vw - 32px));
+  width: min(480px, calc(100vw - 32px));
   overflow: hidden;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-4);
@@ -90,16 +90,32 @@
   animation: header-faucet-panel-in 160ms ease;
 }
 
+.faucet-menu__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
 .faucet-menu__title {
   margin: 0;
-  border-bottom: 1px solid var(--border-subtle);
+  /* border-bottom: 1px solid var(--border-subtle); */
   color: var(--text);
   font-family: var(--font-display);
   font-size: 16px;
   line-height: 22px;
   font-weight: 500;
   letter-spacing: 0;
-  padding: var(--space-4);
+  /* padding: var(--space-4); */
+}
+
+.faucet-menu__description {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
 }
 
 .faucet-menu__list {
@@ -217,7 +233,7 @@
 }
 
 .faucet-menu__action:disabled {
-  cursor: default;
+  cursor: not-allowed;
   opacity: 0.72;
   transform: none;
 }
