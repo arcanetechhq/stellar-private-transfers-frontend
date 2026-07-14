@@ -7,6 +7,7 @@ import {
 } from "@/entities/coin";
 import { addSeenTag } from "@/entities/coin-deliveries";
 import type { IncomingCoinDeliveryDto } from "@/entities/coin-deliveries";
+import { addTransaction } from "@/entities/transaction";
 import { upsertCoinWithMetadataToSdk } from "@/shared/lib/privacy-sdk/upsert-private-record.js";
 import { tryGetPrivacySdkClient } from "@/shared/lib/privacy-sdk/transact-context.js";
 
@@ -16,6 +17,17 @@ interface DecryptedDeliveryCoin {
   depositScalarHex?: string;
   precommitementHex?: string;
   amountDisplay: number;
+  txId: string;
+}
+
+const INCOMING_TX_ID_FALLBACK = "incoming";
+
+function resolveIncomingTransferId(txId: string, deliveryRowId: number): string {
+  const trimmed = txId.trim();
+  if (trimmed && trimmed !== INCOMING_TX_ID_FALLBACK) {
+    return trimmed;
+  }
+  return `coin-delivery-${deliveryRowId}`;
 }
 
 async function markDeliveryProcessedInSdk(deliveryId: number): Promise<void> {
@@ -23,6 +35,59 @@ async function markDeliveryProcessedInSdk(deliveryId: number): Promise<void> {
   if (privacyClient) {
     await privacyClient.markDeliveryProcessed(deliveryId);
   }
+}
+
+async function persistDecryptedCoin(
+  decrypted: DecryptedDeliveryCoin,
+  parameters: {
+    privateAddress: string;
+    assetId: string;
+    poolContract: string;
+    publicKey: string;
+    dispatch: AppDispatch;
+  },
+): Promise<void> {
+  const coinFields = {
+    commitmentHex: decrypted.commitmentHex,
+    coin: decrypted.coin,
+    depositScalarHex: decrypted.depositScalarHex,
+    precommitementHex: decrypted.precommitementHex,
+    privateAddress: parameters.privateAddress,
+    assetId: parameters.assetId,
+    poolContract: parameters.poolContract,
+    amountDisplay: decrypted.amountDisplay,
+    status: "pending" as const,
+  };
+  parameters.dispatch(addCoin(coinFields));
+  await upsertCoinWithMetadataToSdk(coinFields, parameters.publicKey);
+  parameters.dispatch(finalizeCoin(decrypted.commitmentHex));
+}
+
+function recordIncomingTransferTransaction(parameters: {
+  decrypted: DecryptedDeliveryCoin;
+  row: IncomingCoinDeliveryDto;
+  assetId: string;
+  localTransactionIds: string[];
+  dispatch: AppDispatch;
+}): void {
+  const { decrypted, row } = parameters;
+  const isSelfInitiated = parameters.localTransactionIds.includes(decrypted.txId);
+  if (isSelfInitiated) {
+    return;
+  }
+  parameters.dispatch(
+    addTransaction({
+      id: resolveIncomingTransferId(decrypted.txId, row.id),
+      date: row.created_at,
+      type: "received",
+      assetId: parameters.assetId,
+      amount: decrypted.amountDisplay,
+      counterparty: decrypted.txId,
+      status: "completed",
+      confirmationStatus: "none",
+      disclosureStatus: "none",
+    }),
+  );
 }
 
 export async function processIncomingDeliveryRows(parameters: {
@@ -34,6 +99,7 @@ export async function processIncomingDeliveryRows(parameters: {
   assetId: string;
   poolContract: string;
   publicKey: string;
+  localTransactionIds: string[];
   dispatch: AppDispatch;
   decryptDeliveryRow: (
     row: IncomingCoinDeliveryDto,
@@ -62,34 +128,20 @@ export async function processIncomingDeliveryRows(parameters: {
       await markDeliveryProcessedInSdk(row.id);
       continue;
     }
-    parameters.dispatch(
-      addCoin({
-        commitmentHex: decrypted.commitmentHex,
-        coin: decrypted.coin,
-        depositScalarHex: decrypted.depositScalarHex,
-        precommitementHex: decrypted.precommitementHex,
-        privateAddress: parameters.privateAddress,
-        assetId: parameters.assetId,
-        poolContract: parameters.poolContract,
-        amountDisplay: decrypted.amountDisplay,
-        status: "pending",
-      }),
-    );
-    await upsertCoinWithMetadataToSdk(
-      {
-        commitmentHex: decrypted.commitmentHex,
-        coin: decrypted.coin,
-        depositScalarHex: decrypted.depositScalarHex,
-        precommitementHex: decrypted.precommitementHex,
-        privateAddress: parameters.privateAddress,
-        assetId: parameters.assetId,
-        poolContract: parameters.poolContract,
-        amountDisplay: decrypted.amountDisplay,
-        status: "pending",
-      },
-      parameters.publicKey,
-    );
-    parameters.dispatch(finalizeCoin(decrypted.commitmentHex));
+    await persistDecryptedCoin(decrypted, {
+      privateAddress: parameters.privateAddress,
+      assetId: parameters.assetId,
+      poolContract: parameters.poolContract,
+      publicKey: parameters.publicKey,
+      dispatch: parameters.dispatch,
+    });
+    recordIncomingTransferTransaction({
+      decrypted,
+      row,
+      assetId: parameters.assetId,
+      localTransactionIds: parameters.localTransactionIds,
+      dispatch: parameters.dispatch,
+    });
     parameters.dispatch(addSeenTag({ assetId: parameters.assetId, tagBase64: tagB64 }));
     await markDeliveryProcessedInSdk(row.id);
   }

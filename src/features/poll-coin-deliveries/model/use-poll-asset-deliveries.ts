@@ -12,6 +12,7 @@ import {
   useGetIncomingDeliveriesQuery,
   type IncomingCoinDeliveryDto,
 } from "@/entities/coin-deliveries";
+import { selectTransactions } from "@/entities/transaction";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { base64ToBytes } from "@/shared/lib/base64-to-bytes";
 import {
@@ -46,6 +47,7 @@ interface DecryptedDeliveryCoin {
   depositScalarHex?: string;
   precommitementHex?: string;
   amountDisplay: number;
+  txId: string;
 }
 
 async function decryptDeliveryRow(
@@ -86,6 +88,7 @@ async function decryptDeliveryRow(
     depositScalarHex: v1.depositScalarHex,
     precommitementHex: v1.precommitementHex,
     amountDisplay: v1.amountDisplay,
+    txId: v1.txId,
   };
 }
 
@@ -109,6 +112,7 @@ export function usePollAssetDeliveries({
   const seenTags = useAppSelector(selectSeenTagsForAsset(assetId));
   const coinItems = useAppSelector(selectCoinItems);
   const isTagsHydrated = useAppSelector(selectIsTagsHydrated);
+  const localTransactions = useAppSelector(selectTransactions);
   const bloomBitsBase64 = useBloomBitsForSeenTags(seenTags);
   const isSeenTagsBloomReady = bloomBitsBase64 !== undefined;
 
@@ -146,6 +150,7 @@ export function usePollAssetDeliveries({
       assetId,
       poolContract,
       publicKey,
+      localTransactionIds: localTransactions.map((transaction) => transaction.id),
       dispatch,
       decryptDeliveryRow,
     });
@@ -158,6 +163,7 @@ export function usePollAssetDeliveries({
     assetId,
     poolContract,
     privateAddress,
+    localTransactions,
     dispatch,
   ]);
 }
