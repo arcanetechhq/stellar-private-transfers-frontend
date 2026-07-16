@@ -1,5 +1,6 @@
 import { TransactionBuilder, Horizon } from "@stellar/stellar-sdk";
 import { StellarWalletsKit as StellarWalletsKitSdk } from "@creit-tech/stellar-wallets-kit/sdk";
+import { assertWalletSigningAddress } from "@/shared/lib/wallet/assert-wallet-signing-address";
 
 export interface SubmitHorizonTransactionWithWalletInput {
   horizonUrl: string;
@@ -12,6 +13,7 @@ export async function submitHorizonTransactionWithWallet(
   input: SubmitHorizonTransactionWithWalletInput,
 ): Promise<void> {
   const server = new Horizon.Server(input.horizonUrl);
+  await assertWalletSigningAddress(input.publicKey);
   const { signedTxXdr } = await StellarWalletsKitSdk.signTransaction(input.xdr, {
     networkPassphrase: input.networkPassphrase,
     address: input.publicKey,

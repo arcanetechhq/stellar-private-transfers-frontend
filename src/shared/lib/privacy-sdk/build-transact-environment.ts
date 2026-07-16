@@ -4,6 +4,7 @@ import {
 } from "@arcanetech/privacy-sdk-stellar/transact";
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
 import { Networks } from "@stellar/stellar-sdk";
+import { assertWalletSigningAddress } from "@/shared/lib/wallet/assert-wallet-signing-address";
 import { normalizeSorobanContractId } from "@/shared/stellar/normalize-soroban-contract-id.js";
 import { getRequiredApiBaseUrl } from "@/shared/stellar/stellar-network-environment.js";
 import { readClientEnvironment } from "./read-client-environment.js";
@@ -78,6 +79,7 @@ export function buildStellarTransactEnvironment(): StellarTransactEnvironment {
       registerPassageOnChain: false,
     },
     signTransaction: async (input) => {
+      await assertWalletSigningAddress(input.address);
       const { signedTxXdr } = await StellarWalletsKit.signTransaction(
         input.xdr,
         {

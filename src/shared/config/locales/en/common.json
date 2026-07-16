@@ -47,6 +47,7 @@
   "changeWallet": "Change Wallet",
   "changeWalletUnchanged": "Same Freighter account is already connected.",
   "changeWalletFailed": "Could not sync Freighter account. Try again.",
+  "walletAccountMismatch": "Switch to the registered wallet address to continue.",
   "disconnect": "Disconnect",
   "connected": "Connected",
   "notifications": "Notifications",

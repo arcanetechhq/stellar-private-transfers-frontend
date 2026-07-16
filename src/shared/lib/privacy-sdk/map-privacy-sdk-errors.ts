@@ -7,6 +7,10 @@ import {
   parseKytReasonCode,
 } from "@arcanetech/privacy-sdk-stellar/transact";
 import { i18n } from "@/shared/config/i18n-instance.js";
+import {
+  isWalletAccountMismatchError,
+  isWalletAccountMismatchMessage,
+} from "@/shared/lib/wallet/wallet-account-mismatch-error";
 
 export {
   KytInspectError,
@@ -42,6 +46,13 @@ export function formatKytRejectionTitle(): string {
   return i18n.t("inspectRejectedTitle", { ns: "kyt" });
 }
 
+function formatWalletAccountMismatchMessage(): string {
+  return i18n.t("walletAccountMismatch", {
+    ns: "common",
+    defaultValue: "Switch to the registered wallet address to continue.",
+  });
+}
+
 function mapInsufficientStateReason(reason: string): string | undefined {
   const key = PENDING_CLAIM_ERROR_KEYS[reason];
   if (!key) {
@@ -67,6 +78,12 @@ function mapExecutionValidationReason(details: unknown): string | undefined {
 }
 
 function mapPrivacySdkErrorMessage(error: PrivacySdkError): string {
+  if (
+    typeof error.message === "string" &&
+    isWalletAccountMismatchMessage(error.message)
+  ) {
+    return formatWalletAccountMismatchMessage();
+  }
   if (error.code === "insufficient_state") {
     const mapped = mapInsufficientStateReason(error.reason);
     if (mapped) {
@@ -113,6 +130,9 @@ function isHtmlAsJsonParseError(message: string): boolean {
 }
 
 function mapThrownErrorMessage(message: string): string {
+  if (isWalletAccountMismatchMessage(message)) {
+    return formatWalletAccountMismatchMessage();
+  }
   if (isHtmlAsJsonParseError(message)) {
     return i18n.t("apiReturnedHtml", {
       ns: "kyt",
@@ -129,6 +149,9 @@ function mapThrownErrorMessage(message: string): string {
 export function mapPrivacySdkError(error: unknown): string {
   if (error instanceof KytInspectError) {
     return error.message;
+  }
+  if (isWalletAccountMismatchError(error)) {
+    return formatWalletAccountMismatchMessage();
   }
   if (isPrivacySdkError(error)) {
     return mapPrivacySdkErrorMessage(error);
