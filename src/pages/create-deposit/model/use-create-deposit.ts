@@ -1,10 +1,7 @@
 import { type FormEvent, useCallback } from "react";
 import { useNavigate } from "react-router";
-import { useAppDispatch, useAppSelector } from "@/store";
 import { useWalletPrivateAddress } from "@/features/register-private-address";
 import type { AssetWithTrustline } from "@/entities/asset";
-import { selectWalletPublicKey } from "@/entities/wallet";
-import { addTransaction, buildUserTransaction } from "@/entities/transaction";
 import { useDepositTransaction } from "@/features/deposit";
 import { useCreateDepositForm } from "./use-create-deposit-form";
 
@@ -21,45 +18,19 @@ type SubmitDepositFunction = (parameters: {
   privateAddress: string;
 }) => Promise<SubmitDepositResult>;
 
-type SubmitDepositSuccessParameters = {
+async function submitDepositSuccessFlow(input: {
   submitDeposit: SubmitDepositFunction;
-  dispatch: ReturnType<typeof useAppDispatch>;
   navigate: ReturnType<typeof useNavigate>;
   selectedAsset: AssetWithTrustline;
   numericAmount: number;
   destinationPrivateAddressPreview: string;
-  walletPublicKey: string;
-};
-
-async function submitDepositSuccessFlow({
-  submitDeposit,
-  dispatch,
-  navigate,
-  selectedAsset,
-  numericAmount,
-  destinationPrivateAddressPreview,
-  walletPublicKey,
-}: SubmitDepositSuccessParameters) {
-  const trimmedDestinationPrivateAddress = destinationPrivateAddressPreview.trim();
-  const trimmedWalletPublicKey = walletPublicKey.trim();
-  const result = await submitDeposit({
-    asset: selectedAsset,
-    amountDisplay: numericAmount,
-    privateAddress: trimmedDestinationPrivateAddress,
+}) {
+  const result = await input.submitDeposit({
+    asset: input.selectedAsset,
+    amountDisplay: input.numericAmount,
+    privateAddress: input.destinationPrivateAddressPreview.trim(),
   });
-  dispatch(
-    addTransaction(
-      buildUserTransaction({
-        txId: result.txId,
-        type: "deposit",
-        assetId: result.assetId,
-        amount: result.amountDisplay,
-        counterparty: trimmedWalletPublicKey,
-        senderPrivateAddress: trimmedDestinationPrivateAddress,
-      }),
-    ),
-  );
-  navigate(`/transfer-success/${encodeURIComponent(result.txId)}`, {
+  input.navigate(`/transfer-success/${encodeURIComponent(result.txId)}`, {
     state: {
       amount: result.amountDisplay,
       assetId: result.assetId,
@@ -71,9 +42,7 @@ async function submitDepositSuccessFlow({
 }
 
 export function useCreateDeposit() {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const walletPublicKey = useAppSelector(selectWalletPublicKey) ?? "";
   const { privateAddressStpl1 } = useWalletPrivateAddress();
   const {
     mutateAsync: submitDeposit,
@@ -92,19 +61,16 @@ export function useCreateDeposit() {
       try {
         await submitDepositSuccessFlow({
           submitDeposit,
-          dispatch,
           navigate,
           selectedAsset: form.selectedAsset,
           numericAmount: form.numericAmount,
           destinationPrivateAddressPreview: trimmedPrivateAddress,
-          walletPublicKey,
         });
       } catch (error: unknown) {
         console.error("Deposit failed:", error);
       }
     },
     [
-      dispatch,
       form.canSubmit,
       form.numericAmount,
       form.selectedAsset,
@@ -112,7 +78,6 @@ export function useCreateDeposit() {
       navigate,
       privateAddressStpl1,
       submitDeposit,
-      walletPublicKey,
     ],
   );
 

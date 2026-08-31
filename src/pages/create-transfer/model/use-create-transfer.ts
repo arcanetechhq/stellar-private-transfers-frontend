@@ -41,6 +41,9 @@ export function useCreateTransfer() {
     handleOpenReview,
     handleCloseReview,
     handleConfirmSend: model.handleConfirmSend,
+    handleRetry: model.handleRetry,
+    handleFallback: model.handleFallback,
+    relayAction: model.relayAction,
     handleSuccessDone,
   };
 }

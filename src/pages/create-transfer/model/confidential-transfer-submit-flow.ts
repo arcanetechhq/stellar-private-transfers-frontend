@@ -1,9 +1,8 @@
 import { isRejectedWithValue } from "@reduxjs/toolkit";
 import type { NavigateFunction } from "react-router";
-import type { AppDispatch } from "@/store";
 import type { AssetWithTrustline } from "@/entities/asset";
-import { addTransaction, buildUserTransaction } from "@/entities/transaction";
 import { mapPrivacySdkError } from "@/shared/lib/privacy-sdk/map-privacy-sdk-errors.js";
+import { formatProtocolRelayError, ProtocolRelayClientError } from "@/shared/lib/protocol-relay";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 
 type ConfidentialTransferSubmit = (payload: {
@@ -15,6 +14,9 @@ type ConfidentialTransferSubmit = (payload: {
 }) => Promise<{ txId: string; coinDeliveryWarning?: string }>;
 
 export function readConfidentialTransferSubmitError(error: unknown): string {
+  if (error instanceof ProtocolRelayClientError) {
+    return formatProtocolRelayError(error);
+  }
   if (isRejectedWithValue(error)) {
     const payload = error.payload;
     if (typeof payload === "string") {
@@ -62,29 +64,15 @@ export type ConfidentialTransferSuccess = {
 };
 
 function recordSuccessfulTransfer(parameters: {
-  dispatch: AppDispatch;
   navigate: NavigateFunction;
   selectedAsset: AssetWithTrustline;
   recipientTrim: string;
   numericAmount: number;
-  senderPrivateAddress: string;
   txId: string;
   coinDeliveryWarning?: string;
   onSuccess?: (result: ConfidentialTransferSuccess) => void;
 }): void {
   const poolContract = getRequiredPrivacyPoolContractId();
-  parameters.dispatch(
-    addTransaction(
-      buildUserTransaction({
-        txId: parameters.txId,
-        type: "sent",
-        assetId: parameters.selectedAsset.assetId,
-        amount: parameters.numericAmount,
-        counterparty: parameters.recipientTrim,
-        senderPrivateAddress: parameters.senderPrivateAddress.trim(),
-      }),
-    ),
-  );
   const successResult: ConfidentialTransferSuccess = {
     txId: parameters.txId,
     amount: parameters.numericAmount,
@@ -113,7 +101,6 @@ function recordSuccessfulTransfer(parameters: {
 }
 
 export async function runConfidentialTransferSubmitFlow(parameters: {
-  dispatch: AppDispatch;
   navigate: NavigateFunction;
   ensureWalletPrivateAddress: () => Promise<string>;
   ensureWalletScalar: (privateAddressStpl1?: string) => Promise<string>;
@@ -134,12 +121,10 @@ export async function runConfidentialTransferSubmitFlow(parameters: {
     senderPrivateAddress: preparedWallet.senderPrivateAddress,
   });
   recordSuccessfulTransfer({
-    dispatch: parameters.dispatch,
     navigate: parameters.navigate,
     selectedAsset: parameters.selectedAsset,
     recipientTrim: parameters.recipientTrim,
     numericAmount: parameters.numericAmount,
-    senderPrivateAddress: preparedWallet.senderPrivateAddress,
     txId: submitted.txId,
     coinDeliveryWarning: submitted.coinDeliveryWarning,
     onSuccess: parameters.onSuccess,

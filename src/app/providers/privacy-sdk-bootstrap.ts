@@ -11,6 +11,7 @@ import {
   type StellarBrowserPrivacyClientConfig,
   type StellarPrivacyClient,
 } from "@arcanetech/privacy-sdk-stellar";
+import { wrapTransactEngineToProveAtPrepare } from "@/shared/lib/privacy-sdk/wrap-transact-engine.js";
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
 import {
   parseAuditPublicKeyFromEnvHex,
@@ -87,8 +88,19 @@ async function initializePrivacySdkClient(
       transactEnvironment,
       policy: createStellarPolicyAdapterFromEnvironment(transactEnvironment),
     },
-    async (input) =>
-      createDefaultTransactEngine(input.assets, input.transactEnvironment),
+    async (input) => {
+      const engine = await createDefaultTransactEngine(
+        input.assets,
+        input.transactEnvironment,
+      );
+      if (!input.transactEnvironment) {
+        return engine;
+      }
+      return wrapTransactEngineToProveAtPrepare({
+        engine,
+        environment: input.transactEnvironment,
+      });
+    },
   );
   if (!resolved.ok) {
     throw new Error("Privacy SDK client rejected during initialization.");

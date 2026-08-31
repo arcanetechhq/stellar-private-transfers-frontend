@@ -1,8 +1,9 @@
-import { type ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import "./private-asset-table.css";
 import "@/shared/styles/period-select.css";
 import { Wallet } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { RelayReviewActions } from "@/features/submit-private-operation";
 import {
   PrivateAssetTableBody,
   type PrivateAssetPendingClaimItem,
@@ -14,6 +15,10 @@ type PendingClaimControls = {
   canClaim: boolean;
   onClaim: (transactionId: string) => void;
   error?: string;
+  retryAllowed?: boolean;
+  fallbackAllowed?: boolean;
+  onRetry?: () => void;
+  onFallback?: () => void;
 };
 
 type PrivateAssetTableProperties = {
@@ -52,9 +57,18 @@ export function PrivateAssetTable({
         ) : undefined}
       </div>
       {claimControls?.error ? (
-        <p className="asset-balances-panel__claim-error" role="alert">
-          {claimControls.error}
-        </p>
+        <div>
+          <p className="asset-balances-panel__claim-error" role="alert">
+            {claimControls.error}
+          </p>
+          <RelayReviewActions
+            retryAllowed={Boolean(claimControls.retryAllowed)}
+            fallbackAllowed={Boolean(claimControls.fallbackAllowed)}
+            disabled={claimControls.claimingId !== undefined}
+            onRetry={() => claimControls.onRetry?.()}
+            onFallback={() => claimControls.onFallback?.()}
+          />
+        </div>
       ) : undefined}
       <PrivateAssetTableBody
         translateAssets={translateAssets}

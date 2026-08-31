@@ -5,7 +5,8 @@ import {
 } from "@/shared/lib/privacy-sdk/map-privacy-sdk-errors.js";
 import { getPrivacySdkClientOrThrow } from "@/shared/lib/privacy-sdk/transact-context.js";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
-import { postOutputRecordDeliveries } from "@/entities/coin-deliveries";
+import { routePreparedTransact } from "@/shared/lib/protocol-relay";
+import { createAppRelayPorts } from "@/features/submit-private-operation";
 import type {
   RunPrivateWithdrawalMutationInput,
   RunPrivateWithdrawalMutationResult,
@@ -42,18 +43,29 @@ export async function runPrivateWithdrawalMutation(
     throw new Error(mapPrivacySdkErrors(operation.errors));
   }
   try {
-    const receipt = await operation.execute();
-    const txId = receipt.operationId;
-    if (!txId) {
-      throw new Error("Withdrawal transaction did not return an operation id");
-    }
-    const coinDeliveryWarning = await postOutputRecordDeliveries({
-      outputRecords: operation.prepared.outputRecords,
-      txId,
-      dispatch: input.dispatch,
+    return await routePreparedTransact({
+      ports: createAppRelayPorts({
+        dispatch: input.dispatch,
+        submitDirect: async () => {
+          const receipt = await operation.execute();
+          const txId = receipt.operationId;
+          if (!txId) {
+            throw new Error("Withdrawal transaction did not return an operation id");
+          }
+          return { txId };
+        },
+      }),
+      walletPublicKey: input.walletPublicKey,
+      prepared: operation.prepared,
+      display: {
+        kind: "withdraw",
+        assetId: input.assetId,
+        amountDisplay: input.amountDisplay,
+        counterparty: input.destinationAddress.trim(),
+        senderPrivateAddress: input.senderPrivateAddress.trim(),
+      },
     });
-    return { txId, ...(coinDeliveryWarning ? { coinDeliveryWarning } : {}) };
   } catch (error: unknown) {
-    throw new Error(mapPrivacySdkError(error));
+    throw error instanceof Error ? error : new Error(mapPrivacySdkError(error));
   }
 }

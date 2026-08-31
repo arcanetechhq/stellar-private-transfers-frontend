@@ -8,7 +8,7 @@ import {
 } from "./map-privacy-sdk-errors.js";
 import { getPrivacySdkClientOrThrow } from "./transact-context.js";
 
-export async function executeSdkDeposit(input: {
+export async function prepareSdkDeposit(input: {
   walletPublicKey: string;
   privateAddress: string;
   assetId: string;
@@ -25,6 +25,16 @@ export async function executeSdkDeposit(input: {
   if (prepared.status === "rejected") {
     throw new Error(mapPrivacySdkErrors(prepared.errors));
   }
+  return prepared;
+}
+
+export async function executeSdkDeposit(input: {
+  walletPublicKey: string;
+  privateAddress: string;
+  assetId: string;
+  amountStroops: bigint;
+}) {
+  const prepared = await prepareSdkDeposit(input);
   try {
     const receipt = await prepared.execute();
     return {

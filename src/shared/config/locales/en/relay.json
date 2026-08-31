@@ -1,0 +1,17 @@
+{
+  "waitingForProtocol": "Waiting for protocol submission. This is not complete yet.",
+  "privacyFallbackWarning": "Submitting with your wallet will link this operation to your Stellar account on-chain. Continue only if you accept that privacy loss.",
+  "submitWithWallet": "Submit with my wallet",
+  "retryRelay": "Retry protocol submission",
+  "rejected": "Protocol rejected this operation: {{reason}}",
+  "failed": "Protocol submission failed: {{reason}}",
+  "admissionFailed": "Protocol relayer is unavailable ({{reason}}).",
+  "reason_kyt_rejected": "compliance check failed",
+  "reason_invalid_proof": "the proof was invalid",
+  "reason_infrastructure_failed": "infrastructure error",
+  "reason_relayer_unavailable": "relayer unavailable",
+  "reason_rate_limited": "rate limited",
+  "reason_queue_at_capacity": "queue at capacity",
+  "reason_low_balance": "relayer balance too low",
+  "reason_payload_too_large": "payload too large"
+}

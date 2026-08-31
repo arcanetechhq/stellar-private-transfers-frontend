@@ -8,16 +8,16 @@ import { WithdrawalReviewModal } from "./withdrawal-review-modal";
 import { WithdrawalSendPanel } from "./withdrawal-send-panel";
 import { WithdrawalSuccessModal } from "./withdrawal-success-modal";
 
-function resolveDestinationLabel(
-  publicKey: string | null,
-  providerLabel: string,
-  connectedWalletLabel: string,
-  walletProviderSuffix: string,
-): string {
-  if (!publicKey) {
-    return connectedWalletLabel;
+function resolveDestinationLabel(input: {
+  publicKey: string | undefined;
+  providerLabel: string;
+  connectedWalletLabel: string;
+  walletProviderSuffix: string;
+}): string {
+  if (!input.publicKey) {
+    return input.connectedWalletLabel;
   }
-  return `${providerLabel} ${walletProviderSuffix}`;
+  return `${input.providerLabel} ${input.walletProviderSuffix}`;
 }
 
 export function CreateWithdrawal(): React.JSX.Element {
@@ -53,6 +53,10 @@ export function CreateWithdrawal(): React.JSX.Element {
         amount={withdrawal.amount}
         isSubmitting={withdrawal.isSubmitting}
         submitError={withdrawal.submitError}
+        retryAllowed={withdrawal.relayAction?.retryAllowed}
+        fallbackAllowed={withdrawal.relayAction?.fallbackAllowed}
+        onRetry={withdrawal.handleRetry}
+        onFallback={withdrawal.handleFallback}
         onClose={withdrawal.handleCloseReview}
         onConfirm={withdrawal.handleConfirmWithdraw}
       />
@@ -60,12 +64,12 @@ export function CreateWithdrawal(): React.JSX.Element {
       <WithdrawalSuccessModal
         open={withdrawal.step === "success"}
         result={withdrawal.successResult}
-        destinationLabel={resolveDestinationLabel(
-          publicKey,
+        destinationLabel={resolveDestinationLabel({
+          publicKey: publicKey ?? undefined,
           providerLabel,
-          translate("connectedWallet"),
-          translate("walletProviderSuffix"),
-        )}
+          connectedWalletLabel: translate("connectedWallet"),
+          walletProviderSuffix: translate("walletProviderSuffix"),
+        })}
         onDone={withdrawal.handleSuccessDone}
       />
     </div>

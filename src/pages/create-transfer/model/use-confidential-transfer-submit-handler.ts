@@ -1,75 +1,38 @@
+import { useState } from "react";
+import type { RelayActionState } from "@/shared/lib/protocol-relay";
 import {
-  useState,
-  type Dispatch,
-  type SetStateAction,
-} from "react";
-import type { NavigateFunction } from "react-router";
-import type { AppDispatch } from "@/store";
-import type { AssetWithTrustline } from "@/entities/asset";
-import {
-  type ConfidentialTransferSuccess,
-  readConfidentialTransferSubmitError,
-  runConfidentialTransferSubmitFlow,
-} from "./confidential-transfer-submit-flow";
+  confirmConfidentialTransfer,
+  type ConfidentialTransferSubmitParameters,
+} from "./confirm-confidential-transfer";
+import { continueConfidentialTransfer } from "./continue-confidential-transfer";
 
-type ConfidentialTransferSubmit = (payload: {
-  senderPrivateAddress: string;
-  recipientStellarAddress: string;
-  assetId: string;
-  tokenContractRaw: string;
-  amountDisplay: number;
-}) => Promise<{ txId: string; coinDeliveryWarning?: string }>;
+export type { ConfidentialTransferSubmit } from "./confirm-confidential-transfer";
 
-export function useConfidentialTransferSubmitHandler(parameters: {
-  dispatch: AppDispatch;
-  canSubmit: boolean;
-  setIsSubmitting: Dispatch<SetStateAction<boolean>>;
-  setIsPreparingWallet: Dispatch<SetStateAction<boolean>>;
-  selectedAsset: AssetWithTrustline | undefined;
-  submit: ConfidentialTransferSubmit;
-  navigate: NavigateFunction;
-  ensureWalletPrivateAddress: () => Promise<string>;
-  ensureWalletScalar: (privateAddressStpl1?: string) => Promise<string>;
-  recipientTrim: string;
-  numericAmount: number;
-  onSuccess?: (result: ConfidentialTransferSuccess) => void;
-}) {
+export function useConfidentialTransferSubmitHandler(
+  parameters: ConfidentialTransferSubmitParameters,
+) {
   const [submitError, setSubmitError] = useState<string | undefined>();
-
-  const handleConfirmSend = async () => {
-    if (!parameters.selectedAsset) {
-      return;
-    }
-    if (!parameters.canSubmit) {
-      setSubmitError("Complete all fields before sending");
-      return;
-    }
-    parameters.setIsPreparingWallet(true);
-    setSubmitError(undefined);
-    try {
-      await runConfidentialTransferSubmitFlow({
-        dispatch: parameters.dispatch,
-        navigate: parameters.navigate,
-        ensureWalletPrivateAddress: parameters.ensureWalletPrivateAddress,
-        ensureWalletScalar: parameters.ensureWalletScalar,
-        submit: parameters.submit,
-        selectedAsset: parameters.selectedAsset,
-        recipientTrim: parameters.recipientTrim,
-        numericAmount: parameters.numericAmount,
-        onWalletReady: () => {
-          parameters.setIsPreparingWallet(false);
-          parameters.setIsSubmitting(true);
-        },
-        onSuccess: parameters.onSuccess,
-      });
-    } catch (error: unknown) {
-      console.error("Private transfer failed:", error);
-      setSubmitError(readConfidentialTransferSubmitError(error));
-    } finally {
-      parameters.setIsPreparingWallet(false);
-      parameters.setIsSubmitting(false);
-    }
+  const [relayAction, setRelayAction] = useState<RelayActionState>();
+  const controls = { setSubmitError, setRelayAction };
+  return {
+    submitError,
+    setSubmitError,
+    relayAction,
+    handleConfirmSend: () =>
+      void confirmConfidentialTransfer({ parameters, controls }),
+    handleRetry: () =>
+      void continueConfidentialTransfer({
+        parameters,
+        controls,
+        relayAction,
+        action: "retry",
+      }),
+    handleFallback: () =>
+      void continueConfidentialTransfer({
+        parameters,
+        controls,
+        relayAction,
+        action: "fallback",
+      }),
   };
-
-  return { submitError, setSubmitError, handleConfirmSend };
 }

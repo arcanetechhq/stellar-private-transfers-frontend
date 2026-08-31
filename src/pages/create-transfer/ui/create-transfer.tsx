@@ -8,20 +8,20 @@ import { TransferReviewModal } from "./transfer-review-modal";
 import { TransferSendPanel } from "./transfer-send-panel";
 import { TransferSuccessModal } from "./transfer-success-modal";
 
-function resolveRecipientLabel(
-  recipient: string,
-  contacts: { name: string; stellarAddress: string }[],
-  manualRecipientLabel: string,
-): string {
-  const recipientTrim = recipient.trim();
-  const contact = contacts.find(
+function resolveRecipientLabel(input: {
+  recipient: string;
+  contacts: { name: string; stellarAddress: string }[];
+  manualRecipientLabel: string;
+}): string {
+  const recipientTrim = input.recipient.trim();
+  const contact = input.contacts.find(
     (item) => item.stellarAddress.trim() === recipientTrim,
   );
   if (contact) {
     return contact.name;
   }
   if (recipientTrim) {
-    return manualRecipientLabel;
+    return input.manualRecipientLabel;
   }
   return "—";
 }
@@ -64,6 +64,10 @@ export function CreateTransfer(): React.JSX.Element {
         recipient={transfer.recipient}
         isSubmitting={transfer.isSubmitting}
         submitError={transfer.submitError}
+        retryAllowed={transfer.relayAction?.retryAllowed}
+        fallbackAllowed={transfer.relayAction?.fallbackAllowed}
+        onRetry={transfer.handleRetry}
+        onFallback={transfer.handleFallback}
         onClose={transfer.handleCloseReview}
         onConfirm={transfer.handleConfirmSend}
       />
@@ -71,11 +75,11 @@ export function CreateTransfer(): React.JSX.Element {
       <TransferSuccessModal
         open={transfer.step === "success"}
         result={transfer.successResult}
-        recipientLabel={resolveRecipientLabel(
-          transfer.recipient,
+        recipientLabel={resolveRecipientLabel({
+          recipient: transfer.recipient,
           contacts,
-          translate("manualRecipient"),
-        )}
+          manualRecipientLabel: translate("manualRecipient"),
+        })}
         onDone={transfer.handleSuccessDone}
       />
     </div>

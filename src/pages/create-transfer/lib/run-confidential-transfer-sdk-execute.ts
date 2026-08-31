@@ -1,11 +1,8 @@
 import type {
+  StellarPreparedOperation,
   StellarPrivacyClient,
-  StellarPrivateRecord,
 } from "@arcanetech/privacy-sdk-stellar";
-import {
-  mapPrivacySdkError,
-  mapPrivacySdkErrors,
-} from "@/shared/lib/privacy-sdk/map-privacy-sdk-errors.js";
+import { mapPrivacySdkErrors } from "@/shared/lib/privacy-sdk/map-privacy-sdk-errors.js";
 
 const PRIVATE_TRANSFER_DISCLOSURE = {
   senderAddress: "private" as const,
@@ -21,19 +18,17 @@ const ONBOARDING_TRANSFER_DISCLOSURE = {
   amount: "public" as const,
 };
 
-export interface ExecuteSdkTransferResult {
-  operationId: string | undefined;
-  outputRecords: StellarPrivateRecord[];
-}
-
-export async function executeSdkTransfer(parameters: {
+export async function prepareSdkTransfer(parameters: {
   client: StellarPrivacyClient;
   senderPrivateAddress: string;
   recipientAddress: string;
   assetId: string;
   amountStroops: bigint;
   onboardingRecipient: boolean;
-}): Promise<ExecuteSdkTransferResult> {
+}): Promise<{
+  prepared: StellarPreparedOperation;
+  execute: () => Promise<{ operationId: string }>;
+}> {
   const prepared = await parameters.client.transfer({
     from: parameters.senderPrivateAddress,
     to: parameters.recipientAddress,
@@ -46,13 +41,11 @@ export async function executeSdkTransfer(parameters: {
   if (prepared.status === "rejected") {
     throw new Error(mapPrivacySdkErrors(prepared.errors));
   }
-  try {
-    const receipt = await prepared.execute();
-    return {
-      operationId: receipt.operationId || undefined,
-      outputRecords: prepared.prepared.outputRecords,
-    };
-  } catch (error) {
-    throw new Error(mapPrivacySdkError(error));
-  }
+  return {
+    prepared: prepared.prepared,
+    execute: async () => {
+      const receipt = await prepared.execute();
+      return { operationId: receipt.operationId || "" };
+    },
+  };
 }

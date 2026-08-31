@@ -38,12 +38,15 @@ export function mapPendingClaimItemToSdkClaim(
   };
 }
 
-export async function executeSdkPendingClaimTransfer(parameters: {
+export async function prepareSdkPendingClaimTransfer(parameters: {
   client: StellarPrivacyClient;
   claim: PendingClaimItem;
   assetId: string;
   permanentPrivateAddress: string;
-}): Promise<{ operationId: string; outputRecord?: StellarPrivateRecord }> {
+}): Promise<{
+  prepared: import("@arcanetech/privacy-sdk-stellar").StellarPreparedOperation;
+  execute: () => Promise<{ operationId: string }>;
+}> {
   const prepared = await parameters.client.transfer({
     from: {
       kind: "pendingClaim",
@@ -60,6 +63,22 @@ export async function executeSdkPendingClaimTransfer(parameters: {
   if (prepared.status === "rejected") {
     throw new Error(mapPrivacySdkErrors(prepared.errors));
   }
+  return {
+    prepared: prepared.prepared,
+    execute: async () => {
+      const receipt = await prepared.execute();
+      return { operationId: receipt.operationId || "" };
+    },
+  };
+}
+
+export async function executeSdkPendingClaimTransfer(parameters: {
+  client: StellarPrivacyClient;
+  claim: PendingClaimItem;
+  assetId: string;
+  permanentPrivateAddress: string;
+}): Promise<{ operationId: string; outputRecord?: StellarPrivateRecord }> {
+  const prepared = await prepareSdkPendingClaimTransfer(parameters);
   try {
     const receipt = await prepared.execute();
     const operationId = receipt.operationId || "";

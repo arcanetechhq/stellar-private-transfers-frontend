@@ -34,17 +34,20 @@ export function useTransactionPanelPendingClaims(transactions: Transaction[]) {
     claimingId,
     claimError,
     canClaim,
+    relayAction,
+    handleRetry,
+    handleFallback,
   } = useClaimPendingClaim({
     onClaimed: handleClaimed,
   });
 
   const handleClaim = useCallback(
     (transactionId: string) => {
-      claimByTransactionId(
+      claimByTransactionId({
         transactionId,
         claimsById,
         assetIdsByClaimId,
-      );
+      });
     },
     [assetIdsByClaimId, claimByTransactionId, claimsById],
   );
@@ -76,6 +79,10 @@ export function useTransactionPanelPendingClaims(transactions: Transaction[]) {
       canClaim,
       onClaim: handleClaim,
       error: claimError,
+      retryAllowed: relayAction?.retryAllowed,
+      fallbackAllowed: relayAction?.fallbackAllowed,
+      onRetry: handleRetry,
+      onFallback: handleFallback,
     },
   };
 }

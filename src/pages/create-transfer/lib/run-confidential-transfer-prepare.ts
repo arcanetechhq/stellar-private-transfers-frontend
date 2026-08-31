@@ -2,10 +2,11 @@ import { displayAmountToStroops } from "@/shared/lib/stellar/stroops";
 import { getPrivacySdkClientOrThrow } from "@/shared/lib/privacy-sdk/transact-context.js";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import { validateTransferOperation } from "@/shared/lib/privacy-sdk/operation-adapters.js";
-import { postOutputRecordDeliveries } from "@/entities/coin-deliveries";
+import { routePreparedTransact } from "@/shared/lib/protocol-relay";
+import { createAppRelayPorts } from "@/features/submit-private-operation";
 import type { RunConfidentialTransferInput } from "./confidential-transfer-mutation-types";
 import type { RecipientTransferTarget } from "./run-confidential-transfer-mutation";
-import { executeSdkTransfer } from "./run-confidential-transfer-sdk-execute";
+import { prepareSdkTransfer } from "./run-confidential-transfer-sdk-execute";
 
 async function registerResolverAndValidate(parameters: {
   input: RunConfidentialTransferInput;
@@ -24,77 +25,55 @@ async function registerResolverAndValidate(parameters: {
   return privacyClient;
 }
 
-type PreparedTransferContext = {
-  recipientTarget: RecipientTransferTarget;
-  recipientStellarAddress: string;
-  senderTrim: string;
-  transferStroops: bigint;
-  privacyClient: ReturnType<typeof getPrivacySdkClientOrThrow>;
-  input: RunConfidentialTransferInput;
-};
-
-async function buildPreparedTransferContext(parameters: {
+export async function prepareTransferExecution(parameters: {
   input: RunConfidentialTransferInput;
   recipientTarget: RecipientTransferTarget;
-}): Promise<PreparedTransferContext> {
+}): Promise<{ txId: string; coinDeliveryWarning?: string }> {
   const { input, recipientTarget } = parameters;
   const poolContractId = getRequiredPrivacyPoolContractId();
   const recipientStellarAddress = input.recipientStellarAddress.trim();
   const senderTrim = input.senderPrivateAddress.trim();
-  const transferStroops = displayAmountToStroops(input.amountDisplay);
+  const onboardingRecipient = recipientTarget.temporaryKeyMaterial !== undefined;
+  const recipientAddress = recipientTarget.temporaryKeyMaterial
+    ? recipientStellarAddress
+    : recipientTarget.recipientPrivateAddressStpl1;
   const privacyClient = await registerResolverAndValidate({
     input,
     senderTrim,
-    recipientAddress: recipientTarget.temporaryKeyMaterial
-      ? recipientStellarAddress
-      : recipientTarget.recipientPrivateAddressStpl1,
-    onboardingRecipient: recipientTarget.temporaryKeyMaterial !== undefined,
+    recipientAddress,
+    onboardingRecipient,
   });
   await privacyClient.syncPoolMerkleState({
     poolContractId,
     walletPublicKey: input.walletPublicKey,
   });
-  return {
-    input,
-    recipientTarget,
-    recipientStellarAddress,
-    senderTrim,
-    transferStroops,
-    privacyClient,
-  };
-}
-
-async function executeWithSdk(
-  context: PreparedTransferContext,
-): Promise<{ txId: string; coinDeliveryWarning?: string }> {
-  const executed = await executeSdkTransfer({
-    client: context.privacyClient,
-    senderPrivateAddress: context.senderTrim,
-    recipientAddress: context.recipientTarget.temporaryKeyMaterial
-      ? context.recipientStellarAddress
-      : context.recipientTarget.recipientPrivateAddressStpl1,
-    assetId: context.input.assetId,
-    amountStroops: context.transferStroops,
-    onboardingRecipient: context.recipientTarget.temporaryKeyMaterial !== undefined,
+  const prepared = await prepareSdkTransfer({
+    client: privacyClient,
+    senderPrivateAddress: senderTrim,
+    recipientAddress,
+    assetId: input.assetId,
+    amountStroops: displayAmountToStroops(input.amountDisplay),
+    onboardingRecipient,
   });
-  if (!executed.operationId) {
-    throw new Error("SDK transfer execute did not return operation id");
-  }
-  const coinDeliveryWarning = await postOutputRecordDeliveries({
-    outputRecords: executed.outputRecords,
-    txId: executed.operationId,
-    dispatch: context.input.dispatch,
+  return routePreparedTransact({
+    ports: createAppRelayPorts({
+      dispatch: input.dispatch,
+      submitDirect: async () => {
+        const receipt = await prepared.execute();
+        if (!receipt.operationId) {
+          throw new Error("SDK transfer execute did not return operation id");
+        }
+        return { txId: receipt.operationId };
+      },
+    }),
+    walletPublicKey: input.walletPublicKey,
+    prepared: prepared.prepared,
+    display: {
+      kind: onboardingRecipient ? "onboarding" : "transfer",
+      assetId: input.assetId,
+      amountDisplay: input.amountDisplay,
+      counterparty: recipientStellarAddress,
+      senderPrivateAddress: senderTrim,
+    },
   });
-  return {
-    txId: executed.operationId,
-    ...(coinDeliveryWarning ? { coinDeliveryWarning } : {}),
-  };
-}
-
-export async function prepareTransferExecution(parameters: {
-  input: RunConfidentialTransferInput;
-  recipientTarget: RecipientTransferTarget;
-}): Promise<{ txId: string; coinDeliveryWarning?: string }> {
-  const context = await buildPreparedTransferContext(parameters);
-  return executeWithSdk(context);
 }

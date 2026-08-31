@@ -1,15 +1,16 @@
 import type { AppDispatch } from "@/store";
-import { postOutputRecordDeliveries } from "@/entities/coin-deliveries";
-import {
-  getPendingClaimTransactionId,
-  type PendingClaimItem,
-} from "@/entities/pending-claims";
-import { addTransaction } from "@/entities/transaction";
+import type { PendingClaimItem } from "@/entities/pending-claims";
 import { validatePendingClaimOperation } from "@/shared/lib/privacy-sdk/operation-adapters.js";
-import { executeSdkPendingClaimTransfer } from "@/shared/lib/privacy-sdk/execute-sdk-pending-claim-transfer.js";
+import { prepareSdkPendingClaimTransfer } from "@/shared/lib/privacy-sdk/execute-sdk-pending-claim-transfer.js";
 import { mapPrivacySdkError } from "@/shared/lib/privacy-sdk/map-privacy-sdk-errors.js";
 import { getPrivacySdkClientOrThrow } from "@/shared/lib/privacy-sdk/transact-context.js";
 import { stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops.js";
+import {
+  formatProtocolRelayError,
+  ProtocolRelayClientError,
+  routePreparedTransact,
+} from "@/shared/lib/protocol-relay";
+import { bindClaimRelayPorts } from "./bind-claim-relay-ports.js";
 
 export type RunPendingClaimMutationResult = {
   txId: string;
@@ -22,6 +23,7 @@ export async function runPendingClaimMutation(parameters: {
   claim: PendingClaimItem;
   assetId: string;
   permanentPrivateAddress: string;
+  walletPublicKey: string;
 }): Promise<RunPendingClaimMutationResult> {
   const privacyClient = getPrivacySdkClientOrThrow();
   const senderTrim = parameters.permanentPrivateAddress.trim();
@@ -30,47 +32,41 @@ export async function runPendingClaimMutation(parameters: {
     recipientPrivateAddress: senderTrim,
     assetId: parameters.assetId,
   });
-
-  const executed = await executeSdkPendingClaimTransfer({
+  const prepared = await prepareSdkPendingClaimTransfer({
     client: privacyClient,
     claim: parameters.claim,
     assetId: parameters.assetId,
     permanentPrivateAddress: senderTrim,
   });
-
-  const amountDisplay = stroopsToDisplayAmount(
-    BigInt(parameters.claim.noteValue),
-  );
-  const outputRecords = executed.outputRecord ? [executed.outputRecord] : [];
-  const coinDeliveryWarning = await postOutputRecordDeliveries({
-    outputRecords,
-    txId: executed.operationId,
-    dispatch: parameters.dispatch,
-  });
-
-  parameters.dispatch(
-    addTransaction({
-      id: getPendingClaimTransactionId(parameters.claim.id),
-      date: parameters.claim.createdAt,
-      type: "received",
+  const amountDisplay = stroopsToDisplayAmount(BigInt(parameters.claim.noteValue));
+  const routed = await routePreparedTransact({
+    ports: bindClaimRelayPorts({
+      dispatch: parameters.dispatch,
+      execute: prepared.execute,
+    }),
+    walletPublicKey: parameters.walletPublicKey,
+    prepared: prepared.prepared,
+    display: {
+      kind: "pending_claim",
       assetId: parameters.assetId,
-      amount: amountDisplay,
+      amountDisplay,
       counterparty: parameters.claim.poolTxId,
       senderPrivateAddress: senderTrim,
-      status: "completed",
-      confirmationStatus: "none",
-      disclosureStatus: "none",
-    }),
-  );
-
+    },
+  });
   return {
-    txId: executed.operationId,
+    txId: routed.txId,
     amountDisplay,
-    ...(coinDeliveryWarning ? { coinDeliveryWarning } : {}),
+    ...(routed.coinDeliveryWarning
+      ? { coinDeliveryWarning: routed.coinDeliveryWarning }
+      : {}),
   };
 }
 
 export function readPendingClaimMutationError(error: unknown): string {
+  if (error instanceof ProtocolRelayClientError) {
+    return formatProtocolRelayError(error);
+  }
   const mapped = mapPrivacySdkError(error);
   return mapped === "Operation failed" ? "Could not claim pending note." : mapped;
 }

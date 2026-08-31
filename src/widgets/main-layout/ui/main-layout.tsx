@@ -1,4 +1,5 @@
 import { Outlet } from "react-router";
+import React from "react";
 import "./sidebar.css";
 import "./header-faucet.css";
 import { useAppSelector } from "@/store";
@@ -16,6 +17,7 @@ import {
   PollAllAssetDeliveries,
 } from "@/features/poll-coin-deliveries";
 import { PollPendingDeposits } from "@/features/poll-deposit";
+import { ResumePendingPrivateOperations } from "@/features/submit-private-operation";
 import { isNoSidebarRoute } from "@/widgets/settings-layout";
 import { useMainLayoutModel } from "../lib/use-main-layout-model";
 import { useMainLayoutSidebarState } from "../lib/use-main-layout-sidebar-state";
@@ -51,7 +53,7 @@ function MainLayoutBody() {
             }
             data-no-sidebar={noSidebarRouteActive ? "true" : undefined}
           >
-            {!noSidebarRouteActive ? (
+            {noSidebarRouteActive ? undefined : (
               <MainLayoutSidebar
                 navigation={model.navigation}
                 bottomNavigation={model.bottomNavigation}
@@ -63,7 +65,7 @@ function MainLayoutBody() {
                 onMouseEnter={sidebar.handleSidebarMouseEnter}
                 onMouseLeave={sidebar.handleSidebarMouseLeave}
               />
-            ) : null}
+            )}
 
             <div className="workspace">
               <MainLayoutHeader
@@ -90,6 +92,7 @@ function MainLayoutBody() {
           <EnsureMissingPrivateAddressScalars />
           <PollAllAssetDeliveries />
           <PollPendingDeposits />
+          <ResumePendingPrivateOperations />
         </div>
       ) : (
         <ConnectWalletScreen walletKitLoaded={isWalletKitLoaded} />

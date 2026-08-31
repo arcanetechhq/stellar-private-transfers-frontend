@@ -1,22 +1,17 @@
-import { useState, useEffect, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
-import { useAppDispatch, useAppSelector } from "@/store";
+import { useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { type AssetWithTrustline } from "@/entities/asset";
 import { getMaxWithdrawStroops, selectCoinItems } from "@/entities/coin";
 import { isValidStellarPublicAddress } from "@/shared/lib/stellar/is-valid-stellar-public-address";
 import { amountInputToStroops } from "@/shared/lib/stellar/stroops";
+import { ZERO_STROOPS } from "@/shared/lib/privacy-sdk/constants";
 import { parseWithdrawalAmountInput } from "../lib/format-withdrawal-amount";
-import type { PrivateWithdrawalSuccess } from "./private-withdrawal-success";
-import { usePrivateWithdrawal } from "./use-private-withdrawal";
-import { usePrivateWithdrawalSubmitHandler } from "./use-private-withdrawal-submit-handler";
 import { useWithdrawalPrivateAssets } from "./use-withdrawal-private-assets";
 import { useWithdrawalAmountInputs } from "./use-withdrawal-amount-inputs";
-import {
-  useWithdrawalFlowStepHandlers,
-  type WithdrawalFlowStep,
-} from "./use-withdrawal-flow-step-handlers";
+import { useWithdrawalConfirmSlice } from "./use-withdrawal-confirm-slice";
 
 export type { WithdrawalFlowStep } from "./use-withdrawal-flow-step-handlers";
 
@@ -29,38 +24,36 @@ interface WithdrawalCanSubmitInput {
   destinationWallet: string;
 }
 
-function computeWithdrawalCanSubmit(input: WithdrawalCanSubmitInput): boolean {
+function hasValidWithdrawalAmount(input: WithdrawalCanSubmitInput): boolean {
   const numericAmount = parseWithdrawalAmountInput(input.amount);
   const amountStroops = amountInputToStroops(input.amount);
   return (
-    input.senderPrivateAddress !== "" &&
-    input.selectedAsset !== undefined &&
     input.amount !== "" &&
     !Number.isNaN(numericAmount) &&
     numericAmount > 0 &&
     numericAmount <= input.numericBalance &&
     amountStroops !== undefined &&
-    amountStroops > 0n &&
-    amountStroops <= input.maxNoteStroops &&
+    amountStroops > ZERO_STROOPS &&
+    amountStroops <= input.maxNoteStroops
+  );
+}
+
+function computeWithdrawalCanSubmit(input: WithdrawalCanSubmitInput): boolean {
+  return (
+    input.senderPrivateAddress !== "" &&
+    input.selectedAsset !== undefined &&
+    hasValidWithdrawalAmount(input) &&
     input.destinationWallet !== "" &&
     isValidStellarPublicAddress(input.destinationWallet.trim())
   );
 }
 
 export function useCreateWithdrawal() {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const { t: translate } = useTranslation("withdrawal");
-  const { submit } = usePrivateWithdrawal();
   const [searchParameters] = useSearchParams();
   const assetIdFromUrl = searchParameters.get("assetId");
   const publicKey = useAppSelector(selectWalletPublicKey);
   const coins = useAppSelector(selectCoinItems);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [step, setStep] = useState<WithdrawalFlowStep>("form");
-  const [successResult, setSuccessResult] = useState<
-    PrivateWithdrawalSuccess | undefined
-  >();
   const { withdrawalSender, privateAssets, tokenUi } =
     useWithdrawalPrivateAssets(assetIdFromUrl);
   const [destinationWallet, setDestinationWallet] = useState("");
@@ -81,8 +74,8 @@ export function useCreateWithdrawal() {
   const amountStroops = amountInputToStroops(amountInputs.amount);
   const exceedsNoteLimit =
     amountStroops !== undefined &&
-    amountStroops > 0n &&
-    maxNoteStroops > 0n &&
+    amountStroops > ZERO_STROOPS &&
+    maxNoteStroops > ZERO_STROOPS &&
     amountStroops > maxNoteStroops;
   const noteLimitAlert = exceedsNoteLimit
     ? {
@@ -99,33 +92,13 @@ export function useCreateWithdrawal() {
     destinationWallet,
   });
   const numericAmount = parseWithdrawalAmountInput(amountInputs.amount);
-  const destinationTrim = destinationWallet.trim();
-  const { submitError, setSubmitError, handleConfirmWithdraw } =
-    usePrivateWithdrawalSubmitHandler({
-      dispatch,
-      canSubmit,
-      setIsSubmitting,
-      selectedAsset,
-      submit,
-      navigate,
-      senderPrivateAddress: withdrawalSender.senderPrivateAddress,
-      destinationTrim,
-      connectedPublicKey: publicKey?.trim() ?? "",
-      numericAmount: Number.isNaN(numericAmount) ? 0 : numericAmount,
-      onSuccess: (result) => {
-        setSuccessResult(result);
-        setStep("success");
-      },
-    });
-  const { handleOpenReview, handleCloseReview, handleSuccessDone } =
-    useWithdrawalFlowStepHandlers({
-      navigate,
-      canSubmit,
-      isSubmitting,
-      setSubmitError,
-      setStep,
-    });
-
+  const confirm = useWithdrawalConfirmSlice({
+    canSubmit,
+    selectedAsset,
+    senderPrivateAddress: withdrawalSender.senderPrivateAddress,
+    destinationTrim: destinationWallet.trim(),
+    numericAmount: Number.isNaN(numericAmount) ? 0 : numericAmount,
+  });
   return {
     assets: privateAssets,
     selectedToken: selectedAsset,
@@ -137,15 +110,18 @@ export function useCreateWithdrawal() {
     destinationWallet,
     receivedAmount: amountInputs.receivedAmount,
     canSubmit,
-    isSubmitting,
-    submitError,
+    isSubmitting: confirm.isSubmitting,
+    submitError: confirm.submitError,
     noteLimitAlert,
-    step,
-    successResult,
-    handleOpenReview,
-    handleCloseReview,
-    handleConfirmWithdraw,
-    handleSuccessDone,
+    step: confirm.step,
+    successResult: confirm.successResult,
+    handleOpenReview: confirm.handleOpenReview,
+    handleCloseReview: confirm.handleCloseReview,
+    handleConfirmWithdraw: confirm.handleConfirmWithdraw,
+    handleRetry: confirm.handleRetry,
+    handleFallback: confirm.handleFallback,
+    relayAction: confirm.relayAction,
+    handleSuccessDone: confirm.handleSuccessDone,
     senderNonce: withdrawalSender.effectiveSenderNonce,
   };
 }
