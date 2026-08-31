@@ -6,17 +6,6 @@
         "matcher": "Write|Delete",
         "command": "node .cursor/hooks/secureFileEdits.js"
       }
-    ],
-    "postToolUse": [
-      {
-        "matcher": "Write",
-        "command": "node .cursor/hooks/calculateLintAttempts.js"
-      }
-    ],
-    "stop": [
-      {
-        "command": "node .cursor/hooks/iterateUntilLintFixed.js"
-      }
     ]
   }
 }
