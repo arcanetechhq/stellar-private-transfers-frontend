@@ -206,6 +206,7 @@ export function BalanceHero(properties: BalanceHeroProperties) {
             label={translateOverview("withdraw")}
             icon={ArrowUpFromLine}
             variant="outline"
+            testId="open-withdraw"
           />
         </div>
       ) : (

@@ -83,6 +83,7 @@ export function WithdrawalSendPanel({
             <div className="send-money-amount-row__input">
               <input
                 aria-label={translate("amount")}
+                data-testid="withdraw-amount"
                 inputMode="decimal"
                 placeholder="0"
                 value={amount}
@@ -128,6 +129,7 @@ export function WithdrawalSendPanel({
       <button
         type="button"
         className="send-money-continue"
+        data-testid="withdraw-continue"
         disabled={!canContinue || isSubmitting}
         onClick={onContinue}
       >

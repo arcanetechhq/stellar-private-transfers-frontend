@@ -10,6 +10,7 @@ export function PaymentReviewFooter(properties: {
   onClose: () => void;
   onConfirm: () => void;
   extra?: React.ReactNode;
+  confirmTestId?: string;
 }): React.JSX.Element {
   return (
     <>
@@ -27,6 +28,7 @@ export function PaymentReviewFooter(properties: {
           <button
             type="button"
             className="send-review-action send-review-action--send"
+            data-testid={properties.confirmTestId}
             disabled={properties.isSubmitting}
             onClick={properties.onConfirm}
           >

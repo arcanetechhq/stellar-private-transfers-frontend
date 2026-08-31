@@ -48,7 +48,13 @@ export function WithdrawalSuccessModal({
               })}
             </p>
           </div>
-          <p className="send-success-amount">{amountDisplay}</p>
+          <p
+            className="send-success-amount"
+            data-testid="tx-hash"
+            title={result.txId}
+          >
+            {amountDisplay}
+          </p>
         </div>
 
         {result.coinDeliveryWarning ? (
@@ -61,6 +67,7 @@ export function WithdrawalSuccessModal({
           <button
             type="button"
             className="send-money-continue"
+            data-testid="withdraw-success-done"
             onClick={onDone}
           >
             {translate("success.done")}

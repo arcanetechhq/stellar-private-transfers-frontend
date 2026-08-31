@@ -84,6 +84,7 @@ function WithdrawalReviewDialog(properties: {
         submittingLabel={translate("submitting")}
         isSubmitting={properties.isSubmitting}
         showConfirm={!properties.retryAllowed && !properties.fallbackAllowed}
+        confirmTestId="withdraw-confirm"
         onClose={properties.onClose}
         onConfirm={properties.onConfirm}
         extra={
