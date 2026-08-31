@@ -57,6 +57,7 @@ export {
   getPrivacySdkClientOrThrow,
   getPrivacyTransactEnvironment,
   setPrivacyPoolService,
+  setPrivacySdkBootstrapError,
   setPrivacyTransactContext,
   tryGetPrivacySdkClient,
 } from "./transact-context.js";

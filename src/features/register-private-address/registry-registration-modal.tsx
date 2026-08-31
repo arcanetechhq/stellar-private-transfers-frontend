@@ -17,7 +17,8 @@ export function RegistryRegistrationModal({
   onRegistered,
 }: RegistryRegistrationModalProperties) {
   const { t: translate } = useTranslation(["privateAddress", "common"]);
-  const { register, reset, status, hasError } = useRegisterWalletPrivateAddress();
+  const { register, reset, status, hasError } =
+    useRegisterWalletPrivateAddress();
   const isBusy = status === "creating" || status === "registering";
 
   const handleClose = useCallback(() => {
@@ -101,6 +102,7 @@ export function RegistryRegistrationModal({
         </div>
         <button
           type="button"
+          data-testid="register-private-address"
           disabled={isBusy}
           onClick={() => void handleRegister()}
           className="registry-registration-modal__submit"

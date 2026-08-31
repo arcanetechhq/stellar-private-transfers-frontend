@@ -9,7 +9,7 @@ export async function assertWalletSigningAddress(
     throw new Error("Wallet not connected");
   }
 
-  const { address } = await StellarWalletsKit.fetchAddress();
+  const { address } = await StellarWalletsKit.getAddress();
   const active = address.trim();
   if (!active || active !== expected) {
     throw new WalletAccountMismatchError({

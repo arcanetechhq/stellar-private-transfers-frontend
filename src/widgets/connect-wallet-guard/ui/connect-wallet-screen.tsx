@@ -32,28 +32,25 @@ type ConnectWalletScreenProperties = {
 
 function resolveConnectScreenPhase(parameters: {
   isWalletConnected: boolean;
-  walletKitLoaded: boolean;
   isConnectingFreighter: boolean;
   isPickerOpen: boolean;
   onboardingPhase: WalletOnboardingPhase;
 }): ArcaneConnectScreenPhase {
+  if (parameters.onboardingPhase === "error") {
+    return "error";
+  }
+
   if (
     !parameters.isWalletConnected ||
     parameters.onboardingPhase === "wrong_network"
   ) {
     if (
       !parameters.isWalletConnected &&
-      (!parameters.walletKitLoaded ||
-        parameters.isConnectingFreighter ||
-        parameters.isPickerOpen)
+      (parameters.isConnectingFreighter || parameters.isPickerOpen)
     ) {
       return "connecting_wallet";
     }
     return "prompt";
-  }
-
-  if (parameters.onboardingPhase === "error") {
-    return "error";
   }
 
   if (parameters.onboardingPhase === "funding") {
@@ -96,54 +93,25 @@ export function ConnectWalletScreen({
     useStellarWalletModal();
   const [isNoticeOpen, setIsNoticeOpen] = useState(false);
   const [isConnectingFreighter, setIsConnectingFreighter] = useState(false);
-  const [isFreighterAvailable, setIsFreighterAvailable] = useState<
-    boolean | undefined
-  >();
+  const [isFreighterAvailable, setIsFreighterAvailable] = useState(true);
   const [freighterProductUrl, setFreighterProductUrl] = useState(
     FREIGHTER_PRODUCT_URL,
   );
-  const isPickerOpen =
-    isWalletPickerUiEnabled && isOpen && mode === "picker";
+  const isPickerOpen = isWalletPickerUiEnabled && isOpen && mode === "picker";
   const isWrongNetwork = phase === "wrong_network";
-  const isCheckingFreighter = isFreighterAvailable === undefined;
   const screenPhase = resolveConnectScreenPhase({
     isWalletConnected,
-    walletKitLoaded,
     isConnectingFreighter,
     isPickerOpen: isPickerOpen || isWalletConnectInProgress,
     onboardingPhase: phase,
   });
 
   useEffect(() => {
-    if (!walletKitLoaded) {
-      return;
-    }
-
-    let cancelled = false;
-
-    const refreshFreighterAvailability = () => {
-      void resolveFreighterAvailability().then((result) => {
-        if (cancelled) {
-          return;
-        }
-        setIsFreighterAvailable(result.isAvailable);
-        setFreighterProductUrl(result.productUrl);
-      });
-    };
-
-    refreshFreighterAvailability();
-
-    const handleWindowFocus = () => {
-      refreshFreighterAvailability();
-    };
-
-    globalThis.addEventListener("focus", handleWindowFocus);
-
-    return () => {
-      cancelled = true;
-      globalThis.removeEventListener("focus", handleWindowFocus);
-    };
-  }, [walletKitLoaded]);
+    void resolveFreighterAvailability().then((result) => {
+      setIsFreighterAvailable(result.isAvailable);
+      setFreighterProductUrl(result.productUrl);
+    });
+  }, []);
 
   const connectFreighter = async () => {
     setIsConnectingFreighter(true);
@@ -207,12 +175,9 @@ export function ConnectWalletScreen({
     <>
       <ArcaneConnectScreen
         phase={screenPhase}
-        connectDisabled={!walletKitLoaded || isCheckingFreighter}
+        connectDisabled={!walletKitLoaded}
         isConnectingWallet={
-          !walletKitLoaded ||
-          isConnectingFreighter ||
-          isPickerOpen ||
-          isWalletConnectInProgress
+          isConnectingFreighter || isPickerOpen || isWalletConnectInProgress
         }
         isFreighterAvailable={isFreighterAvailable !== false}
         errorMessage={errorMessage}

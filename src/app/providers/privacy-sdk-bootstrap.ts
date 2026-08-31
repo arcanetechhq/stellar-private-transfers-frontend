@@ -12,9 +12,10 @@ import {
   type StellarPrivacyClient,
 } from "@arcanetech/privacy-sdk-stellar";
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
-import type {
-  PrivacyPoolService,
-  StellarTransactEnvironment,
+import {
+  parseAuditPublicKeyFromEnvHex,
+  type PrivacyPoolService,
+  type StellarTransactEnvironment,
 } from "@arcanetech/privacy-sdk-stellar/transact";
 import {
   buildStellarTransactEnvironment,
@@ -58,9 +59,9 @@ function resolveConfiguredPrivacyPoolService(
     const service = createPrivacyPoolService({
       assets,
       applicationId: transactEnvironment.network.applicationId,
-      ...(transactEnvironment.auditPublicKey
-        ? { auditPublicKey: transactEnvironment.auditPublicKey }
-        : {}),
+      auditPublicKey:
+        transactEnvironment.auditPublicKey ??
+        parseAuditPublicKeyFromEnvHex(readAuditPublicKeyHexFromEnvironment()),
     });
     configurePrivacyPoolService(service);
     return service as unknown as PrivacyPoolService;

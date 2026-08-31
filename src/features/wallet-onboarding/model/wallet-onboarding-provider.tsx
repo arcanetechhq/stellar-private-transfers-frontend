@@ -6,17 +6,15 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useStore } from "react-redux";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { selectWalletPublicKey, selectIsWalletKitLoaded } from "@/entities/wallet";
-import {
-  useRegisterWalletPrivateAddress,
-  useWalletPrivateAddress,
-} from "@/features/register-private-address";
+import { useWalletPrivateAddress } from "@/features/register-private-address";
 import { useStellarWalletModal } from "@/features/stellar-wallet-connect";
 import { usePrivacyPoolServiceConfigured } from "@/shared/hooks/use-privacy-pool-service-configured.js";
+import { usePrivacySdkBootstrapError } from "@/shared/hooks/use-privacy-sdk-bootstrap-error.js";
 import { isWalletNetworkMismatchError } from "../lib/wallet-network-mismatch-error";
 import { runWalletOnboardingFlow } from "../lib/run-wallet-onboarding-flow";
+import { syncWalletOnboardingPhase } from "../lib/sync-wallet-onboarding-phase";
 import {
   WalletOnboardingContext,
   type WalletOnboardingContextValue,
@@ -34,7 +32,7 @@ type OnboardingBlock = {
 };
 
 function mapFlowStepToPhase(
-  step: "checking" | "funding" | "registering" | "ready",
+  step: "checking" | "funding" | "ready",
 ): WalletOnboardingPhase {
   if (step === "ready") {
     return "ready";
@@ -46,12 +44,11 @@ export function WalletOnboardingProvider({
   children,
 }: WalletOnboardingProviderProperties) {
   const dispatch = useAppDispatch();
-  const store = useStore();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const isWalletKitLoaded = useAppSelector(selectIsWalletKitLoaded);
   const privacyPoolServiceReady = usePrivacyPoolServiceConfigured();
+  const bootstrapError = usePrivacySdkBootstrapError();
   const { refreshRegistryStatus } = useWalletPrivateAddress();
-  const { register } = useRegisterWalletPrivateAddress();
   const {
     isWalletConnectInProgress,
     isOpen: isWalletModalOpen,
@@ -97,9 +94,7 @@ export function WalletOnboardingProvider({
       try {
         await runWalletOnboardingFlow({
           dispatch,
-          getState: store.getState,
           publicKey: trimmedPublicKey,
-          registerPrivateAddress: register,
           onStep: (step) => {
             if (runReference.current !== runId) {
               return;
@@ -151,64 +146,50 @@ export function WalletOnboardingProvider({
       clearOnboardingBlock,
       dispatch,
       refreshRegistryStatus,
-      register,
-      store,
     ],
   );
 
   const retry = useCallback(() => {
+    if (bootstrapError) {
+      globalThis.location.reload();
+      return;
+    }
     const trimmedPublicKey = publicKey?.trim();
     if (!trimmedPublicKey || !privacyPoolServiceReady) {
       return;
     }
     clearOnboardingBlock();
     void runOnboarding({ blocking: true, targetPublicKey: trimmedPublicKey });
-  }, [clearOnboardingBlock, publicKey, privacyPoolServiceReady, runOnboarding]);
+  }, [
+    bootstrapError,
+    clearOnboardingBlock,
+    publicKey,
+    privacyPoolServiceReady,
+    runOnboarding,
+  ]);
 
   useEffect(() => {
-    const trimmedPublicKey = publicKey?.trim();
-    if (!trimmedPublicKey) {
-      runReference.current += 1;
-      clearOnboardingBlock();
-      setPhase("idle");
-      setReadyPublicKey(undefined);
-      setHasUnlockedApp(false);
-      setErrorMessage(undefined);
-      return;
-    }
-
-    if (!privacyPoolServiceReady) {
-      if (!hasUnlockedApp) {
-        setPhase("checking");
-      }
-      return;
-    }
-
-    if (!isWalletKitLoaded || isWalletConnectInProgress || isWalletPickerOpen) {
-      if (isWalletPickerOpen) {
-        runReference.current += 1;
-      }
-      return;
-    }
-
-    const onboardingBlock = onboardingBlockReference.current;
-    if (onboardingBlock && onboardingBlock.publicKey === trimmedPublicKey) {
-      setPhase(onboardingBlock.kind);
-      setErrorMessage(onboardingBlock.message);
-      return;
-    }
-
-    if (readyPublicKey === trimmedPublicKey) {
-      setPhase("ready");
-      return;
-    }
-
-    void runOnboarding({
-      blocking: !hasUnlockedApp,
-      targetPublicKey: trimmedPublicKey,
+    syncWalletOnboardingPhase({
+      publicKey,
+      bootstrapError,
+      privacyPoolServiceReady,
+      isWalletKitLoaded,
+      isWalletConnectInProgress,
+      isWalletPickerOpen,
+      readyPublicKey,
+      hasUnlockedApp,
+      onboardingBlock: onboardingBlockReference.current,
+      runReference,
+      clearOnboardingBlock,
+      setPhase,
+      setErrorMessage,
+      setReadyPublicKey,
+      setHasUnlockedApp,
+      runOnboarding,
     });
   }, [
     publicKey,
+    bootstrapError,
     privacyPoolServiceReady,
     isWalletKitLoaded,
     isWalletConnectInProgress,

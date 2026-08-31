@@ -10,6 +10,7 @@ import type {
 let privacyPoolServiceInstance: PrivacyPoolService | undefined;
 let transactEnvironment: StellarTransactEnvironment | undefined;
 let privacyClient: StellarPrivacyClient | undefined;
+let privacySdkBootstrapError: string | undefined;
 const privacyPoolServiceReadyListeners = new Set<() => void>();
 
 function notifyPrivacyPoolServiceReadyListeners(): void {
@@ -29,6 +30,21 @@ export function subscribePrivacyPoolServiceConfigured(
 
 export function getPrivacyPoolServiceConfiguredSnapshot(): boolean {
   return privacyPoolServiceInstance !== undefined;
+}
+
+export function subscribePrivacySdkBootstrapError(
+  listener: () => void,
+): () => void {
+  return subscribePrivacyPoolServiceConfigured(listener);
+}
+
+export function getPrivacySdkBootstrapErrorSnapshot(): string | undefined {
+  return privacySdkBootstrapError;
+}
+
+export function setPrivacySdkBootstrapError(message: string | undefined): void {
+  privacySdkBootstrapError = message;
+  notifyPrivacyPoolServiceReadyListeners();
 }
 
 export interface PrivacyTransactRuntimeResolvers {
@@ -132,6 +148,7 @@ export function setPrivacyTransactContext(input: {
   transactEnvironment = input.transactEnvironment;
   privacyClient = input.client;
   privacyPoolServiceInstance = input.privacyPoolService;
+  privacySdkBootstrapError = undefined;
   registerPrivacyTransactRuntimeResolvers(transactRuntimeResolvers);
   notifyPrivacyPoolServiceReadyListeners();
 }
@@ -140,6 +157,7 @@ export function clearPrivacyTransactContext(): void {
   transactEnvironment = undefined;
   privacyClient = undefined;
   privacyPoolServiceInstance = undefined;
+  privacySdkBootstrapError = undefined;
   transactRuntimeResolvers = {};
   notifyPrivacyPoolServiceReadyListeners();
 }

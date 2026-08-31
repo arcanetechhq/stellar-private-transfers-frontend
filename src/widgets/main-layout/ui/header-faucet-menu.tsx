@@ -61,6 +61,7 @@ export function HeaderFaucetMenu({
       <button
         type="button"
         className="topbar-action faucet-menu__trigger"
+        data-testid="faucet-menu"
         aria-haspopup="menu"
         aria-expanded={isOpen}
         data-open={isOpen}
@@ -79,8 +80,12 @@ export function HeaderFaucetMenu({
           aria-label={translate("faucet.menuTitle")}
         >
           <div className="faucet-menu__header">
-            <h2 className="faucet-menu__title">{translate("faucet.menuTitle")}</h2>
-            <p className="faucet-menu__description">{translate("faucet.menuDescription")}</p>
+            <h2 className="faucet-menu__title">
+              {translate("faucet.menuTitle")}
+            </h2>
+            <p className="faucet-menu__description">
+              {translate("faucet.menuDescription")}
+            </p>
           </div>
           <div className="faucet-menu__list">
             {sortedAssets.length === 0 ? (

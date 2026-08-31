@@ -2,7 +2,10 @@ import React from "react";
 import { Check } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router";
-import type { TransferSuccessFlow, TransferSuccessViewModel } from "../lib/build-transfer-success-view";
+import type {
+  TransferSuccessFlow,
+  TransferSuccessViewModel,
+} from "../lib/build-transfer-success-view";
 import { shortenStellarAddress } from "@/shared/lib/shorten-stellar-address";
 import { buildTransactionsPathWithSelection } from "@/widgets/transaction-list";
 
@@ -10,17 +13,21 @@ interface TransferSuccessDetailRowProperties {
   label: string;
   value: string;
   title?: string;
+  testId?: string;
 }
 
 function TransferSuccessDetailRow({
   label,
   value,
   title,
+  testId,
 }: TransferSuccessDetailRowProperties): React.JSX.Element {
   return (
     <div className="private-deposit-success-card__detail">
       <span>{label}</span>
-      <strong title={title}>{value}</strong>
+      <strong title={title} data-testid={testId}>
+        {value}
+      </strong>
     </div>
   );
 }
@@ -92,11 +99,16 @@ export function TransferSuccessPanel({
         aria-live="polite"
       >
         <div className="private-deposit-success-card__hero">
-          <span className="private-deposit-success-card__icon" aria-hidden="true">
+          <span
+            className="private-deposit-success-card__icon"
+            aria-hidden="true"
+          >
             <Check size={34} strokeWidth={1.8} />
           </span>
           <span className="private-deposit-success-card__copy">
-            <h3 className="private-deposit-success-card__heading">{heroTitle}</h3>
+            <h3 className="private-deposit-success-card__heading">
+              {heroTitle}
+            </h3>
             <p className="private-deposit-success-card__description">
               {description}
             </p>
@@ -126,6 +138,12 @@ export function TransferSuccessPanel({
                 value={shortenStellarAddress(sourceWalletDisplay, 4, 3)}
                 title={sourceWallet}
               />
+              <TransferSuccessDetailRow
+                label={translateTransfer("success.transactionId")}
+                value={view.transactionIdShort}
+                title={view.fullTransactionId}
+                testId="tx-hash"
+              />
             </>
           ) : (
             <>
@@ -137,6 +155,7 @@ export function TransferSuccessPanel({
                 label={translateTransfer("success.transactionId")}
                 value={view.transactionIdShort}
                 title={view.fullTransactionId}
+                testId="tx-hash"
               />
               <TransferSuccessDetailRow
                 label={translateTransfer("success.status")}

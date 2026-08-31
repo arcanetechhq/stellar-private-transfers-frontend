@@ -6,6 +6,14 @@ import { disconnectStellarWallet } from "../model/stellar-wallet-thunks";
 
 export type SyncFreighterWalletResult = "unchanged" | "changed" | "failed";
 
+async function readFreighterAddressWithoutPrompt(): Promise<string> {
+  StellarWalletsKitSdk.setWallet(FREIGHTER_WALLET_ID);
+  const { address } = await StellarWalletsKitSdk.selectedModule.getAddress({
+    skipRequestAccess: true,
+  });
+  return address.trim();
+}
+
 export async function syncFreighterWalletAccount(parameters: {
   dispatch: AppDispatch;
   currentPublicKey: string | undefined;
@@ -13,9 +21,7 @@ export async function syncFreighterWalletAccount(parameters: {
   const current = parameters.currentPublicKey?.trim();
 
   try {
-    StellarWalletsKitSdk.setWallet(FREIGHTER_WALLET_ID);
-    const { address } = await StellarWalletsKitSdk.fetchAddress();
-    const next = address.trim();
+    const next = await readFreighterAddressWithoutPrompt();
     if (!next) {
       return "failed";
     }

@@ -11,9 +11,7 @@ import {
   ArrowDownIcon,
   ArrowUpRight,
 } from "lucide-react";
-import {
-  useWalletPrivateAddress,
-} from "@/features/register-private-address";
+import { useWalletPrivateAddress } from "@/features/register-private-address";
 
 type ActionButtonVariant = "primary" | "outline";
 
@@ -22,16 +20,18 @@ interface ActionButtonProperties {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   variant: ActionButtonVariant;
+  testId?: string;
 }
 
 function ActionButton(properties: ActionButtonProperties) {
-  const { to, label, icon: Icon, variant } = properties;
+  const { to, label, icon: Icon, variant, testId } = properties;
 
   return (
     <Link className="min-w-0" to={to}>
       <button
         type="button"
         className="balance-card__action-button"
+        data-testid={testId}
         data-variant={variant}
       >
         <Icon />
@@ -57,16 +57,13 @@ function RegisterAccountButton({
   return (
     <button
       type="button"
+      data-testid="register-private-address-open"
       disabled={disabled}
       className="balance-card__action-button"
       data-variant="primary"
       onClick={onClick}
     >
-      {isLoading ? (
-        <Loader2 className="animate-spin" />
-      ) : (
-        <UserPlus />
-      )}
+      {isLoading ? <Loader2 className="animate-spin" /> : <UserPlus />}
       <span>{label}</span>
     </button>
   );
@@ -151,8 +148,7 @@ export function BalanceHero(properties: BalanceHeroProperties) {
     canOpenRegistryRegistration,
     openRegistryRegistrationModal,
   } = useWalletPrivateAddress();
-  const isRegistryChecking =
-    isRegistryLoading || registryStatus === "checking";
+  const isRegistryChecking = isRegistryLoading || registryStatus === "checking";
 
   function handleRefresh() {
     setRefreshing(true);
@@ -197,6 +193,7 @@ export function BalanceHero(properties: BalanceHeroProperties) {
             label={translateOverview("deposit")}
             icon={ArrowDownIcon}
             variant="primary"
+            testId="open-deposit"
           />
           <ActionButton
             to="/create-transfer"

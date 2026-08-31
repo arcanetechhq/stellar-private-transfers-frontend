@@ -1,0 +1,14 @@
+.git
+.cursor
+.agents
+node_modules
+dist
+coverage
+**/*.md
+.env
+.env.*
+.DS_Store
+package-lock.json
+generated/**/node_modules
+generated/**/out
+generated/**/package-lock.json

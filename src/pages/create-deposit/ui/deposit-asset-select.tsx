@@ -32,6 +32,7 @@ export function DepositAssetSelect({
       <button
         type="button"
         className="deposit-asset-select__button"
+        data-testid="deposit-asset-select"
         data-open={menu.isOpen ? "true" : undefined}
         aria-haspopup="menu"
         aria-expanded={menu.isOpen}
@@ -71,6 +72,8 @@ export function DepositAssetSelect({
               type="button"
               key={option.assetId}
               className="deposit-asset-option"
+              data-testid="deposit-asset-option"
+              data-asset={option.assetId.toUpperCase()}
               data-active={option.assetId === selectedAsset?.assetId ? "true" : undefined}
               role="menuitemradio"
               aria-checked={option.assetId === selectedAsset?.assetId}

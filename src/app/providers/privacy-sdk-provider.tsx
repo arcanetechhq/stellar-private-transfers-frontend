@@ -3,7 +3,6 @@ import React, {
   useContext,
   useEffect,
   useMemo,
-  useState,
   type ReactNode,
 } from "react";
 import type { StellarPrivacyClient } from "@arcanetech/privacy-sdk-stellar";
@@ -16,9 +15,8 @@ import {
 } from "@/entities/privacy-sdk-state";
 import { useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
-import { privacySdkState, store } from "@/store/store.js";
-import { clearPrivacyTransactContext } from "@/shared/lib/privacy-sdk/index.js";
-import { bootstrapPrivacySdkClient } from "./privacy-sdk-bootstrap.js";
+import { store } from "@/store/store.js";
+import { usePrivacySdkBootstrapState } from "./use-privacy-sdk-bootstrap-state.js";
 
 type StoreDispatchAction = Parameters<typeof store.dispatch>[0];
 
@@ -85,49 +83,7 @@ function usePrivacySdkCacheSync(
 }
 
 export function PrivacySdkProvider({ children }: { children: ReactNode }) {
-  const [client, setClient] = useState<StellarPrivacyClient | undefined>();
-  const [ready, setReady] = useState(false);
-  const [error, setError] = useState<Error | undefined>();
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const runBootstrap = async () => {
-      try {
-        const created = await bootstrapPrivacySdkClient(
-          privacySdkState.adapter,
-        );
-        if (cancelled) {
-          return;
-        }
-        setClient(created);
-        setReady(true);
-        setError(undefined);
-      } catch (bootstrapError) {
-        if (cancelled) {
-          return;
-        }
-        clearPrivacyTransactContext();
-        setClient(undefined);
-        setReady(false);
-        setError(
-          bootstrapError instanceof Error
-            ? bootstrapError
-            : new Error(String(bootstrapError)),
-        );
-      }
-    };
-
-    runBootstrap().catch(() => {
-      return;
-    });
-
-    return () => {
-      cancelled = true;
-      clearPrivacyTransactContext();
-    };
-  }, []);
-
+  const { client, ready, error } = usePrivacySdkBootstrapState();
   usePrivacySdkCacheSync(client, ready);
 
   const value = useMemo(

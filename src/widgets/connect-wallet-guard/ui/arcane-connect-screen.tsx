@@ -82,6 +82,7 @@ function ArcaneConnectPrimaryAction(properties: {
     <button
       type="button"
       className="arcane-connect-primary"
+      data-testid="connect-wallet"
       disabled={connectDisabled || isBusyPhase || isConnectingWallet}
       onClick={onConnectWallet}
       {...(isBusyPhase

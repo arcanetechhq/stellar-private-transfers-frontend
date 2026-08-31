@@ -10,10 +10,7 @@ import {
   selectIsClaimLoadingForAsset,
   selectTrustlinePendingAssetId,
 } from "@/entities/asset";
-import {
-  hasClaimedFaucetToday,
-  useClaimFaucet,
-} from "@/features/faucet";
+import { hasClaimedFaucetToday, useClaimFaucet } from "@/features/faucet";
 
 type FaucetRowState = "idle" | "claiming" | "success" | "limited";
 
@@ -54,7 +51,10 @@ function resolveStatusLabel(
       return translate("faucet.statusLimited");
     }
     default: {
-      return translate("faucet.statusAvailable", { amount: claimAmount, symbol });
+      return translate("faucet.statusAvailable", {
+        amount: claimAmount,
+        symbol,
+      });
     }
   }
 }
@@ -186,7 +186,8 @@ export function HeaderFaucetAssetRow({
           type="button"
           className="faucet-menu__action"
           data-state={rowState}
-          data-testid={`faucet-claim-${symbol.toLowerCase()}`}
+          data-testid="faucet-mint"
+          data-asset={symbol}
           disabled={actionDisabled}
           role="menuitem"
           onClick={handleClaim}

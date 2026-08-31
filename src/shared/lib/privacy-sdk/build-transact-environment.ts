@@ -1,4 +1,5 @@
 import {
+  parseAuditPublicKeyFromEnvHex,
   resolvePoolApplicationId,
   type StellarTransactEnvironment,
 } from "@arcanetech/privacy-sdk-stellar/transact";
@@ -71,6 +72,9 @@ export function buildStellarTransactEnvironment(): StellarTransactEnvironment {
       applicationId: readPoolApplicationIdFromEnvironment(),
     },
     zkConfigNonce: readZkConfigNonceFromEnvironment(),
+    auditPublicKey: parseAuditPublicKeyFromEnvHex(
+      readAuditPublicKeyHexFromEnvironment(),
+    ),
     kyt: {
       apiBaseUrl: getRequiredApiBaseUrl(),
       kytPassageRegistryContract: readRequiredContractEnvironment(

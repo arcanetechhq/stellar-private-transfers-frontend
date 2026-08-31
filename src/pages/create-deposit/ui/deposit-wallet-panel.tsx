@@ -64,6 +64,7 @@ export function DepositWalletPanel({
             <div className="send-money-amount-row__input">
               <input
                 aria-label={translate("amount")}
+                data-testid="deposit-amount"
                 inputMode="decimal"
                 value={amount}
                 placeholder="0"
@@ -98,6 +99,7 @@ export function DepositWalletPanel({
 
       <button
         type="submit"
+        data-testid="deposit-confirm"
         className="send-money-continue"
         disabled={!canSubmit}
       >
