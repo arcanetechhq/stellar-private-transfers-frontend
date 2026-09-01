@@ -1,3 +1,4 @@
+import React from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import type { AggregatedPrivateAssetRow } from "@/entities/coin";
@@ -34,6 +35,9 @@ export function PrivateAssetRow({
     <button
       type="button"
       className="asset-balance-row"
+      data-testid="private-asset-row"
+      data-asset={ticker}
+      data-amount={String(row.totalAmountDisplay)}
       aria-label={translate("privateAssets.sendAsset", { asset: ticker })}
       onClick={handleSend}
     >

@@ -200,6 +200,7 @@ export function BalanceHero(properties: BalanceHeroProperties) {
             label={translateOverview("privateSend")}
             icon={ArrowUpRight}
             variant="outline"
+            testId="open-transfer"
           />
           <ActionButton
             to="/withdraw"

@@ -7,14 +7,22 @@ import {
   setWalletKitLoaded,
   setWalletProviderName,
 } from "@/entities/wallet";
+import { FREIGHTER_WALLET_ID } from "../lib/wallet-options";
 import { readWalletProviderNameFromKit } from "../lib/read-wallet-provider-name";
 
 export const syncWalletAddressFromKit = createAsyncThunk(
   "wallet/syncWalletAddressFromKit",
   async (_argument: undefined, { dispatch }) => {
     try {
-      const { address } = await StellarWalletsKitSdk.getAddress();
-      dispatch(setPublicKey(address));
+      StellarWalletsKitSdk.setWallet(FREIGHTER_WALLET_ID);
+      const { address } = await StellarWalletsKitSdk.selectedModule.getAddress({
+        skipRequestAccess: true,
+      });
+      const trimmed = address?.trim();
+      if (!trimmed) {
+        return;
+      }
+      dispatch(setPublicKey(trimmed));
       const providerName = readWalletProviderNameFromKit();
       if (providerName) {
         dispatch(setWalletProviderName(providerName));

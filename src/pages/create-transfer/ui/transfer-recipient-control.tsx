@@ -97,6 +97,7 @@ export function TransferRecipientControl({
           <span className="send-recipient-control__name">{recipientLabel}</span>
           <input
             ref={inputRef}
+            data-testid="transfer-recipient"
             aria-label={translate("recipientAddress")}
             aria-invalid={errorMessage ? true : undefined}
             aria-describedby={
@@ -143,9 +144,15 @@ export function TransferRecipientControl({
         </p>
       ) : null}
       {menu.isOpen ? (
-        <div className="send-recipient-menu" role="menu" aria-label={translate("selectContact")}>
+        <div
+          className="send-recipient-menu"
+          role="menu"
+          aria-label={translate("selectContact")}
+        >
           {filteredContacts.length === 0 ? (
-            <p className="send-recipient-menu__empty">{translate("noContactsFound")}</p>
+            <p className="send-recipient-menu__empty">
+              {translate("noContactsFound")}
+            </p>
           ) : (
             filteredContacts.map((contact) => (
               <button

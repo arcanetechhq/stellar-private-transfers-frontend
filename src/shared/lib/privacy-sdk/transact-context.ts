@@ -1,10 +1,11 @@
 import type { StellarPrivacyClient } from "@arcanetech/privacy-sdk-stellar";
-import type {
-  BuildTransferOnboardingAtExecuteInput,
-  OnboardingPayload,
-  PrivacyPoolService,
-  StellarTransactEnvironment,
-  TransferRecipientExecutionContext,
+import {
+  configurePrivacyPoolService,
+  type BuildTransferOnboardingAtExecuteInput,
+  type OnboardingPayload,
+  type PrivacyPoolService,
+  type StellarTransactEnvironment,
+  type TransferRecipientExecutionContext,
 } from "@arcanetech/privacy-sdk-stellar/transact";
 
 let privacyPoolServiceInstance: PrivacyPoolService | undefined;
@@ -149,6 +150,7 @@ export function setPrivacyTransactContext(input: {
   privacyClient = input.client;
   privacyPoolServiceInstance = input.privacyPoolService;
   privacySdkBootstrapError = undefined;
+  configurePrivacyPoolService(input.privacyPoolService);
   registerPrivacyTransactRuntimeResolvers(transactRuntimeResolvers);
   notifyPrivacyPoolServiceReadyListeners();
 }

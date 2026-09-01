@@ -31,6 +31,25 @@ describe("protocol relay routing and recovery", () => {
     expect(ports.probe.txCalls).toEqual(["wallet-tx"]);
   });
 
+  it("routes a pending claim to wallet-signed direct submission", async () => {
+    expect(chooseSubmissionPath("0", "pending_claim")).toBe(
+      SUBMISSION_PATH.direct,
+    );
+    const ports = createTestPorts();
+    const operation = newOperation("0");
+    const result = await submitPreparedPrivateOperation({
+      ports,
+      operation: {
+        ...operation,
+        display: { ...operation.display, kind: "pending_claim" },
+      },
+    });
+    expect(ports.probe.directCalls).toEqual(["direct"]);
+    expect(ports.probe.order).not.toContain("create");
+    expect(result.outcome).toBe(PENDING_OPERATION_PHASE.succeeded);
+    expect(result.txId).toBe("wallet-tx");
+  });
+
   it("persists a pending operation before creating an all-zero-deposit relay request", async () => {
     expect(chooseSubmissionPath("0")).toBe(SUBMISSION_PATH.relay);
     const ports = createTestPorts();

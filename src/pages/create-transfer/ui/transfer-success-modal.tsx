@@ -1,7 +1,6 @@
 import { Check } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
 import type { ConfidentialTransferSuccess } from "../model/confidential-transfer-submit-flow";
 import { formatTransferAmount } from "../lib/format-transfer-amount";
 
@@ -25,8 +24,8 @@ export function TransferSuccessModal({
   }
 
   const ticker = result.assetId.toUpperCase();
-  const amountDisplay = `${formatTransferAmount(result.amount)} ${ticker}`.trim();
-  const safeTransactionId = encodeURIComponent(result.txId);
+  const amountDisplay =
+    `${formatTransferAmount(result.amount)} ${ticker}`.trim();
 
   return (
     <div className="send-success-backdrop" role="presentation">
@@ -45,28 +44,24 @@ export function TransferSuccessModal({
               {translate("success.title")}
             </h2>
             <p className="send-success-description">
-              {translate("success.sentToRecipient", { recipient: recipientLabel })}
+              {translate("success.sentToRecipient", {
+                recipient: recipientLabel,
+              })}
             </p>
           </div>
           <p className="send-success-amount">{amountDisplay}</p>
+          <p hidden data-testid="tx-hash" title={result.txId}>
+            {result.txId}
+          </p>
         </div>
 
         {result.coinDeliveryWarning ? (
-          <div
-            role="status"
-            className="send-success-warning"
-          >
+          <div role="status" className="send-success-warning">
             {result.coinDeliveryWarning}
           </div>
         ) : null}
 
         <div className="send-success-footer">
-          {/* <Link
-            to={`/transaction/${safeTransactionId}`}
-            className="send-success-details-link"
-          >
-            {translate("success.openDetails")}
-          </Link> */}
           <button
             type="button"
             className="send-money-continue"

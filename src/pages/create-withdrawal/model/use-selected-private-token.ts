@@ -22,7 +22,11 @@ export function useSelectedPrivateToken(
     const fromUrl = assetIdFromUrl
       ? privateAssets.find((asset) => asset.assetId === assetIdFromUrl)
       : undefined;
-    return fromUrl?.assetId ?? privateAssets[0]?.assetId;
+    const funded = privateAssets.find((asset) => {
+      const balance = Number.parseFloat(asset.balance.replaceAll(",", ""));
+      return Number.isFinite(balance) && balance > 0;
+    });
+    return fromUrl?.assetId ?? funded?.assetId ?? privateAssets[0]?.assetId;
   }, [privateAssets, assetIdFromUrl, userSelectedAssetId]);
 
   const selectedToken = useMemo(

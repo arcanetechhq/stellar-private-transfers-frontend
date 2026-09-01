@@ -105,6 +105,7 @@ function TransferReviewDialog(properties: {
         isSubmitting={properties.isSubmitting}
         retryAllowed={properties.retryAllowed}
         fallbackAllowed={properties.fallbackAllowed}
+        confirmTestId="transfer-confirm"
         onClose={properties.onClose}
         onConfirm={properties.onConfirm}
         onRetry={properties.onRetry}

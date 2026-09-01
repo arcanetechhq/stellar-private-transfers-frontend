@@ -113,7 +113,12 @@ export async function submitPreparedPrivateOperation(input: {
   operation: NewPrivateOperation;
 }): Promise<SubmitPrivateOperationResult> {
   const prepared = buildPreparedOperation(input.operation);
-  if (chooseSubmissionPath(input.operation.publicDepositAmount) === SUBMISSION_PATH.direct) {
+  if (
+    chooseSubmissionPath(
+      input.operation.publicDepositAmount,
+      input.operation.display.kind,
+    ) === SUBMISSION_PATH.direct
+  ) {
     return submitDirectPath({
       ports: input.ports,
       operation: prepared,

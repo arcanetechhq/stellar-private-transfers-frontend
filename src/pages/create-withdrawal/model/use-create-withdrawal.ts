@@ -6,7 +6,10 @@ import { selectWalletPublicKey } from "@/entities/wallet";
 import { type AssetWithTrustline } from "@/entities/asset";
 import { getMaxWithdrawStroops, selectCoinItems } from "@/entities/coin";
 import { isValidStellarPublicAddress } from "@/shared/lib/stellar/is-valid-stellar-public-address";
-import { amountInputToStroops } from "@/shared/lib/stellar/stroops";
+import {
+  amountInputToStroops,
+  stroopsToAmountInputString,
+} from "@/shared/lib/stellar/stroops";
 import { ZERO_STROOPS } from "@/shared/lib/privacy-sdk/constants";
 import { parseWithdrawalAmountInput } from "../lib/format-withdrawal-amount";
 import { useWithdrawalPrivateAssets } from "./use-withdrawal-private-assets";
@@ -48,6 +51,46 @@ function computeWithdrawalCanSubmit(input: WithdrawalCanSubmitInput): boolean {
   );
 }
 
+function maxWithdrawInput(maxNoteStroops: bigint): string | undefined {
+  if (maxNoteStroops <= ZERO_STROOPS) {
+    return undefined;
+  }
+  return stroopsToAmountInputString(maxNoteStroops);
+}
+
+function bindWithdrawMaxHandler(input: {
+  maxAmountInput: string | undefined;
+  fallback: () => void;
+  changeAmount: (value: string) => void;
+}): () => void {
+  return () => {
+    if (input.maxAmountInput) {
+      input.changeAmount(input.maxAmountInput);
+      return;
+    }
+    input.fallback();
+  };
+}
+
+function withdrawalNoteLimitAlert(input: {
+  translate: (key: string) => string;
+  amountStroops: bigint | undefined;
+  maxNoteStroops: bigint;
+}): { title: string; subtitle: string } | undefined {
+  const exceeds =
+    input.amountStroops !== undefined &&
+    input.amountStroops > ZERO_STROOPS &&
+    input.maxNoteStroops > ZERO_STROOPS &&
+    input.amountStroops > input.maxNoteStroops;
+  if (!exceeds) {
+    return undefined;
+  }
+  return {
+    title: input.translate("amountExceedsNoteLimitTitle"),
+    subtitle: input.translate("amountExceedsNoteLimitSubtitle"),
+  };
+}
+
 export function useCreateWithdrawal() {
   const { t: translate } = useTranslation("withdrawal");
   const [searchParameters] = useSearchParams();
@@ -72,17 +115,11 @@ export function useCreateWithdrawal() {
     [coins, selectedAsset?.assetId, withdrawalSender.senderPrivateAddress],
   );
   const amountStroops = amountInputToStroops(amountInputs.amount);
-  const exceedsNoteLimit =
-    amountStroops !== undefined &&
-    amountStroops > ZERO_STROOPS &&
-    maxNoteStroops > ZERO_STROOPS &&
-    amountStroops > maxNoteStroops;
-  const noteLimitAlert = exceedsNoteLimit
-    ? {
-        title: translate("amountExceedsNoteLimitTitle"),
-        subtitle: translate("amountExceedsNoteLimitSubtitle"),
-      }
-    : undefined;
+  const noteLimitAlert = withdrawalNoteLimitAlert({
+    translate,
+    amountStroops,
+    maxNoteStroops,
+  });
   const canSubmit = computeWithdrawalCanSubmit({
     senderPrivateAddress: withdrawalSender.senderPrivateAddress,
     selectedAsset,
@@ -92,6 +129,7 @@ export function useCreateWithdrawal() {
     destinationWallet,
   });
   const numericAmount = parseWithdrawalAmountInput(amountInputs.amount);
+  const maxAmountInput = maxWithdrawInput(maxNoteStroops);
   const confirm = useWithdrawalConfirmSlice({
     canSubmit,
     selectedAsset,
@@ -106,7 +144,11 @@ export function useCreateWithdrawal() {
     amount: amountInputs.amount,
     handleAmountChange: amountInputs.handleAmountChange,
     handlePercentage: amountInputs.handlePercentage,
-    handleMaxAmount: amountInputs.handleMaxAmount,
+    handleMaxAmount: bindWithdrawMaxHandler({
+      maxAmountInput,
+      fallback: amountInputs.handleMaxAmount,
+      changeAmount: amountInputs.handleAmountChange,
+    }),
     destinationWallet,
     receivedAmount: amountInputs.receivedAmount,
     canSubmit,

@@ -1,3 +1,4 @@
+import React from "react";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { AssetRowIcon } from "@/shared/ui/asset-row-icon";
@@ -60,7 +61,6 @@ export function PendingAssetClaimRow({
           </span>
         </span>
       </div>
-      {/* <div className="pending-asset-claim__divider" aria-hidden="true" /> */}
       <div className="pending-asset-claim__footer">
         <span className="pending-asset-claim__status">
           <span className="pending-asset-claim__dot" aria-hidden="true" />
@@ -71,6 +71,7 @@ export function PendingAssetClaimRow({
         <button
           type="button"
           className="period-select__button pending-asset-claim__receive"
+          data-testid="pending-claim-receive"
           disabled={receiveDisabled}
           aria-busy={isClaiming}
           onClick={() => {

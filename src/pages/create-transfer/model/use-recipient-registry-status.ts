@@ -1,15 +1,11 @@
 import { useEffect, useState } from "react";
 import { usePrivacySdkClient } from "@/app/providers/privacy-sdk-provider";
 import { isValidStellarPublicAddress } from "@/shared/lib/stellar/is-valid-stellar-public-address";
+import type { RecipientRegistryStatus } from "./recipient-registry-status";
 
 const RECIPIENT_LOOKUP_DEBOUNCE_MS = 400;
 
-export type RecipientRegistryStatus =
-  | "idle"
-  | "checking"
-  | "registered"
-  | "unregistered"
-  | "lookup_failed";
+export type { RecipientRegistryStatus } from "./recipient-registry-status";
 
 export function useRecipientRegistryStatus(parameters: {
   recipient: string;
@@ -24,7 +20,8 @@ export function useRecipientRegistryStatus(parameters: {
     recipientTrim.length > 0 &&
     walletPublicKey.length > 0 &&
     recipientTrim !== walletPublicKey;
-  const shouldLookup = recipientValid && recipientDiffersFromSender && ready && Boolean(client);
+  const shouldLookup =
+    recipientValid && recipientDiffersFromSender && ready && Boolean(client);
 
   useEffect(() => {
     if (!shouldLookup || !client) {
@@ -32,10 +29,10 @@ export function useRecipientRegistryStatus(parameters: {
       return;
     }
 
+    setStatus("checking");
     let cancelled = false;
     const timeoutId = globalThis.setTimeout(() => {
       void (async () => {
-        setStatus("checking");
         try {
           const lookup = await client.checkRegistrationStatus({
             address: recipientTrim,

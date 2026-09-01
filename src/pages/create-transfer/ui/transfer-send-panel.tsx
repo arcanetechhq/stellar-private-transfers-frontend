@@ -5,7 +5,10 @@ import { useTranslation } from "react-i18next";
 import type { AssetWithTrustline } from "@/entities/asset";
 import type { RecipientRegistryStatus } from "../model/use-recipient-registry-status";
 import { formatTransferAmount } from "../lib/format-transfer-amount";
-import { formatTransferBalanceWithTicker, parseTransferBalance } from "../lib/format-transfer-balance";
+import {
+  formatTransferBalanceWithTicker,
+  parseTransferBalance,
+} from "../lib/format-transfer-balance";
 import { TransferAssetSelect } from "./transfer-asset-select";
 import { TransferRecipientControl } from "./transfer-recipient-control";
 
@@ -121,7 +124,8 @@ export function TransferSendPanel({
     Number.isFinite(numericBalance) &&
     numericAmount > numericBalance;
   const amountInvalid = exceedsBalance || Boolean(noteLimitAlert);
-  const recipientGetsDisplay = `${formatTransferAmount(totalAmount)} ${ticker}`.trim();
+  const recipientGetsDisplay =
+    `${formatTransferAmount(totalAmount)} ${ticker}`.trim();
   const feeDisplay = `0 ${ticker}`.trim();
   const availableBalanceDisplay = formatTransferBalanceWithTicker(
     selectedToken?.balance,
@@ -157,6 +161,7 @@ export function TransferSendPanel({
             </div>
             <div className="send-money-amount-row__input">
               <input
+                data-testid="transfer-amount"
                 aria-label={translate("amount")}
                 inputMode="decimal"
                 placeholder="0"
@@ -188,7 +193,9 @@ export function TransferSendPanel({
         {noteLimitAlert ? (
           <div className="send-money-error" role="alert">
             <p className="send-money-error__title">{noteLimitAlert.title}</p>
-            <p className="send-money-error__subtitle">{noteLimitAlert.subtitle}</p>
+            <p className="send-money-error__subtitle">
+              {noteLimitAlert.subtitle}
+            </p>
           </div>
         ) : null}
 
@@ -199,12 +206,15 @@ export function TransferSendPanel({
           </div>
         ) : null}
 
-        <TransferPrivacyNotice recipientRegistryStatus={recipientRegistryStatus} />
+        <TransferPrivacyNotice
+          recipientRegistryStatus={recipientRegistryStatus}
+        />
       </div>
 
       <button
         type="button"
         className="send-money-continue"
+        data-testid="transfer-continue"
         disabled={!canContinue || isSubmitting}
         onClick={onContinue}
       >

@@ -3,7 +3,11 @@ import type { AssetWithTrustline } from "@/entities/asset";
 import { isValidStellarPublicAddress } from "@/shared/lib/stellar/is-valid-stellar-public-address";
 import { amountInputToStroops } from "@/shared/lib/stellar/stroops";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
-import type { RecipientRegistryStatus } from "./use-recipient-registry-status";
+import { ZERO_STROOPS } from "@/shared/lib/privacy-sdk/constants";
+import {
+  isRecipientRegistryReadyToSend,
+  type RecipientRegistryStatus,
+} from "./recipient-registry-status";
 import { parseTransferBalance } from "../lib/format-transfer-balance";
 
 function recipientFieldErrorKey(parameters: {
@@ -33,8 +37,9 @@ function transferIdentityAndRecipientReady(parameters: {
   actionsEnabled: boolean;
   recipientRegistryStatus: RecipientRegistryStatus;
 }): boolean {
-  const recipientLookupReady =
-    parameters.recipientRegistryStatus !== "checking";
+  const recipientLookupReady = isRecipientRegistryReadyToSend(
+    parameters.recipientRegistryStatus,
+  );
   return (
     Boolean(parameters.publicKey?.trim()) &&
     parameters.senderPrivateAddress.length > 0 &&
@@ -60,7 +65,7 @@ function transferAmountWithinBalance(parameters: {
     parameters.numericAmount > 0 &&
     parameters.numericAmount <= parameters.numericBalance &&
     amountStroops !== undefined &&
-    amountStroops > 0n &&
+    amountStroops > ZERO_STROOPS &&
     amountStroops <= parameters.maxNoteStroops
   );
 }
