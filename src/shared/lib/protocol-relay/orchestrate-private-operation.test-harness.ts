@@ -64,15 +64,15 @@ export function newOperation(publicDepositAmount: string): NewPrivateOperation {
 function createMemoryStore() {
   const items = new Map<string, PendingPrivateOperation>();
   return {
-    save(operation: PendingPrivateOperation) {
+    async save(operation: PendingPrivateOperation) {
       items.set(`${operation.walletPublicKey}:${operation.id}`, operation);
     },
-    list(walletPublicKey: string) {
+    async list(walletPublicKey: string) {
       return [...items.values()].filter(
         (item) => item.walletPublicKey === walletPublicKey,
       );
     },
-    read(input: { walletPublicKey: string; operationId: string }) {
+    async read(input: { walletPublicKey: string; operationId: string }) {
       return items.get(`${input.walletPublicKey}:${input.operationId}`);
     },
   };
@@ -148,11 +148,11 @@ export function createTestPorts(relayApi?: Partial<RelayApi>): TestPorts {
     probe,
     relayApi: api,
     store: {
-      save(operation) {
+      async save(operation) {
         if (order.at(-1) !== "save") {
           order.push("save");
         }
-        store.save(operation);
+        await store.save(operation);
       },
       list: store.list,
       read: store.read,

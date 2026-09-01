@@ -1,4 +1,4 @@
-export { chooseSubmissionPath } from "./choose-submission-path.js";
+export { isUnfinalizedRelayOperation } from "./is-unfinalized-relay-operation.js";
 export {
   canOfferDirectSubmission,
   canRetryRelayAttempt,

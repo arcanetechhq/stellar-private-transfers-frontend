@@ -1,0 +1,6 @@
+.relay-waiting-status-shell {
+  position: fixed;
+  z-index: 30;
+  inset-inline-end: var(--space-4);
+  inset-block-end: var(--space-4);
+}

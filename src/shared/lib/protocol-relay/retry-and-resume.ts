@@ -1,4 +1,5 @@
 import { requireStoredOperation } from "./complete-succeeded-operation.js";
+import { isUnfinalizedRelayOperation } from "./is-unfinalized-relay-operation.js";
 import { canRetryRelayAttempt } from "./fallback-policy.js";
 import { pollPendingOperation } from "./poll-pending-operation.js";
 import {
@@ -22,12 +23,12 @@ export async function retryFailedRelayAttempt(input: {
   walletPublicKey: string;
   operationId: string;
 }): Promise<SubmitPrivateOperationResult> {
-  const operation = requireStoredOperation(input);
+  const operation = await requireStoredOperation(input);
   if (!canRetryRelayAttempt(operation) || !operation.relayRequestId) {
     throw new Error("Relay retry is not allowed for this operation.");
   }
   await input.ports.relayApi.retryAttempt(operation.relayRequestId);
-  input.ports.store.save({
+  await input.ports.store.save({
     ...withoutPublicReason(operation),
     phase: PENDING_OPERATION_PHASE.relayAccepted,
     relayStatus: RELAY_STATUS.accepted,
@@ -40,9 +41,10 @@ export async function resumePendingOperations(input: {
   ports: ProtocolRelayPorts;
   walletPublicKey: string;
 }): Promise<SubmitPrivateOperationResult[]> {
-  const pending = input.ports.store
-    .list(input.walletPublicKey)
-    .filter((operation) => operation.relayRequestId && !operation.finalized);
+  const listed = await input.ports.store.list(input.walletPublicKey);
+  const pending = listed.filter((operation) =>
+    isUnfinalizedRelayOperation(operation),
+  );
   const results: SubmitPrivateOperationResult[] = [];
   for (const operation of pending) {
     results.push(

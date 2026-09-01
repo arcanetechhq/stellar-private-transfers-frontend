@@ -12,7 +12,7 @@ export async function submitDirectFallback(input: {
   operationId: string;
   consent: boolean;
 }): Promise<SubmitPrivateOperationResult> {
-  const operation = requireStoredOperation(input);
+  const operation = await requireStoredOperation(input);
   if (!input.consent || !canOfferDirectSubmission(operation)) {
     throw new Error("Direct submission fallback is not allowed.");
   }

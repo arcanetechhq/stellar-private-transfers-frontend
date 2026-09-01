@@ -1,0 +1,11 @@
+.relay-waiting-status {
+  margin: 0;
+  max-width: 360px;
+  border-radius: var(--radius-4);
+  background: var(--surface-high);
+  color: var(--text);
+  padding: var(--space-3) var(--space-4);
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 500;
+}

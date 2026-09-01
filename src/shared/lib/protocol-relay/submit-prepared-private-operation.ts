@@ -42,33 +42,33 @@ async function submitDirectPath(input: {
   });
 }
 
-function saveAdmissionFailure(input: {
+async function saveAdmissionFailure(input: {
   ports: ProtocolRelayPorts;
   operation: PendingPrivateOperation;
   reason: string;
-}): SubmitPrivateOperationResult {
+}): Promise<SubmitPrivateOperationResult> {
   const failed: PendingPrivateOperation = {
     ...input.operation,
     phase: PENDING_OPERATION_PHASE.admissionFailed,
     publicReason: input.reason,
     retryAllowed: false,
   };
-  input.ports.store.save(failed);
+  await input.ports.store.save(failed);
   return toSubmitResult(failed);
 }
 
-function saveRejectedWithoutRequest(input: {
+async function saveRejectedWithoutRequest(input: {
   ports: ProtocolRelayPorts;
   operation: PendingPrivateOperation;
   reason: string;
-}): SubmitPrivateOperationResult {
+}): Promise<SubmitPrivateOperationResult> {
   const rejected: PendingPrivateOperation = {
     ...input.operation,
     phase: PENDING_OPERATION_PHASE.rejected,
     publicReason: input.reason,
     retryAllowed: false,
   };
-  input.ports.store.save(rejected);
+  await input.ports.store.save(rejected);
   return toSubmitResult(rejected);
 }
 
@@ -76,7 +76,7 @@ async function createRelayRequest(input: {
   ports: ProtocolRelayPorts;
   operation: PendingPrivateOperation;
 }): Promise<SubmitPrivateOperationResult> {
-  input.ports.store.save(input.operation);
+  await input.ports.store.save(input.operation);
   try {
     const accepted = await input.ports.relayApi.createRequest(
       input.operation.relayPackage,
@@ -88,7 +88,7 @@ async function createRelayRequest(input: {
       relayStatus: RELAY_STATUS.accepted,
       retryAllowed: false,
     };
-    input.ports.store.save(stored);
+    await input.ports.store.save(stored);
     return toSubmitResult(stored);
   } catch (error: unknown) {
     const reason =

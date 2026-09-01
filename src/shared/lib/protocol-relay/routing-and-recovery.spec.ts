@@ -110,7 +110,7 @@ describe("protocol relay concurrent success", () => {
     expect(ports.probe.finalizeCalls).toEqual([TEST_TX_HASH]);
     expect(ports.probe.drainCalls).toEqual([TEST_TX_HASH]);
     expect(ports.probe.txCalls).toEqual([TEST_TX_HASH]);
-    const stored = ports.store.read({
+    const stored = await ports.store.read({
       walletPublicKey: TEST_WALLET,
       operationId: TEST_OPERATION_ID,
     });

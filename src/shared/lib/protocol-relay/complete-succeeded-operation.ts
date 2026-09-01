@@ -33,12 +33,12 @@ export function toSubmitResult(
   return result;
 }
 
-export function requireStoredOperation(input: {
+export async function requireStoredOperation(input: {
   ports: ProtocolRelayPorts;
   walletPublicKey: string;
   operationId: string;
-}): PendingPrivateOperation {
-  const operation = input.ports.store.read({
+}): Promise<PendingPrivateOperation> {
+  const operation = await input.ports.store.read({
     walletPublicKey: input.walletPublicKey,
     operationId: input.operationId,
   });
@@ -83,7 +83,7 @@ async function applySuccessSideEffects(input: {
   if (!current.finalized) {
     await input.ports.finalizeLocalState({ operation: current, txId: input.txId });
     current = { ...current, finalized: true };
-    input.ports.store.save(current);
+    await input.ports.store.save(current);
   }
   if (!current.deliveriesDrained) {
     warning = await input.ports.drainDeliveries({
@@ -91,12 +91,12 @@ async function applySuccessSideEffects(input: {
       txId: input.txId,
     });
     current = { ...current, deliveriesDrained: true };
-    input.ports.store.save(current);
+    await input.ports.store.save(current);
   }
   if (!current.transactionPersisted) {
     input.ports.persistUserTransaction({ operation: current, txId: input.txId });
     current = { ...current, transactionPersisted: true };
-    input.ports.store.save(current);
+    await input.ports.store.save(current);
   }
   return { operation: current, warning };
 }
@@ -107,7 +107,7 @@ async function applySucceededCompletion(input: {
   txId: string;
 }): Promise<SubmitPrivateOperationResult> {
   const applied = await applySuccessSideEffects(input);
-  input.ports.store.save(applied.operation);
+  await input.ports.store.save(applied.operation);
   return toSubmitResult(applied.operation, {
     txId: input.txId,
     ...(applied.warning ? { coinDeliveryWarning: applied.warning } : {}),
@@ -119,14 +119,14 @@ export async function completeSucceededOperation(input: {
   operation: PendingPrivateOperation;
   txId: string;
 }): Promise<SubmitPrivateOperationResult> {
-  const stored = input.ports.store.read({
+  const stored = await input.ports.store.read({
     walletPublicKey: input.operation.walletPublicKey,
     operationId: input.operation.id,
   });
   const succeeded = withSucceededPhase(stored ?? input.operation, input.txId);
   const key = successKey(succeeded, input.txId);
   if (isAlreadyCompleted(succeeded)) {
-    input.ports.store.save(succeeded);
+    await input.ports.store.save(succeeded);
     return toSubmitResult(succeeded, { txId: input.txId });
   }
   const existing = inFlightCompletions.get(key);

@@ -56,13 +56,13 @@ export async function pollPendingOperation(input: {
   walletPublicKey: string;
   operationId: string;
 }): Promise<SubmitPrivateOperationResult> {
-  const operation = requireStoredOperation(input);
+  const operation = await requireStoredOperation(input);
   if (!operation.relayRequestId) {
     return toSubmitResult(operation);
   }
   const status = await input.ports.relayApi.readStatus(operation.relayRequestId);
   const updated = applyStatus(operation, status);
-  input.ports.store.save(updated);
+  await input.ports.store.save(updated);
   if (status.status === RELAY_STATUS.succeeded && status.transactionHash) {
     return completeSucceededOperation({
       ports: input.ports,

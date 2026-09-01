@@ -4,8 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useAppSelector } from "@/store";
 import { selectContacts } from "@/entities/contact";
 import type { AssetWithTrustline } from "@/entities/asset";
-import { RelayReviewActions } from "@/features/submit-private-operation";
-import { PaymentReviewFooter } from "@/shared/ui/payment-review-footer";
+import { RelayPaymentReviewFooter } from "@/features/submit-private-operation";
 import { formatTransferAmount } from "../lib/format-transfer-amount";
 import { shortenStellarAddress } from "@/shared/lib/shorten-stellar-address";
 import { TransferReviewSummary } from "./transfer-review-summary";
@@ -100,23 +99,16 @@ function TransferReviewDialog(properties: {
           {properties.submitError}
         </div>
       ) : undefined}
-      <PaymentReviewFooter
+      <RelayPaymentReviewFooter
         cancelLabel={translate("review.cancel")}
         confirmLabel={translate("privateSend")}
-        submittingLabel={translate("submitting")}
         isSubmitting={properties.isSubmitting}
-        showConfirm={!properties.retryAllowed && !properties.fallbackAllowed}
+        retryAllowed={properties.retryAllowed}
+        fallbackAllowed={properties.fallbackAllowed}
         onClose={properties.onClose}
         onConfirm={properties.onConfirm}
-        extra={
-          <RelayReviewActions
-            retryAllowed={properties.retryAllowed}
-            fallbackAllowed={properties.fallbackAllowed}
-            disabled={properties.isSubmitting}
-            onRetry={properties.onRetry}
-            onFallback={properties.onFallback}
-          />
-        }
+        onRetry={properties.onRetry}
+        onFallback={properties.onFallback}
       />
     </>
   );

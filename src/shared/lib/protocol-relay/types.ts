@@ -109,12 +109,12 @@ export type RelayApi = {
 };
 
 export type PendingPrivateOperationStore = {
-  save: (operation: PendingPrivateOperation) => void;
-  list: (walletPublicKey: string) => PendingPrivateOperation[];
+  save: (operation: PendingPrivateOperation) => Promise<void>;
+  list: (walletPublicKey: string) => Promise<PendingPrivateOperation[]>;
   read: (input: {
     walletPublicKey: string;
     operationId: string;
-  }) => PendingPrivateOperation | undefined;
+  }) => Promise<PendingPrivateOperation | undefined>;
 };
 
 export type ProtocolRelayPorts = {
