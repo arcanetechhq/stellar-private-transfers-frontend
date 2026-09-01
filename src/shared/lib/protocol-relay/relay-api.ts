@@ -1,4 +1,5 @@
 import { getRequiredApiBaseUrl } from "@/shared/stellar/stellar-network-environment.js";
+import { relayApiOrigin } from "./relay-api-origin.js";
 import { RelayApiError } from "./relay-api-error.js";
 import type {
   RelayApi,
@@ -99,7 +100,7 @@ function mapStatus(record: JsonRecord): RelayRequestStatus {
 }
 
 export function createRelayApi(input?: { baseUrl?: string }): RelayApi {
-  const baseUrl = (input?.baseUrl ?? getRequiredApiBaseUrl()).replace(/\/$/u, "");
+  const baseUrl = relayApiOrigin(input?.baseUrl ?? getRequiredApiBaseUrl());
   return {
     async createRequest(body) {
       const result = await requestJson({

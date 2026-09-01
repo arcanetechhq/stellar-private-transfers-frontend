@@ -99,6 +99,7 @@ async function initializePrivacySdkClient(
       return wrapTransactEngineToProveAtPrepare({
         engine,
         environment: input.transactEnvironment,
+        poolService: getPrivacyPoolService() as unknown as PrivacyPoolService,
       });
     },
   );

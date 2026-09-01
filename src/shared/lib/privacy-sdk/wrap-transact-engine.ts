@@ -4,13 +4,14 @@ import type {
 } from "@arcanetech/privacy-sdk-stellar";
 import {
   finalizeSpendOperationAtExecute,
-  getPrivacyPoolService,
+  type PrivacyPoolService,
   type StellarTransactEnvironment,
 } from "@arcanetech/privacy-sdk-stellar/transact";
 
 export function wrapTransactEngineToProveAtPrepare(input: {
   engine: StellarTransactEngine;
   environment: StellarTransactEnvironment;
+  poolService: PrivacyPoolService;
 }): StellarTransactEngine {
   return {
     prepare: async (prepared: StellarPreparedOperation) => {
@@ -21,7 +22,7 @@ export function wrapTransactEngineToProveAtPrepare(input: {
       return finalizeSpendOperationAtExecute(
         afterPrepare,
         input.environment,
-        getPrivacyPoolService(),
+        input.poolService,
       );
     },
     submit: (prepared, signedPayload) => input.engine.submit(prepared, signedPayload),
