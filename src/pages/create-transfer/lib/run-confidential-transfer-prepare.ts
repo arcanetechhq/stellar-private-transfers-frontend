@@ -31,8 +31,8 @@ export async function prepareTransferExecution(parameters: {
   const poolContractId = getRequiredPrivacyPoolContractId();
   const recipientStellarAddress = input.recipientStellarAddress.trim();
   const senderTrim = input.senderPrivateAddress.trim();
-  const escrowSend = recipientTarget.escrowSend !== undefined;
-  const recipientAddress = escrowSend
+  const isEscrowSend = recipientTarget.escrowSend !== undefined;
+  const recipientAddress = isEscrowSend
     ? recipientStellarAddress
     : recipientTarget.recipientPrivateAddressStpl1;
   const privacyClient = await registerResolverAndValidate({
@@ -64,6 +64,7 @@ export async function prepareTransferExecution(parameters: {
     }),
     walletPublicKey: input.walletPublicKey,
     prepared: prepared.prepared,
+    ...(isEscrowSend ? { escrowSend: true } : {}),
     display: {
       kind: "transfer",
       assetId: input.assetId,

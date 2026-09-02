@@ -13,14 +13,33 @@ import type {
   SafeDisplayMetadata,
 } from "./types.js";
 
+function preparedForSubmission(
+  prepared: StellarPreparedOperation,
+  escrowSend?: boolean,
+): StellarPreparedOperation {
+  if (!escrowSend) {
+    return prepared;
+  }
+  return {
+    ...prepared,
+    transactArtifacts: {
+      ...prepared.transactArtifacts,
+      escrowSend: true,
+      spendSource: "escrow",
+    },
+  };
+}
+
 export async function routePreparedTransact(input: {
   ports: ProtocolRelayPorts;
   walletPublicKey: string;
   prepared: StellarPreparedOperation;
   display: SafeDisplayMetadata;
+  escrowSend?: boolean;
 }): Promise<{ txId: string; coinDeliveryWarning?: string }> {
-  const relayPackage = inspectPreparedRelayPackage(input.prepared);
-  const outbox = deliveryOutboxFromRecords(input.prepared.outputRecords);
+  const prepared = preparedForSubmission(input.prepared, input.escrowSend);
+  const relayPackage = inspectPreparedRelayPackage(prepared);
+  const outbox = deliveryOutboxFromRecords(prepared.outputRecords);
   const operationId = crypto.randomUUID();
   registerDirectSubmitter(operationId, input.ports.submitDirect);
   const result = await submitAndAwaitPrivateOperation({
@@ -28,15 +47,15 @@ export async function routePreparedTransact(input: {
     operation: {
       id: operationId,
       walletPublicKey: input.walletPublicKey,
-      submissionPath: requiredSubmissionMethod(input.prepared),
+      submissionPath: requiredSubmissionMethod(prepared),
       display: input.display,
       snapshot: {
-        consumedRecordIds: input.prepared.consumedRecords.map((record) => record.id),
+        consumedRecordIds: prepared.consumedRecords.map((record) => record.id),
         outputRecords: outbox,
       },
       deliveryOutbox: outbox,
       relayPackage,
-      ...(isEscrowPreparedOperation(input.prepared) ? { escrowSend: true } : {}),
+      ...(isEscrowPreparedOperation(prepared) ? { escrowSend: true } : {}),
     },
   });
   return throwIfRelayUnsuccessful(result);
