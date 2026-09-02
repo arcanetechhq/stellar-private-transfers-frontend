@@ -81,6 +81,7 @@ function createIndexFetch(calls: FetchCall[]): typeof fetch {
             txId: TX_BEFORE_REGISTER,
             poolAddress: POOL_ADDRESS,
             seq: 0,
+            escrowNonce: "7",
             createdAt: CREATED_AT,
           },
         ],

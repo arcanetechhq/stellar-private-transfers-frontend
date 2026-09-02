@@ -9,6 +9,7 @@ function isSameEscrowNote(
     left.txId === right.txId &&
     left.poolAddress === right.poolAddress &&
     left.seq === right.seq &&
+    left.escrowNonce === right.escrowNonce &&
     left.createdAt === right.createdAt
   );
 }

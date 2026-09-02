@@ -3,5 +3,6 @@ export type EscrowIndexNote = {
   txId: string;
   poolAddress: string;
   seq: number;
+  escrowNonce: string;
   createdAt: string;
 };
