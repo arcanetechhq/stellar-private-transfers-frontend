@@ -49,6 +49,46 @@ function TransactionDateCell(properties: TransactionDateCellProperties) {
   );
 }
 
+function readTransactionCounterpartyCopy(input: {
+  transaction: Transaction;
+  walletPublicKey: string | undefined;
+  assetLabel: string;
+  translateTransactions: (key: string) => string;
+}): { display: string; title: string | undefined } {
+  return {
+    display: formatTransactionTableSubtitle({
+      transaction: input.transaction,
+      walletPublicKey: input.walletPublicKey,
+      options: {
+        privateTransferLabel: input.translateTransactions(
+          "privateTransferSubtitle",
+        ),
+        pendingSubtitle: input.translateTransactions(
+          "transactionSubtitle.pending",
+        ),
+        claimCreditLabel: input.translateTransactions("claimCreditSubtitle"),
+        assetFallback: input.assetLabel,
+      },
+    }),
+    title: transactionTableSubtitleTitle(
+      input.transaction,
+      input.walletPublicKey,
+    ),
+  };
+}
+
+function navigateOnRowActivate(input: {
+  event: React.KeyboardEvent<HTMLTableRowElement>;
+  detailsPath: string;
+  navigate: (path: string) => void;
+}): void {
+  if (input.event.key !== "Enter" && input.event.key !== " ") {
+    return;
+  }
+  input.event.preventDefault();
+  input.navigate(input.detailsPath);
+}
+
 export function TransactionTableRow(properties: TransactionTableRowProperties) {
   const { t: translateHistory } = useTranslation("history");
   const { t: translateTransactions } = useTranslation("transactions");
@@ -59,44 +99,23 @@ export function TransactionTableRow(properties: TransactionTableRowProperties) {
   const assetLabel = asset?.name ?? transaction.assetId;
   const amountToneClass = getAmountToneClass(transaction.type);
   const walletPublicKey = useAppSelector(selectWalletPublicKey);
-  const counterpartyDisplay = formatTransactionTableSubtitle(
+  const counterparty = readTransactionCounterpartyCopy({
     transaction,
     walletPublicKey,
-    {
-      privateTransferLabel: translateTransactions("privateTransferSubtitle"),
-      pendingSubtitle: translateTransactions("transactionSubtitle.pending"),
-      claimCreditLabel: translateTransactions("claimCreditSubtitle"),
-      assetFallback: assetLabel,
-    },
-  );
-  const counterpartyTitle = transactionTableSubtitleTitle(
-    transaction,
-    walletPublicKey,
-  );
+    assetLabel,
+    translateTransactions,
+  });
   const detailsPath = buildTransactionsPathWithSelection(transaction.id);
-
-  const handleRowClick = () => {
-    navigate(detailsPath);
-  };
-
-  const handleRowKeyDown: React.KeyboardEventHandler<HTMLTableRowElement> = (
-    event,
-  ) => {
-    if (event.key !== "Enter" && event.key !== " ") {
-      return;
-    }
-
-    event.preventDefault();
-    navigate(detailsPath);
-  };
 
   return (
     <tr
       className="cursor-pointer transition-colors hover:bg-[var(--surface-hover)] focus-visible:bg-[var(--surface-hover)] focus-visible:outline-none"
       role="link"
       tabIndex={0}
-      onClick={handleRowClick}
-      onKeyDown={handleRowKeyDown}
+      onClick={() => navigate(detailsPath)}
+      onKeyDown={(event) =>
+        navigateOnRowActivate({ event, detailsPath, navigate })
+      }
     >
       <TransactionDateCell date={transaction.date} />
       <td className="px-6 py-4 whitespace-nowrap">
@@ -131,9 +150,9 @@ export function TransactionTableRow(properties: TransactionTableRowProperties) {
       </td>
       <td
         className="px-6 py-4 font-mono text-[13px] leading-[18px] whitespace-nowrap text-[var(--foreground-secondary)]"
-        title={counterpartyTitle}
+        title={counterparty.title}
       >
-        {counterpartyDisplay}
+        {counterparty.display}
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         <StatusBadge variant={getStatusVariant(transaction.status)}>

@@ -1,3 +1,4 @@
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { getAssetUsdPrice, useAssetLookup } from "@/entities/asset";
 import { isPendingClaimTransactionId } from "@/entities/pending-claims";
@@ -51,11 +52,15 @@ export function TransactionFromToCell({
   const asset = assetMap.get(transaction.assetId);
   const walletPublicKey = useAppSelector(selectWalletPublicKey);
   const assetFallback = asset?.name ?? transaction.assetId.toUpperCase();
-  const subtitle = formatTransactionTableSubtitle(transaction, walletPublicKey, {
-    privateTransferLabel: translate("privateTransferSubtitle"),
-    pendingSubtitle: translate("transactionSubtitle.pending"),
-    claimCreditLabel: translate("claimCreditSubtitle"),
-    assetFallback,
+  const subtitle = formatTransactionTableSubtitle({
+    transaction,
+    walletPublicKey,
+    options: {
+      privateTransferLabel: translate("privateTransferSubtitle"),
+      pendingSubtitle: translate("transactionSubtitle.pending"),
+      claimCreditLabel: translate("claimCreditSubtitle"),
+      assetFallback,
+    },
   });
 
   return (

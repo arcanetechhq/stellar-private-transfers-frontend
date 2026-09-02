@@ -3,7 +3,7 @@ import type { Transaction } from "@/entities/transaction";
 import { getPendingClaimTransactionId } from "@/entities/pending-claims";
 import { stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops.js";
 import { useClaimPendingClaim } from "@/features/claim-pending-claim";
-import { useTransactionsWithPendingClaims } from "./use-transactions-with-pending-claims.js";
+import { useMergedWalletTransactions } from "./use-merged-wallet-transactions.js";
 
 export type PendingAssetClaimListItem = {
   claimId: number;
@@ -19,7 +19,7 @@ export function useTransactionPanelPendingClaims(transactions: Transaction[]) {
     assetIdsByClaimId,
     reloadPendingClaims,
     removePendingClaim,
-  } = useTransactionsWithPendingClaims(transactions);
+  } = useMergedWalletTransactions(transactions);
 
   const handleClaimed = useCallback(
     (claimId: number) => {

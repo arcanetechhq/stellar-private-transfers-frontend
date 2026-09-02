@@ -1,3 +1,4 @@
+import { isEscrowIndexTransactionId } from "@/entities/escrow-index";
 import type { Transaction } from "@/entities/transaction";
 import { isPendingClaimTransactionId } from "@/entities/pending-claims";
 import {
@@ -13,18 +14,25 @@ function isPublicAddressTableType(type: Transaction["type"]): boolean {
   return type === "deposit" || type === "withdrawal";
 }
 
-export function formatTransactionTableSubtitle(
-  transaction: Transaction,
-  walletPublicKey: string | undefined,
+export function formatTransactionTableSubtitle(input: {
+  transaction: Transaction;
+  walletPublicKey: string | undefined;
   options: {
     privateTransferLabel: string;
     pendingSubtitle: string;
     claimCreditLabel: string;
     assetFallback: string;
-  },
-): string {
+  };
+}): string {
+  const { transaction, walletPublicKey, options } = input;
   if (isPendingClaimTransactionId(transaction.id)) {
     return options.pendingSubtitle;
+  }
+  if (isEscrowIndexTransactionId(transaction.id)) {
+    return formatTransactionPublicAddressForDisplay(
+      transaction,
+      walletPublicKey,
+    );
   }
   if (transaction.type === "claim") {
     return options.claimCreditLabel;
@@ -62,6 +70,13 @@ export function transactionTableSubtitleTitle(
   transaction: Transaction,
   walletPublicKey: string | undefined,
 ): string | undefined {
+  if (isEscrowIndexTransactionId(transaction.id)) {
+    const address = resolveTransactionPublicAddress(
+      transaction,
+      walletPublicKey,
+    );
+    return address || undefined;
+  }
   if (isPrivateTransferTableType(transaction.type)) {
     return undefined;
   }

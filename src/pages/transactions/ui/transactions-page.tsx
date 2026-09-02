@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 import { useAppSelector } from "@/store";
 import {
@@ -9,7 +9,7 @@ import {
   readSelectedTransactionIdFromSearch,
   TransactionDetailsPanel,
   TransactionsPanel,
-  useTransactionsWithPendingClaims,
+  useMergedWalletTransactions,
   writeSelectedTransactionIdToSearch,
 } from "@/widgets/transaction-list";
 
@@ -21,8 +21,7 @@ export function TransactionsPage() {
   >(selectedFromSearch);
   const transactions = useAppSelector(selectTransactions);
   const transactionsLoaded = useAppSelector(selectAreTransactionsLoaded);
-  const { mergedTransactions } =
-    useTransactionsWithPendingClaims(transactions);
+  const { mergedTransactions } = useMergedWalletTransactions(transactions);
 
   const selectedTransaction = useMemo(
     () =>
