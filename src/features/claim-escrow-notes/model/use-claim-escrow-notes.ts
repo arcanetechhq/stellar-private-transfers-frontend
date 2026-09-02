@@ -1,4 +1,6 @@
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import type { EscrowIndexNote } from "@/entities/escrow-index";
 import { useAppDispatch } from "@/store";
 import { sequenceClaimEscrowNotes } from "../lib/sequence-claim-escrow-notes.js";
@@ -15,14 +17,16 @@ export function useClaimEscrowNotes(input: {
   ensureWalletScalar: () => Promise<string>;
 }): void {
   const dispatch = useAppDispatch();
+  const { t: translate } = useTranslation("overview");
   const inFlight = useRef(false);
+  const halted = useRef(false);
   const claimed = useRef(new Set<string>());
   const { notes, walletPublicKey, ensureWalletPrivateAddress, ensureWalletScalar } =
     input;
 
   useEffect(() => {
     const owner = walletPublicKey?.trim();
-    if (!owner || notes.length === 0 || inFlight.current) {
+    if (!owner || notes.length === 0 || inFlight.current || halted.current) {
       return;
     }
     const pending = notes.filter((note) => !claimed.current.has(noteKey(note)));
@@ -45,7 +49,8 @@ export function useClaimEscrowNotes(input: {
       },
     })
       .catch(() => {
-        return;
+        halted.current = true;
+        toast.error(translate("escrowClaimFailed"));
       })
       .finally(() => {
         inFlight.current = false;
@@ -55,6 +60,7 @@ export function useClaimEscrowNotes(input: {
     ensureWalletPrivateAddress,
     ensureWalletScalar,
     notes,
+    translate,
     walletPublicKey,
   ]);
 }

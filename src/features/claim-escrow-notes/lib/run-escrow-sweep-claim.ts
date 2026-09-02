@@ -30,7 +30,7 @@ export async function runEscrowSweepClaim(input: {
     ports: {
       fetchOutputNoteEvents: async ({ txId, poolAddress }) =>
         fetchEscrowOutputNoteEvents({
-          rpcUrl: getPrivacyTransactEnvironment().network.rpcUrl,
+          transactEnvironment: getPrivacyTransactEnvironment(),
           txId,
           poolAddress,
         }),

@@ -23,6 +23,7 @@
   "showBalance": "Show balance",
   "hideBalance": "Hide balance",
   "refreshBalance": "Refresh balance",
+  "escrowClaimFailed": "Could not claim an escrow note.",
   "monthlyNet": {
     "title": "Monthly NET",
     "inflow": "Inflow",

@@ -61,4 +61,22 @@ describe("escrow sweep sequencer", () => {
     });
     expect(registerCalls).toBe(0);
   });
+
+  it("stops on the first claim error and does not continue", async () => {
+    const claimed: string[] = [];
+    await expect(
+      sequenceClaimEscrowNotes({
+        notes: [noteAt(0), noteAt(1), noteAt(2)],
+        ensureWalletPrivateAddress: async () => REGISTERED_PA,
+        ensureWalletScalar: async () => "aa".repeat(SCALAR_HEX_BYTES),
+        claimNote: async ({ note }) => {
+          if (note.txId === "tx-escrow-0") {
+            throw new Error("claim failed");
+          }
+          claimed.push(note.txId);
+        },
+      }),
+    ).rejects.toThrow("claim failed");
+    expect(claimed).toEqual([]);
+  });
 });
