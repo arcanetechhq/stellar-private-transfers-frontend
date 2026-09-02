@@ -8,5 +8,5 @@ export type RecipientRegistryStatus =
 export function isRecipientRegistryReadyToSend(
   status: RecipientRegistryStatus,
 ): boolean {
-  return status === "registered" || status === "unregistered";
+  return status === "registered";
 }
