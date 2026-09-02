@@ -20,5 +20,8 @@ export default {
     "^@/(.*)\\.js$": "<rootDir>/src/$1",
     "^@/(.*)$": "<rootDir>/src/$1",
     "^(\\.{1,2}/.*)\\.js$": "$1",
+    "^@arcanetech/privacy-sdk-relay$":
+      "<rootDir>/node_modules/@arcanetech/privacy-sdk-relay/src/index.ts",
   },
+  transformIgnorePatterns: ["/node_modules/(?!(@arcanetech/privacy-sdk-relay)/)"],
 };
