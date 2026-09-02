@@ -24,8 +24,8 @@
   "senderPrivateAddressPlaceholder": "Choose your private address",
   "invalidRecipientStellarAddress": "Enter a valid Stellar recipient address (G…).",
   "recipientSameAsSender": "Recipient must differ from your connected wallet address.",
-  "onboardingRecipientNotice": "Recipient not registered",
-  "onboardingRecipientDescription": "Transfers to unregistered recipients are not supported. Ask the recipient to register a private address first.",
+  "onboardingRecipientNotice": "Recipient is not registered",
+  "onboardingRecipientDescription": "You can still send privately. The recipient claims the funds after they register.",
   "onboardingTransfer": "Onboarding transfer",
   "errors": {
     "inputNoteAlreadySpent": "One of the selected private notes was already spent on-chain. Refresh your balance and try again."

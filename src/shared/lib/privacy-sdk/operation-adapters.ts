@@ -20,13 +20,6 @@ const PRIVATE_TRANSFER_DISCLOSURE = {
   amount: "private" as const,
 };
 
-const ONBOARDING_TRANSFER_DISCLOSURE = {
-  senderAddress: "public" as const,
-  recipientAddress: "public" as const,
-  assetAddress: "public" as const,
-  amount: "public" as const,
-};
-
 const PUBLIC_WITHDRAW_DISCLOSURE = {
   senderAddress: "private" as const,
   recipientAddress: "public" as const,
@@ -62,7 +55,6 @@ export async function validateTransferOperation(
     recipientAddress: string;
     assetId: string;
     amountStroops: bigint;
-    onboardingRecipient: boolean;
   },
 ): Promise<void> {
   const result = await client.transfer({
@@ -70,9 +62,7 @@ export async function validateTransferOperation(
     to: input.recipientAddress,
     asset: input.assetId,
     amount: input.amountStroops,
-    disclosure: input.onboardingRecipient
-      ? ONBOARDING_TRANSFER_DISCLOSURE
-      : PRIVATE_TRANSFER_DISCLOSURE,
+    disclosure: PRIVATE_TRANSFER_DISCLOSURE,
   });
   if (result.status === "rejected") {
     throw new Error(mapPrivacySdkErrors(result.errors));

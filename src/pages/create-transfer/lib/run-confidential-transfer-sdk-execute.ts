@@ -11,20 +11,12 @@ const PRIVATE_TRANSFER_DISCLOSURE = {
   amount: "private" as const,
 };
 
-const ONBOARDING_TRANSFER_DISCLOSURE = {
-  senderAddress: "public" as const,
-  recipientAddress: "public" as const,
-  assetAddress: "public" as const,
-  amount: "public" as const,
-};
-
 export async function prepareSdkTransfer(parameters: {
   client: StellarPrivacyClient;
   senderPrivateAddress: string;
   recipientAddress: string;
   assetId: string;
   amountStroops: bigint;
-  onboardingRecipient: boolean;
 }): Promise<{
   prepared: StellarPreparedOperation;
   execute: () => Promise<{ operationId: string }>;
@@ -34,9 +26,7 @@ export async function prepareSdkTransfer(parameters: {
     to: parameters.recipientAddress,
     asset: parameters.assetId,
     amount: parameters.amountStroops,
-    disclosure: parameters.onboardingRecipient
-      ? ONBOARDING_TRANSFER_DISCLOSURE
-      : PRIVATE_TRANSFER_DISCLOSURE,
+    disclosure: PRIVATE_TRANSFER_DISCLOSURE,
   });
   if (prepared.status === "rejected") {
     throw new Error(mapPrivacySdkErrors(prepared.errors));

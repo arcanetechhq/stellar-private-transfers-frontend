@@ -1,5 +1,8 @@
 import type { StellarPreparedOperation } from "@arcanetech/privacy-sdk-stellar";
-import { requiredSubmissionMethod } from "@arcanetech/privacy-sdk-stellar/transact";
+import {
+  isEscrowPreparedOperation,
+  requiredSubmissionMethod,
+} from "@arcanetech/privacy-sdk-stellar/transact";
 import { deliveryOutboxFromRecords } from "./map-delivery-outbox.js";
 import { inspectPreparedRelayPackage } from "./inspect-prepared-relay-package.js";
 import { submitAndAwaitPrivateOperation } from "./await-relay-settlement.js";
@@ -33,6 +36,7 @@ export async function routePreparedTransact(input: {
       },
       deliveryOutbox: outbox,
       relayPackage,
+      ...(isEscrowPreparedOperation(input.prepared) ? { escrowSend: true } : {}),
     },
   });
   return throwIfRelayUnsuccessful(result);

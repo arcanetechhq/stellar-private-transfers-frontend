@@ -6,6 +6,6 @@ describe("isRecipientRegistryReadyToSend", () => {
     expect(isRecipientRegistryReadyToSend("checking")).toBe(false);
     expect(isRecipientRegistryReadyToSend("lookup_failed")).toBe(false);
     expect(isRecipientRegistryReadyToSend("registered")).toBe(true);
-    expect(isRecipientRegistryReadyToSend("unregistered")).toBe(false);
+    expect(isRecipientRegistryReadyToSend("unregistered")).toBe(true);
   });
 });

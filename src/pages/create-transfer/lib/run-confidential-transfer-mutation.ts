@@ -4,7 +4,7 @@ import type {
   RunConfidentialTransferResult,
 } from "./confidential-transfer-mutation-types";
 import { prepareTransferExecution } from "./run-confidential-transfer-prepare";
-import type { TemporaryRecipientKeyMaterial } from "@arcanetech/privacy-sdk-stellar/transact";
+import type { TransferEscrowSend } from "@arcanetech/privacy-sdk-stellar/transact";
 
 export type {
   RunConfidentialTransferInput,
@@ -13,7 +13,7 @@ export type {
 
 export type RecipientTransferTarget = {
   recipientPrivateAddressStpl1: string;
-  temporaryKeyMaterial?: TemporaryRecipientKeyMaterial;
+  escrowSend?: TransferEscrowSend;
 };
 
 async function resolveRecipientTransferTarget(parameters: {
@@ -27,9 +27,7 @@ async function resolveRecipientTransferTarget(parameters: {
   });
   return {
     recipientPrivateAddressStpl1: resolved.recipientPrivateAddressStpl1,
-    ...(resolved.temporaryRecipientKey
-      ? { temporaryKeyMaterial: resolved.temporaryRecipientKey }
-      : {}),
+    ...(resolved.escrowSend ? { escrowSend: resolved.escrowSend } : {}),
   };
 }
 

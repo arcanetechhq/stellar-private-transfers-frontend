@@ -12,7 +12,6 @@ async function registerResolverAndValidate(parameters: {
   input: RunConfidentialTransferInput;
   senderTrim: string;
   recipientAddress: string;
-  onboardingRecipient: boolean;
 }): Promise<ReturnType<typeof getPrivacySdkClientOrThrow>> {
   const privacyClient = getPrivacySdkClientOrThrow();
   await validateTransferOperation(privacyClient, {
@@ -20,7 +19,6 @@ async function registerResolverAndValidate(parameters: {
     recipientAddress: parameters.recipientAddress,
     assetId: parameters.input.assetId,
     amountStroops: displayAmountToStroops(parameters.input.amountDisplay),
-    onboardingRecipient: parameters.onboardingRecipient,
   });
   return privacyClient;
 }
@@ -33,15 +31,14 @@ export async function prepareTransferExecution(parameters: {
   const poolContractId = getRequiredPrivacyPoolContractId();
   const recipientStellarAddress = input.recipientStellarAddress.trim();
   const senderTrim = input.senderPrivateAddress.trim();
-  const onboardingRecipient = recipientTarget.temporaryKeyMaterial !== undefined;
-  const recipientAddress = recipientTarget.temporaryKeyMaterial
+  const escrowSend = recipientTarget.escrowSend !== undefined;
+  const recipientAddress = escrowSend
     ? recipientStellarAddress
     : recipientTarget.recipientPrivateAddressStpl1;
   const privacyClient = await registerResolverAndValidate({
     input,
     senderTrim,
     recipientAddress,
-    onboardingRecipient,
   });
   await privacyClient.syncPoolMerkleState({
     poolContractId,
@@ -53,7 +50,6 @@ export async function prepareTransferExecution(parameters: {
     recipientAddress,
     assetId: input.assetId,
     amountStroops: displayAmountToStroops(input.amountDisplay),
-    onboardingRecipient,
   });
   return routePreparedTransact({
     ports: createAppRelayPorts({
@@ -69,7 +65,7 @@ export async function prepareTransferExecution(parameters: {
     walletPublicKey: input.walletPublicKey,
     prepared: prepared.prepared,
     display: {
-      kind: onboardingRecipient ? "onboarding" : "transfer",
+      kind: "transfer",
       assetId: input.assetId,
       amountDisplay: input.amountDisplay,
       counterparty: recipientStellarAddress,
