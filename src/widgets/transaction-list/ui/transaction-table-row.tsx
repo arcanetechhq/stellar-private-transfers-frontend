@@ -63,9 +63,6 @@ function readTransactionCounterpartyCopy(input: {
         privateTransferLabel: input.translateTransactions(
           "privateTransferSubtitle",
         ),
-        pendingSubtitle: input.translateTransactions(
-          "transactionSubtitle.pending",
-        ),
         claimCreditLabel: input.translateTransactions("claimCreditSubtitle"),
         assetFallback: input.assetLabel,
       },

@@ -1,5 +1,4 @@
 import { isEscrowIndexTransactionId } from "@/entities/escrow-index";
-import { isPendingClaimTransactionId } from "@/entities/pending-claims";
 
 export function getTransactionLabel(
   type: string,
@@ -20,9 +19,6 @@ export function resolveTransactionActivityTitle(
   transaction: { id: string; type: string },
   translate: (key: string) => string,
 ): string {
-  if (isPendingClaimTransactionId(transaction.id)) {
-    return translate("transactionLabels.pending");
-  }
   if (isEscrowIndexTransactionId(transaction.id)) {
     return translate("transactionLabels.escrowNote");
   }

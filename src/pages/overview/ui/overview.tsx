@@ -8,7 +8,7 @@ import {
 } from "@/entities/transaction";
 import {
   TransactionsPanel,
-  useTransactionPanelPendingClaims,
+  useMergedWalletTransactions,
 } from "@/widgets/transaction-list";
 import { BalanceHero } from "./balance-hero";
 import { PrivateAssetTable } from "@/widgets/private-asset-table";
@@ -25,8 +25,7 @@ export function Overview() {
 
   const transactions = useAppSelector(selectTransactions);
   const transactionsLoaded = useAppSelector(selectAreTransactionsLoaded);
-  const { mergedTransactions, pendingAssetClaims, claimControls } =
-    useTransactionPanelPendingClaims(transactions);
+  const { mergedTransactions } = useMergedWalletTransactions(transactions);
 
   const privateAmountByAssetId = new Map<string, number>();
   for (const item of privateCoinItems) {
@@ -57,10 +56,7 @@ export function Overview() {
           />
           <div className="grid grid-cols-1 min-[1180px]:grid-cols-[1fr_416px] gap-4">
             <div className="overview-right-rail order-1 min-[1180px]:order-2 min-[1180px]:col-start-2 min-[1180px]:row-start-1">
-              <PrivateAssetTable
-                pendingAssetClaims={pendingAssetClaims}
-                claimControls={claimControls}
-              />
+              <PrivateAssetTable />
             </div>
             <div className="order-2 min-[1180px]:order-1 min-[1180px]:col-start-1 min-[1180px]:row-start-1">
               <TransactionsPanel

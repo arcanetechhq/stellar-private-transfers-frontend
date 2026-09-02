@@ -17,11 +17,7 @@ export {
   parseKytReasonCode,
 } from "@arcanetech/privacy-sdk-stellar/transact";
 
-const PENDING_CLAIM_ERROR_KEYS: Record<string, string> = {
-  pending_claim_not_found: "pendingClaims:errors.claimNotFound",
-  pending_claim_owner_mismatch: "pendingClaims:errors.claimOwnerMismatch",
-  pending_claim_nullifier_spent: "pendingClaims:errors.claimAlreadySpent",
-  pending_claim_missing_nullifier: "pendingClaims:errors.claimMissingNullifier",
+const INSUFFICIENT_STATE_ERROR_KEYS: Record<string, string> = {
   private_record_nullifier_spent: "transfer:errors.inputNoteAlreadySpent",
 };
 
@@ -54,7 +50,7 @@ function formatWalletAccountMismatchMessage(): string {
 }
 
 function mapInsufficientStateReason(reason: string): string | undefined {
-  const key = PENDING_CLAIM_ERROR_KEYS[reason];
+  const key = INSUFFICIENT_STATE_ERROR_KEYS[reason];
   if (!key) {
     return undefined;
   }
@@ -77,6 +73,20 @@ function mapExecutionValidationReason(details: unknown): string | undefined {
   return mapInsufficientStateReason(reason);
 }
 
+function fallbackPrivacySdkErrorMessage(error: PrivacySdkError): string {
+  if (typeof error.message === "string" && error.message.trim().length > 0) {
+    return error.message;
+  }
+  if (error.details === undefined) {
+    return `${error.code}: Operation failed`;
+  }
+  try {
+    return JSON.stringify(error.details);
+  } catch {
+    return `${error.code}: Operation failed`;
+  }
+}
+
 function mapPrivacySdkErrorMessage(error: PrivacySdkError): string {
   if (
     typeof error.message === "string" &&
@@ -96,17 +106,7 @@ function mapPrivacySdkErrorMessage(error: PrivacySdkError): string {
       return mapped;
     }
   }
-  if (typeof error.message === "string" && error.message.trim().length > 0) {
-    return error.message;
-  }
-  if (error.details !== undefined) {
-    try {
-      return JSON.stringify(error.details);
-    } catch {
-      return `${error.code}: Operation failed`;
-    }
-  }
-  return `${error.code}: Operation failed`;
+  return fallbackPrivacySdkErrorMessage(error);
 }
 
 function readErrorLikeMessage(error: unknown): string | undefined {

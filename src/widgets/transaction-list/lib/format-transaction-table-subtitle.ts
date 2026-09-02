@@ -1,6 +1,5 @@
 import { isEscrowIndexTransactionId } from "@/entities/escrow-index";
 import type { Transaction } from "@/entities/transaction";
-import { isPendingClaimTransactionId } from "@/entities/pending-claims";
 import {
   formatTransactionPublicAddressForDisplay,
   resolveTransactionPublicAddress,
@@ -19,15 +18,11 @@ export function formatTransactionTableSubtitle(input: {
   walletPublicKey: string | undefined;
   options: {
     privateTransferLabel: string;
-    pendingSubtitle: string;
     claimCreditLabel: string;
     assetFallback: string;
   };
 }): string {
   const { transaction, walletPublicKey, options } = input;
-  if (isPendingClaimTransactionId(transaction.id)) {
-    return options.pendingSubtitle;
-  }
   if (isEscrowIndexTransactionId(transaction.id)) {
     return formatTransactionPublicAddressForDisplay(
       transaction,

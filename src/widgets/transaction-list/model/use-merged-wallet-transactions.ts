@@ -9,11 +9,9 @@ import { useDiscoverEscrowNotes } from "@/features/discover-escrow-notes";
 import { useClaimEscrowNotes } from "@/features/claim-escrow-notes";
 import { useWalletPrivateAddress } from "@/features/register-private-address";
 import { useAppSelector } from "@/store";
-import { useTransactionsWithPendingClaims } from "./use-transactions-with-pending-claims.js";
 
 export function useMergedWalletTransactions(transactions: Transaction[]) {
   const publicKey = useAppSelector(selectWalletPublicKey);
-  const pending = useTransactionsWithPendingClaims(transactions);
   const { notes } = useDiscoverEscrowNotes(publicKey);
   const { ensureWalletPrivateAddress, ensureWalletScalar } =
     useWalletPrivateAddress();
@@ -35,13 +33,10 @@ export function useMergedWalletTransactions(transactions: Transaction[]) {
   const mergedTransactions = useMemo(
     () =>
       mergeTransactionsWithEscrowNotes({
-        transactions: pending.mergedTransactions,
+        transactions,
         escrowRows,
       }),
-    [escrowRows, pending.mergedTransactions],
+    [escrowRows, transactions],
   );
-  return {
-    ...pending,
-    mergedTransactions,
-  };
+  return { mergedTransactions };
 }

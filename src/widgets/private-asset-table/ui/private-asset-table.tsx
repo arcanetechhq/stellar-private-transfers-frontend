@@ -3,34 +3,15 @@ import "./private-asset-table.css";
 import "@/shared/styles/period-select.css";
 import { Wallet } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { RelayReviewActions } from "@/features/submit-private-operation";
-import {
-  PrivateAssetTableBody,
-  type PrivateAssetPendingClaimItem,
-} from "./private-asset-table-body";
+import { PrivateAssetTableBody } from "./private-asset-table-body";
 import { usePrivateAssetTableModel } from "../lib/use-private-asset-table-model";
-
-type PendingClaimControls = {
-  claimingId: number | undefined;
-  canClaim: boolean;
-  onClaim: (transactionId: string) => void;
-  error?: string;
-  retryAllowed?: boolean;
-  fallbackAllowed?: boolean;
-  onRetry?: () => void;
-  onFallback?: () => void;
-};
 
 type PrivateAssetTableProperties = {
   postAddressPicker?: ReactNode;
-  pendingAssetClaims?: PrivateAssetPendingClaimItem[];
-  claimControls?: PendingClaimControls;
 };
 
 export function PrivateAssetTable({
   postAddressPicker,
-  pendingAssetClaims,
-  claimControls,
 }: PrivateAssetTableProperties) {
   const { t: translateAssets } = useTranslation("assets");
   const { t: translateOverview } = useTranslation("overview");
@@ -56,28 +37,12 @@ export function PrivateAssetTable({
           <div className="asset-balances-panel__meta">{postAddressPicker}</div>
         ) : undefined}
       </div>
-      {claimControls?.error ? (
-        <div>
-          <p className="asset-balances-panel__claim-error" role="alert">
-            {claimControls.error}
-          </p>
-          <RelayReviewActions
-            retryAllowed={Boolean(claimControls.retryAllowed)}
-            fallbackAllowed={Boolean(claimControls.fallbackAllowed)}
-            disabled={claimControls.claimingId !== undefined}
-            onRetry={() => claimControls.onRetry?.()}
-            onFallback={() => claimControls.onFallback?.()}
-          />
-        </div>
-      ) : undefined}
       <PrivateAssetTableBody
         translateAssets={translateAssets}
         noncesLength={effectivePrivateAddress ? 1 : 0}
         aggregates={aggregatesWithZeroAssets}
         assetMetaById={assetMetaById}
         assetUsdPriceById={assetUsdPriceById}
-        pendingAssetClaims={pendingAssetClaims}
-        claimControls={claimControls}
       />
     </section>
   );

@@ -9,10 +9,4 @@ export {
   readSelectedTransactionIdFromSearch,
   writeSelectedTransactionIdToSearch,
 } from "./lib/transactions-selection-path";
-export {
-  useTransactionPanelPendingClaims,
-  type PendingAssetClaimListItem,
-} from "./model/use-transaction-panel-pending-claims.js";
-export { useTransactionsWithPendingClaims } from "./model/use-transactions-with-pending-claims.js";
 export { useMergedWalletTransactions } from "./model/use-merged-wallet-transactions.js";
-export { mergeTransactionsWithPendingClaims } from "./model/merge-transactions-with-pending-claims.js";

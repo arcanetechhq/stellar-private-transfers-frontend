@@ -1,10 +1,5 @@
 import type { StellarPrivacyClient } from "@arcanetech/privacy-sdk-stellar";
 import { mapPrivacySdkErrors } from "./map-privacy-sdk-errors.js";
-import {
-  mapPendingClaimItemToSdkClaim,
-  PENDING_CLAIM_TRANSFER_DISCLOSURE,
-} from "./execute-sdk-pending-claim-transfer.js";
-import type { PendingClaimItem } from "@/entities/pending-claims/model/pending-claim-types.js";
 
 export const DEPOSIT_DISCLOSURE = {
   senderAddress: "public" as const,
@@ -84,29 +79,6 @@ export async function validateWithdrawOperation(
     asset: input.assetId,
     amount: input.amountStroops,
     disclosure: PUBLIC_WITHDRAW_DISCLOSURE,
-  });
-  if (result.status === "rejected") {
-    throw new Error(mapPrivacySdkErrors(result.errors));
-  }
-}
-
-export async function validatePendingClaimOperation(
-  client: StellarPrivacyClient,
-  input: {
-    claim: PendingClaimItem;
-    recipientPrivateAddress: string;
-    assetId: string;
-  },
-): Promise<void> {
-  const result = await client.transfer({
-    from: {
-      kind: "pendingClaim",
-      claim: mapPendingClaimItemToSdkClaim(input.claim, input.assetId),
-    },
-    to: input.recipientPrivateAddress,
-    asset: input.assetId,
-    amount: BigInt(input.claim.noteValue),
-    disclosure: PENDING_CLAIM_TRANSFER_DISCLOSURE,
   });
   if (result.status === "rejected") {
     throw new Error(mapPrivacySdkErrors(result.errors));
