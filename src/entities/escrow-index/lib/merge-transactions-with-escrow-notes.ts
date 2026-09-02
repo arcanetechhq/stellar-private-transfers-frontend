@@ -1,4 +1,4 @@
-import type { Transaction } from "@/entities/transaction/model/transaction";
+import type { Transaction } from "@/entities/transaction";
 
 function sortEscrowHistoryByDateDesc(
   items: readonly Transaction[],

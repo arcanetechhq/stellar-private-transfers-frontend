@@ -3,7 +3,7 @@ import {
   mapEscrowIndexRowToTransaction,
   mergeTransactionsWithEscrowNotes,
 } from "@/entities/escrow-index";
-import type { Transaction } from "@/entities/transaction/model/transaction";
+import type { Transaction } from "@/entities/transaction";
 
 const STELLAR_ADDRESS =
   "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF";
@@ -126,6 +126,12 @@ describe("escrow note discovery", () => {
       fetchImpl: createIndexFetch(calls),
     });
     expect(signedMessages).toEqual([CHALLENGE_MESSAGE]);
+    const issueBody = JSON.parse(
+      calls.find((call) => call.url.endsWith("/api/escrow-tags/issue"))?.body ??
+        "",
+    ) as { stellarAddress?: string; signerPublicKey?: string };
+    expect(issueBody.stellarAddress).toBe(STELLAR_ADDRESS);
+    expect(issueBody.signerPublicKey).toBe(SIGNER_PUBLIC_KEY);
     expect(notes.map((note) => note.txId)).toEqual([TX_BEFORE_REGISTER]);
     const history = mergeTransactionsWithEscrowNotes({
       transactions: [],

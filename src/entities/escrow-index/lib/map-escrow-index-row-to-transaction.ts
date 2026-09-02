@@ -1,4 +1,4 @@
-import type { Transaction } from "@/entities/transaction/model/transaction";
+import type { Transaction } from "@/entities/transaction";
 import type { EscrowIndexNote } from "../model/escrow-index-types.js";
 import { getEscrowIndexTransactionId } from "./escrow-index-transaction-id.js";
 
