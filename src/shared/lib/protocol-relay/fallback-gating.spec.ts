@@ -1,4 +1,4 @@
-import { PENDING_OPERATION_PHASE } from "./types.js";
+import { PENDING_OPERATION_PHASE, SUBMISSION_PATH } from "./types.js";
 import { pollPendingOperation } from "./poll-pending-operation.js";
 import { submitDirectFallback } from "./submit-direct-fallback.js";
 import { submitPreparedPrivateOperation } from "./submit-prepared-private-operation.js";
@@ -27,7 +27,7 @@ describe("protocol relay fallback gating", () => {
     });
     const failed = await submitPreparedPrivateOperation({
       ports,
-      operation: newOperation("0"),
+      operation: newOperation(SUBMISSION_PATH.relay),
     });
     expect(failed.outcome).toBe(PENDING_OPERATION_PHASE.admissionFailed);
     expect(canOfferDirectSubmission(failed.operation)).toBe(true);
@@ -44,7 +44,7 @@ describe("protocol relay fallback gating", () => {
     const ports = createTestPorts();
     await submitPreparedPrivateOperation({
       ports,
-      operation: newOperation("0"),
+      operation: newOperation(SUBMISSION_PATH.relay),
     });
     ports.probe.statusById.set(
       TEST_RELAY_REQUEST_ID,

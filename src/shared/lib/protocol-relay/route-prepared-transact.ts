@@ -1,4 +1,5 @@
 import type { StellarPreparedOperation } from "@arcanetech/privacy-sdk-stellar";
+import { requiredSubmissionMethod } from "@arcanetech/privacy-sdk-stellar/transact";
 import { deliveryOutboxFromRecords } from "./map-delivery-outbox.js";
 import { inspectPreparedRelayPackage } from "./inspect-prepared-relay-package.js";
 import { submitAndAwaitPrivateOperation } from "./await-relay-settlement.js";
@@ -15,7 +16,7 @@ export async function routePreparedTransact(input: {
   prepared: StellarPreparedOperation;
   display: SafeDisplayMetadata;
 }): Promise<{ txId: string; coinDeliveryWarning?: string }> {
-  const inspected = inspectPreparedRelayPackage(input.prepared);
+  const relayPackage = inspectPreparedRelayPackage(input.prepared);
   const outbox = deliveryOutboxFromRecords(input.prepared.outputRecords);
   const operationId = crypto.randomUUID();
   registerDirectSubmitter(operationId, input.ports.submitDirect);
@@ -24,14 +25,14 @@ export async function routePreparedTransact(input: {
     operation: {
       id: operationId,
       walletPublicKey: input.walletPublicKey,
-      publicDepositAmount: inspected.publicDepositAmount,
+      submissionPath: requiredSubmissionMethod(input.prepared),
       display: input.display,
       snapshot: {
         consumedRecordIds: input.prepared.consumedRecords.map((record) => record.id),
         outputRecords: outbox,
       },
       deliveryOutbox: outbox,
-      relayPackage: inspected.relayPackage,
+      relayPackage,
     },
   });
   return throwIfRelayUnsuccessful(result);

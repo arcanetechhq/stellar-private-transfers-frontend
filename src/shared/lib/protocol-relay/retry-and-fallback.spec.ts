@@ -1,4 +1,4 @@
-import { PENDING_OPERATION_PHASE } from "./types.js";
+import { PENDING_OPERATION_PHASE, SUBMISSION_PATH } from "./types.js";
 import { pollPendingOperation } from "./poll-pending-operation.js";
 import { retryFailedRelayAttempt } from "./retry-and-resume.js";
 import { submitDirectFallback } from "./submit-direct-fallback.js";
@@ -21,7 +21,7 @@ describe("protocol relay retry", () => {
     const ports = createTestPorts();
     await submitPreparedPrivateOperation({
       ports,
-      operation: newOperation("0"),
+      operation: newOperation(SUBMISSION_PATH.relay),
     });
     ports.probe.statusById.set(
       TEST_RELAY_REQUEST_ID,
@@ -49,7 +49,7 @@ describe("protocol relay retry", () => {
     const ports = createTestPorts();
     await submitPreparedPrivateOperation({
       ports,
-      operation: newOperation("0"),
+      operation: newOperation(SUBMISSION_PATH.relay),
     });
     ports.probe.statusById.set(
       TEST_RELAY_REQUEST_ID,
