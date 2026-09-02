@@ -31,6 +31,18 @@ export function getRequiredPrivacyPoolContractId(): string {
   return normalizeSorobanContractId(raw);
 }
 
+export function getSpendScalarDomain(): {
+  networkPassphrase: string;
+  poolContract: string;
+  registryContract: string;
+} {
+  return {
+    networkPassphrase: getDefaultStellarNetworkConfig().networkPassphrase,
+    poolContract: getRequiredPrivacyPoolContractId(),
+    registryContract: getRequiredPrivateAddressRegistryContractId(),
+  };
+}
+
 export function getRequiredPrivateAddressRegistryContractId(): string {
   const raw = (
     import.meta.env.VITE_PRIVATE_ADDRESS_REGISTRY_CONTRACT as string | undefined

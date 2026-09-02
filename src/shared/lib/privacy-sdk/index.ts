@@ -32,6 +32,8 @@ export {
   encodePrivateAddressFromHexCoordinates,
   recipientPublicKeysDecimalFromPrivateAddress,
   privateAddressSdk,
+  spendScalarHexFromStellarSignature,
+  OWNER_BOUND_NOTE_SCHEMA_VERSION,
   prepareConfidentialTransferProof,
   prepareConfidentialTransferProofDual,
   requestKytPassageForPoolInteraction,
@@ -45,8 +47,8 @@ export {
 
 export type {
   KytApplicationIdHints,
-  OnboardingPayload,
   RequestKytPassageForPoolInteractionInput,
+  SpendScalarDomain,
   StellarTransactEnvironment,
 } from "@arcanetech/privacy-sdk-stellar/transact";
 

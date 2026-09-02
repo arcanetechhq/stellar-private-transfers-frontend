@@ -7,6 +7,7 @@ import { selectPrivateAddressByNonce } from "../model/private-address-selectors"
 import type { PrivateAddressNonceEntry } from "../model/types";
 import { buildPrivateAddressSignMessage } from "@/shared/lib/privacy-sdk/index.js";
 import { recipientScalarHexFromStellarSignature } from "@/shared/lib/private-address/recipient-scalar-hex";
+import { getSpendScalarDomain } from "@/shared/stellar/stellar-network-environment";
 import { readWalletPrivateAddressViewFromSdkState } from "@/shared/lib/privacy-sdk/wallet-private-address-sdk-branch.js";
 import { saveWalletPrivateAddressRecordToSdkState } from "@/shared/lib/privacy-sdk/wallet-private-address-sdk-state.js";
 import {
@@ -69,14 +70,17 @@ async function trySignAndStoreScalar(
 ): Promise<EnsureScalarResult> {
   const { publicKey, trimmed, entry } = parameters;
   try {
-    const message = buildPrivateAddressSignMessage(publicKey, trimmed);
+    const domain = getSpendScalarDomain();
+    const message = buildPrivateAddressSignMessage(publicKey, domain, trimmed);
     const { networkPassphrase } = await StellarWalletsKit.getNetwork();
     const { signedMessage } = await StellarWalletsKit.signMessage(message, {
       address: publicKey,
       networkPassphrase,
     });
-    const scalarHex =
-      await recipientScalarHexFromStellarSignature(signedMessage);
+    const scalarHex = await recipientScalarHexFromStellarSignature(
+      signedMessage,
+      domain,
+    );
     await persistPrivateAddressRecordToSdkState({
       publicKey,
       nonce: trimmed,

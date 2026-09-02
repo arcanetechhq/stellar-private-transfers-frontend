@@ -1,4 +1,3 @@
-import type { OnboardingPayload } from "@arcanetech/privacy-sdk-stellar/transact";
 import type { AppDispatch } from "@/store";
 import type { CoinWithMetadata } from "@/entities/coin";
 
@@ -10,7 +9,6 @@ export interface RunConfidentialTransferInput {
   senderPrivateAddress: string;
   recipientStellarAddress: string;
   recipientPrivateAddressStpl1: string;
-  onboarding?: OnboardingPayload;
   assetId: string;
   tokenContractRaw: string;
   amountDisplay: number;

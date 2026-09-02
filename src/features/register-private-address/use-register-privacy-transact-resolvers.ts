@@ -3,10 +3,7 @@ import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
 import { useAppSelector } from "@/store";
 import { assetApi, type AssetDto } from "@/entities/asset";
 import { selectWalletPublicKey } from "@/entities/wallet";
-import {
-  buildTransferOnboardingAtExecute,
-  resolveTransferRecipientAtExecute,
-} from "@/shared/lib/privacy-sdk/resolve-transfer-recipient-at-execute.js";
+import { resolveTransferRecipientAtExecute } from "@/shared/lib/privacy-sdk/resolve-transfer-recipient-at-execute.js";
 import {
   registerPrivacyTransactRuntimeResolvers,
   type PrivacyTransactRuntimeResolvers,
@@ -32,7 +29,6 @@ function createRuntimeResolvers(
       return address;
     },
     resolveTransferRecipientAtExecute,
-    buildTransferOnboardingAtExecute,
     ensureSenderPrivKeyScalarHex: (privateAddressStpl1) =>
       parameters.ensureWalletScalar(privateAddressStpl1),
     resolveTokenContractId: (assetId) => {

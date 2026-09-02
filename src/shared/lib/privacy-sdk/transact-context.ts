@@ -1,8 +1,6 @@
 import type { StellarPrivacyClient } from "@arcanetech/privacy-sdk-stellar";
 import {
   configurePrivacyPoolService,
-  type BuildTransferOnboardingAtExecuteInput,
-  type OnboardingPayload,
   type PrivacyPoolService,
   type StellarTransactEnvironment,
   type TransferRecipientExecutionContext,
@@ -55,9 +53,6 @@ export interface PrivacyTransactRuntimeResolvers {
     recipientStellarAddress: string;
     walletPublicKey: string;
   }) => Promise<TransferRecipientExecutionContext>;
-  buildTransferOnboardingAtExecute?: (
-    input: BuildTransferOnboardingAtExecuteInput,
-  ) => Promise<OnboardingPayload>;
   ensureSenderPrivKeyScalarHex?: (
     privateAddressStpl1: string,
   ) => Promise<string>;
@@ -92,13 +87,6 @@ export function attachPrivacyTransactRuntimeResolverProxies(
     const resolver = transactRuntimeResolvers.resolveTransferRecipientAtExecute;
     if (!resolver) {
       throw new Error("Transfer recipient resolver is not configured.");
-    }
-    return resolver(input);
-  };
-  environment.buildTransferOnboardingAtExecute = (input) => {
-    const resolver = transactRuntimeResolvers.buildTransferOnboardingAtExecute;
-    if (!resolver) {
-      throw new Error("Transfer onboarding builder is not configured.");
     }
     return resolver(input);
   };

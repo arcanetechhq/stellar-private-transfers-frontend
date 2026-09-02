@@ -8,7 +8,6 @@ import {
 } from "@arcanetech/privacy-sdk-stellar/transact";
 import { readZkConfigNonceFromEnvironment } from "@/shared/lib/privacy-sdk/build-transact-environment.js";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment.js";
-import { jsonSafeClone } from "./json-safe.js";
 import type { RelayPackageJson } from "./types.js";
 
 export function serializeRelayPackage(
@@ -22,8 +21,8 @@ export function serializeRelayPackage(
     publicSignals: prepared.publicSignals,
     applicationIdHints: prepared.applicationIdHints,
   };
-  if (prepared.onboarding !== undefined) {
-    body.onboarding = jsonSafeClone(prepared.onboarding);
+  if (prepared.escrowRecipient !== undefined) {
+    body.escrowRecipient = prepared.escrowRecipient;
   }
   if (prepared.keyVersionHints) {
     body.keyVersionHints = prepared.keyVersionHints;

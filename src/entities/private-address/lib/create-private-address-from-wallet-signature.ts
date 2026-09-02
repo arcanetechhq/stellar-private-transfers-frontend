@@ -2,6 +2,7 @@ import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
 import type { RootState } from "@/store";
 import { getPrivacyPoolService, buildPrivateAddressSignMessage } from "@/shared/lib/privacy-sdk/index.js";
 import { recipientScalarHexFromStellarSignature } from "@/shared/lib/private-address/recipient-scalar-hex";
+import { getSpendScalarDomain } from "@/shared/stellar/stellar-network-environment";
 import { syncLocalPrivateAddressToSdkState } from "@/shared/lib/privacy-sdk/sync-local-private-address-to-sdk-state.js";
 import {
   readWalletDefaultPrivateAddressNonceFromSdkState,
@@ -20,7 +21,8 @@ export async function createPrivateAddressFromWalletSignature(
   parameters: CreatePrivateAddressFromWalletParameters,
 ): Promise<void> {
   const { getState, publicKey, trimmedNonce } = parameters;
-  const message = buildPrivateAddressSignMessage(publicKey, trimmedNonce);
+  const domain = getSpendScalarDomain();
+  const message = buildPrivateAddressSignMessage(publicKey, domain, trimmedNonce);
   const { networkPassphrase } = await StellarWalletsKit.getNetwork();
   const { signedMessage } = await StellarWalletsKit.signMessage(message, {
     address: publicKey,
@@ -29,9 +31,13 @@ export async function createPrivateAddressFromWalletSignature(
   const privateAddress =
     await getPrivacyPoolService().generatePrivateAddressFromStellarSignature(
       signedMessage,
+      domain,
     );
   const createdAt = Date.now();
-  const scalarHex = await recipientScalarHexFromStellarSignature(signedMessage);
+  const scalarHex = await recipientScalarHexFromStellarSignature(
+    signedMessage,
+    domain,
+  );
   await saveWalletPrivateAddressRecordToSdkState({
     owner: publicKey,
     nonce: trimmedNonce,

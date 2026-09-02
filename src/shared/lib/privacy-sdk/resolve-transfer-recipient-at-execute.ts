@@ -11,5 +11,3 @@ export async function resolveTransferRecipientAtExecute(input: {
     walletPublicKey: input.walletPublicKey,
   });
 }
-
-export { buildTransferOnboardingAtExecute } from "@arcanetech/privacy-sdk-stellar/transact";
