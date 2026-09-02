@@ -22,7 +22,10 @@ export type OrchestrationProbe = {
   statusById: Map<string, RelayRequestStatus>;
 };
 
-export type TestPorts = ProtocolRelayPorts & { probe: OrchestrationProbe };
+export type TestPorts = ProtocolRelayPorts & {
+  probe: OrchestrationProbe;
+  relayApi: RelayApi;
+};
 
 function emptyPackage(): RelayPackageJson {
   return {
@@ -148,6 +151,7 @@ export function createTestPorts(relayApi?: Partial<RelayApi>): TestPorts {
   return {
     probe,
     relayApi: api,
+    relayConfig: { origin: "http://relay.test" },
     store: {
       async save(operation) {
         if (order.at(-1) !== "save") {

@@ -6,6 +6,7 @@ const RELAY_OUTCOME_KEYS = {
   [PENDING_OPERATION_PHASE.rejected]: "rejected",
   [PENDING_OPERATION_PHASE.failed]: "failed",
   [PENDING_OPERATION_PHASE.admissionFailed]: "admissionFailed",
+  [PENDING_OPERATION_PHASE.settlementTimedOut]: "settlementTimedOut",
 } as const;
 
 function translateRelayReason(publicReason: string | undefined): string {
@@ -20,15 +21,12 @@ function translateRelayReason(publicReason: string | undefined): string {
 }
 
 function formatRelayOutcome(error: ProtocolRelayClientError): string | undefined {
-  if (
-    error.outcome !== PENDING_OPERATION_PHASE.rejected &&
-    error.outcome !== PENDING_OPERATION_PHASE.failed &&
-    error.outcome !== PENDING_OPERATION_PHASE.admissionFailed
-  ) {
+  if (!Object.hasOwn(RELAY_OUTCOME_KEYS, error.outcome)) {
     return undefined;
   }
+  const outcomeKey = error.outcome as keyof typeof RELAY_OUTCOME_KEYS;
   const reason = translateRelayReason(error.publicReason) || error.outcome;
-  return i18n.t(RELAY_OUTCOME_KEYS[error.outcome], { ns: "relay", reason });
+  return i18n.t(RELAY_OUTCOME_KEYS[outcomeKey], { ns: "relay", reason });
 }
 
 export function formatProtocolRelayError(error: unknown): string {

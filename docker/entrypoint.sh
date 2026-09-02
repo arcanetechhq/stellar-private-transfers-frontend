@@ -30,6 +30,7 @@ substitute VITE_APPLICATION_ID "${VITE_APPLICATION_ID:-}"
 substitute VITE_STELLAR_AUDIT_PUBLIC_KEY "${VITE_STELLAR_AUDIT_PUBLIC_KEY:-}"
 substitute VITE_PRICE_XLM "${VITE_PRICE_XLM:-}"
 substitute VITE_ZK_CONFIG_NONCE "${VITE_ZK_CONFIG_NONCE:-}"
+substitute VITE_RELAY_API_ORIGIN "${VITE_RELAY_API_ORIGIN:-}"
 
 # Runtime substitution changes hashed JS/CSS bytes without renaming them.
 # Query-bust index.html so browsers do not keep the pre-substitution immutable cache.

@@ -1,1 +1,1 @@
-export { relayApiOrigin } from "@arcanetech/privacy-sdk-relay";
+export { resolveRelayOrigin, isRelayConfigured } from "@arcanetech/privacy-sdk-relay";

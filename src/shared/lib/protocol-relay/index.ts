@@ -10,7 +10,8 @@ export {
   resumePendingOperations,
 } from "./retry-and-resume.js";
 export { submitDirectFallback } from "./submit-direct-fallback.js";
-export { createRelayApi } from "./relay-api.js";
+export { createRelayApi, readRelayRuntimeConfig } from "./relay-api.js";
+export { resolveRelayOrigin, isRelayConfigured } from "./relay-api-origin.js";
 export { bindProtocolRelayPorts } from "./bind-protocol-relay-ports.js";
 export {
   submitAndAwaitPrivateOperation,
@@ -47,4 +48,5 @@ export type {
   SdkFinalizationSnapshot,
   SubmissionPath,
   SubmitPrivateOperationResult,
+  RelayRuntimeConfig,
 } from "./types.js";

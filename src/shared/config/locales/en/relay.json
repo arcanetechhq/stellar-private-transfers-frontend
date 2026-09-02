@@ -6,6 +6,7 @@
   "rejected": "Protocol rejected this operation: {{reason}}",
   "failed": "Protocol submission failed: {{reason}}",
   "admissionFailed": "Protocol relayer is unavailable ({{reason}}).",
+  "settlementTimedOut": "Protocol submission did not settle in time.",
   "reason_kyt_rejected": "compliance check failed",
   "reason_invalid_proof": "the proof was invalid",
   "reason_infrastructure_failed": "infrastructure error",

@@ -15,6 +15,7 @@ export type {
   RelayPackageJson,
   RelayRequestAccepted,
   RelayRequestStatus,
+  RelayRuntimeConfig,
   SafeDisplayMetadata,
   SdkFinalizationSnapshot,
   SubmissionPath,
