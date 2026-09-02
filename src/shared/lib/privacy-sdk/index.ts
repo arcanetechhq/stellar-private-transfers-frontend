@@ -27,6 +27,7 @@ export {
   PrivacyPoolService,
   DEFAULT_PRIVATE_ADDRESS_SIGN_NONCE,
   buildPrivateAddressSignMessage,
+  buildBlindedRecipientTagChallengeMessage,
   decodePrivateAddress,
   encodePrivateAddress,
   encodePrivateAddressFromHexCoordinates,
