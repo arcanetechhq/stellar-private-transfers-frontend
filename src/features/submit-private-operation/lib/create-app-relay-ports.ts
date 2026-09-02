@@ -13,15 +13,12 @@ import {
 
 function transactionTypeFor(
   kind: SafeDisplayMetadata["kind"],
-): "sent" | "withdrawal" | "deposit" | "claim" {
+): "sent" | "withdrawal" | "deposit" {
   if (kind === "withdraw") {
     return "withdrawal";
   }
   if (kind === "deposit") {
     return "deposit";
-  }
-  if (kind === "pending_claim") {
-    return "claim";
   }
   return "sent";
 }
