@@ -62,6 +62,23 @@ describe("escrow sweep sequencer", () => {
     expect(registerCalls).toBe(0);
   });
 
+  it("sweeps only the recipient output when a send also indexed the change note", async () => {
+    const claimed: number[] = [];
+    const changeSeq = 1;
+    await sequenceClaimEscrowNotes({
+      notes: [
+        { ...noteAt(changeSeq), txId: "tx-escrow-send", seq: changeSeq },
+        { ...noteAt(0), txId: "tx-escrow-send", seq: 0 },
+      ],
+      ensureWalletPrivateAddress: async () => REGISTERED_PA,
+      ensureWalletScalar: async () => "aa".repeat(SCALAR_HEX_BYTES),
+      claimNote: async ({ note }) => {
+        claimed.push(note.seq);
+      },
+    });
+    expect(claimed).toEqual([0]);
+  });
+
   it("stops on the first claim error and does not continue", async () => {
     const claimed: string[] = [];
     await expect(
