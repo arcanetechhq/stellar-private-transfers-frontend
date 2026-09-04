@@ -1,5 +1,3 @@
-import { isEscrowIndexTransactionId } from "@/entities/escrow-index";
-
 export function getTransactionLabel(
   type: string,
   translate: (key: string) => string,
@@ -19,9 +17,6 @@ export function resolveTransactionActivityTitle(
   transaction: { id: string; type: string },
   translate: (key: string) => string,
 ): string {
-  if (isEscrowIndexTransactionId(transaction.id)) {
-    return translate("transactionLabels.escrowNote");
-  }
   return getTransactionLabel(transaction.type, translate);
 }
 

@@ -10,6 +10,7 @@ import {
   type ProtocolRelayPorts,
   type SafeDisplayMetadata,
 } from "@/shared/lib/protocol-relay";
+import { persistIfCurrentWallet } from "./persist-if-current-wallet.js";
 
 function transactionTypeFor(
   kind: SafeDisplayMetadata["kind"],
@@ -44,18 +45,21 @@ export function createAppRelayPorts(input: {
       });
     },
     persistUserTransaction(parameters) {
-      input.dispatch(
-        addTransaction(
-          buildUserTransaction({
-            txId: parameters.txId,
-            type: transactionTypeFor(parameters.operation.display.kind),
-            assetId: parameters.operation.display.assetId,
-            amount: parameters.operation.display.amountDisplay,
-            counterparty: parameters.operation.display.counterparty,
-            senderPrivateAddress: parameters.operation.display.senderPrivateAddress,
-          }),
-        ),
-      );
+      persistIfCurrentWallet(parameters.operation.walletPublicKey, () => {
+        input.dispatch(
+          addTransaction(
+            buildUserTransaction({
+              txId: parameters.txId,
+              type: transactionTypeFor(parameters.operation.display.kind),
+              assetId: parameters.operation.display.assetId,
+              amount: parameters.operation.display.amountDisplay,
+              counterparty: parameters.operation.display.counterparty,
+              senderPrivateAddress:
+                parameters.operation.display.senderPrivateAddress,
+            }),
+          ),
+        );
+      });
     },
   });
 }

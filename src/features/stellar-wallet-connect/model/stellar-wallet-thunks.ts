@@ -7,6 +7,7 @@ import {
   setWalletKitLoaded,
   setWalletProviderName,
 } from "@/entities/wallet";
+import { ensureEscrowTagsForWallet } from "@/features/discover-escrow-notes";
 import { FREIGHTER_WALLET_ID } from "../lib/wallet-options";
 import { readWalletProviderNameFromKit } from "../lib/read-wallet-provider-name";
 
@@ -27,6 +28,7 @@ export const syncWalletAddressFromKit = createAsyncThunk(
       if (providerName) {
         dispatch(setWalletProviderName(providerName));
       }
+      await ensureEscrowTagsForWallet(trimmed);
     } catch {
       await Promise.resolve();
     } finally {

@@ -1,4 +1,5 @@
 export { discoverEscrowNotes } from "./lib/discover-escrow-notes.js";
+export { ensureEscrowTagsForWallet } from "./lib/ensure-escrow-tags-for-wallet.js";
 export type {
   DiscoverEscrowNotesInput,
   SignEscrowTagChallenge,

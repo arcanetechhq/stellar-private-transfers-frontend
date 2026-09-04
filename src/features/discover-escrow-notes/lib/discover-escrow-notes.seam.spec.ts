@@ -1,9 +1,8 @@
-import { discoverEscrowNotes } from "./discover-escrow-notes";
 import {
-  mapEscrowIndexRowToTransaction,
-  mergeTransactionsWithEscrowNotes,
-} from "@/entities/escrow-index";
-import type { Transaction } from "@/entities/transaction";
+  discoverEscrowNotes,
+  resetEscrowTagIssueInFlightForTests,
+} from "./discover-escrow-notes";
+import { createMemoryEscrowTagStore } from "./persist-escrow-tags";
 
 const STELLAR_ADDRESS =
   "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF";
@@ -95,6 +94,10 @@ function createIndexFetch(calls: FetchCall[]): typeof fetch {
   };
 }
 
+beforeEach(() => {
+  resetEscrowTagIssueInFlightForTests();
+});
+
 describe("escrow note discovery", () => {
   it("skips Storage and transfers when the storage origin is unset", async () => {
     const calls: FetchCall[] = [];
@@ -105,6 +108,7 @@ describe("escrow note discovery", () => {
         throw new Error("must not sign");
       },
       fetchImpl: createIndexFetch(calls),
+      tagStore: createMemoryEscrowTagStore(),
     });
     expect(notes).toEqual([]);
     expect(calls).toEqual([]);
@@ -113,6 +117,7 @@ describe("escrow note discovery", () => {
   it("lets a recipient see a note written before they registered", async () => {
     const calls: FetchCall[] = [];
     const signedMessages: string[] = [];
+    const tagStore = createMemoryEscrowTagStore();
     const notes = await discoverEscrowNotes({
       storageOrigin: STORAGE_ORIGIN,
       transfersBaseUrl: TRANSFERS_BASE_URL,
@@ -125,6 +130,7 @@ describe("escrow note discovery", () => {
         };
       },
       fetchImpl: createIndexFetch(calls),
+      tagStore,
     });
     expect(signedMessages).toEqual([CHALLENGE_MESSAGE]);
     const issueBody = JSON.parse(
@@ -134,23 +140,20 @@ describe("escrow note discovery", () => {
     expect(issueBody.stellarAddress).toBe(STELLAR_ADDRESS);
     expect(issueBody.signerPublicKey).toBe(SIGNER_PUBLIC_KEY);
     expect(notes.map((note) => note.txId)).toEqual([TX_BEFORE_REGISTER]);
-    const history = mergeTransactionsWithEscrowNotes({
-      transactions: [],
-      escrowRows: notes.map((note) =>
-        mapEscrowIndexRowToTransaction({
-          note,
-          recipientAddress: STELLAR_ADDRESS,
-        }),
-      ),
-    });
-    expect(history).toHaveLength(1);
-    const shown = history[0] as Transaction;
-    expect(shown.id).toContain(TX_BEFORE_REGISTER);
-    expect(shown.counterparty).toBe(STELLAR_ADDRESS);
-    expect(shown.counterparty.startsWith("G")).toBe(true);
-    expect(JSON.stringify(shown)).not.toMatch(/stpl1/i);
+    expect(notes[0]?.txId).toBe(TX_BEFORE_REGISTER);
+    expect(JSON.stringify(notes)).not.toMatch(/stpl1/i);
+    expect(tagStore.read(STELLAR_ADDRESS)?.map((entry) => entry.tag)).toEqual([
+      EARLIER_TAG,
+      CURRENT_TAG,
+    ]);
+    expect(tagStore.read(SIGNER_PUBLIC_KEY)?.map((entry) => entry.tag)).toEqual([
+      EARLIER_TAG,
+      CURRENT_TAG,
+    ]);
   });
+});
 
+describe("escrow note discovery privacy", () => {
   it("never sends a Stellar address to the transfer backend", async () => {
     const calls: FetchCall[] = [];
     await discoverEscrowNotes({
@@ -162,6 +165,7 @@ describe("escrow note discovery", () => {
         signerPublicKey: SIGNER_PUBLIC_KEY,
       }),
       fetchImpl: createIndexFetch(calls),
+      tagStore: createMemoryEscrowTagStore(),
     });
     const transferCalls = calls.filter((call) =>
       call.url.startsWith(TRANSFERS_BASE_URL),
@@ -170,8 +174,42 @@ describe("escrow note discovery", () => {
     const serialized = JSON.stringify(transferCalls);
     expect(serialized).not.toContain(STELLAR_ADDRESS);
     expect(serialized).not.toMatch(/G[A-Z0-9]{55}/);
-    expect(
-      calls.some((call) => call.url.startsWith(STORAGE_ORIGIN)),
-    ).toBe(true);
+    expect(calls.some((call) => call.url.startsWith(STORAGE_ORIGIN))).toBe(
+      true,
+    );
+  });
+});
+
+describe("cached escrow tags", () => {
+  it("reuses stored tags for an address without signing or issuing again", async () => {
+    const calls: FetchCall[] = [];
+    const tagStore = createMemoryEscrowTagStore(
+      new Map([
+        [
+          STELLAR_ADDRESS,
+          [
+            { epoch: 0, tag: EARLIER_TAG },
+            { epoch: 1, tag: CURRENT_TAG },
+          ],
+        ],
+      ]),
+    );
+    const notes = await discoverEscrowNotes({
+      storageOrigin: STORAGE_ORIGIN,
+      transfersBaseUrl: TRANSFERS_BASE_URL,
+      stellarAddress: STELLAR_ADDRESS,
+      signChallenge: async () => {
+        throw new Error("must not sign stored tags");
+      },
+      fetchImpl: createIndexFetch(calls),
+      tagStore,
+    });
+    expect(notes.map((note) => note.txId)).toEqual([TX_BEFORE_REGISTER]);
+    expect(calls.some((call) => call.url.startsWith(STORAGE_ORIGIN))).toBe(
+      false,
+    );
+    expect(calls.every((call) => call.url.startsWith(TRANSFERS_BASE_URL))).toBe(
+      true,
+    );
   });
 });

@@ -80,6 +80,7 @@ function WithdrawalReviewDialog(properties: {
       <RelayPaymentReviewFooter
         cancelLabel={translate("review.cancel")}
         confirmLabel={translate("sendWithdrawal")}
+        submittingLabel={translate("submitting")}
         isSubmitting={properties.isSubmitting}
         retryAllowed={properties.retryAllowed}
         fallbackAllowed={properties.fallbackAllowed}

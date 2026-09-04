@@ -102,6 +102,7 @@ function TransferReviewDialog(properties: {
       <RelayPaymentReviewFooter
         cancelLabel={translate("review.cancel")}
         confirmLabel={translate("privateSend")}
+        submittingLabel={translate("submitting")}
         isSubmitting={properties.isSubmitting}
         retryAllowed={properties.retryAllowed}
         fallbackAllowed={properties.fallbackAllowed}

@@ -89,7 +89,6 @@
     "sent": "Sent",
     "received": "Received",
     "pending": "Received",
-    "escrowNote": "Received before you registered",
     "claimed": "Claimed",
     "withdrawal": "Withdrawal",
     "merge": "Merge"

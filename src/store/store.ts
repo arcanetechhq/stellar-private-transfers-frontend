@@ -31,6 +31,10 @@ import {
   resetWalletScopedState,
   restoreWalletLocalSlices,
 } from "./hydrate-wallet-scoped-state.js";
+import {
+  isWalletScopedRestoreInFlight,
+  runWalletScopedRestore,
+} from "./wallet-scoped-restore.js";
 import { coinReducer, coinSdkSyncMiddleware } from "@/entities/coin";
 
 const loadedContact = loadContactState();
@@ -75,8 +79,10 @@ let lastWalletPublicKey: string | undefined;
 const initialWalletPublicKey = store.getState().wallet.publicKey;
 if (initialWalletPublicKey) {
   lastWalletPublicKey = initialWalletPublicKey;
-  hydrateWalletScopedState(store.dispatch, initialWalletPublicKey);
-  restoreWalletLocalSlices(store.dispatch, initialWalletPublicKey);
+  runWalletScopedRestore(() => {
+    hydrateWalletScopedState(store.dispatch, initialWalletPublicKey);
+    restoreWalletLocalSlices(store.dispatch, initialWalletPublicKey);
+  });
 }
 
 store.subscribe(() => {
@@ -86,12 +92,14 @@ store.subscribe(() => {
     return;
   }
   lastWalletPublicKey = publicKey;
-  if (publicKey) {
-    hydrateWalletScopedState(store.dispatch, publicKey);
-    restoreWalletLocalSlices(store.dispatch, publicKey);
-  } else {
-    resetWalletScopedState(store.dispatch);
-  }
+  runWalletScopedRestore(() => {
+    if (publicKey) {
+      hydrateWalletScopedState(store.dispatch, publicKey);
+      restoreWalletLocalSlices(store.dispatch, publicKey);
+    } else {
+      resetWalletScopedState(store.dispatch);
+    }
+  });
 });
 
 store.subscribe(() => {
@@ -99,6 +107,9 @@ store.subscribe(() => {
 });
 
 store.subscribe(() => {
+  if (isWalletScopedRestoreInFlight()) {
+    return;
+  }
   const state = store.getState();
   const publicKey = state.wallet.publicKey;
   if (!publicKey) {
@@ -108,6 +119,9 @@ store.subscribe(() => {
 });
 
 store.subscribe(() => {
+  if (isWalletScopedRestoreInFlight()) {
+    return;
+  }
   const state = store.getState();
   const publicKey = state.wallet.publicKey;
   const tagsHydrated = state.coinDelivery.tagsHydrated;

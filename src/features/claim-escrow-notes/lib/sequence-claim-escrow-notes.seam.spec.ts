@@ -21,7 +21,7 @@ function noteAt(seq: number): EscrowIndexNote {
 }
 
 describe("escrow sweep sequencer", () => {
-  it("claims three notes in order with one auth signature each and no transaction signature", async () => {
+  it("claims three notes in order", async () => {
     const claimed: string[] = [];
     const authSignatures: string[] = [];
     const transactionSignatures: string[] = [];

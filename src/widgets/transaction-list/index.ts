@@ -9,4 +9,3 @@ export {
   readSelectedTransactionIdFromSearch,
   writeSelectedTransactionIdToSearch,
 } from "./lib/transactions-selection-path";
-export { useMergedWalletTransactions } from "./model/use-merged-wallet-transactions.js";

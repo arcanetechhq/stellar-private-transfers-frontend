@@ -1,6 +1,5 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { mergeTransactionsWithEscrowNotes } from "@/entities/escrow-index";
 
 const SRC_ROOT = path.join(process.cwd(), "src");
 
@@ -36,15 +35,13 @@ describe("retired pending-claims history helpers", () => {
         ),
       ),
     ).toBe(false);
-  });
-
-  it("keeps escrow-index history merge for discovered notes", () => {
-    expect(typeof mergeTransactionsWithEscrowNotes).toBe("function");
     expect(
-      mergeTransactionsWithEscrowNotes({
-        transactions: [],
-        escrowRows: [],
-      }),
-    ).toEqual([]);
+      existsSync(
+        path.join(
+          SRC_ROOT,
+          "widgets/transaction-list/model/use-merged-wallet-transactions.ts",
+        ),
+      ),
+    ).toBe(false);
   });
 });

@@ -10,11 +10,13 @@ import {
 
 export function bindEscrowSweepRelayPorts(input: {
   dispatch: AppDispatch;
+  execute: () => Promise<{ operationId: string }>;
 }): ProtocolRelayPorts {
   return bindProtocolRelayPorts({
     store: createLocalPendingPrivateOperationStore(),
     submitDirect: async () => {
-      throw new Error("Escrow sweep must be submitted through the relayer.");
+      const receipt = await input.execute();
+      return { txId: receipt.operationId };
     },
     async drainDeliveries(parameters) {
       return postOutputRecordDeliveries({

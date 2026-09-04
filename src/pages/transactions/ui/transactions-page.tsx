@@ -9,7 +9,6 @@ import {
   readSelectedTransactionIdFromSearch,
   TransactionDetailsPanel,
   TransactionsPanel,
-  useMergedWalletTransactions,
   writeSelectedTransactionIdToSearch,
 } from "@/widgets/transaction-list";
 
@@ -21,14 +20,13 @@ export function TransactionsPage() {
   >(selectedFromSearch);
   const transactions = useAppSelector(selectTransactions);
   const transactionsLoaded = useAppSelector(selectAreTransactionsLoaded);
-  const { mergedTransactions } = useMergedWalletTransactions(transactions);
 
   const selectedTransaction = useMemo(
     () =>
       selectedTransactionId
-        ? mergedTransactions.find((item) => item.id === selectedTransactionId)
+        ? transactions.find((item) => item.id === selectedTransactionId)
         : undefined,
-    [mergedTransactions, selectedTransactionId],
+    [selectedTransactionId, transactions],
   );
 
   useEffect(() => {
@@ -71,7 +69,7 @@ export function TransactionsPage() {
       >
         <section className="transactions-route__main">
           <TransactionsPanel
-            transactions={mergedTransactions}
+            transactions={transactions}
             isHydrated={transactionsLoaded}
             variant="page"
             selectedTransactionId={selectedTransactionId}

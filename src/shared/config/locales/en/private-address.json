@@ -32,5 +32,6 @@
   "modalGenerateHint": "Generate a private Stellar address after connecting your wallet.",
   "addressLabel": "Address",
   "modalEmptyTitle": "No private address yet",
-  "modalEmptyDescription": "Create one before receiving private transfers."
+  "modalEmptyDescription": "Create one before receiving private transfers.",
+  "registrationFailed": "Could not register your private address."
 }

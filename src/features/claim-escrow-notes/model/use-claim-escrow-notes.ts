@@ -1,66 +1,74 @@
-import { useEffect, useRef } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { toast } from "sonner";
 import type { EscrowIndexNote } from "@/entities/escrow-index";
-import { useAppDispatch } from "@/store";
-import { sequenceClaimEscrowNotes } from "../lib/sequence-claim-escrow-notes.js";
-import { runEscrowSweepClaim } from "../lib/run-escrow-sweep-claim.js";
-
-function noteKey(note: EscrowIndexNote): string {
-  return `${note.txId}:${String(note.seq)}`;
-}
+import {
+  listVisibleEscrowNotes,
+  pendingEscrowClaimId,
+  toPendingEscrowAssetClaim,
+  type PendingEscrowAssetClaim,
+} from "../lib/pending-escrow-asset-claims.js";
+import { useEscrowClaimPreviews } from "./use-escrow-claim-previews.js";
+import { useEscrowClaimedKeys } from "./use-escrow-claimed-keys.js";
+import { useEscrowReceiveClick } from "./use-escrow-receive-click.js";
 
 export function useClaimEscrowNotes(input: {
   notes: readonly EscrowIndexNote[];
   walletPublicKey: string | undefined;
   ensureWalletPrivateAddress: () => Promise<string>;
   ensureWalletScalar: () => Promise<string>;
-}): void {
-  const dispatch = useAppDispatch();
-  const { t: translate } = useTranslation("overview");
-  const inFlight = useRef(false);
-  const halted = useRef(false);
-  const claimed = useRef(new Set<string>());
-  const { notes, walletPublicKey, ensureWalletPrivateAddress, ensureWalletScalar } =
-    input;
+  canClaim: boolean;
+}): {
+  pendingAssetClaims: PendingEscrowAssetClaim[];
+  claimControls: {
+    claimingId: string | undefined;
+    canClaim: boolean;
+    onClaim: (transactionId: string) => void;
+    error?: string;
+  };
+} {
+  const { t: translatePending } = useTranslation("pendingClaims");
+  const { claimed, claimedKeys, bumpClaimed } = useEscrowClaimedKeys(
+    input.walletPublicKey,
+  );
+  const fallbackAssetId = translatePending("unknownAsset");
+  const previews = useEscrowClaimPreviews({
+    notes: input.notes,
+    claimedKeys,
+    walletPublicKey: input.walletPublicKey,
+    fallbackAssetId,
+  });
+  const pendingAssetClaims = useMemo(
+    () =>
+      listVisibleEscrowNotes({ notes: input.notes, claimedKeys }).map(
+        (note) => {
+          const preview = previews.get(pendingEscrowClaimId(note));
+          return toPendingEscrowAssetClaim({
+            note,
+            assetId: preview?.assetId ?? fallbackAssetId,
+            amountDisplay: preview?.amountDisplay ?? 0,
+          });
+        },
+      ),
+    [claimedKeys, fallbackAssetId, input.notes, previews],
+  );
+  const { claimingId, error, onClaim } = useEscrowReceiveClick({
+    notes: input.notes,
+    claimed,
+    claimedKeys,
+    walletPublicKey: input.walletPublicKey,
+    canClaim: input.canClaim,
+    ensureWalletPrivateAddress: input.ensureWalletPrivateAddress,
+    ensureWalletScalar: input.ensureWalletScalar,
+    bumpClaimed,
+  });
 
-  useEffect(() => {
-    const owner = walletPublicKey?.trim();
-    if (!owner || notes.length === 0 || inFlight.current || halted.current) {
-      return;
-    }
-    const pending = notes.filter((note) => !claimed.current.has(noteKey(note)));
-    if (pending.length === 0) {
-      return;
-    }
-    inFlight.current = true;
-    sequenceClaimEscrowNotes({
-      notes: pending,
-      ensureWalletPrivateAddress,
-      ensureWalletScalar,
-      claimNote: async ({ note, registeredPrivateAddress }) => {
-        await runEscrowSweepClaim({
-          dispatch,
-          note,
-          walletPublicKey: owner,
-          registeredPrivateAddress,
-        });
-        claimed.current.add(noteKey(note));
-      },
-    })
-      .catch(() => {
-        halted.current = true;
-        toast.error(translate("escrowClaimFailed"));
-      })
-      .finally(() => {
-        inFlight.current = false;
-      });
-  }, [
-    dispatch,
-    ensureWalletPrivateAddress,
-    ensureWalletScalar,
-    notes,
-    translate,
-    walletPublicKey,
-  ]);
+  return {
+    pendingAssetClaims,
+    claimControls: {
+      claimingId,
+      canClaim: input.canClaim,
+      onClaim,
+      ...(error ? { error } : {}),
+    },
+  };
 }

@@ -17,7 +17,7 @@ export function RegistryRegistrationModal({
   onRegistered,
 }: RegistryRegistrationModalProperties) {
   const { t: translate } = useTranslation(["privateAddress", "common"]);
-  const { register, reset, status, hasError } =
+  const { register, reset, status, hasError, errorMessage } =
     useRegisterWalletPrivateAddress();
   const isBusy = status === "creating" || status === "registering";
 
@@ -95,8 +95,14 @@ export function RegistryRegistrationModal({
             {translate("privateAddress:registrationRequiredDescription")}
           </p>
           {hasError ? (
-            <p className="registry-registration-modal__error" role="alert">
-              {translate("privateAddress:registrationFailed")}
+            <p
+              className="registry-registration-modal__error"
+              role="alert"
+              data-testid="register-private-address-error"
+            >
+              {errorMessage
+                ? `${translate("privateAddress:registrationFailed")}: ${errorMessage}`
+                : translate("privateAddress:registrationFailed")}
             </p>
           ) : null}
         </div>

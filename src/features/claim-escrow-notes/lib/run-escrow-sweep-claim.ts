@@ -1,27 +1,17 @@
-import {
-  fetchEscrowOutputNoteEvents,
-  unsignedEscrowAuthorizationForSweep,
-} from "@arcanetech/privacy-sdk-stellar/transact";
+import { fetchEscrowOutputNoteEvents } from "@arcanetech/privacy-sdk-stellar/transact";
 import type { EscrowIndexNote } from "@/entities/escrow-index";
 import type { AppDispatch } from "@/store";
-import { readClientEnvironment } from "@/shared/lib/privacy-sdk/read-client-environment.js";
 import { getPrivacyTransactEnvironment } from "@/shared/lib/privacy-sdk/transact-context.js";
 import { claimEscrowNote } from "./claim-escrow-note.js";
+import type { EscrowClaimAssetCatalogEntry } from "./pending-escrow-asset-claims.js";
 import { submitEscrowSweep } from "./submit-escrow-sweep.js";
-
-function readRelayerPublicKey(): string {
-  const value = readClientEnvironment("VITE_RELAYER_PUBLIC_KEY")?.trim();
-  if (!value) {
-    throw new Error("Missing VITE_RELAYER_PUBLIC_KEY environment variable");
-  }
-  return value;
-}
 
 export async function runEscrowSweepClaim(input: {
   dispatch: AppDispatch;
   note: EscrowIndexNote;
   walletPublicKey: string;
   registeredPrivateAddress: string;
+  catalog: readonly EscrowClaimAssetCatalogEntry[];
 }): Promise<void> {
   await claimEscrowNote({
     note: input.note,
@@ -34,18 +24,12 @@ export async function runEscrowSweepClaim(input: {
           txId,
           poolAddress,
         }),
-      unsignedAuthEntryXdr: async ({ prepared }) =>
-        unsignedEscrowAuthorizationForSweep({
-          prepared,
-          transactEnvironment: getPrivacyTransactEnvironment(),
-          relayerPublicKey: readRelayerPublicKey(),
-        }),
       submitSweep: async ({ prepared }) => {
         await submitEscrowSweep({
           dispatch: input.dispatch,
           walletPublicKey: input.walletPublicKey,
           prepared,
-          assetId: prepared.intent.asset,
+          catalog: input.catalog,
         });
       },
     },

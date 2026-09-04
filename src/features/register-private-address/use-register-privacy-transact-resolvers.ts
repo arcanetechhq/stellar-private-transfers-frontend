@@ -16,6 +16,27 @@ interface RuntimeResolverParameters {
   ensureWalletScalar: (privateAddressStpl1?: string) => Promise<string>;
 }
 
+function catalogClientContract(
+  assets: AssetDto[] | undefined,
+  assetId: string,
+): string | undefined {
+  return assets?.find(
+    (entry) =>
+      entry.assetId === assetId || entry.clientContract === assetId,
+  )?.clientContract;
+}
+
+function resolveRuntimeTokenContract(
+  assets: AssetDto[] | undefined,
+  assetId: string,
+): string {
+  const fromCatalog = catalogClientContract(assets, assetId);
+  if (fromCatalog) {
+    return resolveTokenContractId(fromCatalog);
+  }
+  return resolveTokenContractId(assetId);
+}
+
 function createRuntimeResolvers(
   parameters: RuntimeResolverParameters,
 ): PrivacyTransactRuntimeResolvers {
@@ -31,13 +52,8 @@ function createRuntimeResolvers(
     resolveTransferRecipientAtExecute,
     ensureSenderPrivKeyScalarHex: (privateAddressStpl1) =>
       parameters.ensureWalletScalar(privateAddressStpl1),
-    resolveTokenContractId: (assetId) => {
-      const asset = parameters.assets?.find((entry) => entry.assetId === assetId);
-      if (!asset?.clientContract) {
-        throw new Error(`Missing token contract for asset ${assetId}.`);
-      }
-      return resolveTokenContractId(asset.clientContract);
-    },
+    resolveTokenContractId: (assetId) =>
+      resolveRuntimeTokenContract(parameters.assets, assetId),
   };
 }
 

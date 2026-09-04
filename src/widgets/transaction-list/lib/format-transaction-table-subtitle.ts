@@ -1,4 +1,3 @@
-import { isEscrowIndexTransactionId } from "@/entities/escrow-index";
 import type { Transaction } from "@/entities/transaction";
 import {
   formatTransactionPublicAddressForDisplay,
@@ -23,12 +22,6 @@ export function formatTransactionTableSubtitle(input: {
   };
 }): string {
   const { transaction, walletPublicKey, options } = input;
-  if (isEscrowIndexTransactionId(transaction.id)) {
-    return formatTransactionPublicAddressForDisplay(
-      transaction,
-      walletPublicKey,
-    );
-  }
   if (transaction.type === "claim") {
     return options.claimCreditLabel;
   }
@@ -65,13 +58,6 @@ export function transactionTableSubtitleTitle(
   transaction: Transaction,
   walletPublicKey: string | undefined,
 ): string | undefined {
-  if (isEscrowIndexTransactionId(transaction.id)) {
-    const address = resolveTransactionPublicAddress(
-      transaction,
-      walletPublicKey,
-    );
-    return address || undefined;
-  }
   if (isPrivateTransferTableType(transaction.type)) {
     return undefined;
   }

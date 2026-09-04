@@ -24,6 +24,10 @@ export function isZeroBalanceRegistrationError(error: unknown): boolean {
   );
 }
 
+export function formatRegisterPrivateAddressError(error: unknown): string {
+  return readErrorText(error).trim();
+}
+
 export function logRegisterPrivateAddressError(error: unknown): void {
   if (isZeroBalanceRegistrationError(error)) {
     console.error(
@@ -32,5 +36,5 @@ export function logRegisterPrivateAddressError(error: unknown): void {
     );
     return;
   }
-  console.error("Register private address failed");
+  console.error("Register private address failed", error);
 }

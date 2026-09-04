@@ -28,6 +28,7 @@ export function restoreWalletLocalSlices(
   dispatch: AppDispatch,
   publicKey: string,
 ): void {
+  dispatch(resetCoinState());
   dispatch(replaceTransactionItems(loadTransactionState(publicKey) ?? []));
   const loadedPrivacySdkState = loadPrivacySdkState(publicKey);
   const legacyPrivateAddress = loadPrivateAddressState(publicKey);
@@ -36,11 +37,9 @@ export function restoreWalletLocalSlices(
     owner: publicKey,
     legacy: legacyPrivateAddress,
   });
-  if (Object.keys(mergedBranch).length > 0) {
-    dispatch(
-      hydrateReduxPrivacySdkState(mergedBranch) as unknown as DispatchAction,
-    );
-  }
+  dispatch(
+    hydrateReduxPrivacySdkState(mergedBranch) as unknown as DispatchAction,
+  );
 }
 
 export function resetWalletScopedState(dispatch: AppDispatch): void {

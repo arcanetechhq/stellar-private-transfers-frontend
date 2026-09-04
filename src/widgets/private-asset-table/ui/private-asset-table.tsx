@@ -3,15 +3,29 @@ import "./private-asset-table.css";
 import "@/shared/styles/period-select.css";
 import { Wallet } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { PrivateAssetTableBody } from "./private-asset-table-body";
+import {
+  PrivateAssetTableBody,
+  type PrivateAssetPendingClaimItem,
+} from "./private-asset-table-body";
 import { usePrivateAssetTableModel } from "../lib/use-private-asset-table-model";
+
+type PendingClaimControls = {
+  claimingId: string | undefined;
+  canClaim: boolean;
+  onClaim: (transactionId: string) => void;
+  error?: string;
+};
 
 type PrivateAssetTableProperties = {
   postAddressPicker?: ReactNode;
+  pendingAssetClaims?: PrivateAssetPendingClaimItem[];
+  claimControls?: PendingClaimControls;
 };
 
 export function PrivateAssetTable({
   postAddressPicker,
+  pendingAssetClaims,
+  claimControls,
 }: PrivateAssetTableProperties) {
   const { t: translateAssets } = useTranslation("assets");
   const { t: translateOverview } = useTranslation("overview");
@@ -37,12 +51,23 @@ export function PrivateAssetTable({
           <div className="asset-balances-panel__meta">{postAddressPicker}</div>
         ) : undefined}
       </div>
+      {claimControls?.error ? (
+        <p
+          className="asset-balances-panel__claim-error"
+          data-testid="escrow-claim-error"
+          role="alert"
+        >
+          {claimControls.error}
+        </p>
+      ) : undefined}
       <PrivateAssetTableBody
         translateAssets={translateAssets}
         noncesLength={effectivePrivateAddress ? 1 : 0}
         aggregates={aggregatesWithZeroAssets}
         assetMetaById={assetMetaById}
         assetUsdPriceById={assetUsdPriceById}
+        pendingAssetClaims={pendingAssetClaims}
+        claimControls={claimControls}
       />
     </section>
   );

@@ -84,6 +84,7 @@ export function TransactionsDataTable<T>({
             <div
               className="transactions-data-table__row"
               key={key}
+              data-tx-id={key}
               data-interactive={interactive}
               data-selected={selectedKey === key}
               role="row"

@@ -2,7 +2,10 @@ import { useCallback, useState } from "react";
 import { useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { getPrivacySdkClientOrThrow } from "@/shared/lib/privacy-sdk/transact-context.js";
-import { logRegisterPrivateAddressError } from "./register-private-address-flow-error";
+import {
+  formatRegisterPrivateAddressError,
+  logRegisterPrivateAddressError,
+} from "./register-private-address-flow-error";
 import { useWalletPrivateAddress } from "./wallet-private-address-context";
 
 export type RegisterPrivateAddressFlowStatus =
@@ -18,10 +21,12 @@ export function useRegisterWalletPrivateAddress() {
     useWalletPrivateAddress();
   const [status, setStatus] = useState<RegisterPrivateAddressFlowStatus>("idle");
   const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const reset = useCallback(() => {
     setStatus("idle");
     setHasError(false);
+    setErrorMessage("");
   }, []);
 
   const register = useCallback(async (): Promise<boolean> => {
@@ -30,6 +35,7 @@ export function useRegisterWalletPrivateAddress() {
       return false;
     }
     setHasError(false);
+    setErrorMessage("");
     setStatus("creating");
     try {
       const privateAddress = await ensureWalletPrivateAddress();
@@ -47,6 +53,7 @@ export function useRegisterWalletPrivateAddress() {
       logRegisterPrivateAddressError(error);
       setStatus("error");
       setHasError(true);
+      setErrorMessage(formatRegisterPrivateAddressError(error));
       return false;
     }
   }, [publicKey, ensureWalletPrivateAddress, refreshRegistryStatus]);
@@ -56,5 +63,6 @@ export function useRegisterWalletPrivateAddress() {
     reset,
     status,
     hasError,
+    errorMessage,
   };
 }

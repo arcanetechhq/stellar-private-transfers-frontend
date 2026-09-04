@@ -2,9 +2,13 @@ import type { Middleware, UnknownAction } from "@reduxjs/toolkit";
 import { STATE_BRIDGE_APPLY_WRITE } from "@arcanetech/privacy-sdk-state-redux";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import type { RootState } from "@/store";
+import { isWalletScopedRestoreInFlight } from "@/store/wallet-scoped-restore.js";
 import { savePrivacySdkState } from "../lib/persist-privacy-sdk-state.js";
 
 function persistPrivacySdkBranch(store: { getState: () => RootState }): void {
+  if (isWalletScopedRestoreInFlight()) {
+    return;
+  }
   const state = store.getState();
   const publicKey = selectWalletPublicKey(state)?.trim();
   if (!publicKey) {

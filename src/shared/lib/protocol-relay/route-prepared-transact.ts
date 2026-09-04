@@ -1,8 +1,6 @@
 import type { StellarPreparedOperation } from "@arcanetech/privacy-sdk-stellar";
-import {
-  isEscrowPreparedOperation,
-  requiredSubmissionMethod,
-} from "@arcanetech/privacy-sdk-stellar/transact";
+import { requiredSubmissionMethod } from "@arcanetech/privacy-sdk-stellar/transact";
+import { readZkConfigNonceFromEnvironment } from "@/shared/lib/privacy-sdk/build-transact-environment.js";
 import { deliveryOutboxFromRecords } from "./map-delivery-outbox.js";
 import { inspectPreparedRelayPackage } from "./inspect-prepared-relay-package.js";
 import { submitAndAwaitPrivateOperation } from "./await-relay-settlement.js";
@@ -47,7 +45,10 @@ export async function routePreparedTransact(input: {
     operation: {
       id: operationId,
       walletPublicKey: input.walletPublicKey,
-      submissionPath: requiredSubmissionMethod(prepared),
+      submissionPath: requiredSubmissionMethod(
+        prepared,
+        readZkConfigNonceFromEnvironment(),
+      ),
       display: input.display,
       snapshot: {
         consumedRecordIds: prepared.consumedRecords.map((record) => record.id),
@@ -55,7 +56,7 @@ export async function routePreparedTransact(input: {
       },
       deliveryOutbox: outbox,
       relayPackage,
-      ...(isEscrowPreparedOperation(prepared) ? { escrowSend: true } : {}),
+      ...(input.escrowSend ? { escrowSend: true } : {}),
     },
   });
   return throwIfRelayUnsuccessful(result);

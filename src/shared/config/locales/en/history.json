@@ -35,7 +35,6 @@
     "deposit": "Deposit to Private Balance",
     "sent": "Private Transfer (Sent)",
     "received": "Private Transfer (Received)",
-    "escrowNote": "Received before you registered",
     "withdrawal": "Withdraw to Public Balance"
   },
   "statusLabels": {

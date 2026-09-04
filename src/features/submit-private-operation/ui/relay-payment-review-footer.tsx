@@ -1,12 +1,11 @@
 import React from "react";
-import { useTranslation } from "react-i18next";
 import { PaymentReviewFooter } from "@/shared/ui/payment-review-footer";
-import { shouldShowRelayWaitingNotice } from "../lib/relay-waiting-notice.js";
 import { RelayReviewActions } from "./relay-review-actions.js";
 
 export function RelayPaymentReviewFooter(properties: {
   cancelLabel: string;
   confirmLabel: string;
+  submittingLabel: string;
   isSubmitting: boolean;
   retryAllowed: boolean;
   fallbackAllowed: boolean;
@@ -16,18 +15,11 @@ export function RelayPaymentReviewFooter(properties: {
   onFallback: () => void;
   confirmTestId?: string;
 }): React.JSX.Element {
-  const { t: translate } = useTranslation("relay");
-  const isWaiting = shouldShowRelayWaitingNotice({
-    isSubmitting: properties.isSubmitting,
-    fallbackAllowed: properties.fallbackAllowed,
-  });
   return (
     <PaymentReviewFooter
       cancelLabel={properties.cancelLabel}
       confirmLabel={properties.confirmLabel}
-      submittingLabel={
-        isWaiting ? translate("waitingForProtocol") : properties.confirmLabel
-      }
+      submittingLabel={properties.submittingLabel}
       isSubmitting={properties.isSubmitting}
       showConfirm={!properties.retryAllowed && !properties.fallbackAllowed}
       confirmTestId={properties.confirmTestId}
