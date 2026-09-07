@@ -63,6 +63,9 @@ function resolveConfiguredPrivacyPoolService(
       auditPublicKey:
         transactEnvironment.auditPublicKey ??
         parseAuditPublicKeyFromEnvHex(readAuditPublicKeyHexFromEnvironment()),
+      ...(transactEnvironment.zkConfigNonce === undefined
+        ? {}
+        : { zkConfigNonce: transactEnvironment.zkConfigNonce }),
     });
     configurePrivacyPoolService(service);
     return service as unknown as PrivacyPoolService;

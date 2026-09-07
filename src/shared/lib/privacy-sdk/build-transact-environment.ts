@@ -1,4 +1,5 @@
 import {
+  DEFAULT_ZK_CONFIG_NONCE,
   parseAuditPublicKeyFromEnvHex,
   resolvePoolApplicationId,
   type StellarTransactEnvironment,
@@ -45,8 +46,11 @@ export function readAuditPublicKeyHexFromEnvironment(): string {
   return readRequiredEnvironment("VITE_STELLAR_AUDIT_PUBLIC_KEY");
 }
 
-export function readZkConfigNonceFromEnvironment(): bigint {
-  const raw = readRequiredEnvironment("VITE_ZK_CONFIG_NONCE");
+export function readZkConfigNonceFromEnvironment(): bigint | undefined {
+  const raw = readClientEnvironment("VITE_ZK_CONFIG_NONCE")?.trim();
+  if (!raw) {
+    return undefined;
+  }
   try {
     const parsed = BigInt(raw);
     if (parsed < ZERO_ZK_CONFIG_NONCE) {
@@ -58,8 +62,13 @@ export function readZkConfigNonceFromEnvironment(): bigint {
   }
 }
 
+export function resolveZkConfigNonceFromEnvironment(): bigint {
+  return readZkConfigNonceFromEnvironment() ?? DEFAULT_ZK_CONFIG_NONCE;
+}
+
 export function buildStellarTransactEnvironment(): StellarTransactEnvironment {
   const { networkPassphrase, sorobanRpcUrl } = readNetworkPassphraseAndRpc();
+  const zkConfigNonce = readZkConfigNonceFromEnvironment();
   return {
     network: {
       id: "stellar-testnet",
@@ -71,7 +80,7 @@ export function buildStellarTransactEnvironment(): StellarTransactEnvironment {
       ),
       applicationId: readPoolApplicationIdFromEnvironment(),
     },
-    zkConfigNonce: readZkConfigNonceFromEnvironment(),
+    ...(zkConfigNonce === undefined ? {} : { zkConfigNonce }),
     auditPublicKey: parseAuditPublicKeyFromEnvHex(
       readAuditPublicKeyHexFromEnvironment(),
     ),

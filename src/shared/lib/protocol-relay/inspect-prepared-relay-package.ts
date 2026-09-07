@@ -1,7 +1,7 @@
 import type { StellarPreparedOperation } from "@arcanetech/privacy-sdk-stellar";
 import { prepareRelayTransactPackageFromPrepared } from "@arcanetech/privacy-sdk-stellar/transact";
 import { serializeRelayPackage } from "@arcanetech/privacy-sdk-relay";
-import { readZkConfigNonceFromEnvironment } from "@/shared/lib/privacy-sdk/build-transact-environment.js";
+import { resolveZkConfigNonceFromEnvironment } from "@/shared/lib/privacy-sdk/build-transact-environment.js";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment.js";
 import type { RelayPackageJson } from "./types.js";
 
@@ -12,7 +12,7 @@ export function inspectPreparedRelayPackage(
     prepareRelayTransactPackageFromPrepared({
       prepared,
       poolSelector: getRequiredPrivacyPoolContractId(),
-      zkConfigNonce: readZkConfigNonceFromEnvironment(),
+      zkConfigNonce: resolveZkConfigNonceFromEnvironment(),
     }),
   );
 }

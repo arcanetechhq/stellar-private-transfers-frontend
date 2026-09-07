@@ -1,6 +1,6 @@
 import type { StellarPreparedOperation } from "@arcanetech/privacy-sdk-stellar";
 import { requiredSubmissionMethod } from "@arcanetech/privacy-sdk-stellar/transact";
-import { readZkConfigNonceFromEnvironment } from "@/shared/lib/privacy-sdk/build-transact-environment.js";
+import { resolveZkConfigNonceFromEnvironment } from "@/shared/lib/privacy-sdk/build-transact-environment.js";
 import { deliveryOutboxFromRecords } from "./map-delivery-outbox.js";
 import { inspectPreparedRelayPackage } from "./inspect-prepared-relay-package.js";
 import { submitAndAwaitPrivateOperation } from "./await-relay-settlement.js";
@@ -47,7 +47,7 @@ export async function routePreparedTransact(input: {
       walletPublicKey: input.walletPublicKey,
       submissionPath: requiredSubmissionMethod(
         prepared,
-        readZkConfigNonceFromEnvironment(),
+        resolveZkConfigNonceFromEnvironment(),
       ),
       display: input.display,
       snapshot: {
