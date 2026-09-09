@@ -23,6 +23,8 @@ function requireSweepSubmitArtifacts(prepared: StellarPreparedOperation): {
   applicationIdsPlaintext: NonNullable<
     StellarPreparedOperation["transactArtifacts"]
   >["applicationIdsPlaintext"];
+  ciphertextHex?: string;
+  outputNoteEphemeralScalars?: string[];
 } {
   const artifacts = prepared.transactArtifacts;
   const proofHex = readTrimmedArtifact(artifacts, "proofHex");
@@ -31,11 +33,17 @@ function requireSweepSubmitArtifacts(prepared: StellarPreparedOperation): {
   if (!artifacts || !proofHex || !publicHex || !walletPublicKey) {
     throw new Error("Prepared sweep is missing transact artifacts.");
   }
+  const ciphertextHex = artifacts.ciphertextHex?.trim();
+  const outputNoteEphemeralScalars = artifacts.outputNoteEphemeralScalars;
   return {
     proofHex,
     publicHex,
     walletPublicKey,
     applicationIdsPlaintext: artifacts.applicationIdsPlaintext,
+    ...(ciphertextHex ? { ciphertextHex } : {}),
+    ...(outputNoteEphemeralScalars
+      ? { outputNoteEphemeralScalars: [...outputNoteEphemeralScalars] }
+      : {}),
   };
 }
 
@@ -51,6 +59,12 @@ async function submitSweepDirect(
     publicHex: artifacts.publicHex,
     ...(artifacts.applicationIdsPlaintext
       ? { applicationIdsPlaintext: artifacts.applicationIdsPlaintext }
+      : {}),
+    ...(artifacts.ciphertextHex
+      ? { ciphertextHex: artifacts.ciphertextHex }
+      : {}),
+    ...(artifacts.outputNoteEphemeralScalars
+      ? { outputNoteEphemeralScalars: artifacts.outputNoteEphemeralScalars }
       : {}),
     networkPassphrase: environment.network.networkPassphrase,
     sorobanRpcUrl: environment.network.rpcUrl,
