@@ -66,6 +66,9 @@ function resolveConfiguredPrivacyPoolService(
       ...(transactEnvironment.zkConfigNonce === undefined
         ? {}
         : { zkConfigNonce: transactEnvironment.zkConfigNonce }),
+      ...(transactEnvironment.zkArtifactBaseUrl === undefined
+        ? {}
+        : { zkArtifactBaseUrl: transactEnvironment.zkArtifactBaseUrl }),
     });
     configurePrivacyPoolService(service);
     return service as unknown as PrivacyPoolService;

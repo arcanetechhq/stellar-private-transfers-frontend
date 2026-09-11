@@ -35,7 +35,7 @@ export default defineConfig({
       },
     },
   },
-  assetsInclude: ["**/*.svg", "**/*.csv", "**/*.wasm", "**/*.zkey"],
+  assetsInclude: ["**/*.svg", "**/*.csv", "**/*.wasm", "**/*.zkey", "**/*.bin", "**/*.gz"],
   build: {
     assetsInlineLimit: 0,
   },
