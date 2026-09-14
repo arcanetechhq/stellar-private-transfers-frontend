@@ -12,7 +12,6 @@ import { getRequiredApiBaseUrl } from "@/shared/stellar/stellar-network-environm
 import { readClientEnvironment } from "./read-client-environment.js";
 
 const DEFAULT_SOROBAN_RPC = "https://soroban-testnet.stellar.org";
-const DEFAULT_ZK_ARTIFACT_BASE_URL = "/zk-artifacts";
 const ZERO_ZK_CONFIG_NONCE = 0n;
 
 function readNetworkPassphraseAndRpc(): {
@@ -67,9 +66,12 @@ export function resolveZkConfigNonceFromEnvironment(): bigint {
   return readZkConfigNonceFromEnvironment() ?? DEFAULT_ZK_CONFIG_NONCE;
 }
 
-export function readZkArtifactBaseUrlFromEnvironment(): string {
+export function readZkArtifactBaseUrlFromEnvironment(): string | undefined {
   const raw = readClientEnvironment("VITE_ZK_ARTIFACT_BASE_URL")?.trim();
-  let withoutSlash = raw ?? DEFAULT_ZK_ARTIFACT_BASE_URL;
+  if (!raw) {
+    return undefined;
+  }
+  let withoutSlash = raw;
   while (withoutSlash.endsWith("/")) {
     withoutSlash = withoutSlash.slice(0, -1);
   }
@@ -92,7 +94,7 @@ export function buildStellarTransactEnvironment(): StellarTransactEnvironment {
       applicationId: readPoolApplicationIdFromEnvironment(),
     },
     ...(zkConfigNonce === undefined ? {} : { zkConfigNonce }),
-    zkArtifactBaseUrl,
+    ...(zkArtifactBaseUrl === undefined ? {} : { zkArtifactBaseUrl }),
     auditPublicKey: parseAuditPublicKeyFromEnvHex(
       readAuditPublicKeyHexFromEnvironment(),
     ),
