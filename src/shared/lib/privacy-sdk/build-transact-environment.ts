@@ -38,8 +38,18 @@ function readRequiredContractEnvironment(name: string): string {
   return normalizeSorobanContractId(readRequiredEnvironment(name));
 }
 
+const DECIMAL_APPLICATION_ID = /^\d+$/u;
+
 export function readPoolApplicationIdFromEnvironment(): string {
-  return resolvePoolApplicationId(readClientEnvironment("VITE_APPLICATION_ID"));
+  const applicationId = resolvePoolApplicationId(
+    readClientEnvironment("VITE_APPLICATION_ID"),
+  );
+  if (!DECIMAL_APPLICATION_ID.test(applicationId)) {
+    throw new Error(
+      "VITE_APPLICATION_ID must be association.audit_id (decimal Fr), not a UUID or foreignId",
+    );
+  }
+  return applicationId;
 }
 
 export function readAuditPublicKeyHexFromEnvironment(): string {
