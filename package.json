@@ -6,6 +6,7 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
+    "vendor:zk-artifacts": "node scripts/vendor-zk-artifacts.mjs",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "lint:fix": "eslint \"src/**/*.{ts,tsx}\" --fix",
     "test": "jest --config jest.config.mjs",
@@ -16,9 +17,9 @@
   },
   "dependencies": {
     "@arcanetech/privacy-sdk-core": "0.3.0",
-    "@arcanetech/privacy-sdk-relay": "file:../privacy-layer-sdk/packages/relay",
+    "@arcanetech/privacy-sdk-relay": "0.2.1",
     "@arcanetech/privacy-sdk-state-redux": "0.2.2",
-    "@arcanetech/privacy-sdk-stellar": "0.3.0",
+    "@arcanetech/privacy-sdk-stellar": "0.5.0",
     "@creit-tech/stellar-wallets-kit": "npm:@jsr/creit-tech__stellar-wallets-kit@^2.1.0",
     "@noble/hashes": "^2.2.0",
     "@radix-ui/react-accordion": "1.2.3",
