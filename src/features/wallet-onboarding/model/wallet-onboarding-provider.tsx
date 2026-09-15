@@ -6,9 +6,13 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useStore } from "react-redux";
 import { useAppDispatch, useAppSelector } from "@/store";
 import { selectWalletPublicKey, selectIsWalletKitLoaded } from "@/entities/wallet";
-import { useWalletPrivateAddress } from "@/features/register-private-address";
+import {
+  useRegisterWalletPrivateAddress,
+  useWalletPrivateAddress,
+} from "@/features/register-private-address";
 import { useStellarWalletModal } from "@/features/stellar-wallet-connect";
 import { usePrivacyPoolServiceConfigured } from "@/shared/hooks/use-privacy-pool-service-configured.js";
 import { usePrivacySdkBootstrapError } from "@/shared/hooks/use-privacy-sdk-bootstrap-error.js";
@@ -32,7 +36,7 @@ type OnboardingBlock = {
 };
 
 function mapFlowStepToPhase(
-  step: "checking" | "funding" | "ready",
+  step: "checking" | "funding" | "registering" | "ready",
 ): WalletOnboardingPhase {
   if (step === "ready") {
     return "ready";
@@ -44,11 +48,13 @@ export function WalletOnboardingProvider({
   children,
 }: WalletOnboardingProviderProperties) {
   const dispatch = useAppDispatch();
+  const store = useStore();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const isWalletKitLoaded = useAppSelector(selectIsWalletKitLoaded);
   const privacyPoolServiceReady = usePrivacyPoolServiceConfigured();
   const bootstrapError = usePrivacySdkBootstrapError();
   const { refreshRegistryStatus } = useWalletPrivateAddress();
+  const { register } = useRegisterWalletPrivateAddress();
   const {
     isWalletConnectInProgress,
     isOpen: isWalletModalOpen,
@@ -94,7 +100,9 @@ export function WalletOnboardingProvider({
       try {
         await runWalletOnboardingFlow({
           dispatch,
+          getState: store.getState,
           publicKey: trimmedPublicKey,
+          registerPrivateAddress: register,
           onStep: (step) => {
             if (runReference.current !== runId) {
               return;
@@ -146,6 +154,8 @@ export function WalletOnboardingProvider({
       clearOnboardingBlock,
       dispatch,
       refreshRegistryStatus,
+      register,
+      store,
     ],
   );
 

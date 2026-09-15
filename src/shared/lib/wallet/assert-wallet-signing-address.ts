@@ -1,4 +1,4 @@
-import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
+import { readConnectedWalletAddress } from "./read-connected-wallet-address";
 import { WalletAccountMismatchError } from "./wallet-account-mismatch-error";
 
 export async function assertWalletSigningAddress(
@@ -9,8 +9,7 @@ export async function assertWalletSigningAddress(
     throw new Error("Wallet not connected");
   }
 
-  const { address } = await StellarWalletsKit.getAddress();
-  const active = address.trim();
+  const active = await readConnectedWalletAddress();
   if (!active || active !== expected) {
     throw new WalletAccountMismatchError({
       expectedAddress: expected,

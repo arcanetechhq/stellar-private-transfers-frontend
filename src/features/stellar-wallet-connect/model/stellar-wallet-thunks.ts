@@ -8,6 +8,7 @@ import {
   setWalletProviderName,
 } from "@/entities/wallet";
 import { ensureEscrowTagsForWallet } from "@/features/discover-escrow-notes";
+import { rememberKitActiveAddress } from "@/shared/lib/wallet/remember-kit-active-address";
 import { FREIGHTER_WALLET_ID } from "../lib/wallet-options";
 import { readWalletProviderNameFromKit } from "../lib/read-wallet-provider-name";
 
@@ -23,6 +24,7 @@ export const syncWalletAddressFromKit = createAsyncThunk(
       if (!trimmed) {
         return;
       }
+      rememberKitActiveAddress(trimmed);
       dispatch(setPublicKey(trimmed));
       const providerName = readWalletProviderNameFromKit();
       if (providerName) {
@@ -45,6 +47,7 @@ export const connectStellarWallet = createAsyncThunk(
       if (!address) {
         return;
       }
+      rememberKitActiveAddress(address);
       dispatch(setPublicKey(address));
       const providerName = readWalletProviderNameFromKit();
       if (providerName) {
@@ -63,6 +66,7 @@ export const connectStellarWalletModule = createAsyncThunk(
     try {
       StellarWalletsKitSdk.setWallet(moduleId);
       const { address } = await StellarWalletsKitSdk.fetchAddress();
+      rememberKitActiveAddress(address);
       dispatch(setPublicKey(address));
       const providerName = readWalletProviderNameFromKit();
       if (providerName) {

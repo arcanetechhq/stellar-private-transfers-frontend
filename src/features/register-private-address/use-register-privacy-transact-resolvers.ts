@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
 import { useAppSelector } from "@/store";
+import { readConnectedWalletAddress } from "@/shared/lib/wallet/read-connected-wallet-address";
 import { assetApi, type AssetDto } from "@/entities/asset";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { resolveTransferRecipientAtExecute } from "@/shared/lib/privacy-sdk/resolve-transfer-recipient-at-execute.js";
@@ -46,8 +46,7 @@ function createRuntimeResolvers(
       if (connected) {
         return connected;
       }
-      const { address } = await StellarWalletsKit.getAddress();
-      return address;
+      return readConnectedWalletAddress();
     },
     resolveTransferRecipientAtExecute,
     ensureSenderPrivKeyScalarHex: (privateAddressStpl1) =>

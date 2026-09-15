@@ -1,5 +1,6 @@
 import { StellarWalletsKit as StellarWalletsKitSdk } from "@creit-tech/stellar-wallets-kit/sdk";
 import type { AppDispatch } from "@/store";
+import { rememberKitActiveAddress } from "@/shared/lib/wallet/remember-kit-active-address";
 import { FREIGHTER_WALLET_ID } from "./wallet-options";
 import { connectFreighterWallet } from "./connect-freighter-wallet";
 import { disconnectStellarWallet } from "../model/stellar-wallet-thunks";
@@ -25,6 +26,7 @@ export async function syncFreighterWalletAccount(parameters: {
     if (!next) {
       return "failed";
     }
+    rememberKitActiveAddress(next);
 
     if (current && next === current) {
       return "unchanged";

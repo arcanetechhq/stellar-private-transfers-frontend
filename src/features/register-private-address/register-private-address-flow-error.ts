@@ -1,3 +1,5 @@
+import { errorToMessage } from "@/shared/lib/wallet/sign-message-errors";
+
 const ZERO_BALANCE_ERROR_MARKERS = [
   "underfund",
   "insufficient",
@@ -8,13 +10,7 @@ const ZERO_BALANCE_ERROR_MARKERS = [
 ] as const;
 
 function readErrorText(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  if (typeof error === "string") {
-    return error;
-  }
-  return String(error);
+  return errorToMessage(error);
 }
 
 export function isZeroBalanceRegistrationError(error: unknown): boolean {

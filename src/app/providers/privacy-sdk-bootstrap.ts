@@ -13,6 +13,7 @@ import {
 } from "@arcanetech/privacy-sdk-stellar";
 import { wrapTransactEngineToProveAtPrepare } from "@/shared/lib/privacy-sdk/wrap-transact-engine.js";
 import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
+import { readConnectedWalletAddress } from "@/shared/lib/wallet/read-connected-wallet-address";
 import {
   parseAuditPublicKeyFromEnvHex,
   type PrivacyPoolService,
@@ -29,10 +30,7 @@ import {
 
 async function createWalletAdapter(networkPassphrase: string) {
   return {
-    getAddress: async () => {
-      const { address } = await StellarWalletsKit.getAddress();
-      return address;
-    },
+    getAddress: readConnectedWalletAddress,
     authorizeMessage: async (message: Uint8Array | string) => {
       const payload =
         typeof message === "string"
