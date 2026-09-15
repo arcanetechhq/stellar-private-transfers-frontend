@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@arcanetech/privacy-sdk-core": "0.3.0",
-    "@arcanetech/privacy-sdk-relay": "0.2.1",
+    "@arcanetech/privacy-sdk-relay": "^0.2.2",
     "@arcanetech/privacy-sdk-state-redux": "0.2.2",
     "@arcanetech/privacy-sdk-stellar": "0.5.1",
     "@creit-tech/stellar-wallets-kit": "npm:@jsr/creit-tech__stellar-wallets-kit@^2.1.0",

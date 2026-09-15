@@ -13,6 +13,9 @@ describe("resolveRelayOrigin", () => {
     expect(resolveRelayOrigin("http://localhost:3010/api")).toBe(
       "http://localhost:3010/api",
     );
+    expect(resolveRelayOrigin("http://localhost:3010/api/")).toBe(
+      "http://localhost:3010/api",
+    );
   });
 });
 
