@@ -11,6 +11,7 @@ import {
 } from "../lib/format-transfer-balance";
 import { TransferAssetSelect } from "./transfer-asset-select";
 import { TransferRecipientControl } from "./transfer-recipient-control";
+import { useRequiredFeeDisplay } from "@/shared/lib/protocol-fee/use-required-fee-display.js";
 
 interface TransferSendPanelProperties {
   assets: AssetWithTrustline[];
@@ -126,7 +127,13 @@ export function TransferSendPanel({
   const amountInvalid = exceedsBalance || Boolean(noteLimitAlert);
   const recipientGetsDisplay =
     `${formatTransferAmount(totalAmount)} ${ticker}`.trim();
-  const feeDisplay = `0 ${ticker}`.trim();
+  const feeDisplay = useRequiredFeeDisplay({
+    kind: "transfer",
+    amount,
+    feeAsset: selectedToken?.clientContract,
+    decimals: selectedToken?.decimals,
+    ticker,
+  });
   const availableBalanceDisplay = formatTransferBalanceWithTicker(
     selectedToken?.balance,
     ticker,

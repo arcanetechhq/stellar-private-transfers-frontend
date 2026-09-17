@@ -12,7 +12,9 @@ export function inspectPreparedRelayPackage(
     prepareRelayTransactPackageFromPrepared({
       prepared,
       poolSelector: getRequiredPrivacyPoolContractId(),
-      zkConfigNonce: resolveZkConfigNonceFromEnvironment(),
+      ...(prepared.transactArtifacts?.zkConfigNonce === undefined
+        ? { zkConfigNonce: resolveZkConfigNonceFromEnvironment() }
+        : { zkConfigNonce: prepared.transactArtifacts.zkConfigNonce }),
     }),
   );
 }

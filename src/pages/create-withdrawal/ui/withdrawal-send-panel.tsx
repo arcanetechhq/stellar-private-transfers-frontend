@@ -10,6 +10,7 @@ import {
 } from "../lib/format-withdrawal-amount";
 import { WithdrawalAssetSelect } from "./withdrawal-asset-select";
 import { WithdrawalWalletControl } from "./withdrawal-wallet-control";
+import { useRequiredFeeDisplay } from "@/shared/lib/protocol-fee/use-required-fee-display.js";
 
 interface WithdrawalSendPanelProperties {
   assets: AssetWithTrustline[];
@@ -52,7 +53,13 @@ export function WithdrawalSendPanel({
     numericAmount > numericBalance;
   const amountInvalid = exceedsBalance || Boolean(noteLimitAlert);
   const recipientGetsDisplay = `${formatWithdrawalAmount(totalAmount)} ${ticker}`.trim();
-  const feeDisplay = `0 ${ticker}`.trim();
+  const feeDisplay = useRequiredFeeDisplay({
+    kind: "withdraw",
+    amount,
+    feeAsset: selectedToken?.clientContract,
+    decimals: selectedToken?.decimals,
+    ticker,
+  });
   const availableBalanceDisplay = formatWithdrawalBalanceWithTicker(
     selectedToken?.balance,
     ticker,

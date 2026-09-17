@@ -47,7 +47,8 @@ export async function routePreparedTransact(input: {
       walletPublicKey: input.walletPublicKey,
       submissionPath: requiredSubmissionMethod(
         prepared,
-        resolveZkConfigNonceFromEnvironment(),
+        prepared.transactArtifacts?.zkConfigNonce ??
+          resolveZkConfigNonceFromEnvironment(),
       ),
       display: input.display,
       snapshot: {

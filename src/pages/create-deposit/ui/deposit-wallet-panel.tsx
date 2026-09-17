@@ -7,6 +7,7 @@ import type { AssetWithTrustline } from "@/entities/asset";
 import { formatDepositBalance } from "../lib/format-deposit-balance";
 import { formatDepositSpendableBalanceInput } from "../lib/compute-deposit-spendable-balance";
 import { DepositWalletControl } from "./deposit-wallet-control";
+import { useRequiredFeeDisplay } from "@/shared/lib/protocol-fee/use-required-fee-display.js";
 
 interface DepositWalletPanelProperties {
   selectedAsset: AssetWithTrustline | undefined;
@@ -38,7 +39,13 @@ export function DepositWalletPanel({
   const availableBalance = formatDepositBalance(spendableBalanceInput);
   const numericAmount = Number.parseFloat(amount);
   const hasAmount = Number.isFinite(numericAmount) && numericAmount > 0;
-  const feeDisplay = `0 ${ticker}`.trim();
+  const feeDisplay = useRequiredFeeDisplay({
+    kind: "deposit",
+    amount,
+    feeAsset: selectedAsset?.clientContract,
+    decimals: selectedAsset?.decimals,
+    ticker,
+  });
 
   return (
     <div className="private-deposit-panel">
