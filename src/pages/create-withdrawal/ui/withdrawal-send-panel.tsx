@@ -128,7 +128,9 @@ export function WithdrawalSendPanel({
         {hasAmount ? (
           <div className="send-money-summary-row">
             <span>{translate("fee")}</span>
-            <span className="send-money-summary-row__value">{feeDisplay}</span>
+            <span className="send-money-summary-row__value" data-testid="required-fee">
+              {feeDisplay}
+            </span>
           </div>
         ) : null}
       </div>
