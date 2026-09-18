@@ -38,7 +38,9 @@ export function CreateWithdrawal(): React.JSX.Element {
             totalAmount={withdrawal.receivedAmount}
             canContinue={withdrawal.canSubmit}
             isSubmitting={withdrawal.isSubmitting}
-            noteLimitAlert={withdrawal.noteLimitAlert}
+            {...(withdrawal.step === "form" && withdrawal.noteLimitAlert
+              ? { noteLimitAlert: withdrawal.noteLimitAlert }
+              : {})}
             onAmountChange={withdrawal.handleAmountChange}
             onTokenSelect={withdrawal.handleTokenSelect}
             onMaxAmount={withdrawal.handleMaxAmount}
