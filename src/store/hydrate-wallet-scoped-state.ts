@@ -4,14 +4,11 @@ import {
   loadSeenTags,
   resetSeenTags,
 } from "@/entities/coin-deliveries";
-import { loadPrivateAddressState } from "@/entities/private-address/lib/persist-private-address";
-import { loadPrivacySdkState } from "@/entities/privacy-sdk-state";
 import { loadTransactionState } from "@/entities/transaction";
 import {
   replaceTransactionItems,
   resetForWalletChange as resetTransactionsForWalletChange,
 } from "@/entities/transaction/model/transaction.js";
-import { mergeLegacyPrivateAddressIntoSdkBranch } from "@/shared/lib/privacy-sdk/wallet-private-address-sdk-branch.js";
 import { hydrateReduxPrivacySdkState } from "@arcanetech/privacy-sdk-state-redux";
 import type { AppDispatch } from "./store.js";
 
@@ -30,16 +27,6 @@ export function restoreWalletLocalSlices(
 ): void {
   dispatch(resetCoinState());
   dispatch(replaceTransactionItems(loadTransactionState(publicKey) ?? []));
-  const loadedPrivacySdkState = loadPrivacySdkState(publicKey);
-  const legacyPrivateAddress = loadPrivateAddressState(publicKey);
-  const mergedBranch = mergeLegacyPrivateAddressIntoSdkBranch({
-    branch: loadedPrivacySdkState ?? {},
-    owner: publicKey,
-    legacy: legacyPrivateAddress,
-  });
-  dispatch(
-    hydrateReduxPrivacySdkState(mergedBranch) as unknown as DispatchAction,
-  );
 }
 
 export function resetWalletScopedState(dispatch: AppDispatch): void {

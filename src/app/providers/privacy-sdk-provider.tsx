@@ -6,19 +6,17 @@ import React, {
   type ReactNode,
 } from "react";
 import type { StellarPrivacyClient } from "@arcanetech/privacy-sdk-stellar";
-import { hydrateReduxPrivacySdkState } from "@arcanetech/privacy-sdk-state-redux";
 import {
   collectPoolContractIdsFromCoinItems,
-  loadPrivacySdkState,
+  hydratePrivacySdkClient,
   startPoolMerkleBackgroundSync,
   syncPrivacySdkCaches,
 } from "@/entities/privacy-sdk-state";
 import { useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { store } from "@/store/store.js";
+import { loadPrivateAddressState } from "@/entities/private-address";
 import { usePrivacySdkBootstrapState } from "./use-privacy-sdk-bootstrap-state.js";
-
-type StoreDispatchAction = Parameters<typeof store.dispatch>[0];
 
 interface PrivacySdkContextValue {
   client: StellarPrivacyClient | undefined;
@@ -47,26 +45,24 @@ function usePrivacySdkCacheSync(
       return;
     }
     const trimmedPublicKey = walletPublicKey?.trim();
-    if (trimmedPublicKey) {
-      const loadedPrivacySdkState = loadPrivacySdkState(trimmedPublicKey);
-      if (
-        loadedPrivacySdkState &&
-        Object.keys(store.getState().privacySdkState).length === 0
-      ) {
-        store.dispatch(
-          hydrateReduxPrivacySdkState(
-            loadedPrivacySdkState,
-          ) as unknown as StoreDispatchAction,
-        );
-      }
+    if (!trimmedPublicKey) {
+      return;
     }
-    syncPrivacySdkCaches({
+    hydratePrivacySdkClient({
       client,
       walletPublicKey: trimmedPublicKey,
-      getState: store.getState,
-    }).catch(() => {
-      return;
-    });
+      legacyPrivateAddress: loadPrivateAddressState(trimmedPublicKey),
+    })
+      .then(() =>
+        syncPrivacySdkCaches({
+          client,
+          walletPublicKey: trimmedPublicKey,
+          getState: store.getState,
+        }),
+      )
+      .catch(() => {
+        return;
+      });
   }, [client, ready, walletPublicKey]);
 
   useEffect(() => {

@@ -4,6 +4,11 @@ import { selectWalletPublicKey } from "@/entities/wallet";
 import type { RootState } from "@/store";
 import { isWalletScopedRestoreInFlight } from "@/store/wallet-scoped-restore.js";
 import { savePrivacySdkState } from "../lib/persist-privacy-sdk-state.js";
+import { savePoolMerkleStates } from "../lib/persist-pool-merkle.js";
+import {
+  readPoolMerkleStatesFromSdkBranch,
+  walletScopedPrivacySdkBranch,
+} from "../lib/privacy-sdk-branch.js";
 
 function persistPrivacySdkBranch(store: { getState: () => RootState }): void {
   if (isWalletScopedRestoreInFlight()) {
@@ -15,9 +20,12 @@ function persistPrivacySdkBranch(store: { getState: () => RootState }): void {
     return;
   }
   const branch = state.privacySdkState;
-  if (typeof branch === "object" && branch !== null && !Array.isArray(branch)) {
-    savePrivacySdkState(publicKey, branch as Record<string, unknown>);
+  if (typeof branch !== "object" || branch === null || Array.isArray(branch)) {
+    return;
   }
+  const record = branch as Record<string, unknown>;
+  savePrivacySdkState(publicKey, walletScopedPrivacySdkBranch(record));
+  void savePoolMerkleStates(readPoolMerkleStatesFromSdkBranch(record));
 }
 
 function isApplyWriteAction(action: unknown): action is UnknownAction {

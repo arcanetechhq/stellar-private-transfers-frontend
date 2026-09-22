@@ -3,6 +3,7 @@ export {
   loadPrivacySdkState,
   savePrivacySdkState,
 } from "./lib/persist-privacy-sdk-state.js";
+export { hydratePrivacySdkClient } from "./lib/hydrate-privacy-sdk-client.js";
 export { syncAssetsToSdkState } from "./lib/sync-assets-to-sdk-state.js";
 export {
   collectPoolContractIdsFromCoinItems,

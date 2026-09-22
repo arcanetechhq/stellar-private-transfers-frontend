@@ -2,6 +2,7 @@ import type { StellarPrivacyClient } from "@arcanetech/privacy-sdk-stellar";
 import { assetApi, type AssetDto } from "@/entities/asset";
 import { syncCoinItemsToSdkState } from "@/entities/coin/lib/sync-private-records-to-sdk.js";
 import type { RootState } from "@/store";
+import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
 import { syncAssetsToSdkState } from "./sync-assets-to-sdk-state.js";
 
 const LEGACY_MERKLE_CACHE_PREFIX = "stellar:merkle:";
@@ -12,10 +13,18 @@ function readCachedAssets(state: RootState): AssetDto[] | undefined {
   return cached && cached.length > 0 ? cached : undefined;
 }
 
+function configuredPoolContractIds(): string[] {
+  try {
+    return [getRequiredPrivacyPoolContractId()];
+  } catch {
+    return [];
+  }
+}
+
 export function collectPoolContractIdsFromCoinItems(
   state: RootState,
 ): string[] {
-  const unique = new Set<string>();
+  const unique = new Set<string>(configuredPoolContractIds());
   for (const item of state.coin.items) {
     const poolContract = item.poolContract?.trim();
     if (poolContract) {
@@ -84,13 +93,14 @@ async function migrateLegacyMerkleLocalStorage(
 export async function syncPoolMerkleStatesFromCoinItems(input: {
   client: StellarPrivacyClient;
   walletPublicKey: string | undefined;
+  getState: () => RootState;
 }): Promise<void> {
   const trimmedPublicKey = input.walletPublicKey?.trim();
   if (!trimmedPublicKey) {
     return;
   }
   await migrateLegacyMerkleLocalStorage(input.client);
-  const poolContractIds = collectPoolContractIdsFromCoinItems();
+  const poolContractIds = collectPoolContractIdsFromCoinItems(input.getState());
   if (poolContractIds.length === 0) {
     return;
   }
@@ -121,6 +131,7 @@ export async function syncPrivacySdkCaches(input: {
   await syncPoolMerkleStatesFromCoinItems({
     client: input.client,
     walletPublicKey: trimmedPublicKey,
+    getState: input.getState,
   });
 }
 
