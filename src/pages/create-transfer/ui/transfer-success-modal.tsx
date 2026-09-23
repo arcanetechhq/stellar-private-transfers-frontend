@@ -65,6 +65,7 @@ export function TransferSuccessModal({
           <button
             type="button"
             className="send-money-continue"
+            data-testid="transfer-success-done"
             onClick={onDone}
           >
             {translate("success.done")}
