@@ -14,9 +14,12 @@ export function getTransactionLabel(
 }
 
 export function resolveTransactionActivityTitle(
-  transaction: { id: string; type: string },
+  transaction: { id: string; type: string; invalidIncomingReason?: string },
   translate: (key: string) => string,
 ): string {
+  if (transaction.invalidIncomingReason) {
+    return translate("invalidIncoming.title");
+  }
   return getTransactionLabel(transaction.type, translate);
 }
 
@@ -54,7 +57,13 @@ export function getStatusVariant(status: string) {
   }
 }
 
-export function getAmountToneClass(type: string): string {
+export function getAmountToneClass(
+  type: string,
+  status?: string,
+): string {
+  if (status === "failed") {
+    return "text-error";
+  }
   switch (type) {
     case "sent":
     case "withdrawal": {
@@ -71,7 +80,10 @@ export function getAmountToneClass(type: string): string {
   }
 }
 
-export function getAmountPrefix(type: string) {
+export function getAmountPrefix(type: string, status?: string) {
+  if (status === "failed") {
+    return "";
+  }
   switch (type) {
     case "sent":
     case "withdrawal": {

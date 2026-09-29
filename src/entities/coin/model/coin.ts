@@ -1,6 +1,10 @@
 import type { CoinData } from "@/shared/lib/privacy-sdk/types.js";
 
-export type CoinStatus = "pending" | "finalized" | "spent";
+export type DeadOnArrivalReason =
+  | "commitment_mismatch"
+  | "nullifier_consumed";
+
+export type CoinStatus = "pending" | "finalized" | "spent" | "dead";
 
 export interface CoinWithMetadata {
   commitmentHex: string;
@@ -12,6 +16,7 @@ export interface CoinWithMetadata {
   poolContract: string;
   amountDisplay: number;
   status: CoinStatus;
+  deadReason?: DeadOnArrivalReason;
   txId?: string;
 }
 

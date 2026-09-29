@@ -41,7 +41,7 @@ const coinSlice = createSlice({
     },
     finalizeCoin: (state, action: PayloadAction<string>) => {
       const item = findCoinItemByLedgerReference(state.items, action.payload);
-      if (!item || item.status === "spent") {
+      if (!item || item.status === "spent" || item.status === "dead") {
         return;
       }
       if (item.status === "pending") {

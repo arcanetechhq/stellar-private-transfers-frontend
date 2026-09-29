@@ -2,6 +2,7 @@ export type {
   CoinData,
   CoinEntry,
   CoinStatus,
+  DeadOnArrivalReason,
   CoinWithMetadata,
   AggregatedPrivateAssetRow,
 } from "./model/coin";
@@ -20,11 +21,6 @@ export {
   type CoinState,
   type CoinRootState,
 } from "./model/coin-slice";
-export { coinSdkSyncMiddleware } from "./model/coin-sdk-sync-middleware.js";
-export {
-  syncCoinItemsToSdkState,
-  upsertPrivateRecordToSdkState,
-} from "./lib/sync-private-records-to-sdk.js";
 
 export { normalizeCommitmentHex } from "./lib/persist-coin";
 export {

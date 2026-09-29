@@ -15,6 +15,7 @@ export interface Transaction {
   status: "completed" | "pending" | "processing" | "created" | "failed";
   confirmationStatus: "created" | "sent" | "viewed" | "used" | "none";
   disclosureStatus: "none" | "partial" | "full" | "pending";
+  invalidIncomingReason?: "commitment_mismatch" | "nullifier_consumed";
 }
 
 export type ChainDetailsEntry =

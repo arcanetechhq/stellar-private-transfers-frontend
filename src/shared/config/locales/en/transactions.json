@@ -103,6 +103,12 @@
     "created": "Created",
     "failed": "Failed"
   },
+  "invalidIncoming": {
+    "title": "Invalid incoming payment",
+    "commitment_mismatch": "Note fields do not match the delivered commitment",
+    "nullifier_consumed": "Note nullifier was already consumed",
+    "pendingSettlement": "Waiting for the note to appear on-chain"
+  },
   "details": {
     "close": "Close transaction details",
     "directionIncoming": "Incoming",

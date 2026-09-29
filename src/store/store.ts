@@ -35,7 +35,8 @@ import {
   isWalletScopedRestoreInFlight,
   runWalletScopedRestore,
 } from "./wallet-scoped-restore.js";
-import { coinReducer, coinSdkSyncMiddleware } from "@/entities/coin";
+import { coinReducer } from "@/entities/coin";
+import { coinSdkSyncMiddleware } from "@/entities/coin/model/coin-sdk-sync-middleware.js";
 
 const loadedContact = loadContactState();
 

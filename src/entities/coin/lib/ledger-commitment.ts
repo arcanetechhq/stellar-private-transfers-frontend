@@ -62,7 +62,7 @@ export function existingSpentCoinMatchesIncomingDelivery(
     incomingKeys.add(keyCoin);
   }
   return items.some((item) => {
-    if (item.status !== "spent") {
+    if (item.status !== "spent" && item.status !== "dead") {
       return false;
     }
     const existingKeys = ledgerCommitmentKeySet(item);

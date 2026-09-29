@@ -26,14 +26,19 @@ export function RecentTransactionRow(
   const assetMap = useAssetLookup();
   const asset = assetMap.get(transaction.assetId);
   const assetLabel = asset?.name ?? transaction.assetId;
-  const amountToneClass = getAmountToneClass(transaction.type);
-  const amountPrefix = getAmountPrefix(transaction.type);
+  const amountToneClass = getAmountToneClass(
+    transaction.type,
+    transaction.status,
+  );
+  const amountPrefix = getAmountPrefix(transaction.type, transaction.status);
 
   return (
     <Link
       to={buildTransactionsPathWithSelection(transaction.id)}
       className={cn(
         "flex h-[68px] items-center bg-[var(--card)] px-5 transition-colors hover:bg-[var(--surface-hover)]",
+        transaction.invalidIncomingReason &&
+          "border-l-2 border-l-error bg-[color-mix(in_oklab,var(--card),red_6%)]",
       )}
     >
       <div className="flex w-full items-center gap-3">
@@ -55,6 +60,13 @@ export function RecentTransactionRow(
               </span>
             </div>
           </div>
+          {transaction.invalidIncomingReason ? (
+            <p className="truncate text-xs leading-4 text-error">
+              {translateTransactions(
+                `invalidIncoming.${transaction.invalidIncomingReason}`,
+              )}
+            </p>
+          ) : null}
         </div>
         <div className="flex-shrink-0 text-right">
           <p className={cn("text-sm leading-5 font-semibold", amountToneClass)}>

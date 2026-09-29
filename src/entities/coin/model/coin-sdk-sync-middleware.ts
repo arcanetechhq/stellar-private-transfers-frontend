@@ -20,14 +20,38 @@ function isPrivacySdkBranchAction(action: unknown): boolean {
   return type === STATE_BRIDGE_HYDRATE || type === STATE_BRIDGE_APPLY_WRITE;
 }
 
+function mergePreservingDeadOnArrivalNotes(
+  mappedItems: ReturnType<typeof mapPrivateRecordsToCoinItemsFromSdkState>,
+  previousItems: RootState["coin"]["items"],
+): ReturnType<typeof mapPrivateRecordsToCoinItemsFromSdkState> {
+  const deadNotes = previousItems.filter((item) => item.status === "dead");
+  if (deadNotes.length === 0) {
+    return mappedItems;
+  }
+  const mappedKeys = new Set(
+    mappedItems.map((item) => item.commitmentHex.trim().toLowerCase()),
+  );
+  const preserved = deadNotes.filter(
+    (item) => !mappedKeys.has(item.commitmentHex.trim().toLowerCase()),
+  );
+  return [...mappedItems, ...preserved];
+}
+
 export const coinSdkSyncMiddleware: Middleware<object, RootState> =
   (store) => (next) => (action) => {
+    const previousDeadItems = store
+      .getState()
+      .coin.items.filter((item) => item.status === "dead");
     const result = next(action);
     if (isPrivacySdkBranchAction(action)) {
       const mappedItems = mapPrivateRecordsToCoinItemsFromSdkState(
         store.getState(),
       );
-      store.dispatch(replaceCoinItems(mappedItems));
+      store.dispatch(
+        replaceCoinItems(
+          mergePreservingDeadOnArrivalNotes(mappedItems, previousDeadItems),
+        ),
+      );
     }
     if (
       typeof action === "object" &&

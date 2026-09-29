@@ -58,6 +58,14 @@ export function TransactionFromToCell({
       privateTransferLabel: translate("privateTransferSubtitle"),
       claimCreditLabel: translate("claimCreditSubtitle"),
       assetFallback,
+      pendingIncomingLabel: translate("invalidIncoming.pendingSettlement"),
+      ...(transaction.invalidIncomingReason
+        ? {
+            invalidIncomingLabel: translate(
+              `invalidIncoming.${transaction.invalidIncomingReason}`,
+            ),
+          }
+        : {}),
     },
   });
 
@@ -98,6 +106,9 @@ type TransactionAmountCellProperties = {
 function getAmountTone(
   transaction: Transaction,
 ): "positive" | "negative" | "pending" | "neutral" {
+  if (transaction.status === "failed") {
+    return "negative";
+  }
   if (
     transaction.status === "pending" ||
     transaction.status === "processing" ||
@@ -105,7 +116,7 @@ function getAmountTone(
   ) {
     return "pending";
   }
-  const toneClass = getAmountToneClass(transaction.type);
+  const toneClass = getAmountToneClass(transaction.type, transaction.status);
   if (toneClass.includes("success")) {
     return "positive";
   }
@@ -118,7 +129,7 @@ function getAmountTone(
 export function TransactionAmountCell({
   transaction,
 }: TransactionAmountCellProperties) {
-  const amountPrefix = getAmountPrefix(transaction.type);
+  const amountPrefix = getAmountPrefix(transaction.type, transaction.status);
   const tone = getAmountTone(transaction);
   const usdAmount =
     transaction.amount * getAssetUsdPrice(transaction.assetId);

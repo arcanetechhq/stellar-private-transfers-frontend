@@ -70,7 +70,14 @@ function statusFromRecord(
   if (record.status === "pending" && !record.txHash) {
     return "finalized";
   }
-  return record.status ?? (record.consumed ? "spent" : "finalized");
+  if (
+    record.status === "pending" ||
+    record.status === "finalized" ||
+    record.status === "spent"
+  ) {
+    return record.status;
+  }
+  return record.consumed ? "spent" : "finalized";
 }
 
 export function mapPrivateRecordToCoinWithMetadata(

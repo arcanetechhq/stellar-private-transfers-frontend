@@ -128,7 +128,7 @@ export function TransactionDetailsPanel({
     walletPublicKey,
   );
   const privateAddressLabel = translateTransactions("details.fields.privateAddress");
-  const amountPrefix = getAmountPrefix(transaction.type);
+  const amountPrefix = getAmountPrefix(transaction.type, transaction.status);
   const ticker = transaction.assetId.toUpperCase();
   const amountDisplay = `${amountPrefix}${transaction.amount.toLocaleString()} ${ticker}`;
   const feeDisplay = `0 ${ticker}`;
@@ -166,7 +166,15 @@ export function TransactionDetailsPanel({
         </div>
         <p
           className="transaction-details__amount"
-          data-tone={isPending ? "warning" : isIncoming ? "positive" : "danger"}
+          data-tone={
+            transaction.status === "failed"
+              ? "danger"
+              : isPending
+                ? "warning"
+                : isIncoming
+                  ? "positive"
+                  : "danger"
+          }
         >
           {amountDisplay}
         </p>
@@ -174,6 +182,13 @@ export function TransactionDetailsPanel({
           <TransactionDetailsStatusBadge tone={resolveTransactionStatusTone(transaction.status)}>
             {statusLabel}
           </TransactionDetailsStatusBadge>
+          {transaction.invalidIncomingReason ? (
+            <p className="transaction-details__invalid-reason text-error text-sm">
+              {translateTransactions(
+                `invalidIncoming.${transaction.invalidIncomingReason}`,
+              )}
+            </p>
+          ) : null}
           <button 
             type="button"
             aria-label={`View on Stellar Explorer`}

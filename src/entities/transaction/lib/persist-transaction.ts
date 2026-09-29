@@ -22,6 +22,17 @@ function hasOptionalSenderPrivateAddressField(record: Record<string, unknown>): 
   return value === undefined || typeof value === "string";
 }
 
+function hasOptionalInvalidIncomingReasonField(
+  record: Record<string, unknown>,
+): boolean {
+  const value = record.invalidIncomingReason;
+  return (
+    value === undefined ||
+    value === "commitment_mismatch" ||
+    value === "nullifier_consumed"
+  );
+}
+
 function isTransactionItem(value: unknown): value is Transaction {
   if (typeof value !== "object" || value === null) {
     return false;
@@ -30,7 +41,8 @@ function isTransactionItem(value: unknown): value is Transaction {
   return (
     hasRequiredStringFields(record) &&
     typeof record.amount === "number" &&
-    hasOptionalSenderPrivateAddressField(record)
+    hasOptionalSenderPrivateAddressField(record) &&
+    hasOptionalInvalidIncomingReasonField(record)
   );
 }
 

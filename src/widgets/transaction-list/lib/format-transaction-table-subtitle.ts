@@ -19,9 +19,22 @@ export function formatTransactionTableSubtitle(input: {
     privateTransferLabel: string;
     claimCreditLabel: string;
     assetFallback: string;
+    invalidIncomingLabel?: string;
+    pendingIncomingLabel?: string;
   };
 }): string {
   const { transaction, walletPublicKey, options } = input;
+  if (
+    transaction.invalidIncomingReason &&
+    options.invalidIncomingLabel?.trim()
+  ) {
+    return options.invalidIncomingLabel;
+  }
+  if (transaction.status === "pending" && transaction.type === "received") {
+    return (
+      options.pendingIncomingLabel?.trim() || options.privateTransferLabel
+    );
+  }
   if (transaction.type === "claim") {
     return options.claimCreditLabel;
   }

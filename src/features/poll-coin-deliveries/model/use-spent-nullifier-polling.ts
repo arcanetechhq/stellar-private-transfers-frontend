@@ -1,25 +1,11 @@
 import { useEffect, useRef } from "react";
 import { useAppDispatch, useAppSelector, type AppDispatch } from "@/store";
-import { markCoinSpent, selectCoinItems, type CoinWithMetadata } from "@/entities/coin";
+import { selectCoinItems, type CoinWithMetadata } from "@/entities/coin";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { tryGetPrivacySdkClient } from "@/shared/lib/privacy-sdk/transact-context.js";
+import { pollSpentNullifiersForCoins } from "./poll-spent-nullifiers.js";
 
 const POLL_INTERVAL_MS = 3000;
-
-function groupFinalizedByPool(
-  items: CoinWithMetadata[],
-): Map<string, CoinWithMetadata[]> {
-  const map = new Map<string, CoinWithMetadata[]>();
-  for (const item of items) {
-    if (item.status !== "finalized") {
-      continue;
-    }
-    const list = map.get(item.poolContract) ?? [];
-    list.push(item);
-    map.set(item.poolContract, list);
-  }
-  return map;
-}
 
 async function runSpentCheckTick(parameters: {
   walletPublicKey: string;
@@ -30,23 +16,13 @@ async function runSpentCheckTick(parameters: {
   if (!privacyClient) {
     return;
   }
-  const byPool = groupFinalizedByPool(parameters.items);
-  for (const [poolContract, coins] of byPool) {
-    for (const coinRow of coins) {
-      try {
-        const { spent } = await privacyClient.checkPrivateRecordSpendStatus({
-          poolContractId: poolContract,
-          nullifier: coinRow.coin.nullifier,
-          walletPublicKey: parameters.walletPublicKey,
-        });
-        if (spent) {
-          parameters.dispatch(markCoinSpent(coinRow.coin.commitment));
-        }
-      } catch {
-        continue;
-      }
-    }
-  }
+  await pollSpentNullifiersForCoins({
+    walletPublicKey: parameters.walletPublicKey,
+    items: parameters.items,
+    dispatch: parameters.dispatch,
+    checkSpendStatus: (input) =>
+      privacyClient.checkPrivateRecordSpendStatus(input),
+  });
 }
 
 export function useSpentNullifierPolling(): void {

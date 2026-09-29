@@ -12,7 +12,12 @@ export function mapCoinWithMetadataToPrivateRecord(
     asset: coin.assetId,
     amount: BigInt(coin.coin.value),
     consumed: coin.status === "spent",
-    status: coin.status,
+    status:
+      coin.status === "pending" ||
+      coin.status === "finalized" ||
+      coin.status === "spent"
+        ? coin.status
+        : "finalized",
     poolContract: coin.poolContract,
     commitmentHex: coin.commitmentHex,
     privateAddress: coin.privateAddress,
@@ -42,6 +47,9 @@ export async function upsertCoinWithMetadataToSdk(
   coin: CoinWithMetadata,
   ownerAddress: string | undefined,
 ): Promise<void> {
+  if (coin.status === "dead") {
+    return;
+  }
   const trimmedOwner = ownerAddress?.trim();
   if (!trimmedOwner) {
     return;

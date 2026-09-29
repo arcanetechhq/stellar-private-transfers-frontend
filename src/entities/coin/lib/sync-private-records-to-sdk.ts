@@ -14,8 +14,14 @@ export async function syncCoinItemsToSdkState(
   if (!client || !trimmedOwner || items.length === 0) {
     return;
   }
+  const syncableItems = items.filter((item) => item.status !== "dead");
+  if (syncableItems.length === 0) {
+    return;
+  }
   await client.upsertPrivateRecords(
-    items.map((item) => mapCoinWithMetadataToPrivateRecord(item, trimmedOwner)),
+    syncableItems.map((item) =>
+      mapCoinWithMetadataToPrivateRecord(item, trimmedOwner),
+    ),
   );
 }
 

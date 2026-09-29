@@ -55,6 +55,9 @@ function readTransactionCounterpartyCopy(input: {
   assetLabel: string;
   translateTransactions: (key: string) => string;
 }): { display: string; title: string | undefined } {
+  const reasonKey = input.transaction.invalidIncomingReason
+    ? `invalidIncoming.${input.transaction.invalidIncomingReason}`
+    : undefined;
   return {
     display: formatTransactionTableSubtitle({
       transaction: input.transaction,
@@ -65,6 +68,14 @@ function readTransactionCounterpartyCopy(input: {
         ),
         claimCreditLabel: input.translateTransactions("claimCreditSubtitle"),
         assetFallback: input.assetLabel,
+        pendingIncomingLabel: input.translateTransactions(
+          "invalidIncoming.pendingSettlement",
+        ),
+        ...(reasonKey
+          ? {
+              invalidIncomingLabel: input.translateTransactions(reasonKey),
+            }
+          : {}),
       },
     }),
     title: transactionTableSubtitleTitle(
@@ -94,7 +105,10 @@ export function TransactionTableRow(properties: TransactionTableRowProperties) {
   const assetMap = useAssetLookup();
   const asset = assetMap.get(transaction.assetId);
   const assetLabel = asset?.name ?? transaction.assetId;
-  const amountToneClass = getAmountToneClass(transaction.type);
+  const amountToneClass = getAmountToneClass(
+    transaction.type,
+    transaction.status,
+  );
   const walletPublicKey = useAppSelector(selectWalletPublicKey);
   const counterparty = readTransactionCounterpartyCopy({
     transaction,
@@ -142,7 +156,7 @@ export function TransactionTableRow(properties: TransactionTableRowProperties) {
           amountToneClass,
         )}
       >
-        {getAmountPrefix(transaction.type)}
+        {getAmountPrefix(transaction.type, transaction.status)}
         {transaction.amount.toLocaleString()}
       </td>
       <td
