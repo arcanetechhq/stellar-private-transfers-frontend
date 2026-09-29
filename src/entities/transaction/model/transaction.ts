@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { DeadOnArrivalReason } from "@/shared/lib/dead-on-arrival-reason.js";
 import {
   fetchSorobanTransactionDetails,
   type SorobanTransactionDetailsFulfilled,
@@ -15,7 +16,7 @@ export interface Transaction {
   status: "completed" | "pending" | "processing" | "created" | "failed";
   confirmationStatus: "created" | "sent" | "viewed" | "used" | "none";
   disclosureStatus: "none" | "partial" | "full" | "pending";
-  invalidIncomingReason?: "commitment_mismatch" | "nullifier_consumed";
+  invalidIncomingReason?: DeadOnArrivalReason;
 }
 
 export type ChainDetailsEntry =

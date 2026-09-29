@@ -1,8 +1,7 @@
 import type { CoinData } from "@/shared/lib/privacy-sdk/types.js";
+import type { DeadOnArrivalReason } from "@/shared/lib/dead-on-arrival-reason.js";
 
-export type DeadOnArrivalReason =
-  | "commitment_mismatch"
-  | "nullifier_consumed";
+export type { DeadOnArrivalReason };
 
 export type CoinStatus = "pending" | "finalized" | "spent" | "dead";
 

@@ -1,3 +1,4 @@
+import type { DeadOnArrivalReason } from "@/shared/lib/dead-on-arrival-reason.js";
 import type { Transaction } from "../model/transaction";
 
 function storageKeyForWallet(publicKey: string): string {
@@ -22,15 +23,15 @@ function hasOptionalSenderPrivateAddressField(record: Record<string, unknown>): 
   return value === undefined || typeof value === "string";
 }
 
+function isDeadOnArrivalReason(value: unknown): value is DeadOnArrivalReason {
+  return value === "commitment_mismatch" || value === "nullifier_consumed";
+}
+
 function hasOptionalInvalidIncomingReasonField(
   record: Record<string, unknown>,
 ): boolean {
   const value = record.invalidIncomingReason;
-  return (
-    value === undefined ||
-    value === "commitment_mismatch" ||
-    value === "nullifier_consumed"
-  );
+  return value === undefined || isDeadOnArrivalReason(value);
 }
 
 function isTransactionItem(value: unknown): value is Transaction {

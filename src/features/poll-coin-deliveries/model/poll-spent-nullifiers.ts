@@ -2,7 +2,7 @@ import type { AppDispatch } from "@/store";
 import { markCoinSpent } from "@/entities/coin/model/coin-slice.js";
 import type { CoinWithMetadata } from "@/entities/coin/model/coin.js";
 
-export function groupFinalizedCoinsByPool(
+function groupFinalizedCoinsByPool(
   items: CoinWithMetadata[],
 ): Map<string, CoinWithMetadata[]> {
   const map = new Map<string, CoinWithMetadata[]>();
