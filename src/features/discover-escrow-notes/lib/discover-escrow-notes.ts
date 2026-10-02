@@ -1,21 +1,20 @@
-import { resolveStorageApiOrigin } from "@/shared/stellar/resolve-storage-api-origin.js";
 import type { EscrowIndexNote } from "@/entities/escrow-index";
-import { issueEscrowTags } from "./issue-escrow-tags.js";
-import type { IssuedBlindedRecipientTag } from "./issue-escrow-tags.js";
+import { normalizePrivateDataOrigin } from "@/shared/stellar/normalize-private-data-origin.js";
+import type { IssuedBlindedRecipientTag } from "./issued-blinded-recipient-tag.js";
+import {
+  issueEscrowTagsViaProvider,
+  type SignEscrowTagChallenge,
+} from "./issue-escrow-tags-via-provider.js";
 import { listEscrowNotesForTags } from "./list-escrow-notes-for-tags.js";
-import { requestEscrowTagChallenge } from "./request-escrow-tag-challenge.js";
 import {
   localStorageEscrowTagStore,
   type EscrowTagStore,
 } from "./persist-escrow-tags.js";
 
-export type SignEscrowTagChallenge = (message: string) => Promise<{
-  signature: string;
-  signerPublicKey: string;
-}>;
+export type { SignEscrowTagChallenge };
 
 export type DiscoverEscrowNotesInput = {
-  storageOrigin?: string;
+  privateDataOrigin?: string;
   transfersBaseUrl: string;
   stellarAddress: string;
   signChallenge: SignEscrowTagChallenge;
@@ -34,32 +33,25 @@ function tagStoreFromInput(input: DiscoverEscrowNotesInput): EscrowTagStore {
 }
 
 async function issueAndStoreTags(input: {
-  storageOrigin: string;
+  privateDataOrigin: string;
   stellarAddress: string;
   signChallenge: SignEscrowTagChallenge;
   fetchImpl?: typeof fetch;
   tagStore: EscrowTagStore;
 }): Promise<IssuedBlindedRecipientTag[]> {
-  const challenge = await requestEscrowTagChallenge({
-    storageOrigin: input.storageOrigin,
+  const issued = await issueEscrowTagsViaProvider({
+    privateDataOrigin: input.privateDataOrigin,
     stellarAddress: input.stellarAddress,
-    ...(input.fetchImpl ? { fetchImpl: input.fetchImpl } : {}),
-  });
-  const proof = await input.signChallenge(challenge.message);
-  const tags = await issueEscrowTags({
-    storageOrigin: input.storageOrigin,
-    challenge,
-    signature: proof.signature,
-    signerPublicKey: proof.signerPublicKey,
+    signChallenge: input.signChallenge,
     ...(input.fetchImpl ? { fetchImpl: input.fetchImpl } : {}),
   });
   persistIssuedTags({
     tagStore: input.tagStore,
     walletAddress: input.stellarAddress,
-    signerAddress: proof.signerPublicKey,
-    tags,
+    signerAddress: issued.signerPublicKey,
+    tags: issued.tags,
   });
-  return tags;
+  return issued.tags;
 }
 
 function persistIssuedTags(input: {
@@ -85,8 +77,8 @@ export async function ensureIssuedEscrowTags(
   if (cached && cached.length > 0) {
     return cached;
   }
-  const storageOrigin = resolveStorageApiOrigin(input.storageOrigin);
-  if (storageOrigin === undefined) {
+  const privateDataOrigin = normalizePrivateDataOrigin(input.privateDataOrigin);
+  if (!privateDataOrigin) {
     return [];
   }
   const pending = issueInFlight.get(stellarAddress);
@@ -94,7 +86,7 @@ export async function ensureIssuedEscrowTags(
     return pending;
   }
   const run = issueAndStoreTags({
-    storageOrigin,
+    privateDataOrigin,
     stellarAddress,
     signChallenge: input.signChallenge,
     tagStore: store,

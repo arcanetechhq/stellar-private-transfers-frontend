@@ -1,4 +1,4 @@
-import type { IssuedBlindedRecipientTag } from "./issue-escrow-tags.js";
+import type { IssuedBlindedRecipientTag } from "./issued-blinded-recipient-tag.js";
 import { escrowEpochPollIntervalMs } from "./escrow-epoch-poll-interval.js";
 import type { EscrowIndexNote } from "@/entities/escrow-index";
 

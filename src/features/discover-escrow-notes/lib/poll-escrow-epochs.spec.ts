@@ -1,4 +1,4 @@
-import type { IssuedBlindedRecipientTag } from "./issue-escrow-tags";
+import type { IssuedBlindedRecipientTag } from "./issued-blinded-recipient-tag";
 import { startEscrowEpochPolling } from "./poll-escrow-epochs";
 
 const EPOCH_COUNT = 8;

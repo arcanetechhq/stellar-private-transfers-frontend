@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@arcanetech/privacy-sdk-core": "0.3.1",
+    "@arcanetech/privacy-sdk-data-layer": "0.1.0",
     "@arcanetech/privacy-sdk-relay": "^0.2.3",
     "@arcanetech/privacy-sdk-state-redux": "0.2.3",
     "@arcanetech/privacy-sdk-stellar": ">=0.7.0 <1.0.0",

@@ -4,11 +4,16 @@ import {
 } from "./discover-escrow-notes";
 import { createMemoryEscrowTagStore } from "./persist-escrow-tags";
 
+jest.mock("@arcanetech/privacy-sdk-stellar", () =>
+  jest.requireActual("../../../../test-shims/privacy-sdk-stellar.ts"),
+);
+
 const STELLAR_ADDRESS =
   "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF";
 const SIGNER_PUBLIC_KEY =
   "GBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBH5C";
 const STORAGE_ORIGIN = "http://storage.example";
+const PRIVATE_DATA_ORIGIN = "http://core.example/api/private-data";
 const TRANSFERS_BASE_URL = "http://transfers.example";
 const EARLIER_TAG =
   "aa901161e699ab3d4ca43cd15e575408441197eba93de07e5da6a2826d2e82d9";
@@ -53,18 +58,21 @@ function createIndexFetch(calls: FetchCall[]): typeof fetch {
   return async (input, init) => {
     recordCall({ calls, request: input, init });
     const url = String(input);
-    if (url.endsWith("/api/escrow-tags/challenge")) {
+    if (url.endsWith("/authorization-challenges")) {
       return jsonResponse({
-        stellarAddress: STELLAR_ADDRESS,
-        networkPassphrase: "Test SDF Network ; September 2015",
-        issuedAt: "2026-09-02T12:00:00.000Z",
-        expiresAt: "2026-09-02T12:05:00.000Z",
-        nonce: "aa".repeat(NONCE_BYTE_LENGTH),
+        protocol: "stellar.escrow-tag",
         message: CHALLENGE_MESSAGE,
-        challengeMac: "mac",
+        fields: {
+          stellarAddress: STELLAR_ADDRESS,
+          networkPassphrase: "Test SDF Network ; September 2015",
+          issuedAt: "2026-09-02T12:00:00.000Z",
+          expiresAt: "2026-09-02T12:05:00.000Z",
+          nonce: "aa".repeat(NONCE_BYTE_LENGTH),
+          challengeMac: "mac",
+        },
       });
     }
-    if (url.endsWith("/api/escrow-tags/issue")) {
+    if (url.endsWith("/authorization-completions")) {
       return jsonResponse({
         tags: [
           { epoch: 0, tag: EARLIER_TAG },
@@ -99,7 +107,7 @@ beforeEach(() => {
 });
 
 describe("escrow note discovery", () => {
-  it("skips Storage and transfers when the storage origin is unset", async () => {
+  it("skips Core and transfers when the private-data origin is unset", async () => {
     const calls: FetchCall[] = [];
     const notes = await discoverEscrowNotes({
       transfersBaseUrl: TRANSFERS_BASE_URL,
@@ -119,7 +127,7 @@ describe("escrow note discovery", () => {
     const signedMessages: string[] = [];
     const tagStore = createMemoryEscrowTagStore();
     const notes = await discoverEscrowNotes({
-      storageOrigin: STORAGE_ORIGIN,
+      privateDataOrigin: PRIVATE_DATA_ORIGIN,
       transfersBaseUrl: TRANSFERS_BASE_URL,
       stellarAddress: STELLAR_ADDRESS,
       signChallenge: async (message) => {
@@ -133,12 +141,18 @@ describe("escrow note discovery", () => {
       tagStore,
     });
     expect(signedMessages).toEqual([CHALLENGE_MESSAGE]);
-    const issueBody = JSON.parse(
-      calls.find((call) => call.url.endsWith("/api/escrow-tags/issue"))?.body ??
-        "",
-    ) as { stellarAddress?: string; signerPublicKey?: string };
-    expect(issueBody.stellarAddress).toBe(STELLAR_ADDRESS);
-    expect(issueBody.signerPublicKey).toBe(SIGNER_PUBLIC_KEY);
+    const completionBody = JSON.parse(
+      calls.find((call) => call.url.endsWith("/authorization-completions"))
+        ?.body ?? "",
+    ) as { fields?: { stellarAddress?: string; signerPublicKey?: string } };
+    expect(completionBody.fields?.stellarAddress).toBe(STELLAR_ADDRESS);
+    expect(completionBody.fields?.signerPublicKey).toBe(SIGNER_PUBLIC_KEY);
+    expect(
+      calls.filter((call) => call.url.endsWith("/authorization-completions")),
+    ).toHaveLength(1);
+    expect(tagStore.read(STELLAR_ADDRESS)?.map((entry) => entry.epoch)).toEqual([
+      0, 1,
+    ]);
     expect(notes.map((note) => note.txId)).toEqual([TX_BEFORE_REGISTER]);
     expect(notes[0]?.txId).toBe(TX_BEFORE_REGISTER);
     expect(JSON.stringify(notes)).not.toMatch(/stpl1/i);
@@ -157,7 +171,7 @@ describe("escrow note discovery privacy", () => {
   it("never sends a Stellar address to the transfer backend", async () => {
     const calls: FetchCall[] = [];
     await discoverEscrowNotes({
-      storageOrigin: STORAGE_ORIGIN,
+      privateDataOrigin: PRIVATE_DATA_ORIGIN,
       transfersBaseUrl: TRANSFERS_BASE_URL,
       stellarAddress: STELLAR_ADDRESS,
       signChallenge: async () => ({
@@ -175,8 +189,15 @@ describe("escrow note discovery privacy", () => {
     expect(serialized).not.toContain(STELLAR_ADDRESS);
     expect(serialized).not.toMatch(/G[A-Z0-9]{55}/);
     expect(calls.some((call) => call.url.startsWith(STORAGE_ORIGIN))).toBe(
+      false,
+    );
+    expect(calls.some((call) => call.url.includes("/api/escrow-tags"))).toBe(
+      false,
+    );
+    expect(calls.some((call) => call.url.startsWith(PRIVATE_DATA_ORIGIN))).toBe(
       true,
     );
+    expect(calls.some((call) => call.url.endsWith("/records"))).toBe(false);
   });
 });
 
@@ -195,7 +216,7 @@ describe("cached escrow tags", () => {
       ]),
     );
     const notes = await discoverEscrowNotes({
-      storageOrigin: STORAGE_ORIGIN,
+      privateDataOrigin: PRIVATE_DATA_ORIGIN,
       transfersBaseUrl: TRANSFERS_BASE_URL,
       stellarAddress: STELLAR_ADDRESS,
       signChallenge: async () => {

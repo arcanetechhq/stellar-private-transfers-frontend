@@ -1,5 +1,5 @@
+import { readPrivateDataOriginFromEnvironment } from "@/shared/stellar/read-private-data-origin.js";
 import { getRequiredApiBaseUrl } from "@/shared/stellar/stellar-network-environment.js";
-import { readStorageApiOriginFromEnvironment } from "@/shared/stellar/read-storage-api-origin.js";
 import { ensureIssuedEscrowTags } from "./discover-escrow-notes.js";
 import { signEscrowTagChallenge } from "./sign-escrow-tag-challenge.js";
 
@@ -10,12 +10,12 @@ export async function ensureEscrowTagsForWallet(
   if (!address) {
     return;
   }
-  const storageOrigin = readStorageApiOriginFromEnvironment();
-  if (storageOrigin === undefined) {
+  const privateDataOrigin = readPrivateDataOriginFromEnvironment();
+  if (privateDataOrigin === undefined) {
     return;
   }
   await ensureIssuedEscrowTags({
-    storageOrigin,
+    privateDataOrigin,
     transfersBaseUrl: getRequiredApiBaseUrl(),
     stellarAddress: address,
     signChallenge: (message) =>

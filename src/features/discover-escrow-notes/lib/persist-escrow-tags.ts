@@ -1,4 +1,4 @@
-import type { IssuedBlindedRecipientTag } from "./issue-escrow-tags.js";
+import type { IssuedBlindedRecipientTag } from "./issued-blinded-recipient-tag.js";
 
 const STORAGE_KEY_PREFIX = "stellar-payment-escrow-tags-v1";
 

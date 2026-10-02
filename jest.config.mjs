@@ -22,6 +22,12 @@ export default {
     "^(\\.{1,2}/.*)\\.js$": "$1",
     "^@arcanetech/privacy-sdk-relay$":
       "<rootDir>/node_modules/@arcanetech/privacy-sdk-relay/src/index.ts",
+    "^@arcanetech/privacy-sdk-data-layer$":
+      "<rootDir>/node_modules/@arcanetech/privacy-sdk-data-layer/src/index.ts",
+    "^@arcanetech/privacy-sdk-core$":
+      "<rootDir>/node_modules/@arcanetech/privacy-sdk-core/src/index.ts",
   },
-  transformIgnorePatterns: ["/node_modules/(?!(@arcanetech/privacy-sdk-relay)/)"],
+  transformIgnorePatterns: [
+    "/node_modules/(?!(@arcanetech/privacy-sdk-relay|@arcanetech/privacy-sdk-data-layer|@arcanetech/privacy-sdk-core)/)",
+  ],
 };

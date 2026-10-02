@@ -3,14 +3,14 @@ import {
   listEscrowIndexByTag,
   type EscrowIndexNote,
 } from "@/entities/escrow-index";
+import { readPrivateDataOriginFromEnvironment } from "@/shared/stellar/read-private-data-origin.js";
 import { getRequiredApiBaseUrl } from "@/shared/stellar/stellar-network-environment.js";
-import { readStorageApiOriginFromEnvironment } from "@/shared/stellar/read-storage-api-origin.js";
 import { ensureIssuedEscrowTags } from "./discover-escrow-notes.js";
+import type { IssuedBlindedRecipientTag } from "./issued-blinded-recipient-tag.js";
 import { localStorageEscrowTagStore } from "./persist-escrow-tags.js";
 import { startEscrowEpochPolling } from "./poll-escrow-epochs.js";
 import { replaceEscrowNotesForTag } from "./replace-escrow-notes-for-tag.js";
 import { signEscrowTagChallenge } from "./sign-escrow-tag-challenge.js";
-import type { IssuedBlindedRecipientTag } from "./issue-escrow-tags.js";
 
 function stopNothing(): void {
   return;
@@ -39,13 +39,13 @@ function applyTagNotes(input: {
 async function loadIssuedTags(
   stellarAddress: string,
 ): Promise<IssuedBlindedRecipientTag[]> {
-  const storageOrigin = readStorageApiOriginFromEnvironment();
+  const privateDataOrigin = readPrivateDataOriginFromEnvironment();
   return ensureIssuedEscrowTags({
     transfersBaseUrl: getRequiredApiBaseUrl(),
     stellarAddress,
     signChallenge: (message) =>
       signEscrowTagChallenge({ message, address: stellarAddress }),
-    ...(storageOrigin === undefined ? {} : { storageOrigin }),
+    ...(privateDataOrigin === undefined ? {} : { privateDataOrigin }),
   });
 }
 

@@ -32,6 +32,7 @@ substitute VITE_PRICE_XLM "${VITE_PRICE_XLM:-}"
 substitute VITE_ZK_CONFIG_NONCE "${VITE_ZK_CONFIG_NONCE:-}"
 substitute VITE_ZK_ARTIFACT_BASE_URL "${VITE_ZK_ARTIFACT_BASE_URL:-}"
 substitute VITE_RELAY_API_ORIGIN "${VITE_RELAY_API_ORIGIN:-}"
+substitute VITE_PRIVATE_DATA_ORIGIN "${VITE_PRIVATE_DATA_ORIGIN:-}"
 
 # Runtime substitution changes hashed JS/CSS bytes without renaming them.
 # Query-bust index.html so browsers do not keep the pre-substitution immutable cache.
