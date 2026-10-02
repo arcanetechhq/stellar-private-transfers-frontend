@@ -20,7 +20,6 @@ import {
   transactionReducer,
 } from "@/entities/transaction";
 import {
-  coinDeliveryApi,
   coinDeliveryReducer,
   saveSeenTags,
 } from "@/entities/coin-deliveries";
@@ -54,7 +53,6 @@ const rootReducer = combineReducers({
   assetUiOperations: assetUiOperationsReducer,
   privacySdkState: privacySdkState.reducer,
   [assetApi.reducerPath]: assetApi.reducer,
-  [coinDeliveryApi.reducerPath]: coinDeliveryApi.reducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
@@ -69,7 +67,6 @@ export const store = configureStore({
       privacySdkSyncMiddleware,
       coinSdkSyncMiddleware,
       assetApi.middleware,
-      coinDeliveryApi.middleware,
     ),
   preloadedState: loadedContact ? { contact: loadedContact } : undefined,
 });

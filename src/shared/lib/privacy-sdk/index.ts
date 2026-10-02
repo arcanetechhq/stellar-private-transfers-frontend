@@ -71,12 +71,6 @@ export {
   mapPrivacySdkError,
   parseKytReasonCode,
 } from "./map-privacy-sdk-errors.js";
-export {
-  encodeEphemeralKeyFromDepositScalar,
-  ecdhEphemeralPublicKeyFromScalarHex,
-  generateRandomDepositScalarHex,
-  sharedSecretFromDepositorPreimage,
-} from "./coin-delivery-helpers.js";
 export type { CoinData, StateFile } from "./types.js";
 
 export { getConfiguredPrivacyPoolService as getPrivacyPoolService } from "./transact-context.js";
