@@ -1,10 +1,8 @@
 import type { AppDispatch } from "@/store";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";
-import { postOutputRecordDeliveries } from "@/entities/coin-deliveries";
 import { createLocalPendingPrivateOperationStore } from "@/entities/pending-private-operation";
 import {
   bindProtocolRelayPorts,
-  recordsFromDeliveryOutbox,
   readDirectSubmitter,
   type PendingPrivateOperation,
   type ProtocolRelayPorts,
@@ -31,18 +29,8 @@ export function createAppRelayPorts(input: {
   return bindProtocolRelayPorts({
     store: createLocalPendingPrivateOperationStore(),
     submitDirect: input.submitDirect,
-    async drainDeliveries(parameters) {
-      return postOutputRecordDeliveries({
-        outputRecords: recordsFromDeliveryOutbox(
-          parameters.operation.deliveryOutbox,
-          {
-            owner: parameters.operation.walletPublicKey,
-            txId: parameters.txId,
-          },
-        ),
-        txId: parameters.txId,
-        dispatch: input.dispatch,
-      });
+    async drainDeliveries() {
+      return undefined;
     },
     persistUserTransaction(parameters) {
       persistIfCurrentWallet(parameters.operation.walletPublicKey, () => {

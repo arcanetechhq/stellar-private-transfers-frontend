@@ -14,6 +14,7 @@ interface AssetPollerProperties {
   privateAddress: string;
   recipientScalarHex: string;
   assetId: string;
+  lookupAsset: string;
   poolContract: string;
   pollingEnabled: boolean;
 }
@@ -22,6 +23,7 @@ function AssetPoller({
   privateAddress,
   recipientScalarHex,
   assetId,
+  lookupAsset,
   poolContract,
   pollingEnabled,
 }: AssetPollerProperties) {
@@ -29,6 +31,7 @@ function AssetPoller({
     privateAddress,
     recipientScalarHex,
     assetId,
+    lookupAsset,
     poolContract,
     pollingEnabled,
   });
@@ -74,6 +77,7 @@ export function PollAllAssetDeliveries() {
             privateAddress={target.privateAddress}
             recipientScalarHex={target.scalarHex}
             assetId={asset.assetId}
+            lookupAsset={asset.clientContract ?? asset.assetId}
             poolContract={poolContract}
             pollingEnabled={actionsEnabled}
           />

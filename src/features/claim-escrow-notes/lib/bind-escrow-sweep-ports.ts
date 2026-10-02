@@ -1,10 +1,8 @@
 import type { AppDispatch } from "@/store";
 import { addTransaction, buildUserTransaction } from "@/entities/transaction";
-import { postOutputRecordDeliveries } from "@/entities/coin-deliveries";
 import { createLocalPendingPrivateOperationStore } from "@/entities/pending-private-operation";
 import {
   bindProtocolRelayPorts,
-  recordsFromDeliveryOutbox,
   type ProtocolRelayPorts,
 } from "@/shared/lib/protocol-relay";
 
@@ -18,18 +16,8 @@ export function bindEscrowSweepRelayPorts(input: {
       const receipt = await input.execute();
       return { txId: receipt.operationId };
     },
-    async drainDeliveries(parameters) {
-      return postOutputRecordDeliveries({
-        outputRecords: recordsFromDeliveryOutbox(
-          parameters.operation.deliveryOutbox,
-          {
-            owner: parameters.operation.walletPublicKey,
-            txId: parameters.txId,
-          },
-        ),
-        txId: parameters.txId,
-        dispatch: input.dispatch,
-      });
+    async drainDeliveries() {
+      return undefined;
     },
     persistUserTransaction(parameters) {
       input.dispatch(
