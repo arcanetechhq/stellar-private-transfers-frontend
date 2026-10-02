@@ -156,6 +156,52 @@ describe("incoming delivery assessment", () => {
     expect(selectSeamTransactions(store.getState())[0]?.status).toBe("completed");
   });
 
+  it("does not record a receipt for a commitment the wallet already holds", async () => {
+    const held: CoinWithMetadata = {
+      commitmentHex: COMMIT_SPENDABLE,
+      coin: coinData(COMMIT_SPENDABLE),
+      privateAddress: PRIVATE_ADDRESS,
+      assetId: ASSET_ID,
+      poolContract: POOL,
+      amountDisplay: 1,
+      status: "finalized",
+    };
+    const store = createTestStore([held]);
+    const { row, decrypted } = decryptedFor(
+      COMMIT_SPENDABLE,
+      TAG_SPENDABLE,
+      1,
+    );
+    const assessments: IncomingNoteAssessment[] = [];
+
+    await processIncomingDeliveryRows({
+      rows: [row],
+      seenTags: [],
+      coinItems: selectCoinItems(store.getState()),
+      recipientScalarHex: SCALAR,
+      privateAddress: PRIVATE_ADDRESS,
+      assetId: ASSET_ID,
+      poolContract: POOL,
+      publicKey: PUBLIC_KEY,
+      localTransactionIds: [],
+      dispatch: store.dispatch,
+      decryptDeliveryRow: async () => decrypted,
+      assessIncomingNote: async () => {
+        assessments.push({ kind: "spendable" });
+        return { kind: "spendable" };
+      },
+      markDeliveryProcessed: async () => undefined,
+      persistSpendableCoinToSdk: noopPersist,
+    });
+
+    expect(selectCoinItems(store.getState())).toHaveLength(1);
+    expect(selectSeamTransactions(store.getState())).toEqual([]);
+    expect(assessments).toEqual([]);
+    expect(selectSeenTagsForAsset(ASSET_ID)(store.getState())).toEqual([
+      TAG_SPENDABLE,
+    ]);
+  });
+
   it("leaves a pending delivery unmarked and finalizes it once spendable", async () => {
     const store = createTestStore();
     const { row, decrypted } = decryptedFor(COMMIT_PENDING, TAG_PENDING, 2);

@@ -12,7 +12,7 @@ import type {
   CoinData,
   CoinWithMetadata,
 } from "@/entities/coin/model/coin.js";
-import { existingSpentCoinMatchesIncomingDelivery } from "@/entities/coin/lib/ledger-commitment.js";
+import { findCoinItemByLedgerReference } from "@/entities/coin/lib/ledger-commitment.js";
 import { addSeenTag } from "@/entities/coin-deliveries/model/coin-delivery.js";
 import { addTransaction } from "@/entities/transaction/model/transaction.js";
 
@@ -211,7 +211,7 @@ async function markDeliverySeen(parameters: {
 export async function processIncomingDeliveryRows(parameters: {
   rows: IncomingDeliveryRow[];
   seenTags: string[];
-  coinItems: Parameters<typeof existingSpentCoinMatchesIncomingDelivery>[0];
+  coinItems: Parameters<typeof findCoinItemByLedgerReference>[0];
   recipientScalarHex: string;
   privateAddress: string;
   assetId: string;
@@ -247,10 +247,14 @@ export async function processIncomingDeliveryRows(parameters: {
       continue;
     }
     if (
-      existingSpentCoinMatchesIncomingDelivery(parameters.coinItems, {
-        commitmentHex: decrypted.commitmentHex,
-        coinCommitment: decrypted.coin.commitment,
-      })
+      findCoinItemByLedgerReference(
+        parameters.coinItems,
+        decrypted.commitmentHex,
+      ) !== undefined ||
+      findCoinItemByLedgerReference(
+        parameters.coinItems,
+        decrypted.coin.commitment,
+      ) !== undefined
     ) {
       await markDeliverySeen({
         assetId: parameters.assetId,
