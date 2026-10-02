@@ -15,7 +15,6 @@ export type { SignEscrowTagChallenge };
 
 export type DiscoverEscrowNotesInput = {
   privateDataOrigin?: string;
-  transfersBaseUrl: string;
   stellarAddress: string;
   signChallenge: SignEscrowTagChallenge;
   fetchImpl?: typeof fetch;
@@ -107,8 +106,12 @@ export async function discoverEscrowNotes(
   if (tags.length === 0) {
     return [];
   }
+  const privateDataOrigin = normalizePrivateDataOrigin(input.privateDataOrigin);
+  if (!privateDataOrigin) {
+    return [];
+  }
   return listEscrowNotesForTags({
-    transfersBaseUrl: input.transfersBaseUrl,
+    privateDataOrigin,
     tags: tags.map((entry) => entry.tag),
     ...(input.fetchImpl ? { fetchImpl: input.fetchImpl } : {}),
   });

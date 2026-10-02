@@ -1,12 +1,9 @@
 import type { Dispatch, SetStateAction } from "react";
-import {
-  listEscrowIndexByTag,
-  type EscrowIndexNote,
-} from "@/entities/escrow-index";
+import type { EscrowIndexNote } from "@/entities/escrow-index";
 import { readPrivateDataOriginFromEnvironment } from "@/shared/stellar/read-private-data-origin.js";
-import { getRequiredApiBaseUrl } from "@/shared/stellar/stellar-network-environment.js";
 import { ensureIssuedEscrowTags } from "./discover-escrow-notes.js";
 import type { IssuedBlindedRecipientTag } from "./issued-blinded-recipient-tag.js";
+import { listEscrowNotesForTags } from "./list-escrow-notes-for-tags.js";
 import { localStorageEscrowTagStore } from "./persist-escrow-tags.js";
 import { startEscrowEpochPolling } from "./poll-escrow-epochs.js";
 import { replaceEscrowNotesForTag } from "./replace-escrow-notes-for-tag.js";
@@ -41,7 +38,6 @@ async function loadIssuedTags(
 ): Promise<IssuedBlindedRecipientTag[]> {
   const privateDataOrigin = readPrivateDataOriginFromEnvironment();
   return ensureIssuedEscrowTags({
-    transfersBaseUrl: getRequiredApiBaseUrl(),
     stellarAddress,
     signChallenge: (message) =>
       signEscrowTagChallenge({ message, address: stellarAddress }),
@@ -61,11 +57,16 @@ function beginEpochPolling(
     onTagNotes: (tag, incoming) => {
       applyTagNotes({ setNotes: input.setNotes, tag, incoming });
     },
-    listTag: (entry) =>
-      listEscrowIndexByTag({
-        transfersBaseUrl: getRequiredApiBaseUrl(),
-        tag: entry.tag,
-      }),
+    listTag: async (entry) => {
+      const privateDataOrigin = readPrivateDataOriginFromEnvironment();
+      if (!privateDataOrigin) {
+        return [];
+      }
+      return listEscrowNotesForTags({
+        privateDataOrigin,
+        tags: [entry.tag],
+      });
+    },
   });
 }
 

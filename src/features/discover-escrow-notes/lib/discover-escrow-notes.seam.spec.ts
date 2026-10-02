@@ -80,9 +80,12 @@ function createIndexFetch(calls: FetchCall[]): typeof fetch {
         ],
       });
     }
-    if (url.includes(`tag=${EARLIER_TAG}`)) {
-      return jsonResponse({
-        data: [
+    if (url.endsWith("/records")) {
+      const body = JSON.parse(
+        typeof init?.body === "string" ? init.body : "{}",
+      ) as { attributes?: { blindedRecipientTag?: string } };
+      if (body.attributes?.blindedRecipientTag === EARLIER_TAG) {
+        return jsonResponse([
           {
             blindedRecipientTag: EARLIER_TAG,
             txId: TX_BEFORE_REGISTER,
@@ -91,14 +94,11 @@ function createIndexFetch(calls: FetchCall[]): typeof fetch {
             escrowNonce: "7",
             createdAt: CREATED_AT,
           },
-        ],
-        meta: { page: 1, limit: 20, total: 1, totalPages: 1 },
-      });
+        ]);
+      }
+      return jsonResponse([]);
     }
-    return jsonResponse({
-      data: [],
-      meta: { page: 1, limit: 20, total: 0, totalPages: 1 },
-    });
+    return jsonResponse([]);
   };
 }
 
@@ -110,7 +110,6 @@ describe("escrow note discovery", () => {
   it("skips Core and transfers when the private-data origin is unset", async () => {
     const calls: FetchCall[] = [];
     const notes = await discoverEscrowNotes({
-      transfersBaseUrl: TRANSFERS_BASE_URL,
       stellarAddress: STELLAR_ADDRESS,
       signChallenge: async () => {
         throw new Error("must not sign");
@@ -128,7 +127,6 @@ describe("escrow note discovery", () => {
     const tagStore = createMemoryEscrowTagStore();
     const notes = await discoverEscrowNotes({
       privateDataOrigin: PRIVATE_DATA_ORIGIN,
-      transfersBaseUrl: TRANSFERS_BASE_URL,
       stellarAddress: STELLAR_ADDRESS,
       signChallenge: async (message) => {
         signedMessages.push(message);
@@ -168,11 +166,10 @@ describe("escrow note discovery", () => {
 });
 
 describe("escrow note discovery privacy", () => {
-  it("never sends a Stellar address to the transfer backend", async () => {
+  it("lists through find and does not call the transfer backend", async () => {
     const calls: FetchCall[] = [];
     await discoverEscrowNotes({
       privateDataOrigin: PRIVATE_DATA_ORIGIN,
-      transfersBaseUrl: TRANSFERS_BASE_URL,
       stellarAddress: STELLAR_ADDRESS,
       signChallenge: async () => ({
         signature: SIGNATURE,
@@ -181,23 +178,24 @@ describe("escrow note discovery privacy", () => {
       fetchImpl: createIndexFetch(calls),
       tagStore: createMemoryEscrowTagStore(),
     });
-    const transferCalls = calls.filter((call) =>
-      call.url.startsWith(TRANSFERS_BASE_URL),
-    );
-    expect(transferCalls.length).toBeGreaterThan(0);
-    const serialized = JSON.stringify(transferCalls);
+    const recordCalls = calls.filter((call) => call.url.endsWith("/records"));
+    expect(recordCalls.length).toBeGreaterThan(0);
+    expect(recordCalls.every((call) => call.method === "POST")).toBe(true);
+    const serialized = JSON.stringify(recordCalls);
+    expect(serialized).toContain("stellar.escrow-index");
+    expect(serialized).toContain(EARLIER_TAG);
     expect(serialized).not.toContain(STELLAR_ADDRESS);
+    expect(serialized).not.toContain(SIGNATURE);
     expect(serialized).not.toMatch(/G[A-Z0-9]{55}/);
+    expect(calls.some((call) => call.url.startsWith(TRANSFERS_BASE_URL))).toBe(
+      false,
+    );
     expect(calls.some((call) => call.url.startsWith(STORAGE_ORIGIN))).toBe(
       false,
     );
     expect(calls.some((call) => call.url.includes("/api/escrow-tags"))).toBe(
       false,
     );
-    expect(calls.some((call) => call.url.startsWith(PRIVATE_DATA_ORIGIN))).toBe(
-      true,
-    );
-    expect(calls.some((call) => call.url.endsWith("/records"))).toBe(false);
   });
 });
 
@@ -217,7 +215,6 @@ describe("cached escrow tags", () => {
     );
     const notes = await discoverEscrowNotes({
       privateDataOrigin: PRIVATE_DATA_ORIGIN,
-      transfersBaseUrl: TRANSFERS_BASE_URL,
       stellarAddress: STELLAR_ADDRESS,
       signChallenge: async () => {
         throw new Error("must not sign stored tags");
@@ -229,8 +226,11 @@ describe("cached escrow tags", () => {
     expect(calls.some((call) => call.url.startsWith(STORAGE_ORIGIN))).toBe(
       false,
     );
-    expect(calls.every((call) => call.url.startsWith(TRANSFERS_BASE_URL))).toBe(
-      true,
-    );
+    expect(
+      calls.every(
+        (call) =>
+          call.url === `${PRIVATE_DATA_ORIGIN}/records` && call.method === "POST",
+      ),
+    ).toBe(true);
   });
 });
