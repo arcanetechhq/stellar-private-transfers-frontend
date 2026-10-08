@@ -1,11 +1,12 @@
 import { createPrivateDataProvider } from "@arcanetech/privacy-sdk-data-layer";
+import type { AppDispatch } from "@/store";
+import type { CoinData, CoinWithMetadata } from "@/entities/coin";
+import { decryptStellarOutputNote } from "@/shared/lib/private-data/decrypt-output-note";
 import {
   STELLAR_OUTPUT_NOTE_DATA_TYPE,
   stellarOutputNoteRecordSchema,
   type StellarOutputNoteRecord,
-} from "@arcanetech/privacy-sdk-stellar";
-import type { AppDispatch } from "@/store";
-import type { CoinData, CoinWithMetadata } from "@/entities/coin";
+} from "@/shared/lib/private-data/stellar-private-data";
 import { stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops";
 import {
   processIncomingDeliveryRows,
@@ -44,14 +45,6 @@ function createOutputNoteProvider(origin: string) {
     dataType: STELLAR_OUTPUT_NOTE_DATA_TYPE,
     recordSchema: stellarOutputNoteRecordSchema,
   });
-}
-
-async function decryptWithSdk(
-  input: Parameters<DecryptOutputNote>[0],
-): Promise<DecryptedOutputNote> {
-  const { decryptStellarOutputNote } =
-    await import("@arcanetech/privacy-sdk-stellar/transact");
-  return decryptStellarOutputNote(input);
 }
 
 function commitmentDecimalFromHex(commitmentHex: string): string {
@@ -132,7 +125,7 @@ export async function receiveOutputNotes(input: {
     created_at: createdAt,
     record,
   }));
-  const decryptNote = input.decryptNote ?? decryptWithSdk;
+  const decryptNote = input.decryptNote ?? decryptStellarOutputNote;
   await processIncomingDeliveryRows({
     rows,
     seenTags: input.seenTags,

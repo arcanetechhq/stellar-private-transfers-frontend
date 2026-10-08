@@ -8,7 +8,7 @@ import {
   stellarEscrowTagCompletionSchema,
   stellarOutputNoteRecordSchema,
   type StellarMessageSigner,
-} from "@arcanetech/privacy-sdk-stellar";
+} from "@/shared/lib/private-data/stellar-private-data";
 
 export function createEscrowDataProvider(input: {
   origin: string;
