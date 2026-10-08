@@ -1,5 +1,13 @@
 import type { StellarPrivateRecord } from "@arcanetech/privacy-sdk-stellar";
 import type { DeliveryOutboxEntry } from "@/shared/lib/protocol-relay/types.js";
+import { stroopsToDisplayAmount } from "@/shared/lib/stellar/stroops.js";
+
+function amountDisplayFromRecord(record: StellarPrivateRecord): number {
+  if (typeof record.amountDisplay === "number") {
+    return record.amountDisplay;
+  }
+  return stroopsToDisplayAmount(BigInt(record.coinNote?.value ?? "0"));
+}
 
 export function deliveryOutboxFromRecords(
   records: StellarPrivateRecord[],
@@ -20,7 +28,7 @@ export function deliveryOutboxFromRecords(
       coinNote: { ...record.coinNote },
       depositScalarHex: record.depositScalarHex,
       assetId: record.asset,
-      amountDisplay: record.amountDisplay ?? 0,
+      amountDisplay: amountDisplayFromRecord(record),
     };
     if (record.precommitementHex) {
       entry.precommitementHex = record.precommitementHex;

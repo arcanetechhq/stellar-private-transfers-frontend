@@ -1,5 +1,12 @@
-import { configureStore, createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { coinReducer, selectCoinItems } from "@/entities/coin/model/coin-slice.js";
+import {
+  configureStore,
+  createSlice,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
+import {
+  coinReducer,
+  selectCoinItems,
+} from "@/entities/coin/model/coin-slice.js";
 import { coinDeliveryReducer } from "@/entities/coin-deliveries/model/coin-delivery.js";
 import { receiveOutputNotes } from "./receive-output-notes.js";
 
@@ -115,7 +122,12 @@ describe("output note receive", () => {
         ephemeralY: EPHEMERAL_Y,
       },
     ]);
-    expect(selectCoinItems(store.getState())[0]?.commitmentHex).toBe(COMMITMENT);
+    expect(selectCoinItems(store.getState())[0]?.commitmentHex).toBe(
+      COMMITMENT,
+    );
+    expect(selectCoinItems(store.getState())[0]?.coin.commitment).toBe(
+      BigInt(`0x${COMMITMENT}`).toString(),
+    );
     expect(uploads).toEqual([]);
   });
 });

@@ -49,10 +49,14 @@ function createOutputNoteProvider(origin: string) {
 async function decryptWithSdk(
   input: Parameters<DecryptOutputNote>[0],
 ): Promise<DecryptedOutputNote> {
-  const { decryptStellarOutputNote } = await import(
-    "@arcanetech/privacy-sdk-stellar/transact"
-  );
+  const { decryptStellarOutputNote } =
+    await import("@arcanetech/privacy-sdk-stellar/transact");
   return decryptStellarOutputNote(input);
+}
+
+function commitmentDecimalFromHex(commitmentHex: string): string {
+  const hex = commitmentHex.trim().replace(/^0x/iu, "");
+  return BigInt(`0x${hex}`).toString();
 }
 
 function coinFromNote(note: DecryptedOutputNote): CoinData {
@@ -60,7 +64,7 @@ function coinFromNote(note: DecryptedOutputNote): CoinData {
     value: note.value,
     nullifier: note.nullifier,
     secret: note.secret,
-    commitment: note.commitmentHex,
+    commitment: commitmentDecimalFromHex(note.commitmentHex),
     asset_hi: note.assetHi,
     asset_lo: note.assetLo,
     application_id: note.applicationId,
