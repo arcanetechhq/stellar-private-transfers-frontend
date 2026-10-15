@@ -25,6 +25,7 @@ export async function pollSpentNullifiersForCoins(parameters: {
     poolContractId: string;
     nullifier: string;
     walletPublicKey: string;
+    privateAddress: string;
   }) => Promise<{ spent: boolean }>;
 }): Promise<void> {
   const byPool = groupFinalizedCoinsByPool(parameters.items);
@@ -35,6 +36,7 @@ export async function pollSpentNullifiersForCoins(parameters: {
           poolContractId: poolContract,
           nullifier: coinRow.coin.nullifier,
           walletPublicKey: parameters.walletPublicKey,
+          privateAddress: coinRow.privateAddress,
         });
         if (spent) {
           parameters.dispatch(markCoinSpent(coinRow.coin.commitment));

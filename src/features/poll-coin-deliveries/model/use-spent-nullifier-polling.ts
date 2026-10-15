@@ -1,7 +1,13 @@
 import { useEffect, useRef } from "react";
-import { useAppDispatch, useAppSelector, type AppDispatch } from "@/store";
+import {
+  store,
+  useAppDispatch,
+  useAppSelector,
+  type AppDispatch,
+} from "@/store";
 import { selectCoinItems, type CoinWithMetadata } from "@/entities/coin";
 import { selectWalletPublicKey } from "@/entities/wallet";
+import { readWalletScalarFromState } from "@/shared/lib/privacy-sdk/read-wallet-scalar-from-state.js";
 import { tryGetPrivacySdkClient } from "@/shared/lib/privacy-sdk/transact-context.js";
 import { pollSpentNullifiersForCoins } from "./poll-spent-nullifiers.js";
 
@@ -20,8 +26,22 @@ async function runSpentCheckTick(parameters: {
     walletPublicKey: parameters.walletPublicKey,
     items: parameters.items,
     dispatch: parameters.dispatch,
-    checkSpendStatus: (input) =>
-      privacyClient.checkPrivateRecordSpendStatus(input),
+    checkSpendStatus: (input) => {
+      const privKeyScalarHex = readWalletScalarFromState({
+        getState: store.getState,
+        publicKey: input.walletPublicKey,
+        privateAddressStpl1: input.privateAddress,
+      });
+      if (!privKeyScalarHex) {
+        return Promise.resolve({ spent: false });
+      }
+      return privacyClient.checkPrivateRecordSpendStatus({
+        poolContractId: input.poolContractId,
+        nullifier: input.nullifier,
+        walletPublicKey: input.walletPublicKey,
+        privKeyScalarHex,
+      });
+    },
   });
 }
 

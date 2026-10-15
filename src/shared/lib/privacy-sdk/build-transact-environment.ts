@@ -76,22 +76,9 @@ export function resolveZkConfigNonceFromEnvironment(): bigint {
   return readZkConfigNonceFromEnvironment() ?? DEFAULT_ZK_CONFIG_NONCE;
 }
 
-export function readZkArtifactBaseUrlFromEnvironment(): string | undefined {
-  const raw = readClientEnvironment("VITE_ZK_ARTIFACT_BASE_URL")?.trim();
-  if (!raw) {
-    return undefined;
-  }
-  let withoutSlash = raw;
-  while (withoutSlash.endsWith("/")) {
-    withoutSlash = withoutSlash.slice(0, -1);
-  }
-  return withoutSlash;
-}
-
 export function buildStellarTransactEnvironment(): StellarTransactEnvironment {
   const { networkPassphrase, sorobanRpcUrl } = readNetworkPassphraseAndRpc();
   const zkConfigNonce = readZkConfigNonceFromEnvironment();
-  const zkArtifactBaseUrl = readZkArtifactBaseUrlFromEnvironment();
   return {
     network: {
       id: "stellar-testnet",
@@ -104,7 +91,6 @@ export function buildStellarTransactEnvironment(): StellarTransactEnvironment {
       applicationId: readPoolApplicationIdFromEnvironment(),
     },
     ...(zkConfigNonce === undefined ? {} : { zkConfigNonce }),
-    ...(zkArtifactBaseUrl === undefined ? {} : { zkArtifactBaseUrl }),
     auditPublicKey: parseAuditPublicKeyFromEnvHex(
       readAuditPublicKeyHexFromEnvironment(),
     ),

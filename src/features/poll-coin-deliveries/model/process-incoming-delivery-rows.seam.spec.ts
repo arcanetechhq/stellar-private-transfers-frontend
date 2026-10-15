@@ -1,28 +1,33 @@
-import { configureStore, createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import {
+  configureStore,
+  createSlice,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
 import {
   coinReducer,
   selectCoinItems,
   selectFinalizedAggregatesForPrivateAddress,
 } from "@/entities/coin/model/coin-slice.js";
-import type {
-  CoinData,
-  CoinWithMetadata,
-} from "@/entities/coin/model/coin.js";
+import type { CoinData, CoinWithMetadata } from "@/entities/coin/model/coin.js";
 import { pickPrivateSpendCoins } from "@/entities/coin/lib/private-spend-coin-selection.js";
 import {
   coinDeliveryReducer,
   selectSeenTagsForAsset,
 } from "@/entities/coin-deliveries/model/coin-delivery.js";
-import type { IncomingNoteAssessment } from "@arcanetech/privacy-sdk-stellar";
 
 jest.mock("@/entities/transaction/model/transaction.js", () => {
-  const { createAction } = jest.requireActual("@reduxjs/toolkit") as typeof import("@reduxjs/toolkit");
+  const { createAction } = jest.requireActual(
+    "@reduxjs/toolkit",
+  ) as typeof import("@reduxjs/toolkit");
   return {
     addTransaction: createAction("transaction/addTransaction"),
   };
 });
 
-import { processIncomingDeliveryRows } from "./process-incoming-delivery-rows.js";
+import {
+  processIncomingDeliveryRows,
+  type IncomingNoteAssessment,
+} from "./process-incoming-delivery-rows.js";
 import { pollSpentNullifiersForCoins } from "./poll-spent-nullifiers.js";
 
 type SeamTransaction = {
@@ -74,11 +79,7 @@ function coinData(commitment: string): CoinData {
   };
 }
 
-function decryptedFor(
-  commitmentHex: string,
-  tagBase64: string,
-  rowId: number,
-) {
+function decryptedFor(commitmentHex: string, tagBase64: string, rowId: number) {
   return {
     row: {
       id: rowId,
@@ -153,7 +154,9 @@ describe("incoming delivery assessment", () => {
     ]);
     expect(marked).toEqual([1]);
     expect(assessments).toEqual([{ kind: "spendable" }]);
-    expect(selectSeamTransactions(store.getState())[0]?.status).toBe("completed");
+    expect(selectSeamTransactions(store.getState())[0]?.status).toBe(
+      "completed",
+    );
   });
 
   it("does not record a receipt for a commitment the wallet already holds", async () => {
@@ -167,11 +170,7 @@ describe("incoming delivery assessment", () => {
       status: "finalized",
     };
     const store = createTestStore([held]);
-    const { row, decrypted } = decryptedFor(
-      COMMIT_SPENDABLE,
-      TAG_SPENDABLE,
-      1,
-    );
+    const { row, decrypted } = decryptedFor(COMMIT_SPENDABLE, TAG_SPENDABLE, 1);
     const assessments: IncomingNoteAssessment[] = [];
 
     await processIncomingDeliveryRows({

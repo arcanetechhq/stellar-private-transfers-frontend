@@ -1,20 +1,28 @@
-import type {
-  IncomingNoteAssessment,
-  IncomingNoteDeadReason,
-  IncomingNoteFields,
-} from "@arcanetech/privacy-sdk-stellar";
 import type { AppDispatch } from "@/store";
-import {
-  addCoin,
-  finalizeCoin,
-} from "@/entities/coin/model/coin-slice.js";
-import type {
-  CoinData,
-  CoinWithMetadata,
-} from "@/entities/coin/model/coin.js";
+import { addCoin, finalizeCoin } from "@/entities/coin/model/coin-slice.js";
+import type { CoinData, CoinWithMetadata } from "@/entities/coin/model/coin.js";
 import { findCoinItemByLedgerReference } from "@/entities/coin/lib/ledger-commitment.js";
 import { addSeenTag } from "@/entities/coin-deliveries/model/coin-delivery.js";
 import { addTransaction } from "@/entities/transaction/model/transaction.js";
+
+export type IncomingNoteDeadReason =
+  | "commitment_mismatch"
+  | "nullifier_consumed";
+
+export type IncomingNoteAssessment =
+  | { kind: "dead"; reason: IncomingNoteDeadReason }
+  | { kind: "pending" }
+  | { kind: "spendable" };
+
+export interface IncomingNoteFields {
+  value: string;
+  nullifier: string;
+  secret: string;
+  commitment: string;
+  asset_hi: string;
+  asset_lo: string;
+  application_id?: string;
+}
 
 interface IncomingDeliveryRow {
   id: number;
@@ -41,7 +49,10 @@ export type AssessIncomingDeliveryPort = (input: {
 
 const INCOMING_TX_ID_FALLBACK = "incoming";
 
-function resolveIncomingTransferId(txId: string, deliveryRowId: number): string {
+function resolveIncomingTransferId(
+  txId: string,
+  deliveryRowId: number,
+): string {
   const trimmed = txId.trim();
   if (trimmed && trimmed !== INCOMING_TX_ID_FALLBACK) {
     return trimmed;
@@ -67,14 +78,17 @@ async function tryAssessWithPrivacyClient(input: {
   walletPublicKey: string;
   poolContractId: string;
 }): Promise<IncomingNoteAssessment> {
-  const { tryGetPrivacySdkClient } = await import(
-    "@/shared/lib/privacy-sdk/transact-context.js"
-  );
+  const { tryGetPrivacySdkClient } =
+    await import("@/shared/lib/privacy-sdk/transact-context.js");
   const privacyClient = tryGetPrivacySdkClient();
-  if (!privacyClient) {
+  if (!privacyClient || !("assessIncomingNote" in privacyClient)) {
     return { kind: "pending" };
   }
-  return privacyClient.assessIncomingNote(input);
+  const assess = privacyClient.assessIncomingNote;
+  if (typeof assess !== "function") {
+    return { kind: "pending" };
+  }
+  return assess.call(privacyClient, input) as Promise<IncomingNoteAssessment>;
 }
 
 async function markDeliveryProcessedInSdk(
@@ -85,9 +99,8 @@ async function markDeliveryProcessedInSdk(
     await markDeliveryProcessed(deliveryId);
     return;
   }
-  const { tryGetPrivacySdkClient } = await import(
-    "@/shared/lib/privacy-sdk/transact-context.js"
-  );
+  const { tryGetPrivacySdkClient } =
+    await import("@/shared/lib/privacy-sdk/transact-context.js");
   const privacyClient = tryGetPrivacySdkClient();
   if (privacyClient) {
     await privacyClient.markDeliveryProcessed(deliveryId);
@@ -98,9 +111,8 @@ async function defaultPersistSpendableCoinToSdk(
   coin: CoinWithMetadata,
   publicKey: string,
 ): Promise<void> {
-  const { upsertCoinWithMetadataToSdk } = await import(
-    "@/shared/lib/privacy-sdk/upsert-private-record.js"
-  );
+  const { upsertCoinWithMetadataToSdk } =
+    await import("@/shared/lib/privacy-sdk/upsert-private-record.js");
   await upsertCoinWithMetadataToSdk(coin, publicKey);
 }
 
@@ -170,7 +182,9 @@ function recordIncomingTransferTransaction(parameters: {
   invalidIncomingReason?: IncomingNoteDeadReason;
 }): void {
   const { decrypted, row } = parameters;
-  const isSelfInitiated = parameters.localTransactionIds.includes(decrypted.txId);
+  const isSelfInitiated = parameters.localTransactionIds.includes(
+    decrypted.txId,
+  );
   if (isSelfInitiated) {
     return;
   }
