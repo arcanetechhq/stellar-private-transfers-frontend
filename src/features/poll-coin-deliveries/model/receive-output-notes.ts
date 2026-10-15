@@ -37,6 +37,11 @@ type OutputNoteRow = {
   record: StellarOutputNoteRecord;
 };
 
+function deliveredCommitmentHex(record: StellarOutputNoteRecord): string | undefined {
+  const commitment = record.commitment?.trim().toLowerCase();
+  return commitment ? commitment : undefined;
+}
+
 const COMMITMENT_TAG_LENGTH = 12;
 
 function createOutputNoteProvider(origin: string) {
@@ -76,7 +81,9 @@ async function decryptRow(
       ephemeralX: row.record.ephemeralX,
       ephemeralY: row.record.ephemeralY,
     });
-    const commitmentHex = note.commitmentHex.trim().toLowerCase();
+    const commitmentHex =
+      deliveredCommitmentHex(row.record) ??
+      note.commitmentHex.trim().toLowerCase();
     return {
       commitmentHex,
       coin: coinFromNote({ ...note, commitmentHex }),

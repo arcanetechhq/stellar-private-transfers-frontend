@@ -34,6 +34,7 @@ export const stellarOutputNoteRecordSchema = zod.object({
   encryptedData: zod.string().min(1),
   ephemeralX: zod.string().min(1),
   ephemeralY: zod.string().min(1),
+  commitment: zod.string().min(1).optional(),
 });
 
 export type StellarOutputNoteRecord = zod.infer<
