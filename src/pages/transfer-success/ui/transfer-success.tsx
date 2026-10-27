@@ -9,6 +9,7 @@ import {
   buildTransferSuccessViewModel,
   type TransferSuccessLocationState,
 } from "../lib/build-transfer-success-view";
+import { markTxSuccess } from "@/shared/lib/tx-bench";
 import { TransferSuccessPanel } from "./transfer-success-panel";
 
 export function TransferSuccess(): React.JSX.Element {
@@ -28,22 +29,25 @@ export function TransferSuccess(): React.JSX.Element {
     language: i18n.language,
   });
   const deliveryWarning = state?.coinDeliveryWarning?.trim();
+  React.useEffect(() => {
+    markTxSuccess();
+  }, []);
 
   return (
     <div className="workspace__inner">
       <div className="deposit-route">
         <div className="deposit-flow" data-testid="transfer-success-screen">
           {deliveryWarning ? (
-            <div
-              role="status"
-              className="private-deposit-success-warning"
-            >
+            <div role="status" className="private-deposit-success-warning">
               {deliveryWarning}
             </div>
           ) : (
             <div className="deposit-flow__title-offset" aria-hidden="true" />
           )}
-          <TransferSuccessPanel view={view} sourceWallet={publicKey ?? undefined} />
+          <TransferSuccessPanel
+            view={view}
+            sourceWallet={publicKey ?? undefined}
+          />
         </div>
       </div>
     </div>

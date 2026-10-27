@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import type { PrivateWithdrawalSuccess } from "../model/private-withdrawal-success";
+import { markTxSuccess } from "@/shared/lib/tx-bench";
 import { formatWithdrawalAmount } from "../lib/format-withdrawal-amount";
 
 interface WithdrawalSuccessModalProperties {
@@ -18,13 +19,19 @@ export function WithdrawalSuccessModal({
   onDone,
 }: WithdrawalSuccessModalProperties): React.JSX.Element | null {
   const { t: translate } = useTranslation("withdrawal");
+  React.useEffect(() => {
+    if (open && result) {
+      markTxSuccess();
+    }
+  }, [open, result]);
 
   if (!open || !result) {
     return null;
   }
 
   const ticker = result.assetId.toUpperCase();
-  const amountDisplay = `${formatWithdrawalAmount(result.amount)} ${ticker}`.trim();
+  const amountDisplay =
+    `${formatWithdrawalAmount(result.amount)} ${ticker}`.trim();
 
   return (
     <div className="send-success-backdrop" role="presentation">
