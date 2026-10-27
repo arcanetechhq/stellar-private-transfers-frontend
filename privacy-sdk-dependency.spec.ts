@@ -9,25 +9,25 @@ const packageJson = JSON.parse(
 };
 
 describe("privacy SDK dependency range", () => {
-  it("depends on privacy-sdk-stellar at >=1.0.1 <2.0.0", () => {
+  it("depends on privacy-sdk-stellar at 1.0.1", () => {
     expect(packageJson.dependencies?.["@arcanetech/privacy-sdk-stellar"]).toBe(
-      ">=1.0.1 <2.0.0",
+      "1.0.1",
     );
   });
 
-  it("depends on the other privacy SDK packages at ^1.0.0", () => {
+  it("depends on the 1.x privacy SDK packages that share core 1.0.2", () => {
     expect(packageJson.dependencies?.["@arcanetech/privacy-sdk-core"]).toBe(
-      "^1.0.0",
+      "1.0.2",
     );
     expect(
       packageJson.dependencies?.["@arcanetech/privacy-sdk-data-layer"],
-    ).toBe("^1.0.0");
+    ).toBe("1.0.1");
     expect(packageJson.dependencies?.["@arcanetech/privacy-sdk-relay"]).toBe(
-      "^1.0.0",
+      "1.0.1",
     );
     expect(
       packageJson.dependencies?.["@arcanetech/privacy-sdk-state-redux"],
-    ).toBe("^1.0.0");
+    ).toBe("1.0.1");
   });
 
   it("does not declare a direct dependency on the zk SDK", () => {
