@@ -1,4 +1,5 @@
 import React from "react";
+import { endTxReview } from "@/shared/lib/tx-bench";
 import { PaymentReviewFooter } from "@/shared/ui/payment-review-footer";
 import { RelayReviewActions } from "./relay-review-actions.js";
 
@@ -24,7 +25,10 @@ export function RelayPaymentReviewFooter(properties: {
       showConfirm={!properties.retryAllowed && !properties.fallbackAllowed}
       confirmTestId={properties.confirmTestId}
       onClose={properties.onClose}
-      onConfirm={properties.onConfirm}
+      onConfirm={() => {
+        endTxReview();
+        properties.onConfirm();
+      }}
       extra={
         <RelayReviewActions
           retryAllowed={properties.retryAllowed}

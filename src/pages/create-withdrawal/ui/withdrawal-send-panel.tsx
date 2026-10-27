@@ -11,6 +11,7 @@ import {
 import { WithdrawalAssetSelect } from "./withdrawal-asset-select";
 import { WithdrawalWalletControl } from "./withdrawal-wallet-control";
 import { useRequiredFeeDisplay } from "@/shared/lib/protocol-fee/use-required-fee-display.js";
+import { beginTxReview } from "@/shared/lib/tx-bench";
 
 interface WithdrawalSendPanelProperties {
   assets: AssetWithTrustline[];
@@ -52,7 +53,8 @@ export function WithdrawalSendPanel({
     Number.isFinite(numericBalance) &&
     numericAmount > numericBalance;
   const amountInvalid = exceedsBalance || Boolean(noteLimitAlert);
-  const recipientGetsDisplay = `${formatWithdrawalAmount(totalAmount)} ${ticker}`.trim();
+  const recipientGetsDisplay =
+    `${formatWithdrawalAmount(totalAmount)} ${ticker}`.trim();
   const feeDisplay = useRequiredFeeDisplay({
     kind: "withdraw",
     amount,
@@ -121,14 +123,19 @@ export function WithdrawalSendPanel({
         {noteLimitAlert ? (
           <div className="send-money-error" role="alert">
             <p className="send-money-error__title">{noteLimitAlert.title}</p>
-            <p className="send-money-error__subtitle">{noteLimitAlert.subtitle}</p>
+            <p className="send-money-error__subtitle">
+              {noteLimitAlert.subtitle}
+            </p>
           </div>
         ) : null}
 
         {hasAmount ? (
           <div className="send-money-summary-row">
             <span>{translate("fee")}</span>
-            <span className="send-money-summary-row__value" data-testid="required-fee">
+            <span
+              className="send-money-summary-row__value"
+              data-testid="required-fee"
+            >
               {feeDisplay}
             </span>
           </div>
@@ -140,7 +147,10 @@ export function WithdrawalSendPanel({
         className="send-money-continue"
         data-testid="withdraw-continue"
         disabled={!canContinue || isSubmitting}
-        onClick={onContinue}
+        onClick={() => {
+          beginTxReview();
+          onContinue();
+        }}
       >
         {isSubmitting ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import type { ConfidentialTransferSuccess } from "../model/confidential-transfer-submit-flow";
+import { markTxSuccess } from "@/shared/lib/tx-bench";
 import { formatTransferAmount } from "../lib/format-transfer-amount";
 
 interface TransferSuccessModalProperties {
@@ -18,6 +19,11 @@ export function TransferSuccessModal({
   onDone,
 }: TransferSuccessModalProperties): React.JSX.Element | null {
   const { t: translate } = useTranslation("transfer");
+  React.useEffect(() => {
+    if (open && result) {
+      markTxSuccess();
+    }
+  }, [open, result]);
 
   if (!open || !result) {
     return null;
