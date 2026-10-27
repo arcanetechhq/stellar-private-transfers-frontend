@@ -12,6 +12,7 @@ import {
 import { TransferAssetSelect } from "./transfer-asset-select";
 import { TransferRecipientControl } from "./transfer-recipient-control";
 import { useRequiredFeeDisplay } from "@/shared/lib/protocol-fee/use-required-fee-display.js";
+import { beginTxReview } from "@/shared/lib/tx-bench";
 
 interface TransferSendPanelProperties {
   assets: AssetWithTrustline[];
@@ -209,7 +210,10 @@ export function TransferSendPanel({
         {hasAmount ? (
           <div className="send-money-summary-row">
             <span>{translate("fee")}</span>
-            <span className="send-money-summary-row__value" data-testid="required-fee">
+            <span
+              className="send-money-summary-row__value"
+              data-testid="required-fee"
+            >
               {feeDisplay}
             </span>
           </div>
@@ -225,7 +229,10 @@ export function TransferSendPanel({
         className="send-money-continue"
         data-testid="transfer-continue"
         disabled={!canContinue || isSubmitting}
-        onClick={onContinue}
+        onClick={() => {
+          beginTxReview();
+          onContinue();
+        }}
       >
         {isSubmitting ? (
           <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

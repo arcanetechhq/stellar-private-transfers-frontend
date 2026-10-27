@@ -11,7 +11,6 @@ import type {
   RunPrivateWithdrawalMutationInput,
   RunPrivateWithdrawalMutationResult,
 } from "./private-withdrawal-mutation-contract";
-import { validatePrivateWithdrawOperationInput } from "./run-private-withdrawal-validate";
 
 export type {
   RunPrivateWithdrawalMutationInput,
@@ -26,7 +25,6 @@ export async function runPrivateWithdrawalMutation(
     poolContractId: getRequiredPrivacyPoolContractId(),
     walletPublicKey: input.walletPublicKey,
   });
-  await validatePrivateWithdrawOperationInput({ input, privacyClient });
   const operation = await privacyClient.withdraw({
     from: input.senderPrivateAddress.trim(),
     to: input.destinationAddress.trim(),
@@ -50,7 +48,9 @@ export async function runPrivateWithdrawalMutation(
           const receipt = await operation.execute();
           const txId = receipt.operationId;
           if (!txId) {
-            throw new Error("Withdrawal transaction did not return an operation id");
+            throw new Error(
+              "Withdrawal transaction did not return an operation id",
+            );
           }
           return { txId };
         },

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { useWalletPrivateAddress } from "@/features/register-private-address";
 import type { AssetWithTrustline } from "@/entities/asset";
 import { useDepositTransaction } from "@/features/deposit";
+import { markTxContinue } from "@/shared/lib/tx-bench";
 import { useCreateDepositForm } from "./use-create-deposit-form";
 
 type SubmitDepositResult = {
@@ -54,8 +55,14 @@ export function useCreateDeposit() {
   const handleSubmit = useCallback(
     async (event: FormEvent) => {
       event.preventDefault();
+      markTxContinue();
       const trimmedPrivateAddress = privateAddressStpl1.trim();
-      if (!form.selectedAsset || !form.canSubmit || isSubmitting || !trimmedPrivateAddress) {
+      if (
+        !form.selectedAsset ||
+        !form.canSubmit ||
+        isSubmitting ||
+        !trimmedPrivateAddress
+      ) {
         return;
       }
       try {
