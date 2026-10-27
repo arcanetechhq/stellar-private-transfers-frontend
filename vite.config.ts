@@ -44,7 +44,7 @@ export default defineConfig({
     },
   },
   resolve: {
-    dedupe: ["buffer"],
+    dedupe: ["buffer", "@arcanetech/privacy-sdk-core"],
     alias: {
       "@": path.resolve(__dirname, "./src"),
       buffer: "buffer",
