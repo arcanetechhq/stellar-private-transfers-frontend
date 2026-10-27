@@ -1,27 +1,11 @@
 import { displayAmountToStroops } from "@/shared/lib/stellar/stroops";
 import { getPrivacySdkClientOrThrow } from "@/shared/lib/privacy-sdk/transact-context.js";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
-import { validateTransferOperation } from "@/shared/lib/privacy-sdk/operation-adapters.js";
 import { routePreparedTransact } from "@/shared/lib/protocol-relay";
 import { createAppRelayPorts } from "@/features/submit-private-operation";
 import type { RunConfidentialTransferInput } from "./confidential-transfer-mutation-types";
 import type { RecipientTransferTarget } from "./run-confidential-transfer-mutation";
 import { prepareSdkTransfer } from "./run-confidential-transfer-sdk-execute";
-
-async function registerResolverAndValidate(parameters: {
-  input: RunConfidentialTransferInput;
-  senderTrim: string;
-  recipientAddress: string;
-}): Promise<ReturnType<typeof getPrivacySdkClientOrThrow>> {
-  const privacyClient = getPrivacySdkClientOrThrow();
-  await validateTransferOperation(privacyClient, {
-    senderPrivateAddress: parameters.senderTrim,
-    recipientAddress: parameters.recipientAddress,
-    assetId: parameters.input.assetId,
-    amountStroops: displayAmountToStroops(parameters.input.amountDisplay),
-  });
-  return privacyClient;
-}
 
 export async function prepareTransferExecution(parameters: {
   input: RunConfidentialTransferInput;
@@ -35,11 +19,7 @@ export async function prepareTransferExecution(parameters: {
   const recipientAddress = isEscrowSend
     ? recipientStellarAddress
     : recipientTarget.recipientPrivateAddressStpl1;
-  const privacyClient = await registerResolverAndValidate({
-    input,
-    senderTrim,
-    recipientAddress,
-  });
+  const privacyClient = getPrivacySdkClientOrThrow();
   await privacyClient.syncPoolMerkleState({
     poolContractId,
     walletPublicKey: input.walletPublicKey,
