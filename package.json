@@ -19,7 +19,7 @@
     "@arcanetech/privacy-sdk-data-layer": "^1.0.0",
     "@arcanetech/privacy-sdk-relay": "^1.0.0",
     "@arcanetech/privacy-sdk-state-redux": "^1.0.0",
-    "@arcanetech/privacy-sdk-stellar": ">=1.0.0 <2.0.0",
+    "@arcanetech/privacy-sdk-stellar": ">=1.0.1 <2.0.0",
     "@creit-tech/stellar-wallets-kit": "npm:@jsr/creit-tech__stellar-wallets-kit@^2.1.0",
     "@noble/hashes": "^2.2.0",
     "@radix-ui/react-accordion": "1.2.3",

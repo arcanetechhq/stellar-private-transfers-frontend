@@ -9,9 +9,9 @@ const packageJson = JSON.parse(
 };
 
 describe("privacy SDK dependency range", () => {
-  it("depends on privacy-sdk-stellar at >=1.0.0 <2.0.0", () => {
+  it("depends on privacy-sdk-stellar at >=1.0.1 <2.0.0", () => {
     expect(packageJson.dependencies?.["@arcanetech/privacy-sdk-stellar"]).toBe(
-      ">=1.0.0 <2.0.0",
+      ">=1.0.1 <2.0.0",
     );
   });
 
