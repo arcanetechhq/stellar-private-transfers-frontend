@@ -1,6 +1,6 @@
 export const HIDDEN_FEATURES = {
   transactionsRefreshButton: true,
-  transactionsExportButton: true,
+  transactionsExportButton: false,
   overviewReferralButton: true,
   contactSupportSection: true,
   settingsReferralProgram: true,

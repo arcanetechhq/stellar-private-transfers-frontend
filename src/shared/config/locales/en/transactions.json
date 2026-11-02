@@ -2,7 +2,7 @@
   "title": "Transactions",
   "searchPlaceholder": "Search",
   "viewAll": "View all",
-  "exportData": "Export data",
+  "exportData": "Operation confirmation",
   "exported": "Exported",
   "refresh": "Refresh transactions",
   "filter": "Filter transactions",
@@ -82,6 +82,26 @@
       "all": "All transactions",
       "inflow": "Inflow only",
       "outflow": "Outflow only"
+    }
+  },
+  "confirmationDialog": {
+    "title": "Operation confirmation",
+    "close": "Close",
+    "period": "Period",
+    "from": "From",
+    "to": "To",
+    "preview": "Preview",
+    "download": "Download statement",
+    "warning": "Issuance reads this period again and may include more operations than this preview.",
+    "empty": "No operations in this period.",
+    "failed": "The statement could not be issued. You can try again.",
+    "connectWallet": "Connect your wallet to request a statement.",
+    "periods": {
+      "all": "All time",
+      "week": "Week",
+      "month": "Month",
+      "year": "Year",
+      "custom": "Custom"
     }
   },
   "transactionLabels": {

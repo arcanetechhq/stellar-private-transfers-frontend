@@ -6,7 +6,7 @@ import { ChevronDown } from "lucide-react";
 import { useAppSelector } from "@/store";
 import type { Transaction } from "@/entities/transaction";
 import { selectIsWalletConnected } from "@/entities/wallet";
-import { TransactionsExportModal } from "@/features/export-transactions";
+import { OperationConfirmationDialog } from "@/features/request-operation-confirmation";
 import { resolveTransactionActivityTitle } from "../lib/transaction-display";
 import {
   collectTransactionAssetIds,
@@ -321,12 +321,9 @@ export function TransactionsPanel({
             onRefresh={handleRefresh}
             onExport={() => setExportOpen(true)}
           />
-          <TransactionsExportModal
+          <OperationConfirmationDialog
             open={exportOpen}
             onOpenChange={setExportOpen}
-            exportContext={{
-              filters: { type: filters.typeFilter },
-            }}
           />
         </div>
       )}
