@@ -112,6 +112,17 @@
   padding: 0 12px;
 }
 
+.confirmation-rows {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 20px;
+}
+
 .confirmation-note,
 .confirmation-error {
   margin: 0;

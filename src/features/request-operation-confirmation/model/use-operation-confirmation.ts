@@ -6,6 +6,7 @@ import { getRequiredApiBaseUrl } from "@/shared/stellar/stellar-network-environm
 import {
   issueOperationConfirmation,
   openOperationConfirmationChallenge,
+  OperationConfirmationRequestError,
   previewOperationConfirmation,
   type ConfirmationPreview,
 } from "../api/operation-confirmation-api";
@@ -33,6 +34,7 @@ type ConfirmationControls = {
   setPreview: (preview: ConfirmationPreview) => void;
   setError: (error: boolean) => void;
   setBusy: (busy: boolean) => void;
+  setBlockingOperationId: (operationId: string | undefined) => void;
 };
 
 async function loadSession(controls: ConfirmationControls): Promise<SignedDraft> {
@@ -69,6 +71,7 @@ async function loadSession(controls: ConfirmationControls): Promise<SignedDraft>
 async function runPreview(controls: ConfirmationControls): Promise<void> {
   controls.setBusy(true);
   controls.setError(false);
+  controls.setBlockingOperationId(undefined);
   try {
     const session = await loadSession(controls);
     controls.setDraft(session);
@@ -89,6 +92,7 @@ async function runPreview(controls: ConfirmationControls): Promise<void> {
 async function runDownload(controls: ConfirmationControls): Promise<void> {
   controls.setBusy(true);
   controls.setError(false);
+  controls.setBlockingOperationId(undefined);
   try {
     const session = await loadSession(controls);
     controls.setDraft(session);
@@ -99,11 +103,19 @@ async function runDownload(controls: ConfirmationControls): Promise<void> {
         signature: session.signature,
       }),
     );
-  } catch {
+  } catch (error: unknown) {
     controls.setError(true);
+    controls.setBlockingOperationId(blockingOperationIdFrom(error));
   } finally {
     controls.setBusy(false);
   }
+}
+
+function blockingOperationIdFrom(error: unknown): string | undefined {
+  if (!(error instanceof OperationConfirmationRequestError)) {
+    return;
+  }
+  return error.blockingOperationId;
 }
 
 export function useOperationConfirmation(open: boolean) {
@@ -115,6 +127,9 @@ export function useOperationConfirmation(open: boolean) {
   const [preview, setPreview] = useState<ConfirmationPreview | undefined>();
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [blockingOperationId, setBlockingOperationId] = useState<
+    string | undefined
+  >();
 
   useEffect(() => {
     if (open) {
@@ -126,12 +141,14 @@ export function useOperationConfirmation(open: boolean) {
     setDraft(undefined);
     setPreview(undefined);
     setError(false);
+    setBlockingOperationId(undefined);
   }, [open]);
 
   function clearSignedPeriod() {
     setDraft(undefined);
     setPreview(undefined);
     setError(false);
+    setBlockingOperationId(undefined);
   }
 
   const controls: ConfirmationControls = {
@@ -144,6 +161,7 @@ export function useOperationConfirmation(open: boolean) {
     setPreview,
     setError,
     setBusy,
+    setBlockingOperationId,
   };
 
   return {
@@ -154,6 +172,7 @@ export function useOperationConfirmation(open: boolean) {
     preview,
     error,
     busy,
+    blockingOperationId,
     changeKind: (next: ConfirmationPeriodKind) => {
       setKind(next);
       clearSignedPeriod();

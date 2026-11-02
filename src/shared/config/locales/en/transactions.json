@@ -94,6 +94,7 @@
     "download": "Download statement",
     "warning": "Issuance reads this period again and may include more operations than this preview.",
     "empty": "No operations in this period.",
+    "blocking": "Operation {{id}} could not be read.",
     "failed": "The statement could not be issued. You can try again.",
     "connectWallet": "Connect your wallet to request a statement.",
     "periods": {

@@ -2,6 +2,11 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Dialog, DialogPortal, DialogTitle } from "@/shared/ui/dialog";
+import {
+  canDownloadOperationConfirmation,
+  previewNotice,
+  type ConfirmationPreviewRow,
+} from "../api/operation-confirmation-api";
 import type { ConfirmationPeriodKind } from "../model/confirmation-period";
 import { useOperationConfirmation } from "../model/use-operation-confirmation";
 import "./operation-confirmation-dialog.css";
@@ -43,15 +48,17 @@ export function OperationConfirmationDialog({
   );
 }
 
+type Translate = (key: string, options?: Record<string, string>) => string;
+
 function ConfirmationForm(input: {
   confirmation: ConfirmationState;
-  translate: (key: string) => string;
+  translate: Translate;
 }) {
   const { confirmation, translate } = input;
-  const canDownload =
-    confirmation.preview?.readable === true &&
-    confirmation.preview.rowCount === 0 &&
-    !confirmation.busy;
+  const canDownload = canDownloadOperationConfirmation(
+    confirmation.preview,
+    confirmation.busy,
+  );
   const periodLabels = {
     all: translate("confirmationDialog.periods.all"),
     week: translate("confirmationDialog.periods.week"),
@@ -80,11 +87,11 @@ function ConfirmationForm(input: {
       <p className="confirmation-note">
         {translate("confirmationDialog.warning")}
       </p>
-      {confirmation.preview ? (
-        <p className="confirmation-note">
-          {translate("confirmationDialog.empty")}
-        </p>
-      ) : undefined}
+      <ConfirmationNotice
+        preview={confirmation.preview}
+        blockingOperationId={confirmation.blockingOperationId}
+        translate={translate}
+      />
       {confirmation.error ? (
         <p className="confirmation-error">
           {translate("confirmationDialog.failed")}
@@ -114,6 +121,46 @@ function ConfirmationForm(input: {
         </button>
       </div>
     </div>
+  );
+}
+
+function ConfirmationNotice(input: {
+  preview: ConfirmationState["preview"];
+  blockingOperationId: string | undefined;
+  translate: Translate;
+}) {
+  const notice = previewNotice(input.preview, input.blockingOperationId);
+  if (notice.kind === "blocking") {
+    return (
+      <p className="confirmation-error">
+        {input.translate("confirmationDialog.blocking", {
+          id: notice.operationId,
+        })}
+      </p>
+    );
+  }
+  if (notice.kind === "rows") {
+    return <ConfirmationRows rows={notice.rows} />;
+  }
+  if (notice.kind === "empty") {
+    return (
+      <p className="confirmation-note">
+        {input.translate("confirmationDialog.empty")}
+      </p>
+    );
+  }
+  return <></>;
+}
+
+function ConfirmationRows(input: { rows: ConfirmationPreviewRow[] }) {
+  return (
+    <ul className="confirmation-rows">
+      {input.rows.map((row) => (
+        <li key={row.id}>
+          {`${row.id} ${row.date} ${row.type} ${row.amount} ${row.asset} ${row.transactionId} ${row.contract} ${row.chain} ${row.sender} ${row.recipient}`}
+        </li>
+      ))}
+    </ul>
   );
 }
 
