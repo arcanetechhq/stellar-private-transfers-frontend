@@ -180,6 +180,7 @@ export function PageTransactionsHeader({
               <button
                 type="button"
                 className="transactions-panel__export-button"
+                data-operation-confirmation="open"
                 onClick={onExport}
               >
                 <FileDown aria-hidden="true" size={20} />

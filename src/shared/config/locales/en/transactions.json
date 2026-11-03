@@ -90,8 +90,15 @@
     "period": "Period",
     "from": "From",
     "to": "To",
-    "preview": "Preview",
     "download": "Download statement",
+    "loading": "Loading operations for this period.",
+    "columns": {
+      "date": "Date",
+      "type": "Type",
+      "amount": "Amount",
+      "from": "From",
+      "to": "To"
+    },
     "warning": "Issuance reads this period again and may include more operations than this preview.",
     "empty": "No operations in this period.",
     "blocking": "Operation {{id}} could not be read.",
