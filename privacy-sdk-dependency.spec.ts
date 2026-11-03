@@ -9,13 +9,13 @@ const packageJson = JSON.parse(
 };
 
 describe("privacy SDK dependency range", () => {
-  it("depends on privacy-sdk-stellar at >=0.8.3 <1.0.0", () => {
+  it("depends on privacy-sdk-stellar 0.8.4 so install pulls zk-sdk 0.15.0", () => {
     expect(packageJson.dependencies?.["@arcanetech/privacy-sdk-stellar"]).toBe(
-      ">=0.8.3 <1.0.0",
+      "0.8.4",
     );
   });
 
-  it("depends on the 0.x privacy SDK packages published with stellar 0.8.3", () => {
+  it("depends on the 0.x privacy SDK packages published with stellar 0.8.4", () => {
     expect(packageJson.dependencies?.["@arcanetech/privacy-sdk-core"]).toBe(
       "0.5.0",
     );
