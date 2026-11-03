@@ -5,10 +5,11 @@ import { Dialog, DialogPortal, DialogTitle } from "@/shared/ui/dialog";
 import {
   canDownloadOperationConfirmation,
   previewNotice,
-  type ConfirmationPreviewRow,
 } from "../api/operation-confirmation-api";
 import type { ConfirmationPeriodKind } from "../model/confirmation-period";
+import { usePublishedConfirmation } from "../model/confirmation-preview-store";
 import { useOperationConfirmation } from "../model/use-operation-confirmation";
+import { ConfirmationTable } from "./confirmation-table";
 import "./operation-confirmation-dialog.css";
 import { PeriodPicker } from "./period-picker";
 
@@ -55,10 +56,10 @@ function ConfirmationForm(input: {
   translate: Translate;
 }) {
   const { confirmation, translate } = input;
-  const canDownload = canDownloadOperationConfirmation(
-    confirmation.preview,
-    confirmation.busy,
-  );
+  const published = usePublishedConfirmation();
+  const preview = published.preview ?? confirmation.preview;
+  const busy = published.preview ? false : published.busy || confirmation.busy;
+  const canDownload = canDownloadOperationConfirmation(preview, busy);
   const periodLabels = {
     all: translate("confirmationDialog.periods.all"),
     week: translate("confirmationDialog.periods.week"),
@@ -67,50 +68,45 @@ function ConfirmationForm(input: {
     custom: translate("confirmationDialog.periods.custom"),
   } satisfies Record<ConfirmationPeriodKind, string>;
   return (
-    <div className="export-sheet">
-      <PeriodPicker
-        label={translate("confirmationDialog.period")}
-        kind={confirmation.kind}
-        labels={periodLabels}
-        onChange={confirmation.changeKind}
-      />
-      {confirmation.kind === "custom" ? (
-        <CustomRange
-          fromLabel={translate("confirmationDialog.from")}
-          toLabel={translate("confirmationDialog.to")}
-          fromDate={confirmation.fromDate}
-          toDate={confirmation.toDate}
-          onFromDate={confirmation.changeFromDate}
-          onToDate={confirmation.changeToDate}
+    <>
+      <div className="export-sheet">
+        <PeriodPicker
+          label={translate("confirmationDialog.period")}
+          kind={confirmation.kind}
+          labels={periodLabels}
+          onChange={confirmation.changeKind}
         />
-      ) : undefined}
-      <p className="confirmation-note">
-        {translate("confirmationDialog.warning")}
-      </p>
-      <ConfirmationNotice
-        preview={confirmation.preview}
-        blockingOperationId={confirmation.blockingOperationId}
-        translate={translate}
-      />
-      {confirmation.error ? (
-        <p className="confirmation-error">
-          {translate("confirmationDialog.failed")}
-        </p>
-      ) : undefined}
-      {confirmation.publicKey ? undefined : (
+        {confirmation.kind === "custom" ? (
+          <CustomRange
+            fromLabel={translate("confirmationDialog.from")}
+            toLabel={translate("confirmationDialog.to")}
+            fromDate={confirmation.fromDate}
+            toDate={confirmation.toDate}
+            onFromDate={confirmation.changeFromDate}
+            onToDate={confirmation.changeToDate}
+          />
+        ) : undefined}
         <p className="confirmation-note">
-          {translate("confirmationDialog.connectWallet")}
+          {translate("confirmationDialog.warning")}
         </p>
-      )}
+        <ConfirmationNotice
+          preview={preview}
+          busy={busy}
+          blockingOperationId={confirmation.blockingOperationId}
+          translate={translate}
+        />
+        {confirmation.error || published.error ? (
+          <p className="confirmation-error">
+            {translate("confirmationDialog.failed")}
+          </p>
+        ) : undefined}
+        {confirmation.publicKey ? undefined : (
+          <p className="confirmation-note">
+            {translate("confirmationDialog.connectWallet")}
+          </p>
+        )}
+      </div>
       <div className="confirmation-actions">
-        <button
-          type="button"
-          className="export-sheet__submit"
-          disabled={confirmation.busy || !confirmation.publicKey}
-          onClick={() => void confirmation.previewStatement()}
-        >
-          {translate("confirmationDialog.preview")}
-        </button>
         <button
           type="button"
           className="export-sheet__submit"
@@ -120,12 +116,13 @@ function ConfirmationForm(input: {
           {translate("confirmationDialog.download")}
         </button>
       </div>
-    </div>
+    </>
   );
 }
 
 function ConfirmationNotice(input: {
   preview: ConfirmationState["preview"];
+  busy: boolean;
   blockingOperationId: string | undefined;
   translate: Translate;
 }) {
@@ -140,7 +137,25 @@ function ConfirmationNotice(input: {
     );
   }
   if (notice.kind === "rows") {
-    return <ConfirmationRows rows={notice.rows} />;
+    return (
+      <ConfirmationTable
+        rows={notice.rows}
+        labels={{
+          date: input.translate("confirmationDialog.columns.date"),
+          type: input.translate("confirmationDialog.columns.type"),
+          amount: input.translate("confirmationDialog.columns.amount"),
+          from: input.translate("confirmationDialog.columns.from"),
+          to: input.translate("confirmationDialog.columns.to"),
+        }}
+      />
+    );
+  }
+  if (notice.kind === "none" && input.busy) {
+    return (
+      <p className="confirmation-note">
+        {input.translate("confirmationDialog.loading")}
+      </p>
+    );
   }
   if (notice.kind === "empty") {
     return (
@@ -150,18 +165,6 @@ function ConfirmationNotice(input: {
     );
   }
   return <></>;
-}
-
-function ConfirmationRows(input: { rows: ConfirmationPreviewRow[] }) {
-  return (
-    <ul className="confirmation-rows">
-      {input.rows.map((row) => (
-        <li key={row.id}>
-          {`${row.id} ${row.date} ${row.type} ${row.amount} ${row.asset} ${row.transactionId} ${row.contract} ${row.chain} ${row.sender} ${row.recipient}`}
-        </li>
-      ))}
-    </ul>
-  );
 }
 
 function ConfirmationHeader(input: {

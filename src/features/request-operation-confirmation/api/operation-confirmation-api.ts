@@ -168,22 +168,18 @@ function previewRow(value: unknown): ConfirmationPreviewRow | undefined {
   if (!isRecord(value)) {
     return;
   }
-  const row = {
-    id: text(value.id),
-    date: text(value.date),
-    type: text(value.type),
-    amount: text(value.amount),
-    asset: text(value.asset),
-    transactionId: text(value.transactionId),
-    contract: text(value.contract),
-    chain: text(value.chain),
-    sender: text(value.sender),
-    recipient: text(value.recipient),
+  return {
+    id: cell(value.id),
+    date: cell(value.date),
+    type: cell(value.type),
+    amount: cell(value.amount),
+    asset: cell(value.asset),
+    transactionId: cell(value.transactionId),
+    contract: cell(value.contract),
+    chain: cell(value.chain),
+    sender: cell(value.sender),
+    recipient: cell(value.recipient),
   };
-  if (Object.values(row).includes(undefined)) {
-    return;
-  }
-  return row as ConfirmationPreviewRow;
 }
 
 function isRecord(value: unknown): value is JsonRecord {
@@ -192,6 +188,16 @@ function isRecord(value: unknown): value is JsonRecord {
 
 function text(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
+}
+
+function cell(value: unknown): string {
+  if (typeof value === "string") {
+    return value;
+  }
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return String(value);
+  }
+  return "";
 }
 
 async function readJson(response: Response): Promise<unknown> {

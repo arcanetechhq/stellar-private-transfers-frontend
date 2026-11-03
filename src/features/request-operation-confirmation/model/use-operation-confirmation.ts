@@ -1,122 +1,17 @@
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { useAppSelector } from "@/store";
 import { selectWalletPublicKey } from "@/entities/wallet";
-import { readClientEnvironment } from "@/shared/lib/privacy-sdk/read-client-environment";
-import { getRequiredApiBaseUrl } from "@/shared/stellar/stellar-network-environment";
+import type { ConfirmationPreview } from "../api/operation-confirmation-api";
+import type { ConfirmationPeriodKind } from "./confirmation-period";
 import {
-  issueOperationConfirmation,
-  openOperationConfirmationChallenge,
-  OperationConfirmationRequestError,
-  previewOperationConfirmation,
-  type ConfirmationPreview,
-} from "../api/operation-confirmation-api";
+  blockingOperationIdFrom,
+  runDownload,
+  type SignedDraft,
+} from "./confirmation-session";
 import {
-  confirmationPeriodBody,
-  confirmationPeriodKey,
-  type ConfirmationPeriodKind,
-} from "./confirmation-period";
-import { downloadConfirmationPdf } from "./download-confirmation-pdf";
-import { signOperationConfirmation } from "./sign-operation-confirmation";
-
-type SignedDraft = {
-  key: string;
-  challenge: string;
-  signature: string;
-};
-
-type ConfirmationControls = {
-  publicKey: string;
-  kind: ConfirmationPeriodKind;
-  fromDate: string;
-  toDate: string;
-  draft: SignedDraft | undefined;
-  setDraft: (draft: SignedDraft) => void;
-  setPreview: (preview: ConfirmationPreview) => void;
-  setError: (error: boolean) => void;
-  setBusy: (busy: boolean) => void;
-  setBlockingOperationId: (operationId: string | undefined) => void;
-};
-
-async function loadSession(controls: ConfirmationControls): Promise<SignedDraft> {
-  const key = confirmationPeriodKey({
-    kind: controls.kind,
-    fromDate: controls.fromDate,
-    toDate: controls.toDate,
-  });
-  if (controls.draft?.key === key) {
-    return controls.draft;
-  }
-  const period = confirmationPeriodBody({
-    kind: controls.kind,
-    fromDate: controls.fromDate,
-    toDate: controls.toDate,
-  });
-  const applicationId = readClientEnvironment("VITE_APPLICATION_ID");
-  if (!period || !controls.publicKey || !applicationId) {
-    throw new Error("Operation Confirmation request is incomplete");
-  }
-  const opened = await openOperationConfirmationChallenge({
-    apiBaseUrl: getRequiredApiBaseUrl(),
-    applicationId,
-    subject: controls.publicKey,
-    period,
-  });
-  const signature = await signOperationConfirmation({
-    challenge: opened.challenge,
-    address: controls.publicKey,
-  });
-  return { key, challenge: opened.challenge, signature };
-}
-
-async function runPreview(controls: ConfirmationControls): Promise<void> {
-  controls.setBusy(true);
-  controls.setError(false);
-  controls.setBlockingOperationId(undefined);
-  try {
-    const session = await loadSession(controls);
-    controls.setDraft(session);
-    controls.setPreview(
-      await previewOperationConfirmation({
-        apiBaseUrl: getRequiredApiBaseUrl(),
-        challenge: session.challenge,
-        signature: session.signature,
-      }),
-    );
-  } catch {
-    controls.setError(true);
-  } finally {
-    controls.setBusy(false);
-  }
-}
-
-async function runDownload(controls: ConfirmationControls): Promise<void> {
-  controls.setBusy(true);
-  controls.setError(false);
-  controls.setBlockingOperationId(undefined);
-  try {
-    const session = await loadSession(controls);
-    controls.setDraft(session);
-    downloadConfirmationPdf(
-      await issueOperationConfirmation({
-        apiBaseUrl: getRequiredApiBaseUrl(),
-        challenge: session.challenge,
-        signature: session.signature,
-      }),
-    );
-  } catch (error: unknown) {
-    controls.setError(true);
-    controls.setBlockingOperationId(blockingOperationIdFrom(error));
-  } finally {
-    controls.setBusy(false);
-  }
-}
-
-function blockingOperationIdFrom(error: unknown): string | undefined {
-  if (!(error instanceof OperationConfirmationRequestError)) {
-    return;
-  }
-  return error.blockingOperationId;
-}
+  useAutomaticConfirmationPreview,
+  type PreviewState,
+} from "./use-automatic-confirmation-preview";
 
 export function useOperationConfirmation(open: boolean) {
   const publicKey = useAppSelector(selectWalletPublicKey) ?? "";
@@ -130,62 +25,103 @@ export function useOperationConfirmation(open: boolean) {
   const [blockingOperationId, setBlockingOperationId] = useState<
     string | undefined
   >();
-
-  useEffect(() => {
-    if (open) {
-      return;
-    }
-    setKind("all");
-    setFromDate("");
-    setToDate("");
-    setDraft(undefined);
-    setPreview(undefined);
-    setError(false);
-    setBlockingOperationId(undefined);
-  }, [open]);
-
-  function clearSignedPeriod() {
-    setDraft(undefined);
-    setPreview(undefined);
-    setError(false);
-    setBlockingOperationId(undefined);
-  }
-
-  const controls: ConfirmationControls = {
+  const requestSerial = useRef(0);
+  const state: PreviewState = {
+    open,
     publicKey,
     kind,
     fromDate,
     toDate,
     draft,
+    requestSerial,
+    setKind,
+    setFromDate,
+    setToDate,
     setDraft,
     setPreview,
     setError,
     setBusy,
     setBlockingOperationId,
   };
+  useAutomaticConfirmationPreview(state);
+  return confirmationView(state);
+}
+
+function confirmationView(state: PreviewState) {
+  function clearSignedPeriod() {
+    state.setDraft(undefined);
+    state.setPreview(undefined);
+    state.setError(false);
+    state.setBlockingOperationId(undefined);
+  }
+
+  function invalidateRequest() {
+    state.requestSerial.current += 1;
+  }
 
   return {
-    publicKey,
-    kind,
-    fromDate,
-    toDate,
-    preview,
-    error,
-    busy,
-    blockingOperationId,
-    changeKind: (next: ConfirmationPeriodKind) => {
-      setKind(next);
-      clearSignedPeriod();
-    },
-    changeFromDate: (next: string) => {
-      setFromDate(next);
-      clearSignedPeriod();
-    },
-    changeToDate: (next: string) => {
-      setToDate(next);
-      clearSignedPeriod();
-    },
-    previewStatement: () => runPreview(controls),
-    downloadStatement: () => runDownload(controls),
+    publicKey: state.publicKey,
+    kind: state.kind,
+    fromDate: state.fromDate,
+    toDate: state.toDate,
+    preview: state.preview,
+    error: state.error,
+    busy: state.busy,
+    blockingOperationId: state.blockingOperationId,
+    changeKind: bindPeriodChange({
+      current: state.kind,
+      apply: state.setKind,
+      invalidate: invalidateRequest,
+      clear: clearSignedPeriod,
+    }),
+    changeFromDate: bindPeriodChange({
+      current: state.fromDate,
+      apply: state.setFromDate,
+      invalidate: invalidateRequest,
+      clear: clearSignedPeriod,
+    }),
+    changeToDate: bindPeriodChange({
+      current: state.toDate,
+      apply: state.setToDate,
+      invalidate: invalidateRequest,
+      clear: clearSignedPeriod,
+    }),
+    downloadStatement: () => downloadCurrentStatement(state),
   };
+}
+
+function bindPeriodChange<Value extends string>(input: {
+  current: Value;
+  apply: (value: Value) => void;
+  invalidate: () => void;
+  clear: () => void;
+}): (next: Value) => void {
+  return (next) => {
+    if (next === input.current) {
+      return;
+    }
+    input.invalidate();
+    input.apply(next);
+    input.clear();
+  };
+}
+
+function downloadCurrentStatement(state: PreviewState): Promise<void> {
+  const serial = state.requestSerial.current;
+  return runDownload({
+    publicKey: state.publicKey,
+    kind: state.kind,
+    fromDate: state.fromDate,
+    toDate: state.toDate,
+    draft: state.draft,
+    isCurrent: () => state.requestSerial.current === serial,
+    onError: (failure) => {
+      state.setBlockingOperationId(blockingOperationIdFrom(failure));
+    },
+    setDraft: state.setDraft,
+    setPreview: state.setPreview,
+    setError: state.setError,
+    setBusy: state.setBusy,
+    setBlockingOperationId: state.setBlockingOperationId,
+  });
 }
