@@ -2,7 +2,7 @@ import React from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useDismissOnOutsideClick } from "@/shared/hooks";
-import type { AssetWithTrustline } from "@/entities/asset";
+import { isNativeCatalogXlm, type AssetWithTrustline } from "@/entities/asset";
 import { formatDepositBalance } from "../lib/format-deposit-balance";
 import { DepositAssetBadge } from "./deposit-asset-badge";
 
@@ -11,6 +11,45 @@ interface DepositAssetSelectProperties {
   selectedAsset: AssetWithTrustline | undefined;
   disabled?: boolean;
   onSelect: (asset: AssetWithTrustline) => void;
+}
+
+function DepositAssetOption({
+  option,
+  selected,
+  onSelect,
+}: {
+  option: AssetWithTrustline;
+  selected: boolean;
+  onSelect: (asset: AssetWithTrustline) => void;
+}) {
+  const balance = formatDepositBalance(option.balance);
+  return (
+    <button
+      type="button"
+      className="deposit-asset-option"
+      data-testid="deposit-asset-option"
+      data-asset={option.assetId.toUpperCase()}
+      data-active={selected ? "true" : undefined}
+      role="menuitemradio"
+      aria-checked={selected}
+      onClick={() => onSelect(option)}
+    >
+      <DepositAssetBadge asset={option} />
+      <span className="deposit-asset-option__text">
+        <span>{option.assetId.toUpperCase()}</span>
+        <span>{option.name}</span>
+      </span>
+      <span
+        className="deposit-asset-option__balance"
+        data-network-fee-balance={
+          isNativeCatalogXlm(option) ? balance : undefined
+        }
+      >
+        {balance}
+      </span>
+      {selected ? <Check size={16} strokeWidth={1.7} /> : undefined}
+    </button>
+  );
 }
 
 export function DepositAssetSelect({
@@ -68,32 +107,15 @@ export function DepositAssetSelect({
       {menu.isOpen ? (
         <span className="deposit-asset-menu" role="menu" aria-label={translate("selectAsset")}>
           {assets.map((option) => (
-            <button
-              type="button"
+            <DepositAssetOption
               key={option.assetId}
-              className="deposit-asset-option"
-              data-testid="deposit-asset-option"
-              data-asset={option.assetId.toUpperCase()}
-              data-active={option.assetId === selectedAsset?.assetId ? "true" : undefined}
-              role="menuitemradio"
-              aria-checked={option.assetId === selectedAsset?.assetId}
-              onClick={() => handleSelect(option)}
-            >
-              <DepositAssetBadge asset={option} />
-              <span className="deposit-asset-option__text">
-                <span>{option.assetId.toUpperCase()}</span>
-                <span>{option.name}</span>
-              </span>
-              <span className="deposit-asset-option__balance">
-                {formatDepositBalance(option.balance)}
-              </span>
-              {option.assetId === selectedAsset?.assetId ? (
-                <Check size={16} strokeWidth={1.7} />
-              ) : null}
-            </button>
+              option={option}
+              selected={option.assetId === selectedAsset?.assetId}
+              onSelect={handleSelect}
+            />
           ))}
         </span>
-      ) : null}
+      ) : undefined}
     </div>
   );
 }

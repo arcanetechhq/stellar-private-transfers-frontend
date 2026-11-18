@@ -52,7 +52,7 @@ function closeFromBackdrop(
 
 export function CustodianWizard(properties: CustodianWizardProperties) {
   const { t: translate } = useTranslation("custodian");
-  const wizard = useCustodianWizard();
+  const wizard = useCustodianWizard(properties.onClose);
   useCloseOnEscape(properties.onClose);
 
   return (

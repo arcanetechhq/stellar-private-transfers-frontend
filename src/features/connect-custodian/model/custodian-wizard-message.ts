@@ -10,6 +10,8 @@ const WIZARD_ERROR_KEYS: Record<FireblocksWizardErrorCode, string> = {
   "invalid-response": "errorInvalidResponse",
   "incomplete-list": "errorIncompleteList",
   "key-store": "errorKeyStore",
+  "walletconnect-unconfigured": "errorWalletConnectNotConfigured",
+  "catalog-mismatch": "errorCatalogMismatch",
 };
 
 const KEEP_PEM_CODES = new Set<FireblocksWizardErrorCode>([
@@ -28,7 +30,7 @@ const STORED_KEY_CODES = new Set<FireblocksWizardErrorCode>([
 
 export type WizardTranslate = (
   key: string,
-  options?: { status: number },
+  options?: { status?: number; detail?: string },
 ) => string;
 
 export function shouldClearPem(error: unknown): boolean {
@@ -51,6 +53,9 @@ export function messageForWizardError(
 ): string {
   if (!(error instanceof FireblocksWizardError)) {
     return translate("errorFireblocks");
+  }
+  if (error.code === "http" && error.detail) {
+    return translate("errorFireblocksDetail", { detail: error.detail });
   }
   if (error.code === "http") {
     return translate(WIZARD_ERROR_KEYS.http, { status: error.status ?? 0 });

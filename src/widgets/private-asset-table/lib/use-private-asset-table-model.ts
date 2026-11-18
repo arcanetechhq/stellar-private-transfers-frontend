@@ -1,15 +1,54 @@
 import { useMemo } from "react";
 import { useAppSelector } from "@/store";
-import { getAssetUsdPrice, useGetAssetsQuery } from "@/entities/asset";
+import {
+  filterPaymentCatalog,
+  getAssetUsdPrice,
+  useGetAssetsQuery,
+  type AssetDto,
+} from "@/entities/asset";
+import { selectNativeXlmPaymentCatalog } from "@/entities/wallet";
 import {
   selectFirstPrivateAddressWithFinalizedCoins,
   selectFinalizedAggregatesForPrivateAddress,
+  type AggregatedPrivateAssetRow,
 } from "@/entities/coin";
 import {
   selectDefaultNonce,
   selectPrivateAddressByNonce,
 } from "@/entities/private-address";
 import { getRequiredPrivacyPoolContractId } from "@/shared/stellar/stellar-network-environment";
+
+function withCatalogZeroRows(input: {
+  aggregates: AggregatedPrivateAssetRow[];
+  nativeXlmOnly: boolean;
+  paymentCatalog: readonly AssetDto[] | undefined;
+}): AggregatedPrivateAssetRow[] {
+  const poolContract = getRequiredPrivacyPoolContractId();
+  const allowed = input.nativeXlmOnly
+    ? new Set((input.paymentCatalog ?? []).map((asset) => asset.assetId))
+    : undefined;
+  const visibleAggregates = allowed
+    ? input.aggregates.filter((aggregate) => allowed.has(aggregate.assetId))
+    : input.aggregates;
+  const byAssetId = new Map(
+    visibleAggregates.map((aggregate) => [aggregate.assetId, aggregate]),
+  );
+  if (input.paymentCatalog) {
+    for (const asset of input.paymentCatalog) {
+      if (byAssetId.has(asset.assetId)) {
+        continue;
+      }
+      byAssetId.set(asset.assetId, {
+        assetId: asset.assetId,
+        poolContract,
+        totalAmountDisplay: 0,
+      });
+    }
+  }
+  return [...byAssetId.values()].toSorted((left, right) =>
+    left.assetId.localeCompare(right.assetId),
+  );
+}
 
 export function usePrivateAssetTableModel() {
   const defaultNonce = useAppSelector(selectDefaultNonce);
@@ -35,51 +74,44 @@ export function usePrivateAssetTableModel() {
   const aggregates = useFallbackAggregates
     ? fallbackAggregates
     : selectedAggregates;
+  const nativeXlmOnly = useAppSelector(selectNativeXlmPaymentCatalog);
   const { data: assetCatalog } = useGetAssetsQuery();
+  const paymentCatalog = useMemo(
+    () => filterPaymentCatalog(assetCatalog, nativeXlmOnly),
+    [assetCatalog, nativeXlmOnly],
+  );
 
-  const aggregatesWithZeroAssets = useMemo(() => {
-    const poolContract = getRequiredPrivacyPoolContractId();
-    const byAssetId = new Map(
-      aggregates.map((aggregate) => [aggregate.assetId, aggregate]),
-    );
-    if (assetCatalog) {
-      for (const asset of assetCatalog) {
-        if (byAssetId.has(asset.assetId)) {
-          continue;
-        }
-        byAssetId.set(asset.assetId, {
-          assetId: asset.assetId,
-          poolContract,
-          totalAmountDisplay: 0,
-        });
-      }
-    }
-    return [...byAssetId.values()].toSorted((left, right) =>
-      left.assetId.localeCompare(right.assetId),
-    );
-  }, [aggregates, assetCatalog]);
+  const aggregatesWithZeroAssets = useMemo(
+    () =>
+      withCatalogZeroRows({
+        aggregates,
+        nativeXlmOnly,
+        paymentCatalog,
+      }),
+    [aggregates, nativeXlmOnly, paymentCatalog],
+  );
 
   const assetMetaById = useMemo(() => {
     const map = new Map<string, { name: string; logoUrl: string | null }>();
-    if (!assetCatalog) {
+    if (!paymentCatalog) {
       return map;
     }
-    for (const dto of assetCatalog) {
+    for (const dto of paymentCatalog) {
       map.set(dto.assetId, { name: dto.name, logoUrl: dto.logoUrl });
     }
     return map;
-  }, [assetCatalog]);
+  }, [paymentCatalog]);
 
   const assetUsdPriceById = useMemo(() => {
     const map = new Map<string, number>();
-    if (!assetCatalog) {
+    if (!paymentCatalog) {
       return map;
     }
-    for (const dto of assetCatalog) {
+    for (const dto of paymentCatalog) {
       map.set(dto.assetId, getAssetUsdPrice(dto.assetId));
     }
     return map;
-  }, [assetCatalog]);
+  }, [paymentCatalog]);
 
   return {
     effectivePrivateAddress,

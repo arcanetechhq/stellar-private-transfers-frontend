@@ -3,6 +3,7 @@ import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit";
 import { StellarWalletsKit as StellarWalletsKitSdk } from "@creit-tech/stellar-wallets-kit/sdk";
 import {
   clearWallet,
+  setPaymentCatalog,
   setPublicKey,
   setWalletKitLoaded,
   setWalletProviderName,
@@ -25,6 +26,7 @@ export const syncWalletAddressFromKit = createAsyncThunk(
       }
       rememberKitActiveAddress(trimmed);
       dispatch(setPublicKey(trimmed));
+      dispatch(setPaymentCatalog("full"));
       const providerName = readWalletProviderNameFromKit();
       if (providerName) {
         dispatch(setWalletProviderName(providerName));
@@ -47,6 +49,7 @@ export const connectStellarWallet = createAsyncThunk(
       }
       rememberKitActiveAddress(address);
       dispatch(setPublicKey(address));
+      dispatch(setPaymentCatalog("full"));
       const providerName = readWalletProviderNameFromKit();
       if (providerName) {
         dispatch(setWalletProviderName(providerName));
@@ -66,6 +69,7 @@ export const connectStellarWalletModule = createAsyncThunk(
       const { address } = await StellarWalletsKitSdk.fetchAddress();
       rememberKitActiveAddress(address);
       dispatch(setPublicKey(address));
+      dispatch(setPaymentCatalog("full"));
       const providerName = readWalletProviderNameFromKit();
       if (providerName) {
         dispatch(setWalletProviderName(providerName));

@@ -29,11 +29,11 @@ export function useTransferFormSlice() {
     ConfidentialTransferSuccess | undefined
   >();
   const wallet = useWalletPrivateAddress();
-  const { assets, tokenUi, amountInputs, selectedAsset } = useTransferAssetModel(
-    wallet.privateAddressStpl1,
-    searchParameters.get("assetId"),
-    searchParameters.get("recipient") ?? "",
-  );
+  const { assets, tokenUi, amountInputs, selectedAsset } = useTransferAssetModel({
+    senderPrivateAddress: wallet.privateAddressStpl1,
+    assetIdFromUrl: searchParameters.get("assetId"),
+    recipientFromUrl: searchParameters.get("recipient") ?? "",
+  });
   const maxNoteStroops = useMemo(
     () =>
       getMaxWithdrawStroops({

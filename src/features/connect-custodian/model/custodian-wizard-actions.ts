@@ -85,14 +85,27 @@ export function selectWizardWallet(
   setModel((current) => ({
     ...current,
     selectedWalletKey: walletKey,
+    errorMessage: undefined,
   }));
 }
 
-export function beginCredentialSubmit(setModel: SetCustodianWizard): void {
+export function beginWizardSubmit(setModel: SetCustodianWizard): void {
   setModel((current) => ({
     ...current,
     isSubmitting: true,
     errorMessage: undefined,
+  }));
+}
+
+export function failWalletSession(input: {
+  setModel: SetCustodianWizard;
+  error: unknown;
+  translate: WizardTranslate;
+}): void {
+  input.setModel((current) => ({
+    ...current,
+    isSubmitting: false,
+    errorMessage: messageForWizardError(input.error, input.translate),
   }));
 }
 

@@ -1,8 +1,12 @@
 import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router";
 import { useAppSelector } from "@/store";
-import { selectWalletPublicKey } from "@/entities/wallet";
 import {
+  selectNativeXlmPaymentCatalog,
+  selectWalletPublicKey,
+} from "@/entities/wallet";
+import {
+  filterPaymentCatalog,
   useAssetsWithTrustlines,
   type AssetWithTrustline,
 } from "@/entities/asset";
@@ -22,6 +26,17 @@ export interface UseCreateDepositFormOptions {
   isSubmitting: boolean;
 }
 
+function useDepositAssets(
+  publicKey: string | undefined,
+): AssetWithTrustline[] {
+  const nativeXlmOnly = useAppSelector(selectNativeXlmPaymentCatalog);
+  const { assets: catalogAssets } = useAssetsWithTrustlines(publicKey);
+  return useMemo(
+    () => [...(filterPaymentCatalog(catalogAssets, nativeXlmOnly) ?? [])],
+    [catalogAssets, nativeXlmOnly],
+  );
+}
+
 export function useCreateDepositForm({
   isSubmitting,
 }: UseCreateDepositFormOptions) {
@@ -30,15 +45,13 @@ export function useCreateDepositForm({
   const publicKey = useAppSelector(selectWalletPublicKey);
   const { privateAddressStpl1, defaultNonce, actionsEnabled } =
     useWalletPrivateAddress();
-  const { assets } = useAssetsWithTrustlines(publicKey);
+  const assets = useDepositAssets(publicKey);
 
   const [showTokenPicker, setShowTokenPicker] = useState(false);
   const [selectedToken, setSelectedToken] = useState<
     AssetWithTrustline | undefined
   >();
   const [amount, setAmount] = useState("");
-  const selectedPrivateAddressNonce = defaultNonce;
-  const selectedPrivateAddress = privateAddressStpl1;
 
   const selectedAsset = resolveSelectedDepositAsset({
     selectedToken,
@@ -104,8 +117,8 @@ export function useCreateDepositForm({
     networkFee: NETWORK_FEE,
     receivedAmount,
     canSubmit,
-    selectedPrivateAddressNonce,
-    destinationPrivateAddressPreview: selectedPrivateAddress,
+    selectedPrivateAddressNonce: defaultNonce,
+    destinationPrivateAddressPreview: privateAddressStpl1,
     selectedAsset,
     numericAmount,
   };

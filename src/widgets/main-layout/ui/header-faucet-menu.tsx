@@ -1,10 +1,13 @@
-import { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef, type RefObject } from "react";
 import { Networks } from "@stellar/stellar-sdk";
 import { ArrowDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAppSelector } from "@/store";
-import { useAssetsWithTrustlines } from "@/entities/asset";
-import { selectWalletPublicKey } from "@/entities/wallet";
+import { filterPaymentCatalog, useAssetsWithTrustlines } from "@/entities/asset";
+import {
+  selectNativeXlmPaymentCatalog,
+  selectWalletPublicKey,
+} from "@/entities/wallet";
 import { STELLAR_NETWORK_PASSPHRASE } from "@/shared/stellar/horizon-server";
 import { HeaderFaucetAssetRow } from "./header-faucet-asset-row";
 
@@ -15,18 +18,24 @@ interface HeaderFaucetMenuProperties {
   onOpenChange: (open: boolean) => void;
 }
 
-export function HeaderFaucetMenu({
-  isOpen,
-  onOpenChange,
-}: HeaderFaucetMenuProperties) {
-  const { t: translate } = useTranslation("assets");
-  const publicKey = useAppSelector(selectWalletPublicKey);
-  const { assets } = useAssetsWithTrustlines(publicKey);
-  const menuReference = useRef<HTMLDivElement>(null);
+function useFaucetCatalog(publicKey: string | undefined) {
+  const nativeXlmOnly = useAppSelector(selectNativeXlmPaymentCatalog);
+  const { assets: catalogAssets } = useAssetsWithTrustlines(publicKey);
+  return useMemo(
+    () => [...(filterPaymentCatalog(catalogAssets, nativeXlmOnly) ?? [])],
+    [catalogAssets, nativeXlmOnly],
+  );
+}
 
+function useDismissWhenOpen(input: {
+  isOpen: boolean;
+  menuReference: RefObject<HTMLDivElement | null>;
+  onOpenChange: (open: boolean) => void;
+}): void {
+  const { isOpen, menuReference, onOpenChange } = input;
   useEffect(() => {
     if (!isOpen) {
-      return undefined;
+      return;
     }
 
     function handlePointerDown(event: PointerEvent) {
@@ -48,7 +57,18 @@ export function HeaderFaucetMenu({
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, onOpenChange]);
+  }, [isOpen, menuReference, onOpenChange]);
+}
+
+export function HeaderFaucetMenu({
+  isOpen,
+  onOpenChange,
+}: HeaderFaucetMenuProperties) {
+  const { t: translate } = useTranslation("assets");
+  const publicKey = useAppSelector(selectWalletPublicKey);
+  const assets = useFaucetCatalog(publicKey);
+  const menuReference = useRef<HTMLDivElement>(null);
+  useDismissWhenOpen({ isOpen, menuReference, onOpenChange });
 
   if (!isTestnet) {
     return;
@@ -102,7 +122,7 @@ export function HeaderFaucetMenu({
             )}
           </div>
         </div>
-      ) : null}
+      ) : undefined}
     </div>
   );
 }

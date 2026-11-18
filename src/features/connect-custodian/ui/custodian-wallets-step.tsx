@@ -40,6 +40,7 @@ export function CustodianWalletsStep(properties: CustodianWalletsStepProperties)
                   }
                   data-testid="custodian-wallet"
                   aria-pressed={selected}
+                  disabled={model.isSubmitting}
                   onClick={() => {
                     actions.selectWallet(walletKey);
                   }}
@@ -55,7 +56,15 @@ export function CustodianWalletsStep(properties: CustodianWalletsStepProperties)
           })}
         </ul>
       )}
-      {selectedKey ? (
+      {model.isSubmitting ? (
+        <p data-testid="custodian-session-opening">{translate("sessionOpening")}</p>
+      ) : undefined}
+      {model.errorMessage ? (
+        <p className="custodian-wizard__error" role="alert" data-testid="custodian-error">
+          {model.errorMessage}
+        </p>
+      ) : undefined}
+      {selectedKey && !model.isSubmitting && !model.errorMessage ? (
         <p className="custodian-wizard__selected" data-testid="custodian-wallet-selected">
           {translate("walletSelected")}
         </p>
@@ -65,6 +74,7 @@ export function CustodianWalletsStep(properties: CustodianWalletsStepProperties)
           type="button"
           className="custodian-wizard__secondary"
           onClick={actions.goBack}
+          disabled={model.isSubmitting}
         >
           {translate("back")}
         </button>

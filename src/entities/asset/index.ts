@@ -16,6 +16,10 @@ export {
 } from "./api/asset-api";
 
 export { buildPrivateTransferAssets } from "./lib/private-asset-list";
+export {
+  filterPaymentCatalog,
+  isNativeCatalogXlm,
+} from "./lib/payment-catalog";
 export { getAssetUsdPrice, initializeAssetUsdPrices } from "./lib/asset-usd-price";
 
 export {

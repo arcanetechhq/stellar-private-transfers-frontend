@@ -18,8 +18,9 @@
   "close": "Close",
   "walletsTitle": "Stellar asset wallets",
   "walletsEmpty": "No Stellar asset wallets were returned.",
-  "walletsHint": "Only addresses that start with G are listed. Selecting one keeps Arcane on this screen.",
+  "walletsHint": "Only addresses that start with G are listed. Choosing XLM_TEST opens Arcane after Fireblocks approves the session. Other wallets stay on this screen.",
   "walletSelected": "Selected. Arcane stays on this screen.",
+  "sessionOpening": "Opening the Stellar session.",
   "availableLabel": "Available",
   "errorMissingApiKey": "Enter the Fireblocks API key.",
   "errorMissingPem": "Paste the Fireblocks private key.",
@@ -29,5 +30,8 @@
   "errorInvalidResponse": "Fireblocks returned a response Arcane could not read. The payment app stayed closed.",
   "errorIncompleteList": "Fireblocks did not finish the asset wallet list. The payment app stayed closed.",
   "errorKeyStore": "This browser could not store the signing key. The payment app stayed closed.",
-  "errorFireblocks": "Fireblocks could not be reached. The payment app stayed closed."
+  "errorFireblocks": "Fireblocks could not be reached. The payment app stayed closed.",
+  "errorFireblocksDetail": "{{detail}} The payment app stayed closed.",
+  "errorWalletConnectNotConfigured": "WalletConnect is not configured.",
+  "errorCatalogMismatch": "XLM_TEST does not match catalog XLM with no issuer. The payment app stayed closed."
 }

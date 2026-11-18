@@ -42,6 +42,12 @@ export default defineConfig({
     fs: {
       allow: [projectRoot, ...Object.values(zkSdkAlias)],
     },
+    proxy: {
+      "/api/custodian": {
+        target: "http://127.0.0.1:5195",
+        changeOrigin: true,
+      },
+    },
   },
   resolve: {
     dedupe: ["buffer"],

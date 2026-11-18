@@ -2,8 +2,10 @@ import { useMemo } from "react";
 import { useAppSelector } from "@/store";
 import {
   buildPrivateTransferAssets,
+  filterPaymentCatalog,
   useGetAssetsQuery,
 } from "@/entities/asset";
+import { selectNativeXlmPaymentCatalog } from "@/entities/wallet";
 import {
   selectFinalizedAggregatesForPrivateAddress,
   withZeroAmountPrivateAssetRows,
@@ -19,13 +21,18 @@ export function useWithdrawalPrivateAssets(assetIdFromUrl: string | null) {
       withdrawalSender.senderPrivateAddress || undefined,
     ),
   );
+  const nativeXlmOnly = useAppSelector(selectNativeXlmPaymentCatalog);
   const { data: assetCatalog } = useGetAssetsQuery();
+  const catalogList = useMemo(() => {
+    const paymentCatalog = filterPaymentCatalog(assetCatalog, nativeXlmOnly);
+    return paymentCatalog === undefined ? undefined : [...paymentCatalog];
+  }, [assetCatalog, nativeXlmOnly]);
   const aggregatesWithZeroAssets = useMemo(() => {
-    return withZeroAmountPrivateAssetRows(aggregates, assetCatalog);
-  }, [aggregates, assetCatalog]);
+    return withZeroAmountPrivateAssetRows(aggregates, catalogList);
+  }, [aggregates, catalogList]);
   const privateAssets = useMemo(
-    () => buildPrivateTransferAssets(aggregatesWithZeroAssets, assetCatalog),
-    [aggregatesWithZeroAssets, assetCatalog],
+    () => buildPrivateTransferAssets(aggregatesWithZeroAssets, catalogList),
+    [aggregatesWithZeroAssets, catalogList],
   );
   const tokenUi = useSelectedPrivateToken(privateAssets, assetIdFromUrl);
   return { withdrawalSender, privateAssets, tokenUi };
