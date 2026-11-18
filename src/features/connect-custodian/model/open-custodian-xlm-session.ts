@@ -1,6 +1,7 @@
 import type { AppDispatch } from "@/store";
 import { assetApi, isNativeCatalogXlm } from "@/entities/asset";
 import {
+  FIREBLOCKS_WALLET_PROVIDER,
   setPaymentCatalog,
   setPublicKey,
   setWalletProviderName,
@@ -8,11 +9,11 @@ import {
 import { rememberKitActiveAddress } from "@/shared/lib/wallet/remember-kit-active-address";
 import { approveWalletConnectSession } from "../api/fireblocks-web3-connection";
 import type { StellarAssetWallet } from "../api/fireblocks-asset-wallets";
+import { bindSessionToPaymentAddress } from "./custodian-signing-session";
 import { FireblocksWizardError } from "./fireblocks-wizard-error";
 import { readFireblocksSession } from "./fireblocks-session";
 import { readSigningKey } from "./fireblocks-signing-key";
 import {
-  FIREBLOCKS_PROVIDER_NAME,
   readReownProjectId,
   startSilentStellarSession,
 } from "./silent-stellar-session";
@@ -61,9 +62,10 @@ async function assertNativeXlmCatalog(dispatch: AppDispatch): Promise<void> {
 }
 
 function publishCustodianAddress(dispatch: AppDispatch, address: string): void {
+  bindSessionToPaymentAddress(address);
   rememberKitActiveAddress(address);
   dispatch(setPublicKey(address));
-  dispatch(setWalletProviderName(FIREBLOCKS_PROVIDER_NAME));
+  dispatch(setWalletProviderName(FIREBLOCKS_WALLET_PROVIDER));
   dispatch(setPaymentCatalog("native-xlm"));
 }
 

@@ -5,15 +5,15 @@ import {
   WalletConnectModule,
   WalletConnectTargetChain,
 } from "@creit-tech/stellar-wallets-kit/modules/wallet-connect";
+import { FIREBLOCKS_WALLET_PROVIDER } from "@/entities/wallet";
 import { readClientEnvironment } from "@/shared/lib/privacy-sdk/read-client-environment";
+import { openCustodianSigningSession } from "./custodian-signing-session";
 import { FireblocksWizardError } from "./fireblocks-wizard-error";
 
 const REOWN_PROJECT_ID = "VITE_REOWN_PROJECT_ID";
 const SIGN_CLIENT_WAIT_MS = 100;
 const SIGN_CLIENT_ATTEMPTS = 50;
 const SESSION_METADATA_NAME = "Arcane private payments";
-
-export const FIREBLOCKS_PROVIDER_NAME = "Fireblocks";
 
 type UriModal = {
   open: (options?: { uri?: string }) => void;
@@ -110,7 +110,11 @@ class SilentStellarWalletConnect extends WalletConnectModule {
       metadata: sessionMetadata(),
       allowedChains: [WalletConnectTargetChain.TESTNET],
     });
-    this.productName = FIREBLOCKS_PROVIDER_NAME;
+    this.productName = FIREBLOCKS_WALLET_PROVIDER;
+  }
+
+  async getAddress(): Promise<{ address: string }> {
+    return openCustodianSigningSession(this);
   }
 
   async getNetwork(): Promise<{ network: string; networkPassphrase: string }> {

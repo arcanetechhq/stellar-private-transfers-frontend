@@ -2,6 +2,8 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 export type PaymentCatalogMode = "full" | "native-xlm";
 
+export const FIREBLOCKS_WALLET_PROVIDER = "Fireblocks";
+
 export interface WalletState {
   publicKey: string | undefined;
   providerName: string | undefined;

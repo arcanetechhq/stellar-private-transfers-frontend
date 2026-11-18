@@ -1,4 +1,5 @@
 export {
+  FIREBLOCKS_WALLET_PROVIDER,
   clearWallet,
   selectIsWalletKitLoaded,
   selectIsWalletConnected,
