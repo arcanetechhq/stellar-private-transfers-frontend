@@ -1,6 +1,8 @@
+import React from "react";
 import { Loader2, RefreshCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Arcn from "@/shared/assets/logo-arcn";
+import { CustodianConnectSection } from "@/features/connect-custodian";
 import { FREIGHTER_ICON_URL } from "@/features/stellar-wallet-connect";
 import { ArcaneShaderGradient } from "./arcane-shader-gradient";
 import "./arcane-connect-screen.css";
@@ -89,7 +91,7 @@ function ArcaneConnectPrimaryAction(properties: {
         ? { "aria-live": "polite" as const, role: "status" as const }
         : {})}
     >
-      {phase === "prompt" ? <FreighterButtonIcon /> : null}
+      {phase === "prompt" && <FreighterButtonIcon />}
       <span>
         {isBusyPhase ? translate(resolveStatusTitleKey(phase)) : promptLabel}
       </span>
@@ -100,7 +102,7 @@ function ArcaneConnectPrimaryAction(properties: {
           className="animate-spin"
           aria-hidden="true"
         />
-      ) : null}
+      ) : undefined}
     </button>
   );
 }
@@ -196,6 +198,7 @@ export function ArcaneConnectScreen({
               onConnectWallet={onConnectWallet}
             />
           )}
+          {(phase === "prompt" || isErrorPhase) && <CustodianConnectSection />}
         </div>
 
         <aside className="arcane-connect-visual" aria-hidden="true">

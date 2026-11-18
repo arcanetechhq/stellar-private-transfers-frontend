@@ -19,6 +19,7 @@ import enDataExport from "./locales/en/dataExport.json";
 import enKyt from "./locales/en/kyt.json";
 import enPendingClaims from "./locales/en/pending-claims.json";
 import enRelay from "./locales/en/relay.json";
+import enCustodian from "./locales/en/custodian.json";
 
 const NAMESPACES = [
   "common",
@@ -40,6 +41,7 @@ const NAMESPACES = [
   "kyt",
   "pendingClaims",
   "relay",
+  "custodian",
 ] as const;
 
 i18n.use(initReactI18next).init({
@@ -69,6 +71,7 @@ i18n.use(initReactI18next).init({
       kyt: enKyt,
       pendingClaims: enPendingClaims,
       relay: enRelay,
+      custodian: enCustodian,
     },
   },
 });
