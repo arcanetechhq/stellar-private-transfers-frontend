@@ -15,6 +15,7 @@ export {
 } from "./model/private-address-selectors";
 export type { PrivateAddressRootState } from "./model/private-address-selectors";
 export {
+  clearPrivateAddressState,
   loadPrivateAddressState,
   readPrivateAddressRecordFromStorage,
 } from "./lib/persist-private-address";

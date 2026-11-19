@@ -10,9 +10,16 @@ import { rememberKitActiveAddress } from "@/shared/lib/wallet/remember-kit-activ
 import { approveWalletConnectSession } from "../api/fireblocks-web3-connection";
 import type { StellarAssetWallet } from "../api/fireblocks-asset-wallets";
 import { bindSessionToPaymentAddress } from "./custodian-signing-session";
+import {
+  beginCustodianIntent,
+  isCurrentCustodianIntent,
+} from "./custodian-intent";
+import { closeCustodianWalletConnectTopic } from "./close-wallet-connect-session";
+import { dropPreviousCustodianPrivateData } from "./drop-previous-custodian-private-data";
 import { FireblocksWizardError } from "./fireblocks-wizard-error";
 import { readFireblocksSession } from "./fireblocks-session";
 import { readSigningKey } from "./fireblocks-signing-key";
+import { saveSelectedFireblocksAsset } from "./selected-fireblocks-asset";
 import {
   readReownProjectId,
   startSilentStellarSession,
@@ -61,12 +68,30 @@ async function assertNativeXlmCatalog(dispatch: AppDispatch): Promise<void> {
   }
 }
 
-function publishCustodianAddress(dispatch: AppDispatch, address: string): void {
+function publishCustodianAddress(
+  dispatch: AppDispatch,
+  wallet: StellarAssetWallet,
+): void {
+  const address = wallet.address.trim();
   bindSessionToPaymentAddress(address);
   rememberKitActiveAddress(address);
   dispatch(setPublicKey(address));
   dispatch(setWalletProviderName(FIREBLOCKS_WALLET_PROVIDER));
   dispatch(setPaymentCatalog("native-xlm"));
+  saveSelectedFireblocksAsset(wallet);
+}
+
+async function approveSilentSession(input: {
+  wallet: StellarAssetWallet;
+  projectId: string;
+}): Promise<string> {
+  const session = startSilentStellarSession(input.projectId);
+  const walletConnectUri = await session.walletConnectUri;
+  await approveWalletConnectSession({
+    vaultId: input.wallet.vaultId,
+    walletConnectUri,
+  });
+  return session.approved;
 }
 
 export async function openCustodianXlmSession(input: {
@@ -76,15 +101,31 @@ export async function openCustodianXlmSession(input: {
   if (!isFireblocksTestXlm(input.wallet)) {
     return;
   }
+  const token = beginCustodianIntent();
   const projectId = requireProjectId();
   await requireStoredCustodian();
-  const session = startSilentStellarSession(projectId);
-  const walletConnectUri = await session.walletConnectUri;
-  await approveWalletConnectSession({
-    vaultId: input.wallet.vaultId,
-    walletConnectUri,
+  await dropPreviousCustodianPrivateData({
+    dispatch: input.dispatch,
+    nextAddress: input.wallet.address,
   });
-  await session.approved;
+  if (!isCurrentCustodianIntent(token)) {
+    return;
+  }
+  const topic = await approveSilentSession({ wallet: input.wallet, projectId });
+  if (await abandonStaleSession(token, topic)) {
+    return;
+  }
   await assertNativeXlmCatalog(input.dispatch);
-  publishCustodianAddress(input.dispatch, input.wallet.address);
+  if (await abandonStaleSession(token, topic)) {
+    return;
+  }
+  publishCustodianAddress(input.dispatch, input.wallet);
+}
+
+async function abandonStaleSession(token: number, topic: string): Promise<boolean> {
+  if (isCurrentCustodianIntent(token)) {
+    return false;
+  }
+  await closeCustodianWalletConnectTopic(topic);
+  return true;
 }

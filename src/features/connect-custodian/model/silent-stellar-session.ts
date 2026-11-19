@@ -28,7 +28,7 @@ type Deferred<Value> = {
 
 export type SilentStellarSession = {
   walletConnectUri: Promise<string>;
-  approved: Promise<void>;
+  approved: Promise<string>;
 };
 
 export function readReownProjectId(): string | undefined {
@@ -46,10 +46,6 @@ function defer<Value>(): Deferred<Value> {
     throw new FireblocksWizardError("invalid-response");
   }
   return { promise, resolve, reject };
-}
-
-function settleAddress(): void {
-  return;
 }
 
 function ignoreRejection(): void {
@@ -113,7 +109,7 @@ class SilentStellarWalletConnect extends WalletConnectModule {
     this.productName = FIREBLOCKS_WALLET_PROVIDER;
   }
 
-  async getAddress(): Promise<{ address: string }> {
+  async getAddress(): Promise<{ address: string; topic: string }> {
     return openCustodianSigningSession(this);
   }
 
@@ -154,7 +150,7 @@ export function startSilentStellarSession(
   installWalletConnectModule(module);
   const approved = waitForSignClient(module)
     .then(() => module.getAddress())
-    .then(settleAddress)
+    .then((result) => result.topic)
     .catch((error: unknown) => {
       const wrapped = wrapSessionError(error);
       uriDeferred.reject(wrapped);

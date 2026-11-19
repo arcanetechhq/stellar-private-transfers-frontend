@@ -12,6 +12,10 @@ import {
   type WalletState,
 } from "@/entities/wallet";
 import { rememberKitActiveAddress } from "@/shared/lib/wallet/remember-kit-active-address";
+import {
+  leaveFireblocksBeforeOtherWallet,
+  shouldLeaveFireblocksCustodian,
+} from "../lib/leave-fireblocks-custodian";
 import { FREIGHTER_WALLET_ID } from "../lib/wallet-options";
 import { readWalletProviderNameFromKit } from "../lib/read-wallet-provider-name";
 
@@ -71,12 +75,13 @@ export const syncWalletAddressFromKit = createAsyncThunk(
 
 export const connectStellarWallet = createAsyncThunk(
   "wallet/connectStellarWallet",
-  async (_argument: undefined, { dispatch }) => {
+  async (_argument: undefined, { dispatch, getState }) => {
     try {
       const { address } = await StellarWalletsKit.authModal();
       if (!address) {
         return;
       }
+      await leaveFireblocksBeforeOtherWallet({ dispatch, getState });
       rememberKitActiveAddress(address);
       dispatch(setPublicKey(address));
       dispatch(setPaymentCatalog("full"));
@@ -93,10 +98,11 @@ export const connectStellarWallet = createAsyncThunk(
 
 export const connectStellarWalletModule = createAsyncThunk(
   "wallet/connectStellarWalletModule",
-  async (moduleId: string, { dispatch }) => {
+  async (moduleId: string, { dispatch, getState }) => {
     try {
       StellarWalletsKitSdk.setWallet(moduleId);
       const { address } = await StellarWalletsKitSdk.fetchAddress();
+      await leaveFireblocksBeforeOtherWallet({ dispatch, getState });
       rememberKitActiveAddress(address);
       dispatch(setPublicKey(address));
       dispatch(setPaymentCatalog("full"));
@@ -113,8 +119,16 @@ export const connectStellarWalletModule = createAsyncThunk(
 
 export const disconnectStellarWallet = createAsyncThunk(
   "wallet/disconnectStellarWallet",
-  async (_argument: undefined, { dispatch }) => {
-    await StellarWalletsKit.disconnect();
+  async (_argument: undefined, { dispatch, getState }) => {
+    const leavingFireblocks = shouldLeaveFireblocksCustodian(getState());
+    await leaveFireblocksBeforeOtherWallet({ dispatch, getState });
+    try {
+      await StellarWalletsKit.disconnect();
+    } catch (error) {
+      if (!leavingFireblocks) {
+        throw error;
+      }
+    }
     dispatch(clearWallet());
   },
 );

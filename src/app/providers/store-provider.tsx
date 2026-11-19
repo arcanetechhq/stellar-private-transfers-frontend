@@ -1,12 +1,29 @@
-import { type ReactNode, useEffect } from "react";
+import React, { type ReactNode, useEffect } from "react";
 import { Provider } from "react-redux";
-import { store, useAppDispatch } from "@/store";
+import { setWalletKitLoaded } from "@/entities/wallet";
+import { installCustodianSessionPort } from "@/features/connect-custodian";
 import { syncWalletAddressFromKit } from "@/features/stellar-wallet-connect";
+import { custodianSessionPort } from "@/shared/lib/wallet/custodian-session-port";
+import { store, useAppDispatch, type AppDispatch } from "@/store";
+
+installCustodianSessionPort();
+
+async function restoreOrSyncWallet(dispatch: AppDispatch): Promise<void> {
+  if (!custodianSessionPort().hasSelection()) {
+    await dispatch(syncWalletAddressFromKit());
+    return;
+  }
+  dispatch(setWalletKitLoaded());
+  const outcome = await custodianSessionPort().resume(dispatch);
+  if (outcome === "absent") {
+    await dispatch(syncWalletAddressFromKit());
+  }
+}
 
 function StellarWalletSync() {
   const dispatch = useAppDispatch();
   useEffect(() => {
-    void dispatch(syncWalletAddressFromKit());
+    void restoreOrSyncWallet(dispatch);
   }, [dispatch]);
   return <></>;
 }

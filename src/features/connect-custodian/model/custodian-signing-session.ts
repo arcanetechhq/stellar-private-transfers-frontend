@@ -54,7 +54,7 @@ function rememberApprovedAccounts(session: ApprovedSession): string | undefined 
 async function acceptSigningSession(
   module: WalletConnectModule,
   approval: () => Promise<ApprovedSession>,
-): Promise<{ address: string }> {
+): Promise<{ address: string; topic: string }> {
   try {
     const session = await approval();
     const address = rememberApprovedAccounts(session);
@@ -62,7 +62,7 @@ async function acceptSigningSession(
     if (!address) {
       throw new FireblocksWizardError("invalid-response");
     }
-    return { address };
+    return { address, topic: session.topic };
   } catch (error) {
     module.modal.close();
     throw error;
@@ -71,7 +71,7 @@ async function acceptSigningSession(
 
 export async function openCustodianSigningSession(
   module: WalletConnectModule,
-): Promise<{ address: string }> {
+): Promise<{ address: string; topic: string }> {
   await module.runChecks();
   assertSupportedNetwork();
   const chains = sessionChains(module);

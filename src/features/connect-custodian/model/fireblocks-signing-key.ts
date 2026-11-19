@@ -109,6 +109,17 @@ export async function storeSigningKey(signingKey: CryptoKey): Promise<void> {
   });
 }
 
+export async function deleteSigningKey(): Promise<void> {
+  try {
+    await withSigningKeyDatabase("readwrite", async (store, transaction) => {
+      store.delete(SIGNING_KEY_ID);
+      await transactionDone(transaction);
+    });
+  } catch {
+    return;
+  }
+}
+
 export async function readSigningKey(): Promise<CryptoKey | undefined> {
   return withSigningKeyDatabase("readonly", async (store) => {
     const stored = await requestToPromise(store.get(SIGNING_KEY_ID));

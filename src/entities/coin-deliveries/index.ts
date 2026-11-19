@@ -11,6 +11,7 @@ export {
 } from "./model/coin-delivery";
 
 export {
+  clearSeenTags,
   loadSeenTags,
   saveSeenTags,
   type SeenTagsByAssetId,

@@ -76,6 +76,14 @@ export function loadPrivateAddressState(
   }
 }
 
+export function clearPrivateAddressState(publicKey: string): void {
+  try {
+    localStorage.removeItem(storageKeyForWallet(publicKey));
+  } catch {
+    return;
+  }
+}
+
 export function readPrivateAddressRecordFromStorage(
   publicKey: string,
   nonce: string,

@@ -45,3 +45,11 @@ function safeSetItem(key: string, value: string): boolean {
 export function saveSeenTags(publicKey: string, tags: SeenTagsByAssetId): void {
   void safeSetItem(storageKey(publicKey), JSON.stringify(tags));
 }
+
+export function clearSeenTags(publicKey: string): void {
+  try {
+    localStorage.removeItem(storageKey(publicKey));
+  } catch {
+    return;
+  }
+}
