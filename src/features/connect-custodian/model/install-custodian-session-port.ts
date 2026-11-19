@@ -1,7 +1,7 @@
 import {
   registerCustodianSessionPort,
   type CustodianSessionPort,
-} from "@/shared/lib/wallet/custodian-session-port";
+} from "@/entities/wallet";
 import { leaveCustodianSession } from "./leave-custodian-session";
 import { resumeCustodianSession } from "./resume-custodian-session";
 import { readSelectedFireblocksAsset } from "./selected-fireblocks-asset";

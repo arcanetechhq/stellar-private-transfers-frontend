@@ -18,7 +18,7 @@ import { closeCustodianWalletConnectTopic } from "./close-wallet-connect-session
 import { dropPreviousCustodianPrivateData } from "./drop-previous-custodian-private-data";
 import { FireblocksWizardError } from "./fireblocks-wizard-error";
 import { readFireblocksSession } from "./fireblocks-session";
-import { readSigningKey } from "./fireblocks-signing-key";
+import { readSigningKey, storeSigningKey } from "./fireblocks-signing-key";
 import { saveSelectedFireblocksAsset } from "./selected-fireblocks-asset";
 import {
   readReownProjectId,
@@ -94,6 +94,36 @@ async function approveSilentSession(input: {
   return session.approved;
 }
 
+async function restoreReplacedSigningKey(
+  replacedPrevious: boolean,
+  signingKey: CryptoKey | undefined,
+): Promise<void> {
+  if (!replacedPrevious || signingKey === undefined) {
+    return;
+  }
+  await storeSigningKey(signingKey);
+}
+
+async function approveOpenedSession(input: {
+  token: number;
+  projectId: string;
+  wallet: StellarAssetWallet;
+  dispatch: AppDispatch;
+}): Promise<void> {
+  const topic = await approveSilentSession({
+    wallet: input.wallet,
+    projectId: input.projectId,
+  });
+  if (await abandonStaleSession(input.token, topic)) {
+    return;
+  }
+  await assertNativeXlmCatalog(input.dispatch);
+  if (await abandonStaleSession(input.token, topic)) {
+    return;
+  }
+  publishCustodianAddress(input.dispatch, input.wallet);
+}
+
 export async function openCustodianXlmSession(input: {
   wallet: StellarAssetWallet;
   dispatch: AppDispatch;
@@ -104,22 +134,27 @@ export async function openCustodianXlmSession(input: {
   const token = beginCustodianIntent();
   const projectId = requireProjectId();
   await requireStoredCustodian();
-  await dropPreviousCustodianPrivateData({
-    dispatch: input.dispatch,
-    nextAddress: input.wallet.address,
-  });
-  if (!isCurrentCustodianIntent(token)) {
-    return;
+  const retainedSigningKey = await readSigningKey();
+  let replacedPrevious = false;
+  try {
+    replacedPrevious = await dropPreviousCustodianPrivateData({
+      dispatch: input.dispatch,
+      nextAddress: input.wallet.address,
+    });
+    if (!isCurrentCustodianIntent(token)) {
+      return;
+    }
+    await approveOpenedSession({
+      token,
+      projectId,
+      wallet: input.wallet,
+      dispatch: input.dispatch,
+    });
+  } finally {
+    if (isCurrentCustodianIntent(token)) {
+      await restoreReplacedSigningKey(replacedPrevious, retainedSigningKey);
+    }
   }
-  const topic = await approveSilentSession({ wallet: input.wallet, projectId });
-  if (await abandonStaleSession(token, topic)) {
-    return;
-  }
-  await assertNativeXlmCatalog(input.dispatch);
-  if (await abandonStaleSession(token, topic)) {
-    return;
-  }
-  publishCustodianAddress(input.dispatch, input.wallet);
 }
 
 async function abandonStaleSession(token: number, topic: string): Promise<boolean> {

@@ -3,7 +3,7 @@ import { Provider } from "react-redux";
 import { setWalletKitLoaded } from "@/entities/wallet";
 import { installCustodianSessionPort } from "@/features/connect-custodian";
 import { syncWalletAddressFromKit } from "@/features/stellar-wallet-connect";
-import { custodianSessionPort } from "@/shared/lib/wallet/custodian-session-port";
+import { custodianSessionPort } from "@/entities/wallet";
 import { store, useAppDispatch, type AppDispatch } from "@/store";
 
 installCustodianSessionPort();

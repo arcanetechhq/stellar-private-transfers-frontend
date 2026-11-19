@@ -1,10 +1,12 @@
 import {
+  clearWallet,
   FIREBLOCKS_WALLET_PROVIDER,
   selectWalletProviderName,
   selectWalletPublicKey,
+  type CustodianResumeResult,
 } from "@/entities/wallet";
-import type { CustodianResumeResult } from "@/shared/lib/wallet/custodian-session-port";
 import { store, type AppDispatch } from "@/store";
+import { publishCustodianResumeFailure } from "./custodian-resume-failure";
 import {
   isFireblocksTestXlm,
   openCustodianXlmSession,
@@ -26,12 +28,18 @@ export async function resumeCustodianSession(
   if (!wallet || !isFireblocksTestXlm(wallet)) {
     return "absent";
   }
+  const address = wallet.address.trim();
   try {
     await openCustodianXlmSession({ wallet, dispatch });
-  } catch {
+  } catch (error: unknown) {
+    if (restoredFireblocksAddress() === address) {
+      return "restored";
+    }
+    publishCustodianResumeFailure(error);
+    if (selectWalletPublicKey(store.getState())?.trim() === address) {
+      dispatch(clearWallet());
+    }
     return "failed";
   }
-  return restoredFireblocksAddress() === wallet.address.trim()
-    ? "restored"
-    : "failed";
+  return restoredFireblocksAddress() === address ? "restored" : "failed";
 }

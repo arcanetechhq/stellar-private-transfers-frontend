@@ -3,7 +3,7 @@ import {
   FIREBLOCKS_WALLET_PROVIDER,
   type WalletState,
 } from "@/entities/wallet";
-import { custodianSessionPort } from "@/shared/lib/wallet/custodian-session-port";
+import { custodianSessionPort } from "@/entities/wallet";
 
 function readWallet(state: unknown): WalletState | undefined {
   if (!state || typeof state !== "object" || !("wallet" in state)) {

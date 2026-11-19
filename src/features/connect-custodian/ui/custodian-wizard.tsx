@@ -11,6 +11,7 @@ import { CustodianWalletsStep } from "./custodian-wallets-step";
 
 type CustodianWizardProperties = {
   onClose: () => void;
+  resumeError?: unknown;
 };
 
 function useCloseOnEscape(onClose: () => void): void {
@@ -52,7 +53,7 @@ function closeFromBackdrop(
 
 export function CustodianWizard(properties: CustodianWizardProperties) {
   const { t: translate } = useTranslation("custodian");
-  const wizard = useCustodianWizard(properties.onClose);
+  const wizard = useCustodianWizard(properties.onClose, properties.resumeError);
   useCloseOnEscape(properties.onClose);
 
   return (

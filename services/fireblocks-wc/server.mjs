@@ -5,6 +5,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const PORT = Number(process.env.CUSTODIAN_WC_PORT ?? 5195);
+const HOST = "0.0.0.0";
 const FIREBLOCKS_ORIGIN = (
   process.env.FIREBLOCKS_BASE_URL ?? "https://sandbox-api.fireblocks.io"
 )
@@ -253,8 +254,8 @@ const server = createServer(async (request, response) => {
   }
 });
 
-server.listen(PORT, "127.0.0.1", () => {
+server.listen(PORT, HOST, () => {
   process.stdout.write(
-    `custodian walletconnect listening on http://127.0.0.1:${PORT}\n`,
+    `custodian walletconnect listening on http://${HOST}:${PORT}\n`,
   );
 });

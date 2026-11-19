@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, type AppDispatch } from "@/store";
 import {
@@ -6,6 +6,7 @@ import {
   type StellarAssetWallet,
 } from "../api/fireblocks-asset-wallets";
 import {
+  applyResumeFailure,
   beginWizardSubmit,
   changeWizardApiKey,
   changeWizardEnvironment,
@@ -16,6 +17,7 @@ import {
   selectWizardWallet,
   showFireblocksCredentials,
   showPreviousWizardStep,
+  wizardModelForResumeFailure,
 } from "./custodian-wizard-actions";
 import type { WizardTranslate } from "./custodian-wizard-message";
 import { FireblocksWizardError } from "./fireblocks-wizard-error";
@@ -78,22 +80,32 @@ function startXlmSession(input: {
     });
 }
 
-export function useCustodianWizard(onConnected: () => void): {
-  model: CustodianWizardModel;
-  actions: CustodianWizardActions;
-} {
-  const { t: translate } = useTranslation("custodian");
-  const dispatch = useAppDispatch();
-  const mounted = useRef(true);
-  const running = useRef(false);
-  const [model, setModel] = useState(INITIAL_CUSTODIAN_WIZARD);
+function useApplyResumeFailure(input: {
+  resumeError: unknown;
+  setModel: SetCustodianWizard;
+  translate: WizardTranslate;
+}): void {
+  const { resumeError, setModel, translate } = input;
   useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
-  const actions: CustodianWizardActions = {
+    if (resumeError === undefined) {
+      return;
+    }
+    applyResumeFailure({ setModel, error: resumeError, translate });
+  }, [resumeError, setModel, translate]);
+}
+
+function wizardActions(input: {
+  model: CustodianWizardModel;
+  setModel: SetCustodianWizard;
+  dispatch: AppDispatch;
+  translate: WizardTranslate;
+  onConnected: () => void;
+  mounted: { current: boolean };
+  running: { current: boolean };
+}): CustodianWizardActions {
+  const { model, setModel, dispatch, translate, onConnected, mounted, running } =
+    input;
+  return {
     chooseFireblocks: () => {
       showFireblocksCredentials(setModel);
     },
@@ -110,23 +122,17 @@ export function useCustodianWizard(onConnected: () => void): {
       changeWizardEnvironment(setModel, environmentId);
     },
     submitCredentials: () => {
-      const snapshot = {
+      beginWizardSubmit(setModel);
+      void submitCustodianCredentials({
         apiKey: model.apiKey,
         pemText: model.pemText,
         environmentId: model.environmentId,
-      };
-      beginWizardSubmit(setModel);
-      void submitCustodianCredentials(snapshot)
+      })
         .then((wallets) => {
           finishCredentialSubmit(setModel, wallets);
         })
         .catch((error: unknown) => {
-          failCredentialSubmit({
-            setModel,
-            error,
-            translate: (key, options) =>
-              options === undefined ? translate(key) : translate(key, options),
-          });
+          failCredentialSubmit({ setModel, error, translate });
         });
     },
     selectWallet: (walletKey) => {
@@ -141,13 +147,57 @@ export function useCustodianWizard(onConnected: () => void): {
         wallet,
         dispatch,
         setModel,
-        translate: (key, options) =>
-          options === undefined ? translate(key) : translate(key, options),
+        translate,
         onConnected,
         mounted,
         running,
       });
     },
   };
-  return { model, actions };
+}
+
+export function useCustodianWizard(
+  onConnected: () => void,
+  resumeError?: unknown,
+): {
+  model: CustodianWizardModel;
+  actions: CustodianWizardActions;
+} {
+  const { t: translate } = useTranslation("custodian");
+  const wizardTranslate = useMemo<WizardTranslate>(
+    () => (key, options) =>
+      options === undefined ? translate(key) : translate(key, options),
+    [translate],
+  );
+  const dispatch = useAppDispatch();
+  const mounted = useRef(true);
+  const running = useRef(false);
+  const [model, setModel] = useState(() =>
+    resumeError === undefined
+      ? INITIAL_CUSTODIAN_WIZARD
+      : wizardModelForResumeFailure(resumeError, wizardTranslate),
+  );
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+  useApplyResumeFailure({
+    resumeError,
+    setModel,
+    translate: wizardTranslate,
+  });
+  return {
+    model,
+    actions: wizardActions({
+      model,
+      setModel,
+      dispatch,
+      translate: wizardTranslate,
+      onConnected,
+      mounted,
+      running,
+    }),
+  };
 }

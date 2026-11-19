@@ -15,3 +15,10 @@ export {
   type WalletState,
 } from "./model/wallet";
 export { useWalletProviderLabel } from "./lib/use-wallet-provider-label";
+export {
+  custodianSessionPort,
+  registerCustodianSessionPort,
+  type CustodianLeaveInput,
+  type CustodianResumeResult,
+  type CustodianSessionPort,
+} from "./model/custodian-session-port";

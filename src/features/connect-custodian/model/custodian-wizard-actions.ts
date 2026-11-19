@@ -8,9 +8,10 @@ import {
   signingKeyWasStored,
   type WizardTranslate,
 } from "./custodian-wizard-message";
-import type {
-  CustodianWizardModel,
-  SetCustodianWizard,
+import {
+  INITIAL_CUSTODIAN_WIZARD,
+  type CustodianWizardModel,
+  type SetCustodianWizard,
 } from "./custodian-wizard-model";
 
 function patchWizard(
@@ -24,15 +25,7 @@ function patchWizard(
   }));
 }
 
-export function showFireblocksCredentials(setModel: SetCustodianWizard): void {
-  const remembered = readFireblocksSession();
-  setModel((current) => ({
-    ...current,
-    step: "credentials",
-    errorMessage: undefined,
-    apiKey: remembered?.apiKey ?? current.apiKey,
-    environmentId: remembered?.environmentId ?? current.environmentId,
-  }));
+function rememberStoredSigningKey(setModel: SetCustodianWizard): void {
   void readSigningKey()
     .then((signingKey) => {
       setModel((current) => ({
@@ -46,6 +39,42 @@ export function showFireblocksCredentials(setModel: SetCustodianWizard): void {
         hasStoredSigningKey: false,
       }));
     });
+}
+
+export function showFireblocksCredentials(setModel: SetCustodianWizard): void {
+  const remembered = readFireblocksSession();
+  setModel((current) => ({
+    ...current,
+    step: "credentials",
+    errorMessage: undefined,
+    apiKey: remembered?.apiKey ?? current.apiKey,
+    environmentId: remembered?.environmentId ?? current.environmentId,
+  }));
+  rememberStoredSigningKey(setModel);
+}
+
+export function wizardModelForResumeFailure(
+  error: unknown,
+  translate: WizardTranslate,
+): CustodianWizardModel {
+  const remembered = readFireblocksSession();
+  return {
+    ...INITIAL_CUSTODIAN_WIZARD,
+    step: "credentials",
+    apiKey: remembered?.apiKey ?? "",
+    environmentId:
+      remembered?.environmentId ?? INITIAL_CUSTODIAN_WIZARD.environmentId,
+    errorMessage: messageForWizardError(error, translate),
+  };
+}
+
+export function applyResumeFailure(input: {
+  setModel: SetCustodianWizard;
+  error: unknown;
+  translate: WizardTranslate;
+}): void {
+  input.setModel(wizardModelForResumeFailure(input.error, input.translate));
+  rememberStoredSigningKey(input.setModel);
 }
 
 export function showPreviousWizardStep(setModel: SetCustodianWizard): void {

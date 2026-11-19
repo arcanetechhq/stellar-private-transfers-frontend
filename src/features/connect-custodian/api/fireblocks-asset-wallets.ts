@@ -1,4 +1,6 @@
+import { lookupStellarAddresses } from "./fireblocks-asset-addresses";
 import { callFireblocks } from "./fireblocks-request";
+import { readPagingAfter } from "./fireblocks-paging";
 import { FireblocksWizardError } from "../model/fireblocks-wizard-error";
 import { isRecord } from "../model/record-value";
 
@@ -6,6 +8,11 @@ const API_PREFIX = "/v1";
 const ASSET_WALLETS_PATH = "/vault/asset_wallets";
 const MAX_ASSET_WALLET_PAGES = 50;
 const STELLAR_ADDRESS_PREFIX = "G";
+const LIST_ADDRESS_FIELDS = [
+  "address",
+  "legacyAddress",
+  "enterpriseAddress",
+] as const;
 
 export type StellarAssetWallet = {
   vaultId: string;
@@ -19,6 +26,18 @@ export type ListStellarAssetWalletsInput = {
   apiKey: string;
   signingKey: CryptoKey;
 };
+
+type LookupRow = {
+  kind: "lookup";
+  vaultId: string;
+  assetId: string;
+  available: string;
+};
+
+type ParsedAssetWallet =
+  | { kind: "ready"; wallet: StellarAssetWallet }
+  | LookupRow
+  | { kind: "skip" };
 
 export function stellarWalletKey(wallet: StellarAssetWallet): string {
   return `${wallet.vaultId}:${wallet.assetId}:${wallet.address}`;
@@ -34,23 +53,43 @@ function assetWalletsUri(cursor: string | undefined): string {
 
 function readStringField(record: Record<string, unknown>, key: string): string {
   const value = record[key];
-  return typeof value === "string" ? value : "";
+  return typeof value === "string" ? value.trim() : "";
 }
 
-function toStellarWallet(value: unknown): StellarAssetWallet | undefined {
+function stellarAddressFrom(record: Record<string, unknown>): string {
+  for (const field of LIST_ADDRESS_FIELDS) {
+    const value = readStringField(record, field);
+    if (value.startsWith(STELLAR_ADDRESS_PREFIX)) {
+      return value;
+    }
+  }
+  return "";
+}
+
+function hasListedAddress(record: Record<string, unknown>): boolean {
+  return LIST_ADDRESS_FIELDS.some(
+    (field) => readStringField(record, field).length > 0,
+  );
+}
+
+function parseAssetWallet(value: unknown): ParsedAssetWallet {
   if (!isRecord(value)) {
-    return undefined;
+    return { kind: "skip" };
   }
-  const address = readStringField(value, "address");
-  if (!address.startsWith(STELLAR_ADDRESS_PREFIX)) {
-    return undefined;
+  const vaultId = readStringField(value, "vaultId");
+  const assetId = readStringField(value, "assetId");
+  const available = readStringField(value, "available");
+  const address = stellarAddressFrom(value);
+  if (address.length > 0) {
+    return {
+      kind: "ready",
+      wallet: { vaultId, assetId, address, available },
+    };
   }
-  return {
-    vaultId: readStringField(value, "vaultId"),
-    assetId: readStringField(value, "assetId"),
-    address,
-    available: readStringField(value, "available"),
-  };
+  if (hasListedAddress(value) || vaultId.length === 0 || assetId.length === 0) {
+    return { kind: "skip" };
+  }
+  return { kind: "lookup", vaultId, assetId, available };
 }
 
 function readAssetWalletList(payload: unknown): unknown[] {
@@ -60,22 +99,17 @@ function readAssetWalletList(payload: unknown): unknown[] {
   return payload.assetWallets;
 }
 
-function readNextCursor(payload: unknown): string | undefined {
-  if (!isRecord(payload) || !isRecord(payload.paging)) {
-    return undefined;
-  }
-  const after = payload.paging.after;
-  return typeof after === "string" && after.length > 0 ? after : undefined;
-}
-
-function appendStellarWallets(
-  target: StellarAssetWallet[],
-  payload: unknown,
-): void {
-  for (const record of readAssetWalletList(payload)) {
-    const wallet = toStellarWallet(record);
-    if (wallet) {
-      target.push(wallet);
+async function appendStellarWallets(input: {
+  target: StellarAssetWallet[];
+  request: ListStellarAssetWalletsInput;
+  payload: unknown;
+}): Promise<void> {
+  for (const record of readAssetWalletList(input.payload)) {
+    const parsed = parseAssetWallet(record);
+    if (parsed.kind === "ready") {
+      input.target.push(parsed.wallet);
+    } else if (parsed.kind === "lookup") {
+      input.target.push(...(await lookupStellarAddresses(input.request, parsed)));
     }
   }
 }
@@ -99,8 +133,8 @@ export async function listStellarAssetWallets(
   let cursor: string | undefined;
   for (let page = 0; page < MAX_ASSET_WALLET_PAGES; page += 1) {
     const payload = await readAssetWalletPage(input, cursor);
-    appendStellarWallets(wallets, payload);
-    const nextCursor = readNextCursor(payload);
+    await appendStellarWallets({ target: wallets, request: input, payload });
+    const nextCursor = readPagingAfter(payload);
     if (nextCursor === undefined || nextCursor === cursor) {
       return wallets;
     }
