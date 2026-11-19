@@ -17,7 +17,7 @@ export type RegisterPrivateAddressFlowStatus =
 
 export function useRegisterWalletPrivateAddress() {
   const publicKey = useAppSelector(selectWalletPublicKey);
-  const { ensureWalletPrivateAddress, refreshRegistryStatus } =
+  const { ensureWalletPrivateAddress, ensureWalletScalar, refreshRegistryStatus } =
     useWalletPrivateAddress();
   const [status, setStatus] = useState<RegisterPrivateAddressFlowStatus>("idle");
   const [hasError, setHasError] = useState(false);
@@ -39,12 +39,14 @@ export function useRegisterWalletPrivateAddress() {
     setStatus("creating");
     try {
       const privateAddress = await ensureWalletPrivateAddress();
+      const spendScalarHex = await ensureWalletScalar();
       setStatus("registering");
       const privacyClient = getPrivacySdkClientOrThrow();
       await privacyClient.registerPrivateAddress({
         owner: trimmedPublicKey,
         walletPublicKey: trimmedPublicKey,
         privateAddressStpl1: privateAddress,
+        spendScalarHex,
       });
       await refreshRegistryStatus();
       setStatus("success");
@@ -54,9 +56,14 @@ export function useRegisterWalletPrivateAddress() {
       setStatus("error");
       setHasError(true);
       setErrorMessage(formatRegisterPrivateAddressError(error));
-      return false;
+      throw error;
     }
-  }, [publicKey, ensureWalletPrivateAddress, refreshRegistryStatus]);
+  }, [
+    publicKey,
+    ensureWalletPrivateAddress,
+    ensureWalletScalar,
+    refreshRegistryStatus,
+  ]);
 
   return {
     register,

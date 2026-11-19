@@ -14,6 +14,7 @@ const FIREBLOCKS_ORIGIN = (
 const CONNECTIONS_PATH = "/v1/connections/wc";
 const SESSION_PATH = "/api/custodian/wallet-connect";
 const HEALTH_PATH = "/api/custodian/health";
+const FORWARD_PREFIX = "/api/fireblocks";
 const BODY_LIMIT = 65_536;
 const JWT_LIFETIME_SECONDS = 29;
 const STELLAR_TESTNET_CHAIN = "stellar:testnet";
@@ -200,6 +201,66 @@ function sessionRequest(raw) {
   return { uri, vaultAccountId: Number(vaultText) };
 }
 
+function isVaultForward(pathname) {
+  return (
+    pathname === FORWARD_PREFIX || pathname.startsWith(`${FORWARD_PREFIX}/`)
+  );
+}
+
+function vaultTargetPath(url) {
+  const rest = `${url.pathname.slice(FORWARD_PREFIX.length)}${url.search}`;
+  if (rest !== "/v1" && !rest.startsWith("/v1/")) {
+    return "";
+  }
+  return rest;
+}
+
+function browserVaultHeaders(request, body) {
+  const headers = {};
+  const authorization = request.headers.authorization;
+  const apiKey = request.headers["x-api-key"];
+  if (typeof authorization === "string" && authorization.length > 0) {
+    headers.Authorization = authorization;
+  }
+  if (typeof apiKey === "string" && apiKey.length > 0) {
+    headers["X-API-Key"] = apiKey;
+  }
+  if (body.length > 0) {
+    const contentType = request.headers["content-type"];
+    headers["Content-Type"] =
+      typeof contentType === "string" && contentType.length > 0
+        ? contentType
+        : "application/json";
+  }
+  return headers;
+}
+
+async function forwardVaultCall(request, response, targetPath) {
+  const method = request.method ?? "GET";
+  if (method !== "GET" && method !== "POST" && method !== "PUT") {
+    sendJson(response, 405, { error: "Method not allowed" });
+    return;
+  }
+  const body = method === "GET" ? "" : await readRequestBody(request);
+  let upstream;
+  try {
+    upstream = await fetch(`${FIREBLOCKS_ORIGIN}${targetPath}`, {
+      method,
+      headers: browserVaultHeaders(request, body),
+      ...(body.length > 0 ? { body } : {}),
+    });
+  } catch {
+    sendJson(response, 502, { error: "Fireblocks could not be reached" });
+    return;
+  }
+  const text = await upstream.text();
+  response.writeHead(upstream.status, {
+    "Content-Type": upstream.headers.get("content-type") ?? "application/json",
+    "Content-Length": Buffer.byteLength(text),
+  });
+  response.end(text);
+}
+
 function sendJson(response, status, payload) {
   const body = JSON.stringify(payload);
   response.writeHead(status, {
@@ -237,6 +298,20 @@ const server = createServer(async (request, response) => {
     sendJson(response, 200, { ok: true });
     return;
   }
+  if (isVaultForward(url.pathname)) {
+    const targetPath = vaultTargetPath(url);
+    if (!targetPath) {
+      sendJson(response, 404, { error: "Not found" });
+      return;
+    }
+    try {
+      await forwardVaultCall(request, response, targetPath);
+    } catch (error) {
+      const status = Number(error?.status) || 502;
+      sendJson(response, status, { error: "Fireblocks could not be reached" });
+    }
+    return;
+  }
   if (request.method !== "POST" || url.pathname !== SESSION_PATH) {
     sendJson(response, 404, { error: "Not found" });
     return;
@@ -250,7 +325,9 @@ const server = createServer(async (request, response) => {
     const status = Number(error?.status) || 502;
     const message =
       error instanceof Error ? error.message : "WalletConnect session failed";
-    sendJson(response, status, { error: message });
+    sendJson(response, status, {
+      error: message.replace(/wc:\S+/gu, "[session]"),
+    });
   }
 });
 

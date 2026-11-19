@@ -1,3 +1,7 @@
+w3m-modal {
+  display: none;
+}
+
 .custodian-section {
   display: grid;
   gap: 12px;

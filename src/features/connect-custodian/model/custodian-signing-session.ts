@@ -6,6 +6,7 @@ import {
   WalletConnectTargetChain,
 } from "@creit-tech/stellar-wallets-kit/modules/wallet-connect";
 import { FireblocksWizardError } from "./fireblocks-wizard-error";
+import { grantStellarSigningMethods } from "./custodian-message-signature";
 
 const CAIP_ACCOUNT_SEGMENTS = 3;
 
@@ -26,8 +27,18 @@ function assertSupportedNetwork(): void {
   throw new FireblocksWizardError("invalid-response");
 }
 
+export type CustodianSigningModule = {
+  signClient: WalletConnectModule["signClient"];
+  wcParams: Pick<WalletConnectModule["wcParams"], "allowedChains">;
+  modal: {
+    open: (options?: { uri?: string }) => void;
+    close: () => void;
+  };
+  runChecks: () => Promise<void>;
+};
+
 function sessionChains(
-  module: WalletConnectModule,
+  module: CustodianSigningModule,
 ): WalletConnectTargetChain[] {
   return module.wcParams.allowedChains ?? [WalletConnectTargetChain.TESTNET];
 }
@@ -39,28 +50,52 @@ function accountKey(account: string): string {
   return key.trim();
 }
 
+function stellarAccounts(session: ApprovedSession): string[] {
+  const namespaces = session.namespaces as Record<
+    string,
+    { accounts?: string[] } | undefined
+  >;
+  const accounts: string[] = [];
+  for (const [key, value] of Object.entries(namespaces)) {
+    if (key !== "stellar" && !key.startsWith("stellar:")) {
+      continue;
+    }
+    for (const account of value?.accounts ?? []) {
+      if (account.trim().length > 0) {
+        accounts.push(account);
+      }
+    }
+  }
+  return accounts;
+}
+
 function rememberApprovedAccounts(session: ApprovedSession): string | undefined {
-  const accounts = session.namespaces.stellar?.accounts ?? [];
+  const accounts = stellarAccounts(session);
   const keys = accounts
     .map((account) => accountKey(account))
     .filter((key) => key.length > 0);
   wcSessionPaths.value = [
-    ...wcSessionPaths.value,
+    ...wcSessionPaths.value.filter((path) => !keys.includes(path.publicKey)),
     ...keys.map((publicKey) => ({ publicKey, topic: session.topic })),
   ];
   return keys[0];
 }
 
 async function acceptSigningSession(
-  module: WalletConnectModule,
+  module: CustodianSigningModule,
   approval: () => Promise<ApprovedSession>,
 ): Promise<{ address: string; topic: string }> {
   try {
     const session = await approval();
+    grantStellarSigningMethods(module.signClient, session.topic);
     const address = rememberApprovedAccounts(session);
     module.modal.close();
     if (!address) {
-      throw new FireblocksWizardError("invalid-response");
+      throw new FireblocksWizardError(
+        "invalid-response",
+        undefined,
+        "WalletConnect session did not include a Stellar address",
+      );
     }
     return { address, topic: session.topic };
   } catch (error) {
@@ -69,8 +104,20 @@ async function acceptSigningSession(
   }
 }
 
-export async function openCustodianSigningSession(
-  module: WalletConnectModule,
+let signingSession: Promise<{ address: string; topic: string }> | undefined;
+
+function rememberedSession(): { address: string; topic: string } | undefined {
+  const path = wcSessionPaths.value.at(-1);
+  const address = path?.publicKey.trim() ?? "";
+  const topic = path?.topic.trim() ?? "";
+  if (address.length === 0 || topic.length === 0) {
+    return undefined;
+  }
+  return { address, topic };
+}
+
+async function connectSigningSession(
+  module: CustodianSigningModule,
 ): Promise<{ address: string; topic: string }> {
   await module.runChecks();
   assertSupportedNetwork();
@@ -101,6 +148,26 @@ export async function openCustodianSigningSession(
     module.modal.open({ uri: pending.uri });
   }
   return acceptSigningSession(module, pending.approval);
+}
+
+export function openCustodianSigningSession(
+  module: CustodianSigningModule,
+  options?: { fresh?: boolean },
+): Promise<{ address: string; topic: string }> {
+  if (signingSession) {
+    return signingSession;
+  }
+  if (!options?.fresh) {
+    const existing = rememberedSession();
+    if (existing) {
+      return Promise.resolve(existing);
+    }
+  }
+  const pending = connectSigningSession(module).finally(() => {
+    signingSession = undefined;
+  });
+  signingSession = pending;
+  return pending;
 }
 
 export function bindSessionToPaymentAddress(address: string): void {

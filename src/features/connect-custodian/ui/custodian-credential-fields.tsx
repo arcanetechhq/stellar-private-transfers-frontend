@@ -66,6 +66,7 @@ export function CustodianPemField(properties: CustodianPemFieldProperties) {
 
 const ENVIRONMENT_LABEL_KEYS: Record<FireblocksEnvironmentId, string> = {
   sandbox: "environmentSandbox",
+  stand: "environmentStand",
 };
 
 type CustodianEnvironmentFieldProperties = {

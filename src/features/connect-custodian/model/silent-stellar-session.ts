@@ -1,30 +1,27 @@
-import { StellarWalletsKit } from "@creit-tech/stellar-wallets-kit/sdk";
-import { activeModules } from "@creit-tech/stellar-wallets-kit/state";
-import { Networks } from "@creit-tech/stellar-wallets-kit/types";
-import {
-  WalletConnectModule,
-  WalletConnectTargetChain,
-} from "@creit-tech/stellar-wallets-kit/modules/wallet-connect";
-import { FIREBLOCKS_WALLET_PROVIDER } from "@/entities/wallet";
+import SignClient from "@walletconnect/sign-client";
 import { readClientEnvironment } from "@/shared/lib/privacy-sdk/read-client-environment";
+import { releaseWalletConnectApproval } from "../api/fireblocks-web3-connection";
 import { openCustodianSigningSession } from "./custodian-signing-session";
+import {
+  CustodianSignModule,
+  installCustodianSignModule,
+} from "./custodian-sign-module";
 import { FireblocksWizardError } from "./fireblocks-wizard-error";
+import { isRecord } from "./record-value";
 
 const REOWN_PROJECT_ID = "VITE_REOWN_PROJECT_ID";
-const SIGN_CLIENT_WAIT_MS = 100;
-const SIGN_CLIENT_ATTEMPTS = 50;
 const SESSION_METADATA_NAME = "Arcane private payments";
-
-type UriModal = {
-  open: (options?: { uri?: string }) => void;
-  close: () => void;
-};
+const SESSION_HOLDER = "__arcaneSilentStellarSession";
+const SIGN_CLIENT_HOLDER = "__arcaneSilentSignClient";
+const WALLET_CONNECT_DATABASE = /walletconnect|wc@/iu;
 
 type Deferred<Value> = {
   promise: Promise<Value>;
   resolve: (value: Value) => void;
   reject: (error: unknown) => void;
 };
+
+type SessionHolder = { current?: SilentStellarSession };
 
 export type SilentStellarSession = {
   walletConnectUri: Promise<string>;
@@ -67,98 +64,141 @@ function sessionMetadata(): {
   };
 }
 
-function captureWalletConnectUri(
-  modal: WalletConnectModule["modal"],
-  onUri: (walletConnectUri: string) => void,
-): void {
-  const sink = modal as unknown as UriModal;
-  const originalClose = sink.close.bind(sink);
-  let captured = false;
-  sink.open = (options) => {
-    const walletConnectUri = options?.uri?.trim() ?? "";
-    if (captured || walletConnectUri.length === 0) {
-      return;
-    }
-    captured = true;
-    onUri(walletConnectUri);
-  };
-  sink.close = () => {
-    try {
-      originalClose();
-    } catch {
-      return;
-    }
-  };
+function sessionHolder(): SessionHolder {
+  const host = globalThis as typeof globalThis &
+    Record<string, SessionHolder | undefined>;
+  const existing = host[SESSION_HOLDER];
+  if (existing) {
+    return existing;
+  }
+  const created: SessionHolder = {};
+  host[SESSION_HOLDER] = created;
+  return created;
 }
 
-function installWalletConnectModule(module: WalletConnectModule): void {
-  const others = activeModules.value.filter(
-    (item) => item.productId !== module.productId,
-  );
-  activeModules.value = [...others, module];
-  StellarWalletsKit.setWallet(module.productId);
+function readMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message.trim();
+  }
+  if (isRecord(error) && typeof error.message === "string") {
+    return error.message.trim();
+  }
+  return "";
 }
 
-class SilentStellarWalletConnect extends WalletConnectModule {
-  constructor(projectId: string) {
-    super({
-      projectId,
-      metadata: sessionMetadata(),
-      allowedChains: [WalletConnectTargetChain.TESTNET],
-    });
-    this.productName = FIREBLOCKS_WALLET_PROVIDER;
+function sessionFailureDetail(error: unknown): string {
+  const message = readMessage(error);
+  if (message.length > 0 && message !== "invalid-response") {
+    return message;
   }
-
-  async getAddress(): Promise<{ address: string; topic: string }> {
-    return openCustodianSigningSession(this);
-  }
-
-  async getNetwork(): Promise<{ network: string; networkPassphrase: string }> {
-    return {
-      network: "testnet",
-      networkPassphrase: Networks.TESTNET,
-    };
-  }
-}
-
-async function waitForSignClient(module: WalletConnectModule): Promise<void> {
-  for (let attempt = 0; attempt < SIGN_CLIENT_ATTEMPTS; attempt += 1) {
-    if (module.signClient) {
-      return;
-    }
-    await new Promise((resolve) => {
-      setTimeout(resolve, SIGN_CLIENT_WAIT_MS);
-    });
-  }
-  throw new FireblocksWizardError("invalid-response");
+  return "WalletConnect session was not approved";
 }
 
 function wrapSessionError(error: unknown): FireblocksWizardError {
-  return error instanceof FireblocksWizardError
-    ? error
-    : new FireblocksWizardError("invalid-response");
+  if (error instanceof FireblocksWizardError && error.detail) {
+    return error;
+  }
+  return new FireblocksWizardError(
+    "invalid-response",
+    undefined,
+    sessionFailureDetail(error),
+  );
 }
 
-export function startSilentStellarSession(
-  projectId: string,
-): SilentStellarSession {
-  const module = new SilentStellarWalletConnect(projectId);
-  const uriDeferred = defer<string>();
-  captureWalletConnectUri(module.modal, (walletConnectUri) => {
-    uriDeferred.resolve(walletConnectUri);
+function deleteDatabase(name: string): Promise<void> {
+  return new Promise((resolve) => {
+    const request = indexedDB.deleteDatabase(name);
+    request.onsuccess = () => {
+      resolve();
+    };
+    request.onerror = () => {
+      resolve();
+    };
+    request.onblocked = () => {
+      resolve();
+    };
   });
-  installWalletConnectModule(module);
-  const approved = waitForSignClient(module)
-    .then(() => module.getAddress())
+}
+
+async function clearWalletConnectStorage(): Promise<void> {
+  if (typeof indexedDB === "undefined" || !indexedDB.databases) {
+    return;
+  }
+  const databases = await indexedDB.databases();
+  const names = databases
+    .map((database) => database.name ?? "")
+    .filter((name) => WALLET_CONNECT_DATABASE.test(name));
+  await Promise.all(names.map((name) => deleteDatabase(name)));
+}
+
+async function sharedSignClient(projectId: string): Promise<SignClient> {
+  const host = globalThis as typeof globalThis &
+    Record<string, Promise<SignClient> | undefined>;
+  const existing = host[SIGN_CLIENT_HOLDER];
+  if (existing) {
+    return existing;
+  }
+  const pending = clearWalletConnectStorage().then(() =>
+    SignClient.init({
+      projectId,
+      metadata: sessionMetadata(),
+    }),
+  );
+  host[SIGN_CLIENT_HOLDER] = pending;
+  try {
+    return await pending;
+  } catch (error) {
+    delete host[SIGN_CLIENT_HOLDER];
+    throw error;
+  }
+}
+
+function beginSilentSession(projectId: string): SilentStellarSession {
+  const uriDeferred = defer<string>();
+  const module = new CustodianSignModule();
+  const approved = sharedSignClient(projectId)
+    .then((client) => {
+      module.attach(client, {
+        open: (options) => {
+          const walletConnectUri = options?.uri?.trim() ?? "";
+          if (walletConnectUri.length > 0) {
+            uriDeferred.resolve(walletConnectUri);
+          }
+        },
+        close: () => undefined,
+      });
+      installCustodianSignModule(module);
+      return openCustodianSigningSession(module, { fresh: true });
+    })
     .then((result) => result.topic)
     .catch((error: unknown) => {
       const wrapped = wrapSessionError(error);
       uriDeferred.reject(wrapped);
       throw wrapped;
+    })
+    .finally(() => {
+      releaseWalletConnectApproval();
     });
   void approved.catch(ignoreRejection);
   return {
     walletConnectUri: uriDeferred.promise,
     approved,
   };
+}
+
+export function startSilentStellarSession(
+  projectId: string,
+): SilentStellarSession {
+  const holder = sessionHolder();
+  if (holder.current) {
+    return holder.current;
+  }
+  const session = beginSilentSession(projectId);
+  holder.current = session;
+  void session.approved.finally(() => {
+    if (holder.current === session) {
+      holder.current = undefined;
+    }
+  });
+  return session;
 }

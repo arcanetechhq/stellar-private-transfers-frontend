@@ -39,7 +39,23 @@ async function readPayload(response: Response): Promise<unknown> {
   }
 }
 
-export async function approveWalletConnectSession(
+const APPROVAL_GATE = "__arcaneCustodianApproval";
+
+type ApprovalGate = { posted: boolean };
+
+function approvalGate(): ApprovalGate {
+  const host = globalThis as typeof globalThis &
+    Record<string, ApprovalGate | undefined>;
+  const existing = host[APPROVAL_GATE];
+  if (existing) {
+    return existing;
+  }
+  const created: ApprovalGate = { posted: false };
+  host[APPROVAL_GATE] = created;
+  return created;
+}
+
+async function postWalletConnectApproval(
   input: ApproveWalletConnectInput,
 ): Promise<void> {
   let response: Response;
@@ -63,4 +79,19 @@ export async function approveWalletConnectSession(
       : new FireblocksWizardError("http", response.status, detail);
   }
   connectionId(payload);
+}
+
+export function approveWalletConnectSession(
+  input: ApproveWalletConnectInput,
+): Promise<void> {
+  const gate = approvalGate();
+  if (gate.posted) {
+    return Promise.resolve();
+  }
+  gate.posted = true;
+  return postWalletConnectApproval(input);
+}
+
+export function releaseWalletConnectApproval(): void {
+  approvalGate().posted = false;
 }

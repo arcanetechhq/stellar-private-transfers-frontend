@@ -54,7 +54,10 @@ export function messageForWizardError(
   if (!(error instanceof FireblocksWizardError)) {
     return translate("errorFireblocks");
   }
-  if (error.code === "http" && error.detail) {
+  if (
+    (error.code === "http" || error.code === "invalid-response") &&
+    error.detail
+  ) {
     return translate("errorFireblocksDetail", { detail: error.detail });
   }
   if (error.code === "http") {

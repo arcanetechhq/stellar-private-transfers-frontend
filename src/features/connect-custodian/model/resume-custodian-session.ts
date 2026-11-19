@@ -8,6 +8,10 @@ import {
 import { store, type AppDispatch } from "@/store";
 import { publishCustodianResumeFailure } from "./custodian-resume-failure";
 import {
+  beginCustodianResume,
+  endCustodianResume,
+} from "./custodian-resume-flight";
+import {
   isFireblocksTestXlm,
   openCustodianXlmSession,
 } from "./open-custodian-xlm-session";
@@ -29,17 +33,22 @@ export async function resumeCustodianSession(
     return "absent";
   }
   const address = wallet.address.trim();
+  beginCustodianResume();
   try {
-    await openCustodianXlmSession({ wallet, dispatch });
-  } catch (error: unknown) {
-    if (restoredFireblocksAddress() === address) {
-      return "restored";
+    try {
+      await openCustodianXlmSession({ wallet, dispatch });
+    } catch (error: unknown) {
+      if (restoredFireblocksAddress() === address) {
+        return "restored";
+      }
+      publishCustodianResumeFailure(error);
+      if (selectWalletPublicKey(store.getState())?.trim() === address) {
+        dispatch(clearWallet());
+      }
+      return "failed";
     }
-    publishCustodianResumeFailure(error);
-    if (selectWalletPublicKey(store.getState())?.trim() === address) {
-      dispatch(clearWallet());
-    }
-    return "failed";
+    return restoredFireblocksAddress() === address ? "restored" : "failed";
+  } finally {
+    endCustodianResume();
   }
-  return restoredFireblocksAddress() === address ? "restored" : "failed";
 }

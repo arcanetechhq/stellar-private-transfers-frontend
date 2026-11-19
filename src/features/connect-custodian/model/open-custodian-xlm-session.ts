@@ -124,7 +124,9 @@ async function approveOpenedSession(input: {
   publishCustodianAddress(input.dispatch, input.wallet);
 }
 
-export async function openCustodianXlmSession(input: {
+let openedSession: Promise<void> | undefined;
+
+async function runOpenCustodianXlmSession(input: {
   wallet: StellarAssetWallet;
   dispatch: AppDispatch;
 }): Promise<void> {
@@ -155,6 +157,20 @@ export async function openCustodianXlmSession(input: {
       await restoreReplacedSigningKey(replacedPrevious, retainedSigningKey);
     }
   }
+}
+
+export function openCustodianXlmSession(input: {
+  wallet: StellarAssetWallet;
+  dispatch: AppDispatch;
+}): Promise<void> {
+  if (openedSession) {
+    return openedSession;
+  }
+  const pending = runOpenCustodianXlmSession(input).finally(() => {
+    openedSession = undefined;
+  });
+  openedSession = pending;
+  return pending;
 }
 
 async function abandonStaleSession(token: number, topic: string): Promise<boolean> {

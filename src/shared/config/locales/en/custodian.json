@@ -11,6 +11,7 @@
   "pemStoredHint": "A signing key is already in this browser. Leave the private key empty to use it, or paste a new PEM to replace it.",
   "environmentLabel": "Environment",
   "environmentSandbox": "Sandbox",
+  "environmentStand": "Stand",
   "credentialsStayInBrowser": "The API key, private key, and Fireblocks responses stay in this browser.",
   "listWallets": "List Stellar wallets",
   "listingWallets": "Requesting asset wallets",

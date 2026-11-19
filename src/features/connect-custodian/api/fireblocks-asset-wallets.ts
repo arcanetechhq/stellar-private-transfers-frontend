@@ -72,6 +72,10 @@ function hasListedAddress(record: Record<string, unknown>): boolean {
   );
 }
 
+function isStellarAssetId(assetId: string): boolean {
+  return assetId === "XLM" || assetId.startsWith("XLM_");
+}
+
 function parseAssetWallet(value: unknown): ParsedAssetWallet {
   if (!isRecord(value)) {
     return { kind: "skip" };
@@ -79,6 +83,9 @@ function parseAssetWallet(value: unknown): ParsedAssetWallet {
   const vaultId = readStringField(value, "vaultId");
   const assetId = readStringField(value, "assetId");
   const available = readStringField(value, "available");
+  if (!isStellarAssetId(assetId)) {
+    return { kind: "skip" };
+  }
   const address = stellarAddressFrom(value);
   if (address.length > 0) {
     return {

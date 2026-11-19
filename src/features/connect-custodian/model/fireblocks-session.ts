@@ -1,5 +1,5 @@
 import {
-  SANDBOX_ENVIRONMENT_ID,
+  FIREBLOCKS_ENVIRONMENTS,
   fireblocksEnvironmentFor,
   type FireblocksEnvironmentId,
 } from "./fireblocks-environment";
@@ -17,13 +17,15 @@ function parseSession(value: unknown): FireblocksSession | undefined {
   if (!isRecord(value)) {
     return undefined;
   }
-  if (value.environmentId !== SANDBOX_ENVIRONMENT_ID) {
+  const environment = FIREBLOCKS_ENVIRONMENTS.find(
+    (item) => item.id === value.environmentId,
+  );
+  if (!environment) {
     return undefined;
   }
   if (typeof value.apiKey !== "string" || value.apiKey.trim().length === 0) {
     return undefined;
   }
-  const environment = fireblocksEnvironmentFor(SANDBOX_ENVIRONMENT_ID);
   if (value.baseUrl !== environment.baseUrl) {
     return undefined;
   }

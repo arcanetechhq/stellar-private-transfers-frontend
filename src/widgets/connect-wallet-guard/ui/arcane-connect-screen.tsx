@@ -2,7 +2,10 @@ import React from "react";
 import { Loader2, RefreshCcw } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import Arcn from "@/shared/assets/logo-arcn";
-import { CustodianConnectSection } from "@/features/connect-custodian";
+import {
+  CustodianConnectSection,
+  useCustodianResumeInFlight,
+} from "@/features/connect-custodian";
 import { FREIGHTER_ICON_URL } from "@/features/stellar-wallet-connect";
 import { ArcaneShaderGradient } from "./arcane-shader-gradient";
 import "./arcane-connect-screen.css";
@@ -68,6 +71,7 @@ function ArcaneConnectPrimaryAction(properties: {
   onConnectWallet: () => void;
 }) {
   const { t: translate } = useTranslation("common");
+  const resumeInFlight = useCustodianResumeInFlight();
   const {
     phase,
     connectDisabled,
@@ -76,6 +80,7 @@ function ArcaneConnectPrimaryAction(properties: {
     isFreighterAvailable,
     onConnectWallet,
   } = properties;
+  const restoring = resumeInFlight && phase === "prompt";
   const promptLabel = isFreighterAvailable
     ? translate("connectFreighter")
     : translate("installFreighter");
@@ -84,18 +89,20 @@ function ArcaneConnectPrimaryAction(properties: {
     <button
       type="button"
       className="arcane-connect-primary"
-      data-testid="connect-wallet"
-      disabled={connectDisabled || isBusyPhase || isConnectingWallet}
+      {...(restoring ? { "aria-busy": true } : { "data-testid": "connect-wallet" })}
+      disabled={connectDisabled || isBusyPhase || isConnectingWallet || restoring}
       onClick={onConnectWallet}
       {...(isBusyPhase
         ? { "aria-live": "polite" as const, role: "status" as const }
         : {})}
     >
-      {phase === "prompt" && <FreighterButtonIcon />}
+      {phase === "prompt" && !restoring && <FreighterButtonIcon />}
       <span>
-        {isBusyPhase ? translate(resolveStatusTitleKey(phase)) : promptLabel}
+        {isBusyPhase || restoring
+          ? translate(resolveStatusTitleKey(restoring ? "connecting_wallet" : phase))
+          : promptLabel}
       </span>
-      {isBusyPhase ? (
+      {isBusyPhase || restoring ? (
         <Loader2
           size={21}
           strokeWidth={1.8}
@@ -123,6 +130,7 @@ function ArcaneConnectErrorActions(properties: {
         <button
           type="button"
           className="arcane-connect-primary"
+          data-testid="connect-screen-retry"
           onClick={properties.onRetry}
         >
           <span>{translate("connectScreenRetry")}</span>
