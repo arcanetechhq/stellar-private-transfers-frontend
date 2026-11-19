@@ -35,9 +35,7 @@ describe("privacy SDK dependency range", () => {
       packageJson.dependencies?.["@arcanetech/stellar-privacy-pool-zk-sdk"],
     ).toBeUndefined();
     expect(
-      packageJson.devDependencies?.[
-        "@arcanetech/stellar-privacy-pool-zk-sdk"
-      ],
+      packageJson.devDependencies?.["@arcanetech/stellar-privacy-pool-zk-sdk"],
     ).toBeUndefined();
   });
 });
