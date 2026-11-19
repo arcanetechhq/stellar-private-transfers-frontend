@@ -1,4 +1,4 @@
-import type { StellarAssetWallet } from "../api/fireblocks-asset-wallets";
+import type { StellarAssetWallet } from "./stellar-asset-wallet";
 import { isRecord } from "./record-value";
 
 const SELECTED_ASSET_STORAGE_KEY = "arcane.fireblocks-custodian.asset";

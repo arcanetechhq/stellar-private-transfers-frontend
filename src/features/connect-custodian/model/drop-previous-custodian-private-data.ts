@@ -2,7 +2,6 @@ import { clearWallet, selectWalletPublicKey } from "@/entities/wallet";
 import { store, type AppDispatch } from "@/store";
 import { closeAllCustodianWalletConnectSessions } from "./close-wallet-connect-session";
 import { deleteCustodianPrivateData } from "./custodian-private-data";
-import { deleteSigningKey } from "./fireblocks-signing-key";
 import {
   clearSelectedFireblocksAsset,
   readSelectedFireblocksAsset,
@@ -25,7 +24,6 @@ export async function dropPreviousCustodianPrivateData(input: {
   if (previous.length === 0 || previous === nextAddress) {
     return false;
   }
-  await deleteSigningKey();
   clearSelectedFireblocksAsset();
   await closeAllCustodianWalletConnectSessions(previous);
   deleteCustodianPrivateData({

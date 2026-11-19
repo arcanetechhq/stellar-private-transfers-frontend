@@ -107,6 +107,13 @@ w3m-modal {
   margin: 0;
 }
 
+.custodian-wizard__step--locked {
+  filter: blur(6px);
+  opacity: 0.72;
+  pointer-events: none;
+  user-select: none;
+}
+
 .custodian-wizard__step h2 {
   margin: 0 48px 0 0;
   color: var(--arcane-connect-ink);
@@ -251,7 +258,10 @@ w3m-modal {
 .custodian-wallet {
   display: grid;
   width: 100%;
-  gap: 4px;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 12px;
+  row-gap: 4px;
+  align-items: center;
   padding: 12px 14px;
   border: 1px solid rgba(7, 26, 47, 0.16);
   border-radius: 12px;
@@ -260,6 +270,10 @@ w3m-modal {
   cursor: pointer;
   font: inherit;
   text-align: left;
+}
+
+.custodian-wallet__icon {
+  grid-row: span 3;
 }
 
 .custodian-wallet--selected {

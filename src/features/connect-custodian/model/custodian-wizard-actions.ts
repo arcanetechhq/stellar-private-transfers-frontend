@@ -1,11 +1,8 @@
 import { readFireblocksSession } from "./fireblocks-session";
-import { readSigningKey } from "./fireblocks-signing-key";
-import type { StellarAssetWallet } from "../api/fireblocks-asset-wallets";
-import type { FireblocksEnvironmentId } from "./fireblocks-environment";
+import type { StellarAssetWallet } from "./stellar-asset-wallet";
 import {
   messageForWizardError,
   shouldClearPem,
-  signingKeyWasStored,
   type WizardTranslate,
 } from "./custodian-wizard-message";
 import {
@@ -25,22 +22,6 @@ function patchWizard(
   }));
 }
 
-function rememberStoredSigningKey(setModel: SetCustodianWizard): void {
-  void readSigningKey()
-    .then((signingKey) => {
-      setModel((current) => ({
-        ...current,
-        hasStoredSigningKey: signingKey !== undefined,
-      }));
-    })
-    .catch(() => {
-      setModel((current) => ({
-        ...current,
-        hasStoredSigningKey: false,
-      }));
-    });
-}
-
 export function showFireblocksCredentials(setModel: SetCustodianWizard): void {
   const remembered = readFireblocksSession();
   setModel((current) => ({
@@ -48,9 +29,8 @@ export function showFireblocksCredentials(setModel: SetCustodianWizard): void {
     step: "credentials",
     errorMessage: undefined,
     apiKey: remembered?.apiKey ?? current.apiKey,
-    environmentId: remembered?.environmentId ?? current.environmentId,
+    hasStoredSigningKey: remembered?.pemAccepted === true,
   }));
-  rememberStoredSigningKey(setModel);
 }
 
 export function wizardModelForResumeFailure(
@@ -62,8 +42,7 @@ export function wizardModelForResumeFailure(
     ...INITIAL_CUSTODIAN_WIZARD,
     step: "credentials",
     apiKey: remembered?.apiKey ?? "",
-    environmentId:
-      remembered?.environmentId ?? INITIAL_CUSTODIAN_WIZARD.environmentId,
+    hasStoredSigningKey: remembered?.pemAccepted === true,
     errorMessage: messageForWizardError(error, translate),
   };
 }
@@ -74,7 +53,6 @@ export function applyResumeFailure(input: {
   translate: WizardTranslate;
 }): void {
   input.setModel(wizardModelForResumeFailure(input.error, input.translate));
-  rememberStoredSigningKey(input.setModel);
 }
 
 export function showPreviousWizardStep(setModel: SetCustodianWizard): void {
@@ -100,11 +78,16 @@ export function changeWizardPem(
   patchWizard(setModel, { pemText });
 }
 
-export function changeWizardEnvironment(
+export function lockWizardWallet(
   setModel: SetCustodianWizard,
-  environmentId: FireblocksEnvironmentId,
+  walletKey: string,
 ): void {
-  patchWizard(setModel, { environmentId });
+  setModel((current) => ({
+    ...current,
+    selectedWalletKey: walletKey,
+    isSubmitting: true,
+    errorMessage: undefined,
+  }));
 }
 
 export function selectWizardWallet(
@@ -165,7 +148,5 @@ export function failCredentialSubmit(input: {
     isSubmitting: false,
     pemText: shouldClearPem(error) ? "" : current.pemText,
     errorMessage: messageForWizardError(error, translate),
-    hasStoredSigningKey:
-      current.hasStoredSigningKey || signingKeyWasStored(error),
   }));
 }

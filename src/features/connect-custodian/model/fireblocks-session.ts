@@ -1,38 +1,22 @@
-import {
-  FIREBLOCKS_ENVIRONMENTS,
-  fireblocksEnvironmentFor,
-  type FireblocksEnvironmentId,
-} from "./fireblocks-environment";
 import { isRecord } from "./record-value";
 
 const SESSION_STORAGE_KEY = "arcane.fireblocks-custodian.session";
 
 export type FireblocksSession = {
   apiKey: string;
-  environmentId: FireblocksEnvironmentId;
-  baseUrl: string;
+  pemAccepted: boolean;
 };
 
 function parseSession(value: unknown): FireblocksSession | undefined {
   if (!isRecord(value)) {
     return undefined;
   }
-  const environment = FIREBLOCKS_ENVIRONMENTS.find(
-    (item) => item.id === value.environmentId,
-  );
-  if (!environment) {
-    return undefined;
-  }
   if (typeof value.apiKey !== "string" || value.apiKey.trim().length === 0) {
-    return undefined;
-  }
-  if (value.baseUrl !== environment.baseUrl) {
     return undefined;
   }
   return {
     apiKey: value.apiKey.trim(),
-    environmentId: environment.id,
-    baseUrl: environment.baseUrl,
+    pemAccepted: value.pemAccepted === true,
   };
 }
 
@@ -49,11 +33,9 @@ export function readFireblocksSession(): FireblocksSession | undefined {
 }
 
 export function saveFireblocksSession(session: FireblocksSession): void {
-  const environment = fireblocksEnvironmentFor(session.environmentId);
   const stored: FireblocksSession = {
-    apiKey: session.apiKey,
-    environmentId: environment.id,
-    baseUrl: environment.baseUrl,
+    apiKey: session.apiKey.trim(),
+    pemAccepted: session.pemAccepted,
   };
   localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(stored));
 }

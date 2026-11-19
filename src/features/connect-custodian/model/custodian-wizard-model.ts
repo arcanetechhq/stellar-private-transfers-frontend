@@ -1,9 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import type { StellarAssetWallet } from "../api/fireblocks-asset-wallets";
-import {
-  SANDBOX_ENVIRONMENT_ID,
-  type FireblocksEnvironmentId,
-} from "./fireblocks-environment";
+import type { StellarAssetWallet } from "./stellar-asset-wallet";
 
 export type CustodianWizardStep = "choice" | "credentials" | "wallets";
 
@@ -11,7 +7,6 @@ export type CustodianWizardModel = {
   step: CustodianWizardStep;
   apiKey: string;
   pemText: string;
-  environmentId: FireblocksEnvironmentId;
   wallets: StellarAssetWallet[];
   selectedWalletKey: string | undefined;
   errorMessage: string | undefined;
@@ -23,7 +18,6 @@ export const INITIAL_CUSTODIAN_WIZARD: CustodianWizardModel = {
   step: "choice",
   apiKey: "",
   pemText: "",
-  environmentId: SANDBOX_ENVIRONMENT_ID,
   wallets: [],
   selectedWalletKey: undefined,
   errorMessage: undefined,
@@ -38,7 +32,6 @@ export type CustodianWizardActions = {
   goBack: () => void;
   changeApiKey: (value: string) => void;
   changePem: (value: string) => void;
-  changeEnvironment: (environmentId: FireblocksEnvironmentId) => void;
   submitCredentials: () => void;
   selectWallet: (walletKey: string) => void;
 };

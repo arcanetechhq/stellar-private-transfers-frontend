@@ -8,7 +8,7 @@ import {
 } from "@/entities/wallet";
 import { rememberKitActiveAddress } from "@/shared/lib/wallet/remember-kit-active-address";
 import { approveWalletConnectSession } from "../api/fireblocks-web3-connection";
-import type { StellarAssetWallet } from "../api/fireblocks-asset-wallets";
+import type { StellarAssetWallet } from "./stellar-asset-wallet";
 import { bindSessionToPaymentAddress } from "./custodian-signing-session";
 import {
   beginCustodianIntent,
@@ -18,7 +18,6 @@ import { closeCustodianWalletConnectTopic } from "./close-wallet-connect-session
 import { dropPreviousCustodianPrivateData } from "./drop-previous-custodian-private-data";
 import { FireblocksWizardError } from "./fireblocks-wizard-error";
 import { readFireblocksSession } from "./fireblocks-session";
-import { readSigningKey, storeSigningKey } from "./fireblocks-signing-key";
 import { saveSelectedFireblocksAsset } from "./selected-fireblocks-asset";
 import {
   readReownProjectId,
@@ -43,10 +42,8 @@ function requireProjectId(): string {
   return projectId;
 }
 
-async function requireStoredCustodian(): Promise<void> {
-  const session = readFireblocksSession();
-  const signingKey = await readSigningKey();
-  if (!session || !signingKey) {
+function requireStoredCustodian(): void {
+  if (!readFireblocksSession()) {
     throw new FireblocksWizardError("key-store");
   }
 }
@@ -94,16 +91,6 @@ async function approveSilentSession(input: {
   return session.approved;
 }
 
-async function restoreReplacedSigningKey(
-  replacedPrevious: boolean,
-  signingKey: CryptoKey | undefined,
-): Promise<void> {
-  if (!replacedPrevious || signingKey === undefined) {
-    return;
-  }
-  await storeSigningKey(signingKey);
-}
-
 async function approveOpenedSession(input: {
   token: number;
   projectId: string;
@@ -135,28 +122,20 @@ async function runOpenCustodianXlmSession(input: {
   }
   const token = beginCustodianIntent();
   const projectId = requireProjectId();
-  await requireStoredCustodian();
-  const retainedSigningKey = await readSigningKey();
-  let replacedPrevious = false;
-  try {
-    replacedPrevious = await dropPreviousCustodianPrivateData({
-      dispatch: input.dispatch,
-      nextAddress: input.wallet.address,
-    });
-    if (!isCurrentCustodianIntent(token)) {
-      return;
-    }
-    await approveOpenedSession({
-      token,
-      projectId,
-      wallet: input.wallet,
-      dispatch: input.dispatch,
-    });
-  } finally {
-    if (isCurrentCustodianIntent(token)) {
-      await restoreReplacedSigningKey(replacedPrevious, retainedSigningKey);
-    }
+  requireStoredCustodian();
+  await dropPreviousCustodianPrivateData({
+    dispatch: input.dispatch,
+    nextAddress: input.wallet.address,
+  });
+  if (!isCurrentCustodianIntent(token)) {
+    return;
   }
+  await approveOpenedSession({
+    token,
+    projectId,
+    wallet: input.wallet,
+    dispatch: input.dispatch,
+  });
 }
 
 export function openCustodianXlmSession(input: {

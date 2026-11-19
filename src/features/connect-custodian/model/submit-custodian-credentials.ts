@@ -1,17 +1,11 @@
-import { listStellarAssetWallets } from "../api/fireblocks-asset-wallets";
-import type { StellarAssetWallet } from "../api/fireblocks-asset-wallets";
-import {
-  fireblocksEnvironmentFor,
-  type FireblocksEnvironmentId,
-} from "./fireblocks-environment";
+import { listCustodianAssetWallets } from "../api/custodian-asset-wallets";
+import type { StellarAssetWallet } from "./stellar-asset-wallet";
 import { saveFireblocksSession } from "./fireblocks-session";
-import { resolveSigningKey } from "./fireblocks-signing-key";
 import { FireblocksWizardError } from "./fireblocks-wizard-error";
 
 export type CredentialSubmitInput = {
   apiKey: string;
   pemText: string;
-  environmentId: FireblocksEnvironmentId;
 };
 
 export async function submitCustodianCredentials(
@@ -21,16 +15,10 @@ export async function submitCustodianCredentials(
   if (apiKey.length === 0) {
     throw new FireblocksWizardError("missing-api-key");
   }
-  const environment = fireblocksEnvironmentFor(input.environmentId);
-  const signingKey = await resolveSigningKey(input.pemText);
-  saveFireblocksSession({
+  const wallets = await listCustodianAssetWallets({
     apiKey,
-    environmentId: environment.id,
-    baseUrl: environment.baseUrl,
+    privateKey: input.pemText.trim(),
   });
-  return listStellarAssetWallets({
-    baseUrl: environment.baseUrl,
-    apiKey,
-    signingKey,
-  });
+  saveFireblocksSession({ apiKey, pemAccepted: true });
+  return wallets;
 }

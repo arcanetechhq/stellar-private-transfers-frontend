@@ -21,13 +21,6 @@ const KEEP_PEM_CODES = new Set<FireblocksWizardErrorCode>([
   "key-store",
 ]);
 
-const STORED_KEY_CODES = new Set<FireblocksWizardErrorCode>([
-  "browser-blocked",
-  "http",
-  "invalid-response",
-  "incomplete-list",
-]);
-
 export type WizardTranslate = (
   key: string,
   options?: { status?: number; detail?: string },
@@ -38,13 +31,6 @@ export function shouldClearPem(error: unknown): boolean {
     return true;
   }
   return !KEEP_PEM_CODES.has(error.code);
-}
-
-export function signingKeyWasStored(error: unknown): boolean {
-  if (!(error instanceof FireblocksWizardError)) {
-    return true;
-  }
-  return STORED_KEY_CODES.has(error.code);
 }
 
 export function messageForWizardError(

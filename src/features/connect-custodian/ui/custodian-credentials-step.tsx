@@ -5,7 +5,6 @@ import type {
   CustodianWizardModel,
 } from "../model/custodian-wizard-model";
 import {
-  CustodianEnvironmentField,
   CustodianPemField,
   CustodianTextField,
 } from "./custodian-credential-fields";
@@ -81,11 +80,6 @@ export function CustodianCredentialsStep(
         value={model.pemText}
         disabled={model.isSubmitting}
         onChange={actions.changePem}
-      />
-      <CustodianEnvironmentField
-        environmentId={model.environmentId}
-        disabled={model.isSubmitting}
-        onChange={actions.changeEnvironment}
       />
       {model.errorMessage && (
         <p

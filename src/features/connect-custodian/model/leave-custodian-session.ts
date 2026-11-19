@@ -2,7 +2,6 @@ import type { AppDispatch } from "@/store";
 import { beginCustodianIntent } from "./custodian-intent";
 import { closeAllCustodianWalletConnectSessions } from "./close-wallet-connect-session";
 import { deleteCustodianPrivateData } from "./custodian-private-data";
-import { deleteSigningKey } from "./fireblocks-signing-key";
 import {
   clearSelectedFireblocksAsset,
   readSelectedFireblocksAsset,
@@ -23,7 +22,6 @@ export async function leaveCustodianSession(input: {
   beginCustodianIntent();
   const storedAddress = readSelectedFireblocksAsset()?.address;
   const addresses = addressesToWipe(storedAddress, input.fireblocksPublicKey);
-  await deleteSigningKey();
   clearSelectedFireblocksAsset();
   await closeAllCustodianWalletConnectSessions(storedAddress ?? input.fireblocksPublicKey);
   for (const address of addresses) {

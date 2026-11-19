@@ -2,23 +2,23 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAppDispatch, type AppDispatch } from "@/store";
 import {
-  stellarWalletKey,
-  type StellarAssetWallet,
-} from "../api/fireblocks-asset-wallets";
-import {
   applyResumeFailure,
   beginWizardSubmit,
   changeWizardApiKey,
-  changeWizardEnvironment,
   changeWizardPem,
   failCredentialSubmit,
   failWalletSession,
   finishCredentialSubmit,
+  lockWizardWallet,
   selectWizardWallet,
   showFireblocksCredentials,
   showPreviousWizardStep,
   wizardModelForResumeFailure,
 } from "./custodian-wizard-actions";
+import {
+  stellarWalletKey,
+  type StellarAssetWallet,
+} from "./stellar-asset-wallet";
 import type { WizardTranslate } from "./custodian-wizard-message";
 import { FireblocksWizardError } from "./fireblocks-wizard-error";
 import {
@@ -43,10 +43,8 @@ function startXlmSession(input: {
   mounted: { current: boolean };
   running: { current: boolean };
 }): void {
-  if (input.running.current) {
-    return;
-  }
   if (!readReownProjectId()) {
+    input.running.current = false;
     failWalletSession({
       setModel: input.setModel,
       error: new FireblocksWizardError("walletconnect-unconfigured"),
@@ -54,8 +52,6 @@ function startXlmSession(input: {
     });
     return;
   }
-  input.running.current = true;
-  beginWizardSubmit(input.setModel);
   void openCustodianXlmSession({
     wallet: input.wallet,
     dispatch: input.dispatch,
@@ -118,15 +114,11 @@ function wizardActions(input: {
     changePem: (value) => {
       changeWizardPem(setModel, value);
     },
-    changeEnvironment: (environmentId) => {
-      changeWizardEnvironment(setModel, environmentId);
-    },
     submitCredentials: () => {
       beginWizardSubmit(setModel);
       void submitCustodianCredentials({
         apiKey: model.apiKey,
         pemText: model.pemText,
-        environmentId: model.environmentId,
       })
         .then((wallets) => {
           finishCredentialSubmit(setModel, wallets);
@@ -136,13 +128,21 @@ function wizardActions(input: {
         });
     },
     selectWallet: (walletKey) => {
+      if (running.current) {
+        return;
+      }
       const wallet = model.wallets.find(
         (item) => stellarWalletKey(item) === walletKey,
       );
-      selectWizardWallet(setModel, walletKey);
-      if (!wallet || !isFireblocksTestXlm(wallet)) {
+      if (!wallet) {
         return;
       }
+      if (!isFireblocksTestXlm(wallet)) {
+        selectWizardWallet(setModel, walletKey);
+        return;
+      }
+      running.current = true;
+      lockWizardWallet(setModel, walletKey);
       startXlmSession({
         wallet,
         dispatch,
