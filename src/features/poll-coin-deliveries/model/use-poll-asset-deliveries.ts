@@ -1,13 +1,15 @@
 import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "@/store";
+import { useStore } from "react-redux";
+import { useAppDispatch, useAppSelector, type RootState } from "@/store";
 import { selectCoinItems } from "@/entities/coin";
 import {
   selectIsTagsHydrated,
   selectSeenTagsForAsset,
 } from "@/entities/coin-deliveries";
-import { selectTransactions } from "@/entities/transaction";
+import { removeTransactions, selectTransactions } from "@/entities/transaction";
 import { selectWalletPublicKey } from "@/entities/wallet";
 import { readPrivateDataOriginFromEnvironment } from "@/shared/stellar/read-private-data-origin";
+import { ownOutputNoteReceiptIds } from "./own-output-note-receipts.js";
 import { receiveOutputNotes } from "./receive-output-notes.js";
 
 const POLL_INTERVAL_MS = 12_000;
@@ -30,6 +32,7 @@ export function usePollAssetDeliveries({
   pollingEnabled = true,
 }: UsePollAssetDeliveriesParameters): void {
   const dispatch = useAppDispatch();
+  const store = useStore<RootState>();
   const publicKey = useAppSelector(selectWalletPublicKey);
   const seenTags = useAppSelector(selectSeenTagsForAsset(assetId));
   const coinItems = useAppSelector(selectCoinItems);
@@ -48,12 +51,22 @@ export function usePollAssetDeliveries({
 
   useEffect(() => {
     if (!canPoll || !origin || !publicKey) {
-      return undefined;
+      return;
     }
     let stopped = false;
     const tick = () => {
       if (stopped) {
         return;
+      }
+      const state = store.getState();
+      const coins = selectCoinItems(state);
+      const transactions = selectTransactions(state);
+      const duplicateReceiptIds = ownOutputNoteReceiptIds({
+        transactions,
+        coins,
+      });
+      if (duplicateReceiptIds.length > 0) {
+        dispatch(removeTransactions(duplicateReceiptIds));
       }
       void receiveOutputNotes({
         origin,
@@ -63,11 +76,10 @@ export function usePollAssetDeliveries({
         assetId,
         poolContract,
         publicKey,
-        seenTags,
-        coinItems,
-        localTransactionIds: localTransactions.map(
-          (transaction) => transaction.id,
-        ),
+        seenTags: selectSeenTagsForAsset(assetId)(state),
+        coinItems: coins,
+        readCoinItems: () => selectCoinItems(store.getState()),
+        localTransactionIds: transactions.map((transaction) => transaction.id),
         dispatch,
       });
     };
@@ -90,5 +102,6 @@ export function usePollAssetDeliveries({
     coinItems,
     localTransactions,
     dispatch,
+    store,
   ]);
 }

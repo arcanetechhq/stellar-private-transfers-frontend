@@ -1,5 +1,6 @@
 export {
   addTransaction,
+  removeTransactions,
   resetForWalletChange,
   transactionReducer,
   selectTransactions,

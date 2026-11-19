@@ -37,9 +37,14 @@ type OutputNoteRow = {
   record: StellarOutputNoteRecord;
 };
 
-function deliveredCommitmentHex(record: StellarOutputNoteRecord): string | undefined {
+function deliveredCommitmentHex(
+  record: StellarOutputNoteRecord,
+): string | undefined {
   const commitment = record.commitment?.trim().toLowerCase();
-  return commitment ? commitment : undefined;
+  if (!commitment) {
+    return;
+  }
+  return commitment;
 }
 
 const COMMITMENT_TAG_LENGTH = 12;
@@ -69,20 +74,20 @@ function coinFromNote(note: DecryptedOutputNote): CoinData {
   };
 }
 
-async function decryptRow(
-  row: OutputNoteRow,
-  recipientScalarHex: string,
-  decryptNote: DecryptOutputNote,
-) {
+async function decryptRow(input: {
+  row: OutputNoteRow;
+  recipientScalarHex: string;
+  decryptNote: DecryptOutputNote;
+}) {
   try {
-    const note = await decryptNote({
-      recipientScalarHex,
-      encryptedData: row.record.encryptedData,
-      ephemeralX: row.record.ephemeralX,
-      ephemeralY: row.record.ephemeralY,
+    const note = await input.decryptNote({
+      recipientScalarHex: input.recipientScalarHex,
+      encryptedData: input.row.record.encryptedData,
+      ephemeralX: input.row.record.ephemeralX,
+      ephemeralY: input.row.record.ephemeralY,
     });
     const commitmentHex =
-      deliveredCommitmentHex(row.record) ??
+      deliveredCommitmentHex(input.row.record) ??
       note.commitmentHex.trim().toLowerCase();
     return {
       commitmentHex,
@@ -91,7 +96,7 @@ async function decryptRow(
       txId: `output-note-${commitmentHex.slice(0, COMMITMENT_TAG_LENGTH)}`,
     };
   } catch {
-    return undefined;
+    return;
   }
 }
 
@@ -105,6 +110,9 @@ export async function receiveOutputNotes(input: {
   publicKey: string;
   seenTags: string[];
   coinItems: Parameters<typeof processIncomingDeliveryRows>[0]["coinItems"];
+  readCoinItems?: () => Parameters<
+    typeof processIncomingDeliveryRows
+  >[0]["coinItems"];
   localTransactionIds: string[];
   dispatch: AppDispatch;
   loadRecords?: () => Promise<readonly StellarOutputNoteRecord[]>;
@@ -144,12 +152,17 @@ export async function receiveOutputNotes(input: {
     publicKey: input.publicKey,
     localTransactionIds: input.localTransactionIds,
     dispatch: input.dispatch,
+    ...(input.readCoinItems ? { readCoinItems: input.readCoinItems } : {}),
     decryptDeliveryRow: (row, recipientScalarHex) =>
-      decryptRow(row as OutputNoteRow, recipientScalarHex, decryptNote),
+      decryptRow({
+        row: row as OutputNoteRow,
+        recipientScalarHex,
+        decryptNote,
+      }),
     ...(input.assessIncomingNote
       ? { assessIncomingNote: input.assessIncomingNote }
       : {}),
-    markDeliveryProcessed: async () => undefined,
+    markDeliveryProcessed: async () => {},
     ...(input.persistSpendableCoinToSdk
       ? { persistSpendableCoinToSdk: input.persistSpendableCoinToSdk }
       : {}),

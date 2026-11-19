@@ -5,10 +5,7 @@ import {
 } from "@reduxjs/toolkit";
 import type { AggregatedPrivateAssetRow, CoinWithMetadata } from "./coin";
 import { normalizeCommitmentHex } from "../lib/persist-coin";
-import {
-  findCoinItemByLedgerReference,
-  incomingSharesLedgerKeyWithAnyItem,
-} from "../lib/ledger-commitment";
+import { findCoinItemByLedgerReference } from "../lib/ledger-commitment";
 
 export interface CoinState {
   items: CoinWithMetadata[];
@@ -30,7 +27,19 @@ const coinSlice = createSlice({
       state.items = action.payload;
     },
     addCoin: (state, action: PayloadAction<CoinWithMetadata>) => {
-      if (incomingSharesLedgerKeyWithAnyItem(state.items, action.payload)) {
+      const existing =
+        findCoinItemByLedgerReference(
+          state.items,
+          action.payload.commitmentHex,
+        ) ??
+        findCoinItemByLedgerReference(
+          state.items,
+          action.payload.coin.commitment,
+        );
+      if (existing) {
+        if (!existing.txId && action.payload.txId) {
+          existing.txId = action.payload.txId;
+        }
         return;
       }
       const normalized = commitmentKey(action.payload.commitmentHex);

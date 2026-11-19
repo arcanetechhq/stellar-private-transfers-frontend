@@ -55,6 +55,13 @@ const transactionSlice = createSlice({
         state.items[index] = action.payload;
       }
     },
+    removeTransactions: (state, action: PayloadAction<readonly string[]>) => {
+      const ids = new Set(action.payload);
+      if (ids.size === 0) {
+        return;
+      }
+      state.items = state.items.filter((item) => !ids.has(item.id));
+    },
     resetForWalletChange: () => initialState,
   },
   extraReducers: (builder) => {
@@ -86,8 +93,12 @@ const transactionSlice = createSlice({
   },
 });
 
-export const { replaceTransactionItems, addTransaction, resetForWalletChange } =
-  transactionSlice.actions;
+export const {
+  replaceTransactionItems,
+  addTransaction,
+  removeTransactions,
+  resetForWalletChange,
+} = transactionSlice.actions;
 
 export const transactionReducer = transactionSlice.reducer;
 

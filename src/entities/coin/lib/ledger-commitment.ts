@@ -29,22 +29,6 @@ export function findCoinItemByLedgerReference(
   return items.find((entry) => ledgerCommitmentKeySet(entry).has(needle));
 }
 
-export function incomingSharesLedgerKeyWithAnyItem(
-  items: CoinWithMetadata[],
-  payload: CoinWithMetadata,
-): boolean {
-  const incomingKeys = ledgerCommitmentKeySet(payload);
-  return items.some((item) => {
-    const existingKeys = ledgerCommitmentKeySet(item);
-    for (const key of incomingKeys) {
-      if (existingKeys.has(key)) {
-        return true;
-      }
-    }
-    return false;
-  });
-}
-
 export function existingSpentCoinMatchesIncomingDelivery(
   items: CoinWithMetadata[],
   parameters: {
